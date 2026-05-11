@@ -7,7 +7,15 @@ const CONTRACT_ABI = ["function sendMoney(address token, address recipient, uint
 const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)"];
 const COUNTRIES = ["Mexico","Brazil","India","Philippines","Nigeria","Indonesia","Pakistan","Bangladesh","Vietnam","Ghana","Kenya","Egypt","Turkey","Argentina","Colombia","Ukraine","Ethiopia","Tanzania","Uganda","Nepal"];
 const FEES = [{name:"Arc Remittance",fee:"~$0.007",time:"< 1 sec",best:true},{name:"Western Union",fee:"$4.99 + 3%",time:"1-5 days",best:false},{name:"SWIFT / Bank",fee:"$25-45",time:"3-5 days",best:false},{name:"PayPal",fee:"5% up to $4.99",time:"1-3 days",best:false},{name:"Wise",fee:"0.5-2%",time:"1-2 days",best:false}];
-async function detectProvider(){if(window.ethereum?.providers?.length)return window.ethereum.providers[0];if(window.ethereum)return window.ethereum;if(window.web3?.currentProvider)return window.web3.currentProvider;return null;}
+const ARC_NETWORK = {chainId:ARC_CHAIN_ID,chainName:"Arc Testnet",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},rpcUrls:["https://rpc.testnet.arc.network"],blockExplorerUrls:["https://testnet.arcscan.app"]};
+async function detectProvider(){
+  if(window.ethereum?.providers?.length){
+    return window.ethereum.providers.find(p=>p.isMetaMask)||window.ethereum.providers[0];
+  }
+  if(window.ethereum)return window.ethereum;
+  if(window.web3?.currentProvider)return window.web3.currentProvider;
+  return null;
+}
 const tabs=["Send","Invoice","History","Fees"];
 function App(){
 const [wallet,setWallet]=useState(null);
@@ -24,15 +32,16 @@ const [providerName,setProviderName]=useState("");
 const [walletProvider,setWalletProvider]=useState(null);
 async function connectWallet(){
 const provider=await detectProvider();
-if(!provider){setStatus("No wallet found! Install MetaMask or Trust Wallet.");return;}
+if(!provider){setStatus("No wallet found! Please install MetaMask, Trust Wallet or Coinbase Wallet.");return;}
 if(provider.isMetaMask)setProviderName("MetaMask");
 else if(provider.isCoinbaseWallet)setProviderName("Coinbase");
 else if(provider.isTrust)setProviderName("Trust Wallet");
+else if(provider.isBraveWallet)setProviderName("Brave Wallet");
 else setProviderName("Web3 Wallet");
 try{
 await provider.request({method:"eth_requestAccounts"});
 try{await provider.request({method:"wallet_switchEthereumChain",params:[{chainId:ARC_CHAIN_ID}]});}
-catch(e){if(e.code===4902)await provider.request({method:"wallet_addEthereumChain",params:[{chainId:ARC_CHAIN_ID,chainName:"Arc Testnet",nativeCurrency:{name:"USDC",symbol:"USDC",decimals:6},rpcUrls:["https://rpc.testnet.arc.network"],blockExplorerUrls:["https://testnet.arcscan.app"]}]});}
+catch(e){if(e.code===4902||e.code===-32603)await provider.request({method:"wallet_addEthereumChain",params:[ARC_NETWORK]});}
 const ep=new ethers.BrowserProvider(provider);
 const s=await ep.getSigner();
 const a=await s.getAddress();
@@ -54,7 +63,7 @@ return(
 </div>
 {!wallet?(
 <div style={{textAlign:"center"}}>
-<p style={{color:"#888",marginBottom:12,fontSize:14}}>Works with MetaMask, Trust Wallet, Coinbase and more</p>
+<p style={{color:"#888",marginBottom:12,fontSize:14}}>Works with MetaMask, Trust Wallet, Brave Wallet, Coinbase and more</p>
 <button onClick={connectWallet} style={btn}>Connect Wallet</button>
 {status&&<p style={{color:"red",marginTop:10,fontSize:13}}>{status}</p>}
 </div>
