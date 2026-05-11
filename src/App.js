@@ -108,7 +108,7 @@ async function sendMoney(){
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
     const t=await c.sendMoney(USDC_ADDRESS,recipient,a,country);
     await t.wait();
-    setStatus("Sent successfully! 🎉");
+    setStatus("Sent successfully 👍");
     loadPayments(wallet,walletProvider);
   }catch(e){setStatus("Error: "+e.message);}
   setLoading(false);
@@ -124,7 +124,7 @@ async function createInvoice(){
     const t=await c.createInvoice(recipient,a,description,country);
     const r=await t.wait();
     setInvoiceId(r.logs[0].topics[1]);
-    setStatus("Invoice created! 🎉");
+    setStatus("Invoice created 📃");
   }catch(e){setStatus("Error: "+e.message);}
   setLoading(false);
 }
@@ -169,7 +169,7 @@ return(
 <input placeholder="10" value={amount} onChange={e=>setAmount(e.target.value)} style={inp}/>
 <label style={lbl}>Destination Country</label>
 <select value={country} onChange={e=>setCountry(e.target.value)} style={inp}>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select>
-<button onClick={sendMoney} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Processing...":"Send USDC 🚀"}</button>
+<button onClick={sendMoney} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Processing...":"Send USDC "}</button>
 </div>
 )}
 {tab==="Invoice"&&(
@@ -197,7 +197,7 @@ return(
 <h3 style={{color:"#1a1a2e",marginBottom:4}}>Fee Comparison</h3>
 <p style={{color:"#888",fontSize:13,marginBottom:12}}>Sending $100 internationally</p>
 {FEES.map((f,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",marginBottom:8,borderRadius:10,background:f.best?"#f0f4ff":"#fafafa",border:f.best?"2px solid #4F46E5":"1px solid #eee"}}><div><div style={{fontWeight:"bold",color:f.best?"#4F46E5":"#333",fontSize:14}}>{f.name} {f.best&&"✅"}</div><div style={{color:"#888",fontSize:12}}>{f.time}</div></div><div style={{fontWeight:"bold",color:f.best?"#4F46E5":"#e53e3e",fontSize:15}}>{f.fee}</div></div>))}
-<p style={{color:"#4F46E5",fontSize:12,textAlign:"center",marginTop:8}}>Arc saves up to $44.99 per transaction 🚀</p>
+<p style={{color:"#4F46E5",fontSize:12,textAlign:"center",marginTop:8}}>Arc saves up to $44.99 per transaction 😇</p>
 </div>
 )}
 {status&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:isOk?"#f0fff4":"#fff0f0",color:isOk?"green":"#c00",fontSize:14}}>{status}</div>)}
