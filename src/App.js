@@ -106,9 +106,9 @@ async function sendMoney(){
     await u.approve(CONTRACT_ADDRESS,a);
     setStatus("Sending...");
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
-    const t=await c.sendMoney(USDC_ADDRESS,recipient,a,country);
+    const t=await c.sendMoney(USDC_ADDRESS,ethers.getAddress(recipient),a,country);
     await t.wait();
-    setStatus("Sent successfully 👍");
+    setStatus("Sent successfully");
     loadPayments(wallet,walletProvider);
   }catch(e){setStatus("Error: "+e.message);}
   setLoading(false);
@@ -121,17 +121,17 @@ async function createInvoice(){
     const s=await ep.getSigner();
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
     const a=ethers.parseUnits(amount,6);
-    const t=await c.createInvoice(recipient,a,description,country);
+    const t=await c.createInvoice(ethers.getAddress(recipient),a,description,country);
     const r=await t.wait();
     setInvoiceId(r.logs[0].topics[1]);
-    setStatus("Invoice created 📃");
+    setStatus("Invoice created");
   }catch(e){setStatus("Error: "+e.message);}
   setLoading(false);
 }
 
 const inp={width:"100%",padding:12,marginTop:4,marginBottom:14,borderRadius:10,border:"1px solid #ddd",boxSizing:"border-box",fontSize:14};
 const lbl={fontSize:13,color:"#444",fontWeight:"bold"};
-const isOk=status.includes("!")||status.includes("created");
+const isOk=status.includes("successfully")||status.includes("created");
 
 return(
 <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#667eea,#764ba2)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
@@ -145,17 +145,17 @@ return(
 <div style={{textAlign:"center"}}>
 <p style={{color:"#888",marginBottom:16,fontSize:14}}>Connect your wallet to get started</p>
 <button onClick={connectWithExtension} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:"bold",marginBottom:10}}>
-🦊 Browser Wallet (MetaMask, Brave)
+Browser Wallet (MetaMask, Brave)
 </button>
 <button onClick={connectWithWalletConnect} style={{width:"100%",padding:"14px",background:"white",color:"#667eea",border:"2px solid #667eea",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:"bold"}}>
-📱 Mobile Wallet (WalletConnect)
+Mobile Wallet (WalletConnect)
 </button>
 {status&&<p style={{color:"red",marginTop:10,fontSize:13}}>{status}</p>}
 </div>
 ):(
 <>
 <div style={{background:"#f0f4ff",borderRadius:10,padding:"8px 14px",marginBottom:16,fontSize:13,color:"#4F46E5",display:"flex",justifyContent:"space-between"}}>
-<span>✅ {wallet.slice(0,6)}...{wallet.slice(-4)}</span>
+<span>Connected: {wallet.slice(0,6)}...{wallet.slice(-4)}</span>
 <span style={{color:"#888"}}>{providerName}</span>
 </div>
 <div style={{display:"flex",gap:6,marginBottom:20}}>
@@ -169,7 +169,7 @@ return(
 <input placeholder="10" value={amount} onChange={e=>setAmount(e.target.value)} style={inp}/>
 <label style={lbl}>Destination Country</label>
 <select value={country} onChange={e=>setCountry(e.target.value)} style={inp}>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select>
-<button onClick={sendMoney} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Processing...":"Send USDC "}</button>
+<button onClick={sendMoney} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Processing...":"Send USDC"}</button>
 </div>
 )}
 {tab==="Invoice"&&(
@@ -182,7 +182,7 @@ return(
 <input placeholder="Logo design - March 2026" value={description} onChange={e=>setDescription(e.target.value)} style={inp}/>
 <label style={lbl}>Your Country</label>
 <select value={country} onChange={e=>setCountry(e.target.value)} style={inp}>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select>
-<button onClick={createInvoice} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Creating...":"Create Invoice 📄"}</button>
+<button onClick={createInvoice} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Creating...":"Create Invoice"}</button>
 {invoiceId&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:"#f0fff4",fontSize:12}}><strong>Invoice ID:</strong><br/><span style={{wordBreak:"break-all",color:"#4F46E5"}}>{invoiceId}</span><br/><small style={{color:"#666"}}>Share with your client to pay</small></div>)}
 </div>
 )}
@@ -196,8 +196,8 @@ return(
 <div>
 <h3 style={{color:"#1a1a2e",marginBottom:4}}>Fee Comparison</h3>
 <p style={{color:"#888",fontSize:13,marginBottom:12}}>Sending $100 internationally</p>
-{FEES.map((f,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",marginBottom:8,borderRadius:10,background:f.best?"#f0f4ff":"#fafafa",border:f.best?"2px solid #4F46E5":"1px solid #eee"}}><div><div style={{fontWeight:"bold",color:f.best?"#4F46E5":"#333",fontSize:14}}>{f.name} {f.best&&"✅"}</div><div style={{color:"#888",fontSize:12}}>{f.time}</div></div><div style={{fontWeight:"bold",color:f.best?"#4F46E5":"#e53e3e",fontSize:15}}>{f.fee}</div></div>))}
-<p style={{color:"#4F46E5",fontSize:12,textAlign:"center",marginTop:8}}>Arc saves up to $44.99 per transaction 😇</p>
+{FEES.map((f,i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",marginBottom:8,borderRadius:10,background:f.best?"#f0f4ff":"#fafafa",border:f.best?"2px solid #4F46E5":"1px solid #eee"}}><div><div style={{fontWeight:"bold",color:f.best?"#4F46E5":"#333",fontSize:14}}>{f.name} {f.best&&"(Best)"}</div><div style={{color:"#888",fontSize:12}}>{f.time}</div></div><div style={{fontWeight:"bold",color:f.best?"#4F46E5":"#e53e3e",fontSize:15}}>{f.fee}</div></div>))}
+<p style={{color:"#4F46E5",fontSize:12,textAlign:"center",marginTop:8}}>Arc saves up to $44.99 per transaction</p>
 </div>
 )}
 {status&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:isOk?"#f0fff4":"#fff0f0",color:isOk?"green":"#c00",fontSize:14}}>{status}</div>)}
