@@ -16,6 +16,19 @@ async function detectProvider(){
   if(window.web3?.currentProvider)return window.web3.currentProvider;
   return null;
 }
+async function switchToArc(provider){
+  try{
+    await provider.request({method:"wallet_switchEthereumChain",params:[{chainId:ARC_CHAIN_ID}]});
+  }catch(e){
+    if(e.code===4902||e.code===-32603||e.message?.includes("Unrecognized")||e.message?.includes("wallet_addEthereumChain")){
+      try{
+        await provider.request({method:"wallet_addEthereumChain",params:[ARC_NETWORK]});
+      }catch(e2){
+        if(!e2.message?.includes("already")){throw e2;}
+      }
+    }
+  }
+}
 const tabs=["Send","Invoice","History","Fees"];
 function App(){
 const [wallet,setWallet]=useState(null);
@@ -31,28 +44,67 @@ const [invoiceId,setInvoiceId]=useState("");
 const [providerName,setProviderName]=useState("");
 const [walletProvider,setWalletProvider]=useState(null);
 async function connectWallet(){
-const provider=await detectProvider();
-if(!provider){setStatus("No wallet found! Please install MetaMask, Trust Wallet or Coinbase Wallet.");return;}
-if(provider.isMetaMask)setProviderName("MetaMask");
-else if(provider.isCoinbaseWallet)setProviderName("Coinbase");
-else if(provider.isTrust)setProviderName("Trust Wallet");
-else if(provider.isBraveWallet)setProviderName("Brave Wallet");
-else setProviderName("Web3 Wallet");
-try{
-await provider.request({method:"eth_requestAccounts"});
-try{await provider.request({method:"wallet_switchEthereumChain",params:[{chainId:ARC_CHAIN_ID}]});}
-catch(e){if(e.code===4902||e.code===-32603)await provider.request({method:"wallet_addEthereumChain",params:[ARC_NETWORK]});}
-const ep=new ethers.BrowserProvider(provider);
-const s=await ep.getSigner();
-const a=await s.getAddress();
-setWallet(a);setWalletProvider(provider);loadPayments(a,provider);
-}catch(e){setStatus("Failed: "+e.message);}}
-async function loadPayments(addr,prov){try{const ep=new ethers.BrowserProvider(prov||window.ethereum);const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,ep);const t=await c.getPayments(addr);setPayments(t);}catch(e){}}
-async function sendMoney(){try{setLoading(true);setStatus("Approving...");const ep=new ethers.BrowserProvider(walletProvider||window.ethereum);const s=await ep.getSigner();const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);const a=ethers.parseUnits(amount,6);await u.approve(CONTRACT_ADDRESS,a);setStatus("Sending...");const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);const t=await c.sendMoney(USDC_ADDRESS,recipient,a,country);await t.wait();setStatus("Sent successfully!");loadPayments(wallet,walletProvider);}catch(e){setStatus("Error: "+e.message);}setLoading(false);}
-async function createInvoice(){try{setLoading(true);setStatus("Creating...");const ep=new ethers.BrowserProvider(walletProvider||window.ethereum);const s=await ep.getSigner();const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);const a=ethers.parseUnits(amount,6);const t=await c.createInvoice(recipient,a,description,country);const r=await t.wait();setInvoiceId(r.logs[0].topics[1]);setStatus("Invoice created!");}catch(e){setStatus("Error: "+e.message);}setLoading(false);}
+  const provider=await detectProvider();
+  if(!provider){setStatus("No wallet found! Please install MetaMask or Coinbase Wallet extension.");return;}
+  if(provider.isMetaMask)setProviderName("MetaMask");
+  else if(provider.isCoinbaseWallet)setProviderName("Coinbase");
+  else if(provider.isTrust)setProviderName("Trust Wallet");
+  else if(provider.isBraveWallet)setProviderName("Brave Wallet");
+  else setProviderName("Web3 Wallet");
+  try{
+    await provider.request({method:"eth_requestAccounts"});
+    await switchToArc(provider);
+    const ep=new ethers.BrowserProvider(provider);
+    const s=await ep.getSigner();
+    const a=await s.getAddress();
+    setWallet(a);
+    setWalletProvider(provider);
+    loadPayments(a,provider);
+  }catch(e){setStatus("Failed: "+e.message);}
+}
+async function loadPayments(addr,prov){
+  try{
+    const ep=new ethers.BrowserProvider(prov||window.ethereum);
+    const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,ep);
+    const t=await c.getPayments(addr);
+    setPayments(t);
+  }catch(e){}
+}
+async function sendMoney(){
+  try{
+    setLoading(true);setStatus("Approving USDC...");
+    const ep=new ethers.BrowserProvider(walletProvider||window.ethereum);
+    const s=await ep.getSigner();
+    const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);
+    const a=ethers.parseUnits(amount,6);
+    await u.approve(CONTRACT_ADDRESS,a);
+    setStatus("Sending...");
+    const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
+    const t=await c.sendMoney(USDC_ADDRESS,recipient,a,country);
+    await t.wait();
+    setStatus("Sent successfully! 🎉");
+    loadPayments(wallet,walletProvider);
+  }catch(e){setStatus("Error: "+e.message);}
+  setLoading(false);
+}
+async function createInvoice(){
+  try{
+    setLoading(true);setStatus("Creating invoice...");
+    const ep=new ethers.BrowserProvider(walletProvider||window.ethereum);
+    const s=await ep.getSigner();
+    const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
+    const a=ethers.parseUnits(amount,6);
+    const t=await c.createInvoice(recipient,a,description,country);
+    const r=await t.wait();
+    setInvoiceId(r.logs[0].topics[1]);
+    setStatus("Invoice created! 🎉");
+  }catch(e){setStatus("Error: "+e.message);}
+  setLoading(false);
+}
 const inp={width:"100%",padding:12,marginTop:4,marginBottom:14,borderRadius:10,border:"1px solid #ddd",boxSizing:"border-box",fontSize:14};
 const lbl={fontSize:13,color:"#444",fontWeight:"bold"};
 const btn={width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"};
+const isOk=status.includes("!")||status.includes("created");
 return(
 <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#667eea,#764ba2)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
 <div style={{background:"white",borderRadius:20,padding:32,width:"100%",maxWidth:480,boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
@@ -63,14 +115,14 @@ return(
 </div>
 {!wallet?(
 <div style={{textAlign:"center"}}>
-<p style={{color:"#888",marginBottom:12,fontSize:14}}>Works with MetaMask, Trust Wallet, Brave Wallet, Coinbase and more</p>
+<p style={{color:"#888",marginBottom:12,fontSize:14}}>Works with MetaMask, Brave Wallet, Coinbase Wallet and more</p>
 <button onClick={connectWallet} style={btn}>Connect Wallet</button>
 {status&&<p style={{color:"red",marginTop:10,fontSize:13}}>{status}</p>}
 </div>
 ):(
 <>
 <div style={{background:"#f0f4ff",borderRadius:10,padding:"8px 14px",marginBottom:16,fontSize:13,color:"#4F46E5",display:"flex",justifyContent:"space-between"}}>
-<span>Connected: {wallet.slice(0,6)}...{wallet.slice(-4)}</span>
+<span>✅ {wallet.slice(0,6)}...{wallet.slice(-4)}</span>
 <span style={{color:"#888"}}>{providerName}</span>
 </div>
 <div style={{display:"flex",gap:6,marginBottom:20}}>
@@ -98,7 +150,7 @@ return(
 <label style={lbl}>Your Country</label>
 <select value={country} onChange={e=>setCountry(e.target.value)} style={inp}>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select>
 <button onClick={createInvoice} disabled={loading} style={btn}>{loading?"Creating...":"Create Invoice 📄"}</button>
-{invoiceId&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:"#f0fff4",fontSize:12}}><strong>Invoice ID:</strong><br/><span style={{wordBreak:"break-all",color:"#4F46E5"}}>{invoiceId}</span><br/><small style={{color:"#666"}}>Share with client to pay</small></div>)}
+{invoiceId&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:"#f0fff4",fontSize:12}}><strong>Invoice ID:</strong><br/><span style={{wordBreak:"break-all",color:"#4F46E5"}}>{invoiceId}</span><br/><small style={{color:"#666"}}>Share with your client to pay</small></div>)}
 </div>
 )}
 {tab==="History"&&(
@@ -115,7 +167,7 @@ return(
 <p style={{color:"#4F46E5",fontSize:12,textAlign:"center",marginTop:8}}>Arc saves up to $44.99 per transaction 🚀</p>
 </div>
 )}
-{status&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:status.includes("!")||status.includes("created")?"#f0fff4":"#fff0f0",color:status.includes("!")||status.includes("created")?"green":"#c00",fontSize:14}}>{status}</div>)}
+{status&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:isOk?"#f0fff4":"#fff0f0",color:isOk?"green":"#c00",fontSize:14}}>{status}</div>)}
 </>
 )}
 <p style={{textAlign:"center",marginTop:16,fontSize:12,color:"#aaa"}}>Powered by Arc Testnet • USDC Native</p>
