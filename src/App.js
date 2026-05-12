@@ -63,6 +63,7 @@ async function connectWithExtension(){
   if(provider.isMetaMask)setProviderName("MetaMask");
   else if(provider.isCoinbaseWallet)setProviderName("Coinbase");
   else if(provider.isBraveWallet)setProviderName("Brave Wallet");
+  else if(provider.isRabby)setProviderName("Rabby");
   else setProviderName("Web3 Wallet");
   try{
     await provider.request({method:"eth_requestAccounts"});
@@ -173,10 +174,10 @@ return(
 <div style={{textAlign:"center"}}>
 <p style={{color:"#888",marginBottom:16,fontSize:14}}>Connect your wallet to get started</p>
 <button onClick={connectWithExtension} style={{width:"100%",padding:"14px",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:"bold",marginBottom:10}}>
-Browser Wallet (MetaMask, Brave)
+Connect Browser Wallet
 </button>
 <button onClick={connectWithWalletConnect} style={{width:"100%",padding:"14px",background:"white",color:"#667eea",border:"2px solid #667eea",borderRadius:12,cursor:"pointer",fontSize:15,fontWeight:"bold"}}>
-Mobile Wallet (WalletConnect)
+Connect Mobile Wallet
 </button>
 {status&&<p style={{color:"red",marginTop:10,fontSize:13}}>{status}</p>}
 </div>
@@ -187,7 +188,7 @@ Mobile Wallet (WalletConnect)
 <span style={{color:"#888"}}>{providerName}</span>
 </div>
 <div style={{display:"flex",gap:4,marginBottom:20,flexWrap:"wrap"}}>
-{tabs.map(t=>(<button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"8px 4px",borderRadius:8,border:"none",background:tab===t?"linear-gradient(135deg,#667eea,#764ba2)":"#f0f4ff",color:tab===t?"white":"#4F46E5",cursor:"pointer",fontSize:11,fontWeight:"bold",minWidth:60}}>{t}</button>))}
+{tabs.map(t=>(<button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"8px 4px",borderRadius:8,border:"none",background:tab===t?"linear-gradient(135deg,#667eea,#764ba2)":"#f0f4ff",color:tab===t?"white":"#4F46E5",cursor:"pointer",fontSize:11,fontWeight:"bold",minWidth:55}}>{t}</button>))}
 </div>
 {tab==="Send"&&(
 <div>
