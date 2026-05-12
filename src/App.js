@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
 const CONTRACT_ADDRESS = "0xedaa77dea8329031c9da96b64f92da9b00da2179";
-const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
 const ARC_CHAIN_ID = "0x4CE052";
 const ARC_CHAIN_ID_NUM = 5042002;
 const WALLETCONNECT_PROJECT_ID = "8bb24a433758c9a403057e2e3f2c371b";
