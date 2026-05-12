@@ -7,7 +7,13 @@ const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
 const ARC_CHAIN_ID = "0x4CE052";
 const ARC_CHAIN_ID_NUM = 5042002;
 const WALLETCONNECT_PROJECT_ID = "8bb24a433758c9a403057e2e3f2c371b";
-const CONTRACT_ABI = ["function sendMoney(address token, address recipient, uint256 amount, string memory country) external","function createInvoice(address recipient, uint256 amount, string memory description, string memory country) external returns (bytes32)","function getPayments(address user) external view returns (tuple(address sender, address recipient, uint256 amount, string country, uint256 timestamp, bytes32 invoiceId)[])"];
+const CONTRACT_ABI = [
+  "function sendMoney(address token, address recipient, uint256 amount, string memory country) external",
+  "function createInvoice(address recipient, uint256 amount, string memory description, string memory country) external returns (bytes32)",
+  "function payInvoice(address token, bytes32 invoiceId) external",
+  "function getPayments(address user) external view returns (tuple(address sender, address recipient, uint256 amount, string country, uint256 timestamp, bytes32 invoiceId)[])",
+  "function invoices(bytes32) view returns (address creator, address recipient, uint256 amount, string description, string country, bool paid, uint256 createdAt)"
+];
 const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)"];
 const COUNTRIES = ["Mexico","Brazil","India","Philippines","Nigeria","Indonesia","Pakistan","Bangladesh","Vietnam","Ghana","Kenya","Egypt","Turkey","Argentina","Colombia","Ukraine","Ethiopia","Tanzania","Uganda","Nepal"];
 const FEES = [{name:"Arc Remittance",fee:"~$0.007",time:"< 1 sec",best:true},{name:"Western Union",fee:"$4.99 + 3%",time:"1-5 days",best:false},{name:"SWIFT / Bank",fee:"$25-45",time:"3-5 days",best:false},{name:"PayPal",fee:"5% up to $4.99",time:"1-3 days",best:false},{name:"Wise",fee:"0.5-2%",time:"1-2 days",best:false}];
@@ -34,7 +40,7 @@ async function switchToArc(provider){
   }
 }
 
-const tabs=["Send","Invoice","History","Fees"];
+const tabs=["Send","Invoice","Pay","History","Fees"];
 
 function App(){
 const [wallet,setWallet]=useState(null);
@@ -43,6 +49,7 @@ const [recipient,setRecipient]=useState("");
 const [amount,setAmount]=useState("");
 const [country,setCountry]=useState("Mexico");
 const [description,setDescription]=useState("");
+const [invoiceIdInput,setInvoiceIdInput]=useState("");
 const [status,setStatus]=useState("");
 const [loading,setLoading]=useState(false);
 const [payments,setPayments]=useState([]);
@@ -103,8 +110,8 @@ async function sendMoney(){
     const s=await ep.getSigner();
     const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);
     const a=ethers.parseUnits(amount,6);
-    const approveTx = await u.approve(CONTRACT_ADDRESS,a);
-await approveTx.wait();
+    const approveTx=await u.approve(CONTRACT_ADDRESS,a);
+    await approveTx.wait();
     setStatus("Sending...");
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
     const t=await c.sendMoney(USDC_ADDRESS,recipient.toLowerCase(),a,country);
@@ -126,6 +133,27 @@ async function createInvoice(){
     const r=await t.wait();
     setInvoiceId(r.logs[0].topics[1]);
     setStatus("Invoice created");
+  }catch(e){setStatus("Error: "+e.message);}
+  setLoading(false);
+}
+
+async function payInvoice(){
+  try{
+    setLoading(true);setStatus("Loading invoice...");
+    const ep=new ethers.BrowserProvider(walletProvider||window.ethereum);
+    const s=await ep.getSigner();
+    const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,ep);
+    const inv=await c.invoices(invoiceIdInput);
+    if(inv.paid){setStatus("Error: Invoice already paid");setLoading(false);return;}
+    const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);
+    setStatus("Approving USDC...");
+    const approveTx=await u.approve(CONTRACT_ADDRESS,inv.amount);
+    await approveTx.wait();
+    setStatus("Paying invoice...");
+    const cw=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
+    const t=await cw.payInvoice(USDC_ADDRESS,invoiceIdInput);
+    await t.wait();
+    setStatus("Invoice paid successfully");
   }catch(e){setStatus("Error: "+e.message);}
   setLoading(false);
 }
@@ -158,8 +186,8 @@ Mobile Wallet (WalletConnect)
 <span>Connected: {wallet.slice(0,6)}...{wallet.slice(-4)}</span>
 <span style={{color:"#888"}}>{providerName}</span>
 </div>
-<div style={{display:"flex",gap:6,marginBottom:20}}>
-{tabs.map(t=>(<button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"8px 4px",borderRadius:8,border:"none",background:tab===t?"linear-gradient(135deg,#667eea,#764ba2)":"#f0f4ff",color:tab===t?"white":"#4F46E5",cursor:"pointer",fontSize:12,fontWeight:"bold"}}>{t}</button>))}
+<div style={{display:"flex",gap:4,marginBottom:20,flexWrap:"wrap"}}>
+{tabs.map(t=>(<button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:"8px 4px",borderRadius:8,border:"none",background:tab===t?"linear-gradient(135deg,#667eea,#764ba2)":"#f0f4ff",color:tab===t?"white":"#4F46E5",cursor:"pointer",fontSize:11,fontWeight:"bold",minWidth:60}}>{t}</button>))}
 </div>
 {tab==="Send"&&(
 <div>
@@ -174,7 +202,8 @@ Mobile Wallet (WalletConnect)
 )}
 {tab==="Invoice"&&(
 <div>
-<label style={lbl}>Client Address</label>
+<p style={{color:"#888",fontSize:13,marginBottom:14}}>Create an invoice to request payment from a client</p>
+<label style={lbl}>Client Wallet Address</label>
 <input placeholder="0x..." value={recipient} onChange={e=>setRecipient(e.target.value)} style={inp}/>
 <label style={lbl}>Amount (USDC)</label>
 <input placeholder="500" value={amount} onChange={e=>setAmount(e.target.value)} style={inp}/>
@@ -183,7 +212,15 @@ Mobile Wallet (WalletConnect)
 <label style={lbl}>Your Country</label>
 <select value={country} onChange={e=>setCountry(e.target.value)} style={inp}>{COUNTRIES.map(c=><option key={c}>{c}</option>)}</select>
 <button onClick={createInvoice} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Creating...":"Create Invoice"}</button>
-{invoiceId&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:"#f0fff4",fontSize:12}}><strong>Invoice ID:</strong><br/><span style={{wordBreak:"break-all",color:"#4F46E5"}}>{invoiceId}</span><br/><small style={{color:"#666"}}>Share with your client to pay</small></div>)}
+{invoiceId&&(<div style={{marginTop:14,padding:12,borderRadius:10,background:"#f0fff4",fontSize:12}}><strong>Invoice ID:</strong><br/><span style={{wordBreak:"break-all",color:"#4F46E5"}}>{invoiceId}</span><br/><small style={{color:"#666"}}>Share this ID with your client — they can pay using the Pay tab</small></div>)}
+</div>
+)}
+{tab==="Pay"&&(
+<div>
+<p style={{color:"#888",fontSize:13,marginBottom:14}}>Received an invoice ID? Pay it here</p>
+<label style={lbl}>Invoice ID</label>
+<input placeholder="0x..." value={invoiceIdInput} onChange={e=>setInvoiceIdInput(e.target.value)} style={inp}/>
+<button onClick={payInvoice} disabled={loading} style={{width:"100%",padding:"14px",background:loading?"#ccc":"linear-gradient(135deg,#667eea,#764ba2)",color:"white",border:"none",borderRadius:12,cursor:loading?"not-allowed":"pointer",fontSize:16,fontWeight:"bold"}}>{loading?"Processing...":"Pay Invoice"}</button>
 </div>
 )}
 {tab==="History"&&(
