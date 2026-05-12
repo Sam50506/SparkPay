@@ -103,7 +103,8 @@ async function sendMoney(){
     const s=await ep.getSigner();
     const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);
     const a=ethers.parseUnits(amount,6);
-    await u.approve(CONTRACT_ADDRESS,a);
+    const approveTx = await u.approve(CONTRACT_ADDRESS,a);
+await approveTx.wait();
     setStatus("Sending...");
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
     const t=await c.sendMoney(USDC_ADDRESS,recipient.toLowerCase(),a,country);
