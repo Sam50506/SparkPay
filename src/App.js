@@ -52,7 +52,7 @@ const [walletProvider,setWalletProvider]=useState(null);
 
 async function connectWithExtension(){
   const provider=await detectProvider();
-  if(!provider){setStatus("No wallet extension found! Use mobile wallet option below.");return;}
+  if(!provider){setStatus("No wallet extension found. Use mobile wallet option below.");return;}
   if(provider.isMetaMask)setProviderName("MetaMask");
   else if(provider.isCoinbaseWallet)setProviderName("Coinbase");
   else if(provider.isBraveWallet)setProviderName("Brave Wallet");
@@ -106,7 +106,7 @@ async function sendMoney(){
     await u.approve(CONTRACT_ADDRESS,a);
     setStatus("Sending...");
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
-    const t=await c.sendMoney(USDC_ADDRESS,ethers.getAddress(recipient),a,country);
+    const t=await c.sendMoney(USDC_ADDRESS,recipient.toLowerCase(),a,country);
     await t.wait();
     setStatus("Sent successfully");
     loadPayments(wallet,walletProvider);
@@ -121,7 +121,7 @@ async function createInvoice(){
     const s=await ep.getSigner();
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
     const a=ethers.parseUnits(amount,6);
-    const t=await c.createInvoice(ethers.getAddress(recipient),a,description,country);
+    const t=await c.createInvoice(recipient.toLowerCase(),a,description,country);
     const r=await t.wait();
     setInvoiceId(r.logs[0].topics[1]);
     setStatus("Invoice created");
@@ -137,7 +137,6 @@ return(
 <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#667eea,#764ba2)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
 <div style={{background:"white",borderRadius:20,padding:32,width:"100%",maxWidth:480,boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
 <div style={{textAlign:"center",marginBottom:20}}>
-<div style={{fontSize:40}}>🌍</div>
 <h1 style={{margin:"8px 0",fontSize:26,color:"#1a1a2e"}}>Arc Remittance</h1>
 <p style={{color:"#666",margin:0,fontSize:14}}>Send USDC globally in seconds</p>
 </div>
