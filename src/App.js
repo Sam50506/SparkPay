@@ -9,10 +9,10 @@ const ARC_CHAIN_ID_NUM = 5042002;
 const WALLETCONNECT_PROJECT_ID = "8bb24a433758c9a403057e2e3f2c371b";
 const CONTRACT_ABI = [
   "function sendMoney(address token, address recipient, uint256 amount, string memory country) external",
-  "function createInvoice(address recipient, uint256 amount, string memory description, string memory country) external returns (bytes32)",
+  "function createInvoice(address payer, uint256 amount, string memory description, string memory country) external returns (bytes32)",
   "function payInvoice(address token, bytes32 invoiceId) external",
   "function getPayments(address user) external view returns (tuple(address sender, address recipient, uint256 amount, string country, uint256 timestamp, bytes32 invoiceId)[])",
-  "function invoices(bytes32) view returns (address creator, address recipient, uint256 amount, string description, string country, bool paid, uint256 createdAt)"
+  "function invoices(bytes32) view returns (address creator, address payer, uint256 amount, string description, string country, bool paid, uint256 createdAt)"
 ];
 const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)"];
 const COUNTRIES = ["Mexico","Brazil","India","Philippines","Nigeria","Indonesia","Pakistan","Bangladesh","Vietnam","Ghana","Kenya","Egypt","Turkey","Argentina","Colombia","Ukraine","Ethiopia","Tanzania","Uganda","Nepal"];
@@ -111,16 +111,23 @@ async function sendMoney(){
     const s=await ep.getSigner();
     const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);
     const a=ethers.parseUnits(amount,6);
-    const approveTx=await u.approve(CONTRACT_ADDRESS,a);
+    const approveTx=await u.approve(CONTRACT_ADDRESS,a,{gasLimit:100000});
     await approveTx.wait();
     setStatus("Sending...");
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
-    const t=await c.sendMoney(USDC_ADDRESS,recipient.toLowerCase(),a,country);
+    const t=await c.sendMoney(USDC_ADDRESS,recipient.toLowerCase(),a,country,{gasLimit:300000});
     await t.wait();
     setStatus("Sent successfully");
     loadPayments(wallet,walletProvider);
-  }catch(e){setStatus("Error: "+e.message);}
-  setLoading(false);
+  }catch(e){
+    if(e.message.includes("txpool is full")){
+      setStatus("Network busy, retrying in 10 seconds...");
+      setTimeout(()=>sendMoney(),10000);
+    }else{
+      setStatus("Error: "+e.message);
+      setLoading(false);
+    }
+  }
 }
 
 async function createInvoice(){
@@ -130,12 +137,19 @@ async function createInvoice(){
     const s=await ep.getSigner();
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
     const a=ethers.parseUnits(amount,6);
-    const t=await c.createInvoice(recipient.toLowerCase(),a,description,country);
+    const t=await c.createInvoice(recipient.toLowerCase(),a,description,country,{gasLimit:300000});
     const r=await t.wait();
     setInvoiceId(r.logs[0].topics[1]);
     setStatus("Invoice created");
-  }catch(e){setStatus("Error: "+e.message);}
-  setLoading(false);
+  }catch(e){
+    if(e.message.includes("txpool is full")){
+      setStatus("Network busy, retrying in 10 seconds...");
+      setTimeout(()=>createInvoice(),10000);
+    }else{
+      setStatus("Error: "+e.message);
+      setLoading(false);
+    }
+  }
 }
 
 async function payInvoice(){
@@ -146,17 +160,25 @@ async function payInvoice(){
     const c=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,ep);
     const inv=await c.invoices(invoiceIdInput);
     if(inv.paid){setStatus("Error: Invoice already paid");setLoading(false);return;}
+    if(inv.amount===0n){setStatus("Error: Invoice not found");setLoading(false);return;}
     const u=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,s);
     setStatus("Approving USDC...");
-    const approveTx=await u.approve(CONTRACT_ADDRESS,inv.amount);
+    const approveTx=await u.approve(CONTRACT_ADDRESS,inv.amount,{gasLimit:100000});
     await approveTx.wait();
     setStatus("Paying invoice...");
     const cw=new ethers.Contract(CONTRACT_ADDRESS,CONTRACT_ABI,s);
-    const t=await cw.payInvoice(USDC_ADDRESS,invoiceIdInput);
+    const t=await cw.payInvoice(USDC_ADDRESS,invoiceIdInput,{gasLimit:300000});
     await t.wait();
     setStatus("Invoice paid successfully");
-  }catch(e){setStatus("Error: "+e.message);}
-  setLoading(false);
+  }catch(e){
+    if(e.message.includes("txpool is full")){
+      setStatus("Network busy, retrying in 10 seconds...");
+      setTimeout(()=>payInvoice(),10000);
+    }else{
+      setStatus("Error: "+e.message);
+      setLoading(false);
+    }
+  }
 }
 
 const inp={width:"100%",padding:12,marginTop:4,marginBottom:14,borderRadius:10,border:"1px solid #ddd",boxSizing:"border-box",fontSize:14};
