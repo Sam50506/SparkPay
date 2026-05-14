@@ -669,8 +669,8 @@ export default function App() {
           </>
         )}
 
-        <div style={s.footer}>Powered by Arc Testnet • USDC Native</div>
+      <div style={s.footer}>Powered by Arc Testnet • USDC Native</div>
       </div>
     </div>
   );
-          }
+}
