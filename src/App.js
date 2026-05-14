@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
-const CONTRACT_ADDRESS = "0x902895a956dce5f1d52c3ee65f1b393eafea2ecf";
+const CONTRACT_ADDRESS = "0x3b61dca1b03c5cc303fe5733d40f5bd6588fc66d";
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
 const ARC_CHAIN_ID = "0x4CE052";
 const ARC_CHAIN_ID_NUM = 5042002;
