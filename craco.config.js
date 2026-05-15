@@ -1,0 +1,33 @@
+const webpack = require("webpack");
+
+module.exports = {
+  webpack: {
+    configure: (webpackConfig) => {
+      // Add Node.js polyfills
+      webpackConfig.resolve.fallback = {
+        ...webpackConfig.resolve.fallback,
+        buffer: require.resolve("buffer/"),
+        crypto: require.resolve("crypto-browserify"),
+        stream: require.resolve("stream-browserify"),
+        assert: require.resolve("assert/"),
+        process: require.resolve("process/browser"),
+        http: false,
+        https: false,
+        os: false,
+        url: false,
+        zlib: false,
+      };
+
+      // Inject globals
+      webpackConfig.plugins = [
+        ...webpackConfig.plugins,
+        new webpack.ProvidePlugin({
+          Buffer: ["buffer", "Buffer"],
+          process: "process/browser",
+        }),
+      ];
+
+      return webpackConfig;
+    },
+  },
+};
