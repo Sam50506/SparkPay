@@ -171,7 +171,11 @@ export default function App() {
       if (accounts.length === 0) disconnect();
       else if (accounts[0] !== address) setAddress(accounts[0]);
     };
-    const handleChain = () => window.location.reload();
+    const handleChain = async (chainId) => {
+  if (chainId !== ARC_CHAIN_ID_HEX) {
+    await switchToArc(window.ethereum);
+  }
+};
     window.ethereum.on('accountsChanged', handleAccounts);
     window.ethereum.on('chainChanged', handleChain);
     return () => {
