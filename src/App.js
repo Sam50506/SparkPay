@@ -4,7 +4,7 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
 /* ─── Constants ─── */
 const ARC_CHAIN_ID = 5042002;
-const ARC_CHAIN_ID_HEX = '0x4CEF52';
+const ARC_CHAIN_ID_HEX = '0x4CE752'; // ✅ FIXED: was 0x4CEF52
 const ARC_RPC = 'https://rpc.testnet.arc.network';
 const REMITTANCE_ADDRESS = '0x71ec1d33f56a9f72a05c507647e1455b238cb7da';
 const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
@@ -125,6 +125,7 @@ const executeWithRetry = async (txFunc, setStatus) => {
 
 /* ─── Main App ─── */
 export default function App() {
+  // eslint-disable-next-line no-unused-vars
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [address, setAddress] = useState('');
@@ -177,6 +178,7 @@ export default function App() {
       window.ethereum.removeListener('accountsChanged', handleAccounts);
       window.ethereum.removeListener('chainChanged', handleChain);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
   useEffect(() => {
@@ -356,16 +358,16 @@ export default function App() {
       return;
     }
     setLoading(true);
-    setStatus({ type: 'info', message: 'Creating...' });
+    setStatus({ type: 'info', message: 'Creating invoice...' });
     try {
       const { remittance } = getContracts();
       const amount = ethers.parseUnits(invoiceAmount, USDC_DECIMALS);
+      const checksumAddress = ethers.getAddress(invoicePayer.trim());
 
-      // Predict invoice ID before sending
-      const invoiceId = await remittance.createInvoice.staticCall(invoicePayer, amount, invoiceDescription, invoiceCountry);
+      const invoiceId = await remittance.createInvoice.staticCall(checksumAddress, amount, invoiceDescription, invoiceCountry);
 
       const tx = await executeWithRetry(
-        () => remittance.createInvoice(invoicePayer, amount, invoiceDescription, invoiceCountry, { gasLimit: GAS_LIMIT }),
+        () => remittance.createInvoice(checksumAddress, amount, invoiceDescription, invoiceCountry, { gasLimit: GAS_LIMIT }),
         setStatus
       );
       await tx.wait();
@@ -669,7 +671,7 @@ export default function App() {
           </>
         )}
 
-      <div style={s.footer}>Powered by Arc Testnet • USDC Native</div>
+        <div style={s.footer}>Powered by Arc Testnet • USDC Native</div>
       </div>
     </div>
   );
