@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@craco/craco": "^7.1.0",
     "@walletconnect/ethereum-provider": "^2.11.0",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",
@@ -13,11 +14,8 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "stream-browserify": "^3.0.0",
+    "typescript": "^6.0.3",
     "web-vitals": "^2.1.4"
-  },
-  "devDependencies": {
-    "@craco/craco": "^7.1.0",
-    "typescript": "^6.0.3"
   },
   "scripts": {
     "start": "craco start",
@@ -26,24 +24,14 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": [
-      "react-app"
-    ],
+    "extends": ["react-app"],
     "rules": {
       "no-unused-vars": "warn",
       "react-hooks/exhaustive-deps": "warn"
     }
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
   }
 }
