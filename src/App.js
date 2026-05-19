@@ -38,10 +38,10 @@ const COUNTRIES = Object.keys(CURRENCY_RATES);
 
 const REMITTANCE_ABI = [
   { inputs: [{ name: 'token', type: 'address' }, { name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'country', type: 'string' }], name: 'sendMoney', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  { inputs: [{ name: 'payer', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'description', type: 'string' }, { name: 'country', type: 'string' }], name: 'createInvoice', outputs: [{ name: '', type: 'bytes32' }], stateMutability: 'nonpayable', type: 'function' },
+  { inputs: [{ name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'description', type: 'string' }, { name: 'country', type: 'string' }], name: 'createInvoice', outputs: [{ name: '', type: 'bytes32' }], stateMutability: 'nonpayable', type: 'function' },
   { inputs: [{ name: 'token', type: 'address' }, { name: 'invoiceId', type: 'bytes32' }], name: 'payInvoice', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   { inputs: [{ name: 'user', type: 'address' }], name: 'getPayments', outputs: [{ components: [{ name: 'sender', type: 'address' }, { name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'country', type: 'string' }, { name: 'timestamp', type: 'uint256' }], name: '', type: 'tuple[]' }], stateMutability: 'view', type: 'function' },
-  { inputs: [{ name: '', type: 'bytes32' }], name: 'invoices', outputs: [{ name: 'creator', type: 'address' }, { name: 'payer', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'description', type: 'string' }, { name: 'country', type: 'string' }, { name: 'paid', type: 'bool' }, { name: 'timestamp', type: 'uint256' }], stateMutability: 'view', type: 'function' },
+  { inputs: [{ name: '', type: 'bytes32' }], name: 'invoices', outputs: [{ name: 'creator', type: 'address' }, { name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'description', type: 'string' }, { name: 'country', type: 'string' }, { name: 'paid', type: 'bool' }, { name: 'timestamp', type: 'uint256' }], stateMutability: 'view', type: 'function' },
 ];
 
 const ERC20_ABI = [
@@ -270,7 +270,7 @@ export default function App() {
       const { remittance, usdc } = getContracts();
       const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
       const recipient = ethers.getAddress(sendRecipient.trim());
-      const allowance = BigInt(0);
+      const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
       if (allowance < amount) {
         setStatus({ type: 'info', message: 'Approving USDC spend...' });
         const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, { gasLimit: GAS_LIMIT });
@@ -317,12 +317,8 @@ export default function App() {
       if (invoice.paid) { setStatus({ type: 'error', message: 'Invoice already paid' }); setLoading(false); return; }
       setPayInvoiceDetails({ creator: invoice.creator, amount: invoice.amount, description: invoice.description, country: invoice.country });
       const amount = invoice.amount;
-      const allowance = BigInt(0);
-      if (allowance < amount) {
-        setStatus({ type: 'info', message: 'Approving USDC...' });
-        const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, { gasLimit: GAS_LIMIT });
-        await approveTx.wait();
-      }
+      setStatus({ type: 'info', message: 'Approving USDC...' });
+      try { const approveTx = await usdc.approve(REMITTANCE_ADDRESS, ethers.MaxUint256, { gasLimit: GAS_LIMIT }); await approveTx.wait(); } catch(e) { console.log(e); }
       setStatus({ type: 'info', message: 'Paying invoice...' });
       const tx = await remittance.payInvoice(USDC_ADDRESS, invoiceId, { gasLimit: GAS_LIMIT });
       await tx.wait();
