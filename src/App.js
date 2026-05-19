@@ -269,7 +269,7 @@ export default function App() {
     try {
       const { remittance, usdc } = getContracts();
       const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
-      const recipient = ethers.getAddress(sendRecipient.trim());
+      const recipient = ethers.getAddress(sendRecipient.trim().toLowerCase());
       const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
       if (allowance < amount) {
         setStatus({ type: 'info', message: 'Approving USDC spend...' });
