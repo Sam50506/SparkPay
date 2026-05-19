@@ -4,7 +4,7 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 
 const ARC_CHAIN_ID = 5042002;
 const ARC_CHAIN_ID_HEX = '0x4CEF52';
-const ARC_RPC = 'https://arc-testnet.drpc.org';
+const ARC_RPC = 'https://rpc.testnet.arc.network';
 const REMITTANCE_ADDRESS = '0x71ec1d33f56a9f72a05c507647e1455b238cb7da';
 const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
 const USDC_DECIMALS = 6;
@@ -219,7 +219,7 @@ export default function App() {
       if (!ethProvider) { setStatus({ type: 'error', message: 'No wallet detected. Please install MetaMask.' }); return; }
       await ethProvider.request({ method: 'eth_requestAccounts' });
       await switchToArc(ethProvider);
-      const browserProvider = new ethers.BrowserProvider(ethProvider, { name: 'Arc Testnet', chainId: ARC_CHAIN_ID });
+      const browserProvider = new ethers.BrowserProvider(ethProvider);
       const newSigner = await browserProvider.getSigner();
       const newAddress = await newSigner.getAddress();
       setProvider(browserProvider);
@@ -237,7 +237,7 @@ export default function App() {
       setStatus({ type: 'info', message: 'Opening WalletConnect...' });
       const ethProvider = await EthereumProvider.init({ projectId: WC_PROJECT_ID, chains: [ARC_CHAIN_ID], showQrModal: true, methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign', 'wallet_addEthereumChain', 'wallet_switchEthereumChain'], events: ['chainChanged', 'accountsChanged'] });
       await ethProvider.enable();
-      const browserProvider = new ethers.BrowserProvider(ethProvider, { name: 'Arc Testnet', chainId: ARC_CHAIN_ID });
+      const browserProvider = new ethers.BrowserProvider(ethProvider);
       const newSigner = await browserProvider.getSigner();
       const newAddress = await newSigner.getAddress();
       setWcProvider(ethProvider);
