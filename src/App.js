@@ -46,7 +46,7 @@ const REMITTANCE_ABI = [
 
 const ERC20_ABI = [
   'function approve(address spender, uint256 amount) returns (bool)',
-  'function allowance(address owner, address spender) view returns (uint256)', 'function transfer(address to, uint256 amount) returns (bool)',
+  'function allowance(address owner, address spender) view returns (uint256)',
   'function balanceOf(address account) view returns (uint256)',
 ];
 
@@ -269,7 +269,7 @@ export default function App() {
     try {
       const { remittance, usdc } = getContracts();
       const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
-      const recipient = ethers.getAddress(sendRecipient.trim().toLowerCase());
+      const recipient = ethers.getAddress(sendRecipient.trim());
       const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
       if (allowance < amount) {
         setStatus({ type: 'info', message: 'Approving USDC spend...' });
