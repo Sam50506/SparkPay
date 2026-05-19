@@ -219,7 +219,7 @@ export default function App() {
       if (!ethProvider) { setStatus({ type: 'error', message: 'No wallet detected. Please install MetaMask.' }); return; }
       await ethProvider.request({ method: 'eth_requestAccounts' });
       await switchToArc(ethProvider);
-      const browserProvider = new ethers.BrowserProvider(ethProvider);
+      const browserProvider = new ethers.BrowserProvider(ethProvider, "any");
       const newSigner = await browserProvider.getSigner();
       const newAddress = await newSigner.getAddress();
       setProvider(browserProvider);
@@ -237,7 +237,7 @@ export default function App() {
       setStatus({ type: 'info', message: 'Opening WalletConnect...' });
       const ethProvider = await EthereumProvider.init({ projectId: WC_PROJECT_ID, chains: [ARC_CHAIN_ID], showQrModal: true, methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign', 'wallet_addEthereumChain', 'wallet_switchEthereumChain'], events: ['chainChanged', 'accountsChanged'] });
       await ethProvider.enable();
-      const browserProvider = new ethers.BrowserProvider(ethProvider);
+      const browserProvider = new ethers.BrowserProvider(ethProvider, "any");
       const newSigner = await browserProvider.getSigner();
       const newAddress = await newSigner.getAddress();
       setWcProvider(ethProvider);
