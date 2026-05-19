@@ -2,8 +2,8 @@
 pragma solidity ^0.8.28;
 
 interface IERC20 {
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
     function transfer(address recipient, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
 }
 
 contract Remittance {
@@ -53,14 +53,14 @@ contract Remittance {
         require(!inv.paid, "Already paid");
         require(inv.amount > 0, "Invalid invoice");
         inv.paid = true;
-        IERC20(token).transferFrom(msg.sender, inv.creator, inv.amount);
+        IERC20(token).transfer(inv.creator, inv.amount);
         payments[msg.sender].push(Payment(msg.sender, inv.creator, inv.amount, inv.country, block.timestamp, invoiceId));
         emit InvoicePaid(invoiceId, msg.sender);
         emit MoneySent(msg.sender, inv.creator, inv.amount, inv.country, invoiceId);
     }
 
     function sendMoney(address token, address recipient, uint256 amount, string memory country) external {
-        IERC20(token).transferFrom(msg.sender, recipient, amount);
+        IERC20(token).transfer(recipient, amount);
         payments[msg.sender].push(Payment(msg.sender, recipient, amount, country, block.timestamp, bytes32(0)));
         emit MoneySent(msg.sender, recipient, amount, country, bytes32(0));
     }
