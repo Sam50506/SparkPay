@@ -58,9 +58,7 @@ const formatLocalAmount = (usdcAmount, country) => {
   if (!curr || !usdcAmount) return '';
   const local = parseFloat(usdcAmount) * curr.rate;
   return `${curr.flag} ${curr.symbol}${local.toLocaleString('en-US', { maximumFractionDigits: 0 })} ${curr.code}`;
-};
-
-const CSS = `
+};const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'DM Sans',sans-serif;background:#F0F2F5;min-height:100vh;}
@@ -159,8 +157,7 @@ const CSS = `
   @keyframes spin{to{transform:rotate(360deg);}}
   .btn-disconnect{background:none;border:1px solid #FEE2E2;color:#DC2626;padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
   .btn-disconnect:hover{background:#FEF2F2;}
-`;
-export default function App() {
+`;export default function App() {
   const styleRef = useRef(null);
 
   useEffect(() => {
@@ -360,8 +357,7 @@ export default function App() {
     { id: 'pay', icon: '↓', label: 'Pay Invoice' },
     { id: 'history', icon: '📊', label: 'Analytics' },
     { id: 'fees', icon: '⚡', label: 'Fee Compare' },
-  ];
-if (!address) {
+  ];if (!address) {
     return (
       <div className="arc-app">
         <div className="landing">
