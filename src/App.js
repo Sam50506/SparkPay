@@ -207,9 +207,11 @@ export default function App() {
     try {
       await ethProvider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX }] });
     } catch (err) {
-      if (err.code === 4902) {
-        await ethProvider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX, chainName: 'Arc Testnet', nativeCurrency: { name: 'ARC', symbol: 'ARC', decimals: 18 }, rpcUrls: [ARC_RPC], blockExplorerUrls: [] }] });
-      } else throw err;
+      if (err.code === 4902 || err.code === -32603) {
+        try {
+          await ethProvider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX, chainName: 'Arc Testnet', nativeCurrency: { name: 'ARC', symbol: 'ARC', decimals: 18 }, rpcUrls: [ARC_RPC], blockExplorerUrls: [] }] });
+        } catch(e) { console.log('add chain error', e); }
+      }
     }
   };
 
