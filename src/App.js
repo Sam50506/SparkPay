@@ -270,7 +270,7 @@ export default function App() {
       const { remittance, usdc } = getContracts();
       const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
       const recipient = ethers.getAddress(sendRecipient.trim());
-      const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
+      const allowance = BigInt(0);
       if (allowance < amount) {
         setStatus({ type: 'info', message: 'Approving USDC spend...' });
         const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, { gasLimit: GAS_LIMIT });
@@ -317,7 +317,7 @@ export default function App() {
       if (invoice.paid) { setStatus({ type: 'error', message: 'Invoice already paid' }); setLoading(false); return; }
       setPayInvoiceDetails({ creator: invoice.creator, amount: invoice.amount, description: invoice.description, country: invoice.country });
       const amount = invoice.amount;
-      const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
+      const allowance = BigInt(0);
       if (allowance < amount) {
         setStatus({ type: 'info', message: 'Approving USDC...' });
         const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, { gasLimit: GAS_LIMIT });
