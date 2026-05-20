@@ -5,7 +5,7 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 const ARC_CHAIN_ID = 5042002;
 const ARC_CHAIN_ID_HEX = '0x4CEF52';
 const ARC_RPC = 'https://rpc.testnet.arc.network';
-const REMITTANCE_ADDRESS = '0x71ec1d33f56a9f72a05c507647e1455b238cb7da';
+const REMITTANCE_ADDRESS = '0x8c4C0C64Ea3bE42b905486d25BBe30aa49F68118';
 const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
 const USDC_DECIMALS = 6;
 const GAS_LIMIT = 300000;
@@ -45,9 +45,8 @@ const REMITTANCE_ABI = [
 ];
 
 const ERC20_ABI = [
-  'function approve(address spender, uint256 amount) returns (bool)',
-  'function allowance(address owner, address spender) view returns (uint256)',
-  'function balanceOf(address account) view returns (uint256)',
+    'function balanceOf(address account) view returns (uint256)',
+    'function transfer(address to, uint256 amount) returns (bool)',
 ];
 
 const shortenAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '';
@@ -270,14 +269,8 @@ export default function App() {
       const { remittance, usdc } = getContracts();
       const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
       const recipient = ethers.getAddress(sendRecipient.trim());
-      const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
-      if (allowance < amount) {
-        setStatus({ type: 'info', message: 'Approving USDC spend...' });
-        const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, { gasLimit: GAS_LIMIT });
-        await approveTx.wait();
-      }
       setStatus({ type: 'info', message: 'Sending USDC...' });
-      const tx = await remittance.sendMoney(USDC_ADDRESS, recipient, amount, sendCountry, { gasLimit: GAS_LIMIT });
+      const tx = await usdc.transfer(recipient, amount, { gasLimit: 500000 });
       await tx.wait();
       setStatus({ type: 'success', message: `Sent ${sendAmount} USDC to ${shortenAddress(recipient)} in ${sendCountry}` });
       setSendRecipient(''); setSendAmount('');
@@ -318,7 +311,6 @@ export default function App() {
       setPayInvoiceDetails({ creator: invoice.creator, amount: invoice.amount, description: invoice.description, country: invoice.country });
       const amount = invoice.amount;
       setStatus({ type: 'info', message: 'Approving USDC...' });
-      try { const approveTx = await usdc.approve(REMITTANCE_ADDRESS, ethers.MaxUint256, { gasLimit: GAS_LIMIT }); await approveTx.wait(); } catch(e) { console.log(e); }
       setStatus({ type: 'info', message: 'Paying invoice...' });
       const tx = await remittance.payInvoice(USDC_ADDRESS, invoiceId, { gasLimit: GAS_LIMIT });
       await tx.wait();
