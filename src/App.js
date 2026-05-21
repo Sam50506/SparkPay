@@ -291,7 +291,7 @@ export default function App() {
         await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
       }
       setStatus({type:'info',message:'Sending...'});
-      const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,sendRecipient,amount,sendCountry,{gasLimit:GAS_LIMIT}),setStatus);
+      const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,sendRecipient,amount,sendCountry,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
       await tx.wait();
       setStatus({type:'success',message:`Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
       setSendRecipient(''); setSendAmount('');
@@ -311,7 +311,7 @@ export default function App() {
         const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
         if(allowance<amount) await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
         setStatus({type:'info',message:`Sending to ${short(r.addr)}...`});
-        const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:GAS_LIMIT}),setStatus);
+        const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
         await tx.wait();
       }
       setStatus({type:'success',message:`Sent to ${valid.length} recipients`});
