@@ -6,6 +6,12 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar
 } from 'recharts';
 
+// Load Syne display font
+const _fl = document.createElement("link");
+_fl.href = "https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&display=swap";
+_fl.rel = "stylesheet";
+document.head.appendChild(_fl);
+
 /* ─── Constants ─────────────────────────────────────────────────────────────── */
 const ARC_CHAIN_ID = 5042002;
 const ARC_CHAIN_ID_HEX = '0x4CEF52';
@@ -129,6 +135,8 @@ export default function App() {
   const [wcProvider, setWcProvider] = useState(null);
   const [rates, setRates] = useState({});
   const [ratesLoaded, setRatesLoaded] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('arc_dark') === 'true');
+  const [defaultCurrency, setDefaultCurrency] = useState(() => localStorage.getItem('arc_currency') || 'Pakistan');
 
   // Send
   const [sendRecipient, setSendRecipient] = useState('');
@@ -281,18 +289,13 @@ export default function App() {
   /* ─── Actions ───────────────────────────────────────────────────────────── */
   const handleSend = async () => {
     if(!signer||!sendRecipient||!sendAmount){ setStatus({type:'error',message:'Fill all fields and connect wallet'}); return; }
-    setLoading(true); setStatus({type:'info',message:'Processing...'});
+    setLoading(true); setStatus({type:'info',message:'Sending...'});
     try {
-      const {remittance,usdc} = getContracts();
+      const {usdc} = getContracts();
       const amount = ethers.parseUnits(sendAmount,USDC_DECIMALS);
-      const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
-      if(allowance<amount){
-        setStatus({type:'info',message:'Approving USDC...'});
-        await Promise.race([(await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
-      }
-      setStatus({type:'info',message:'Sending...'});
-      const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,sendRecipient,amount,sendCountry,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
-      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
+      const tx = await usdc.transfer(sendRecipient,amount,{gasLimit:300000});
+      setStatus({type:'info',message:'Confirming...'});
+      await tx.wait();
       setStatus({type:'success',message:`Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
       setSendRecipient(''); setSendAmount('');
       fetchBalance();
@@ -309,10 +312,10 @@ export default function App() {
       for(const r of valid){
         const amount = ethers.parseUnits(r.amount,USDC_DECIMALS);
         const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
-        if(allowance<amount) await Promise.race([(await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
+        if(allowance<amount) await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
         setStatus({type:'info',message:`Sending to ${short(r.addr)}...`});
-        const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
-        await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
+        const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:GAS_LIMIT}),setStatus);
+        await tx.wait();
       }
       setStatus({type:'success',message:`Sent to ${valid.length} recipients`});
       setMultiRows([{addr:'',amount:'',country:'Pakistan'}]);
@@ -329,7 +332,7 @@ export default function App() {
       const amount = ethers.parseUnits(invAmount,USDC_DECIMALS);
       const invoiceId = await remittance.createInvoice.staticCall(invPayer,amount,invDesc,invCountry);
       const tx = await executeWithRetry(()=>remittance.createInvoice(invPayer,amount,invDesc,invCountry,{gasLimit:GAS_LIMIT}),setStatus);
-      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
+      await tx.wait();
       setCreatedInvId(invoiceId);
       // persist
       const saved = ls('arc_invoices',[]);
@@ -354,11 +357,11 @@ export default function App() {
       const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
       if(allowance<inv.amount){
         setStatus({type:'info',message:'Approving USDC...'});
-        await Promise.race([(await usdc.approve(REMITTANCE_ADDRESS,inv.amount,{gasLimit:GAS_LIMIT})).wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
+        await (await usdc.approve(REMITTANCE_ADDRESS,inv.amount,{gasLimit:GAS_LIMIT})).wait();
       }
       setStatus({type:'info',message:'Paying...'});
       const tx = await executeWithRetry(()=>remittance.payInvoice(USDC_ADDRESS,id,{gasLimit:GAS_LIMIT}),setStatus);
-      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
+      await tx.wait();
       setStatus({type:'success',message:`Paid ${fmtUSDC(inv.amount)} USDC`});
       setPayId(''); setPayDetails(null); fetchBalance();
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
@@ -410,7 +413,7 @@ export default function App() {
         </div>
 
         {/* Hero headline */}
-        <h1 style={{fontSize:'clamp(48px,12vw,80px)',fontWeight:900,lineHeight:1.05,margin:'0 0 24px',color:'#0f172a',letterSpacing:'-2px'}}>
+        <h1 style={{fontSize:'clamp(48px,12vw,80px)',fontWeight:800,lineHeight:1.05,margin:'0 0 24px',color:'#0f172a',letterSpacing:'-2px',fontFamily:'"Syne",sans-serif'}}>
           Send Money<br />
           <span style={{color:'#6d28d9'}}>Globally.</span><br />
           Instantly.
@@ -463,6 +466,7 @@ export default function App() {
     {id:'history', label:'History',   icon:'↺'},
     {id:'rates',   label:'Rates',     icon:'⟲'},
     {id:'fees',    label:'Compare',   icon:'≈'},
+    {id:'settings', label:'Settings',  icon:'⚙'},
   ];
 
   const C = {
@@ -936,6 +940,56 @@ export default function App() {
               <div style={{fontSize:13,color:'#7c3aed',fontWeight:600,marginBottom:4}}>ANNUAL SAVINGS (sending $500/month)</div>
               <div style={{fontSize:32,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'}}>$2,699</div>
               <div style={{fontSize:13,color:'#94a3b8',marginTop:4}}>vs. traditional bank wire</div>
+            </div>
+          </div>
+        )}
+
+
+        {activeTab==='settings' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Settings</div>
+            <div style={{display:'flex',flexDirection:'column',gap:0}}>
+
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 0',borderBottom:'1px solid #f1f5f9'}}>
+                <div>
+                  <div style={{fontWeight:600,fontSize:15}}>Dark Mode</div>
+                  <div style={{fontSize:13,color:'#94a3b8',marginTop:2}}>Switch to dark theme</div>
+                </div>
+                <div onClick={()=>{const n=!darkMode;setDarkMode(n);localStorage.setItem('arc_dark',String(n));}} style={{width:52,height:28,borderRadius:999,background:darkMode?'#6d28d9':'#e2e8f0',cursor:'pointer',position:'relative',transition:'background 0.2s'}}>
+                  <div style={{position:'absolute',top:3,left:darkMode?26:3,width:22,height:22,borderRadius:'50%',background:'#fff',transition:'left 0.2s',boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}}/>
+                </div>
+              </div>
+
+              <div style={{padding:'18px 0',borderBottom:'1px solid #f1f5f9'}}>
+                <div style={{fontWeight:600,fontSize:15,marginBottom:4}}>Default Send Country</div>
+                <div style={{fontSize:13,color:'#94a3b8',marginBottom:10}}>Pre-selected when you open the Send tab</div>
+                <select style={C.select} value={defaultCurrency} onChange={e=>{setDefaultCurrency(e.target.value);localStorage.setItem('arc_currency',e.target.value);setSendCountry(e.target.value);}}>
+                  {COUNTRIES.map(c=><option key={c}>{FLAG[c]} {c}</option>)}
+                </select>
+              </div>
+
+              <div style={{padding:'18px 0',borderBottom:'1px solid #f1f5f9'}}>
+                <div style={{fontWeight:600,fontSize:15,marginBottom:8}}>Network Info</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,fontSize:13}}>
+                  <div style={{color:'#94a3b8'}}>Chain ID</div><div style={{fontFamily:'monospace'}}>{ARC_CHAIN_ID}</div>
+                  <div style={{color:'#94a3b8'}}>RPC</div><div style={{fontFamily:'monospace',fontSize:11,wordBreak:'break-all'}}>rpc.testnet.arc.network</div>
+                  <div style={{color:'#94a3b8'}}>USDC</div><div style={{fontFamily:'monospace',fontSize:11}}>{USDC_ADDRESS.slice(0,10)}...</div>
+                  <div style={{color:'#94a3b8'}}>Contract</div><div style={{fontFamily:'monospace',fontSize:11}}>{REMITTANCE_ADDRESS.slice(0,10)}...</div>
+                </div>
+              </div>
+
+              <div style={{padding:'18px 0',borderBottom:'1px solid #f1f5f9'}}>
+                <div style={{fontWeight:600,fontSize:15,marginBottom:4}}>Privacy</div>
+                <div style={{fontSize:13,color:'#94a3b8',marginBottom:12}}>All data is stored locally on your device only. Nothing is sent to any server.</div>
+                <button style={{...C.btnDanger,padding:'10px 20px'}} onClick={()=>{if(window.confirm('Clear all contacts and scheduled payments?')){setContacts([]);setSchedRows([]);setStatus({type:'success',message:'Local data cleared'});}}}>Clear Local Data</button>
+              </div>
+
+              <div style={{padding:'18px 0'}}>
+                <div style={{fontWeight:600,fontSize:15,marginBottom:4}}>About ArcPay</div>
+                <div style={{fontSize:13,color:'#94a3b8',lineHeight:1.6}}>Non-custodial USDC remittance on Arc Testnet. Your keys, your funds. Zero hidden fees. Zero middlemen.</div>
+                <div style={{fontSize:12,color:'#6d28d9',marginTop:8,fontWeight:700}}>v1.0.0 · Arc Testnet · Built on Arc</div>
+              </div>
+
             </div>
           </div>
         )}
