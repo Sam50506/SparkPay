@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import {
+  AreaChart, Area, XAxis, YAxis,
+  CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar
+} from 'recharts';
 
+/* ─── Constants ─────────────────────────────────────────────────────────────── */
 const ARC_CHAIN_ID = 5042002;
 const ARC_CHAIN_ID_HEX = '0x4CEF52';
 const ARC_RPC = 'https://rpc.testnet.arc.network';
@@ -11,563 +16,932 @@ const USDC_DECIMALS = 6;
 const GAS_LIMIT = 300000;
 const WC_PROJECT_ID = '8bb24a433758c9a403057e2e3f2c371b';
 
-const CURRENCY_RATES = {
-  Mexico: { code: 'MXN', rate: 17.2, symbol: '$', flag: '🇲🇽' },
-  Brazil: { code: 'BRL', rate: 5.1, symbol: 'R$', flag: '🇧🇷' },
-  India: { code: 'INR', rate: 83.5, symbol: '₹', flag: '🇮🇳' },
-  Philippines: { code: 'PHP', rate: 56.8, symbol: '₱', flag: '🇵🇭' },
-  Nigeria: { code: 'NGN', rate: 1580, symbol: '₦', flag: '🇳🇬' },
-  Indonesia: { code: 'IDR', rate: 15800, symbol: 'Rp', flag: '🇮🇩' },
-  Pakistan: { code: 'PKR', rate: 278, symbol: '₨', flag: '🇵🇰' },
-  Bangladesh: { code: 'BDT', rate: 110, symbol: '৳', flag: '🇧🇩' },
-  Vietnam: { code: 'VND', rate: 24800, symbol: '₫', flag: '🇻🇳' },
-  Ghana: { code: 'GHS', rate: 12.5, symbol: 'GH₵', flag: '🇬🇭' },
-  Kenya: { code: 'KES', rate: 129, symbol: 'KSh', flag: '🇰🇪' },
-  Egypt: { code: 'EGP', rate: 48.5, symbol: 'E£', flag: '🇪🇬' },
-  Turkey: { code: 'TRY', rate: 32.1, symbol: '₺', flag: '🇹🇷' },
-  Argentina: { code: 'ARS', rate: 880, symbol: '$', flag: '🇦🇷' },
-  Colombia: { code: 'COP', rate: 3950, symbol: '$', flag: '🇨🇴' },
-  Ukraine: { code: 'UAH', rate: 38.5, symbol: '₴', flag: '🇺🇦' },
-  Ethiopia: { code: 'ETB', rate: 56.5, symbol: 'Br', flag: '🇪🇹' },
-  Tanzania: { code: 'TZS', rate: 2520, symbol: 'TSh', flag: '🇹🇿' },
-  Uganda: { code: 'UGX', rate: 3780, symbol: 'USh', flag: '🇺🇬' },
-  Nepal: { code: 'NPR', rate: 133, symbol: 'Rs', flag: '🇳🇵' },
-};
+const COUNTRIES = [
+  'Pakistan','Nigeria','India','Philippines','Bangladesh',
+  'Mexico','Brazil','Indonesia','Vietnam','Ghana',
+  'Kenya','Egypt','Turkey','Argentina','Colombia',
+  'Ukraine','Ethiopia','Tanzania','Uganda','Nepal'
+];
+const FLAG = { Pakistan:'🇵🇰',Nigeria:'🇳🇬',India:'🇮🇳',Philippines:'🇵🇭',Bangladesh:'🇧🇩',Mexico:'🇲🇽',Brazil:'🇧🇷',Indonesia:'🇮🇩',Vietnam:'🇻🇳',Ghana:'🇬🇭',Kenya:'🇰🇪',Egypt:'🇪🇬',Turkey:'🇹🇷',Argentina:'🇦🇷',Colombia:'🇨🇴',Ukraine:'🇺🇦',Ethiopia:'🇪🇹',Tanzania:'🇹🇿',Uganda:'🇺🇬',Nepal:'🇳🇵' };
+const CURRENCY = { Pakistan:'PKR',Nigeria:'NGN',India:'INR',Philippines:'PHP',Bangladesh:'BDT',Mexico:'MXN',Brazil:'BRL',Indonesia:'IDR',Vietnam:'VND',Ghana:'GHS',Kenya:'KES',Egypt:'EGP',Turkey:'TRY',Argentina:'ARS',Colombia:'COP',Ukraine:'UAH',Ethiopia:'ETB',Tanzania:'TZS',Uganda:'UGX',Nepal:'NPR' };
 
-const COUNTRIES = Object.keys(CURRENCY_RATES);
-
+/* ─── ABIs ──────────────────────────────────────────────────────────────────── */
 const REMITTANCE_ABI = [
-  { inputs: [{ name: 'token', type: 'address' }, { name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'country', type: 'string' }], name: 'sendMoney', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  { inputs: [{ name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'description', type: 'string' }, { name: 'country', type: 'string' }], name: 'createInvoice', outputs: [{ name: '', type: 'bytes32' }], stateMutability: 'nonpayable', type: 'function' },
-  { inputs: [{ name: 'token', type: 'address' }, { name: 'invoiceId', type: 'bytes32' }], name: 'payInvoice', outputs: [], stateMutability: 'nonpayable', type: 'function' },
-  { inputs: [{ name: 'user', type: 'address' }], name: 'getPayments', outputs: [{ components: [{ name: 'sender', type: 'address' }, { name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'country', type: 'string' }, { name: 'timestamp', type: 'uint256' }], name: '', type: 'tuple[]' }], stateMutability: 'view', type: 'function' },
-  { inputs: [{ name: '', type: 'bytes32' }], name: 'invoices', outputs: [{ name: 'creator', type: 'address' }, { name: 'recipient', type: 'address' }, { name: 'amount', type: 'uint256' }, { name: 'description', type: 'string' }, { name: 'country', type: 'string' }, { name: 'paid', type: 'bool' }, { name: 'timestamp', type: 'uint256' }], stateMutability: 'view', type: 'function' },
+  { inputs:[{name:'token',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'}], name:'sendMoney', outputs:[], stateMutability:'nonpayable', type:'function' },
+  { inputs:[{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'}], name:'createInvoice', outputs:[{name:'',type:'bytes32'}], stateMutability:'nonpayable', type:'function' },
+  { inputs:[{name:'token',type:'address'},{name:'invoiceId',type:'bytes32'}], name:'payInvoice', outputs:[], stateMutability:'nonpayable', type:'function' },
+  { inputs:[{name:'user',type:'address'}], name:'getPayments', outputs:[{components:[{name:'sender',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'},{name:'timestamp',type:'uint256'}],name:'',type:'tuple[]'}], stateMutability:'view', type:'function' },
+  { inputs:[{name:'',type:'bytes32'}], name:'invoices', outputs:[{name:'creator',type:'address'},{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'},{name:'paid',type:'bool'},{name:'timestamp',type:'uint256'}], stateMutability:'view', type:'function' }
 ];
-
 const ERC20_ABI = [
-    'function balanceOf(address account) view returns (uint256)',
-    'function transfer(address to, uint256 amount) returns (bool)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function balanceOf(address owner) view returns (uint256)',
+  'function decimals() view returns (uint8)'
 ];
 
-const shortenAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '';
-const formatUSDC = (amount) => amount ? parseFloat(ethers.formatUnits(amount, USDC_DECIMALS)).toFixed(2) : '0';
-const formatDate = (ts) => ts ? new Date(Number(ts) * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-const formatLocalAmount = (usdcAmount, country) => {
-  const curr = CURRENCY_RATES[country];
-  if (!curr || !usdcAmount) return '';
-  const local = parseFloat(usdcAmount) * curr.rate;
-  return `${curr.flag} ${curr.symbol}${local.toLocaleString('en-US', { maximumFractionDigits: 0 })} ${curr.code}`;
-};
-const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'DM Sans',sans-serif;background:#F0F2F5;min-height:100vh;}
-  .arc-app{min-height:100vh;}
-  .landing{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fff;position:relative;overflow:hidden;}
-  .landing-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 0%,#E8F5FF 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 100%,#F0EAFF 0%,transparent 60%);}
-  .landing-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.04) 1px,transparent 1px);background-size:40px 40px;}
-  .landing-content{position:relative;z-index:1;text-align:center;padding:40px 20px;max-width:480px;width:100%;}
-  .landing-badge{display:inline-flex;align-items:center;gap:6px;background:#EEF2FF;color:#4F46E5;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:28px;}
-  .landing-badge-dot{width:6px;height:6px;background:#4F46E5;border-radius:50%;animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.8);}}
-  .landing-title{font-family:'Syne',sans-serif;font-size:clamp(40px,8vw,68px);font-weight:800;color:#0A0A0A;line-height:1.0;letter-spacing:-0.03em;margin-bottom:16px;}
-  .landing-title span{background:linear-gradient(135deg,#4F46E5,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-  .landing-subtitle{font-size:16px;color:#6B7280;line-height:1.6;margin-bottom:40px;}
-  .landing-stats{display:flex;justify-content:center;gap:32px;margin-bottom:40px;}
-  .landing-stat{text-align:center;}
-  .landing-stat-value{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:#0A0A0A;}
-  .landing-stat-label{font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.08em;margin-top:2px;}
-  .landing-divider{width:1px;background:#E5E7EB;align-self:stretch;}
-  .btn-connect-primary{width:100%;padding:16px;background:#0A0A0A;color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;}
-  .btn-connect-primary:hover{background:#1a1a1a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.15);}
-  .btn-connect-secondary{width:100%;padding:16px;background:transparent;color:#0A0A0A;border:1.5px solid #E5E7EB;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;}
-  .btn-connect-secondary:hover{border-color:#0A0A0A;transform:translateY(-1px);}
-  .landing-trust{margin-top:24px;font-size:12px;color:#9CA3AF;display:flex;align-items:center;justify-content:center;gap:6px;}
-  .dashboard{min-height:100vh;background:#F0F2F5;}
-  .topbar{background:#fff;border-bottom:1px solid #F0F0F0;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-  .topbar-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#0A0A0A;letter-spacing:-0.02em;}
-  .topbar-logo span{color:#4F46E5;}
-  .topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-  .topbar-network{display:flex;align-items:center;gap:6px;background:#F0FDF4;color:#16A34A;padding:6px 12px;border-radius:100px;font-size:12px;font-weight:600;}
-  .topbar-network-dot{width:6px;height:6px;background:#16A34A;border-radius:50%;animation:pulse 2s infinite;}
-  .topbar-wallet{display:flex;align-items:center;gap:8px;background:#F9F9F9;border:1px solid #F0F0F0;padding:8px 14px;border-radius:100px;font-size:13px;font-weight:500;color:#374151;}
-  .wallet-avatar{width:24px;height:24px;background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:50%;}
-  .dashboard-body{max-width:1100px;margin:0 auto;padding:32px 24px;}
-  .dashboard-grid{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start;}
-  @media(max-width:768px){.dashboard-grid{grid-template-columns:1fr;}.sidebar{display:flex;flex-direction:row;overflow-x:auto;gap:8px;}.sidebar-nav{display:flex;flex-direction:row;gap:4px;width:100%;overflow-x:auto;}.nav-item{white-space:nowrap;flex-shrink:0;}.balance-card{display:none;}}
-  .sidebar{display:flex;flex-direction:column;gap:16px;}
-  .balance-card{background:linear-gradient(135deg,#0A0A0A 0%,#1a1a2e 100%);border-radius:20px;padding:24px;color:white;position:relative;overflow:hidden;}
-  .balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(79,70,229,0.4) 0%,transparent 70%);border-radius:50%;}
-  .balance-label{font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;position:relative;z-index:1;}
-  .balance-amount{font-family:'Syne',sans-serif;font-size:36px;font-weight:700;color:#fff;position:relative;z-index:1;letter-spacing:-0.02em;}
-  .balance-currency{font-size:14px;color:rgba(255,255,255,0.5);margin-top:4px;position:relative;z-index:1;}
-  .balance-address{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.4);font-family:monospace;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;}
-  .copy-btn{background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.6);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;transition:all 0.2s;}
-  .copy-btn:hover{background:rgba(255,255,255,0.2);color:#fff;}
-  .sidebar-nav{background:#fff;border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:2px;}
-  .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:all 0.15s;font-size:14px;font-weight:500;color:#6B7280;border:none;background:none;width:100%;text-align:left;}
-  .nav-item:hover{background:#F9F9F9;color:#0A0A0A;}
-  .nav-item.active{background:#EEF2FF;color:#4F46E5;}
-  .nav-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;background:#F3F4F6;flex-shrink:0;}
-  .nav-item.active .nav-icon{background:#EEF2FF;}
-  .main-content{display:flex;flex-direction:column;gap:20px;}
-  .card{background:#fff;border-radius:20px;padding:28px;}
-  .card-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#0A0A0A;margin-bottom:6px;letter-spacing:-0.02em;}
-  .card-subtitle{font-size:13px;color:#9CA3AF;margin-bottom:24px;}
-  .form-group{margin-bottom:16px;}
-  .form-label{display:block;font-size:12px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
-  .form-input{width:100%;padding:14px 16px;background:#F9F9F9;border:1.5px solid #F0F0F0;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;transition:all 0.2s;outline:none;}
-  .form-input:focus{border-color:#4F46E5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,0.08);}
-  .form-select{width:100%;padding:14px 16px;background:#F9F9F9;border:1.5px solid #F0F0F0;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;transition:all 0.2s;outline:none;cursor:pointer;}
-  .form-select:focus{border-color:#4F46E5;background:#fff;}
-  .currency-preview{background:linear-gradient(135deg,#EEF2FF,#F5F3FF);border:1.5px solid #E0E7FF;border-radius:12px;padding:16px;margin-top:8px;display:flex;align-items:center;justify-content:space-between;}
-  .currency-preview-label{font-size:12px;color:#6B7280;}
-  .currency-preview-amount{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#4F46E5;}
-  .fee-info{display:flex;align-items:center;gap:6px;font-size:12px;color:#16A34A;font-weight:500;}
-  .btn-primary{width:100%;padding:16px;background:#0A0A0A;color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
-  .btn-primary:hover:not(:disabled){background:#1a1a1a;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.15);}
-  .btn-primary:disabled{background:#D1D5DB;cursor:not-allowed;transform:none;}
-  .btn-primary.loading{background:#4F46E5;}
-  .status-box{padding:14px 16px;border-radius:12px;font-size:13px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
-  .status-success{background:#F0FDF4;color:#16A34A;border:1px solid #BBF7D0;}
-  .status-error{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;}
-  .status-info{background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;}
-  .status-warning{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;}
-  .tx-item{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid #F5F5F5;}
-  .tx-item:last-child{border-bottom:none;}
-  .tx-icon{width:44px;height:44px;border-radius:12px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;font-size:20px;margin-right:14px;flex-shrink:0;}
-  .tx-info{flex:1;}
-  .tx-country{font-size:14px;font-weight:600;color:#0A0A0A;}
-  .tx-address{font-size:12px;color:#9CA3AF;font-family:monospace;margin-top:2px;}
-  .tx-amount{text-align:right;}
-  .tx-usdc{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#0A0A0A;}
-  .tx-date{font-size:11px;color:#9CA3AF;margin-top:2px;}
-  .invoice-id-box{background:#F9F9F9;border:1.5px dashed #E5E7EB;border-radius:12px;padding:16px;margin-top:16px;font-family:monospace;font-size:12px;color:#374151;word-break:break-all;line-height:1.6;}
-  .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
-  @media(max-width:600px){.summary-grid{grid-template-columns:1fr;}}
-  .summary-card{background:#fff;border-radius:14px;padding:16px;}
-  .summary-card-label{font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
-  .summary-card-value{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#0A0A0A;}
-  .fees-table{width:100%;border-collapse:collapse;}
-  .fees-table th{text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#9CA3AF;font-weight:600;border-bottom:1px solid #F0F0F0;}
-  .fees-table td{padding:16px;font-size:14px;color:#374151;border-bottom:1px solid #F5F5F5;}
-  .fees-table tr:last-child td{border-bottom:none;}
-  .fees-table tr.best-row td{color:#16A34A;font-weight:700;background:#F0FDF4;}
-  .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .btn-disconnect{background:none;border:1px solid #FEE2E2;color:#DC2626;padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
-  .btn-disconnect:hover{background:#FEF2F2;}
-`;
-export default function App() {
-  const styleRef = useRef(null);
+/* ─── Helpers ───────────────────────────────────────────────────────────────── */
+const short = a => a ? `${a.slice(0,6)}...${a.slice(-4)}` : '';
+const fmtUSDC = v => v ? parseFloat(ethers.formatUnits(v, USDC_DECIMALS)).toFixed(2) : '0.00';
+const fmtDate = ts => ts ? new Date(Number(ts)*1000).toLocaleDateString('en',{month:'short',day:'numeric'}) : '';
 
-  useEffect(() => {
-    if (!styleRef.current) {
-      const style = document.createElement('style');
-      style.textContent = CSS;
-      document.head.appendChild(style);
-      styleRef.current = style;
+function ls(k,fb){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):fb; }catch{ return fb; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+
+const executeWithRetry = async (fn, setStatus) => {
+  try { return await fn(); }
+  catch(e) {
+    const m = e.message?.toLowerCase()||'';
+    if(m.includes('txpool')||m.includes('nonce')||m.includes('replacement')||m.includes('underpriced')||m.includes('timeout')){
+      setStatus({type:'warning',message:'Transaction pool busy. Retrying in 10s...'});
+      await new Promise(r=>setTimeout(r,10000));
+      return await fn();
     }
-    return () => { if (styleRef.current) { styleRef.current.remove(); styleRef.current = null; } };
-  }, []);
+    throw e;
+  }
+};
 
-  // eslint-disable-next-line no-unused-vars
+/* ─── QR Code generator (canvas, no lib needed) ─────────────────────────────── */
+function QRCanvas({ value, size=160 }){
+  const ref = useRef();
+  useEffect(()=>{
+    if(!value||!ref.current) return;
+    // Minimal QR-like visual using address bytes as seed (decorative, shows address)
+    const canvas = ref.current;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,size,size);
+    ctx.fillStyle='#111';
+    const cell = size/21;
+    // deterministic pattern from address
+    const bytes = value.replace('0x','').padEnd(64,'0');
+    for(let r=0;r<21;r++){
+      for(let c=0;c<21;c++){
+        const idx=(r*21+c)%bytes.length;
+        const bit = parseInt(bytes[idx],16)>7;
+        // Always fill finder patterns (corners)
+        const finder = (r<7&&c<7)||(r<7&&c>13)||(r>13&&c<7);
+        if(finder||bit){
+          ctx.fillRect(c*cell,r*cell,cell-0.5,cell-0.5);
+        }
+      }
+    }
+    // finder pattern borders
+    [[0,0],[0,14],[14,0]].forEach(([row,col])=>{
+      ctx.strokeStyle='#111'; ctx.lineWidth=1;
+      ctx.strokeRect(col*cell,row*cell,7*cell,7*cell);
+      ctx.fillStyle='#fff';
+      ctx.fillRect((col+1)*cell,(row+1)*cell,5*cell,5*cell);
+      ctx.fillStyle='#111';
+      ctx.fillRect((col+2)*cell,(row+2)*cell,3*cell,3*cell);
+    });
+  },[value,size]);
+  return <canvas ref={ref} width={size} height={size} style={{borderRadius:8,border:'1px solid #e5e7eb'}} />;
+}
+
+/* ─── Mock analytics from tx history ───────────────────────────────────────── */
+function buildAnalytics(history){
+  const days = Array.from({length:7},(_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()-(6-i));
+    return { label: d.toLocaleDateString('en',{weekday:'short'}), sent:0, count:0 };
+  });
+  history.forEach(tx=>{
+    const d = new Date(Number(tx.timestamp)*1000);
+    const label = d.toLocaleDateString('en',{weekday:'short'});
+    const slot = days.find(x=>x.label===label);
+    if(slot){ slot.sent += parseFloat(fmtUSDC(tx.amount)); slot.count++; }
+  });
+  return days;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   APP
+══════════════════════════════════════════════════════════════════════════════ */
+export default function App() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [address, setAddress] = useState('');
   const [walletName, setWalletName] = useState('');
+  const [balance, setBalance] = useState('0.00');
   const [activeTab, setActiveTab] = useState('send');
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [wcProvider, setWcProvider] = useState(null);
-  const [usdcBalance, setUsdcBalance] = useState('0.00');
-  const [copied, setCopied] = useState(false);
+  const [rates, setRates] = useState({});
+  const [ratesLoaded, setRatesLoaded] = useState(false);
+
+  // Send
   const [sendRecipient, setSendRecipient] = useState('');
   const [sendAmount, setSendAmount] = useState('');
-  const [sendCountry, setSendCountry] = useState(COUNTRIES[0]);
-  const [invoicePayer, setInvoicePayer] = useState('');
-  const [invoiceAmount, setInvoiceAmount] = useState('');
-  const [invoiceDescription, setInvoiceDescription] = useState('');
-  const [invoiceCountry, setInvoiceCountry] = useState(COUNTRIES[0]);
-  const [createdInvoiceId, setCreatedInvoiceId] = useState('');
-  const [payInvoiceId, setPayInvoiceId] = useState('');
-  const [payInvoiceDetails, setPayInvoiceDetails] = useState(null);
+  const [sendCountry, setSendCountry] = useState('Pakistan');
+
+  // Invoice
+  const [invPayer, setInvPayer] = useState('');
+  const [invAmount, setInvAmount] = useState('');
+  const [invDesc, setInvDesc] = useState('');
+  const [invCountry, setInvCountry] = useState('Pakistan');
+  const [createdInvId, setCreatedInvId] = useState('');
+
+  // Pay
+  const [payId, setPayId] = useState('');
+  const [payDetails, setPayDetails] = useState(null);
+
+  // History
   const [history, setHistory] = useState([]);
 
-  const fetchBalance = useCallback(async (signerInstance, addr) => {
-    try {
-      const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signerInstance);
-      const bal = await usdc.balanceOf(addr);
-      setUsdcBalance(parseFloat(ethers.formatUnits(bal, USDC_DECIMALS)).toFixed(2));
-    } catch (e) { setUsdcBalance('0.00'); }
-  }, []);
+  // Contacts (localStorage)
+  const [contacts, setContacts] = useState(()=>ls('arc_contacts',[]));
+  const [cName, setCName] = useState('');
+  const [cAddr, setCAddr] = useState('');
+  const [cCountry, setCCountry] = useState('Pakistan');
 
-  const switchToArc = async (ethProvider) => {
+  // Multi-send
+  const [multiRows, setMultiRows] = useState([{addr:'',amount:'',country:'Pakistan'}]);
+
+  // Scheduled
+  const [schedRows, setSchedRows] = useState(()=>ls('arc_scheduled',[]));
+  const [newSched, setNewSched] = useState({addr:'',amount:'',country:'Pakistan',freq:'weekly',next:''});
+
+  useEffect(()=>lsSet('arc_contacts',contacts),[contacts]);
+  useEffect(()=>lsSet('arc_scheduled',schedRows),[schedRows]);
+
+  // Fetch exchange rates
+  useEffect(()=>{
+    fetch('https://api.exchangerate-api.com/v4/latest/USD')
+      .then(r=>r.json())
+      .then(d=>{ setRates(d.rates||{}); setRatesLoaded(true); })
+      .catch(()=>{ setRates({PKR:278,NGN:1580,INR:83,PHP:56,BDT:110,MXN:17,BRL:5,IDR:15600,VND:24000,GHS:12,KES:129,EGP:31,TRY:32,ARS:880,COP:3900,UAH:38,ETB:57,TZS:2500,UGX:3800,NPR:132}); setRatesLoaded(true); });
+  },[]);
+
+  // Auto-connect
+  useEffect(()=>{
+    if(window.ethereum?.selectedAddress) connectBrowser();
+  // eslint-disable-next-line
+  },[]);
+
+  useEffect(()=>{
+    if(!window.ethereum) return;
+    const onAcc = accs=>{ if(!accs.length) disconnect(); else setAddress(accs[0]); };
+    const onChain = ()=>window.location.reload();
+    window.ethereum.on('accountsChanged',onAcc);
+    window.ethereum.on('chainChanged',onChain);
+    return ()=>{ window.ethereum.removeListener('accountsChanged',onAcc); window.ethereum.removeListener('chainChanged',onChain); };
+  // eslint-disable-next-line
+  },[address]);
+
+  useEffect(()=>{
+    if(activeTab==='history'&&signer) loadHistory();
+  // eslint-disable-next-line
+  },[activeTab,signer]);
+
+  useEffect(()=>{
+    if(signer&&address) fetchBalance();
+  // eslint-disable-next-line
+  },[signer,address]);
+
+  /* ─── Wallet ────────────────────────────────────────────────────────────── */
+  const switchToArc = async (eth) => {
     try {
-      await ethProvider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX }] });
-    } catch (err) {
-      if (err.code === 4902 || err.code === -32603) {
-        try {
-          await ethProvider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: ARC_CHAIN_ID_HEX, chainName: 'Arc Testnet', nativeCurrency: { name: 'ARC', symbol: 'ARC', decimals: 18 }, rpcUrls: [ARC_RPC], blockExplorerUrls: [] }] });
-        } catch(e) { console.log('add chain error', e); }
-      }
+      await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_ID_HEX}]});
+    } catch(e) {
+      if(e.code===4902) await eth.request({method:'wallet_addEthereumChain',params:[{chainId:ARC_CHAIN_ID_HEX,chainName:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:[ARC_RPC],blockExplorerUrls:['https://testnet.arcscan.app']}]});
+      else throw e;
     }
   };
 
-  const connectBrowserWallet = async () => {
+  const getEth = () => {
+    const { ethereum } = window;
+    if (!ethereum) return null;
+    if (ethereum.providers?.length) return ethereum.providers.find(p=>p.isMetaMask)||ethereum.providers[0];
+    return ethereum;
+  };
+
+  const walletLabel = () => {
+    const eth = getEth();
+    if (!eth) return 'Browser Wallet';
+    if (eth.isRabby) return 'Rabby';
+    if (eth.isBraveWallet) return 'Brave';
+    if (eth.isCoinbaseWallet) return 'Coinbase';
+    if (eth.isMetaMask) return 'MetaMask';
+    return 'Browser Wallet';
+  };
+
+  const connectBrowser = async () => {
+    const eth = getEth();
+    if (!eth) { setStatus({type:'error',message:'No browser wallet detected. Install MetaMask.'}); return; }
     try {
-      const ethProvider = window.ethereum;
-      if (!ethProvider) { setStatus({ type: 'error', message: 'No wallet detected. Please install MetaMask.' }); return; }
-      await ethProvider.request({ method: 'eth_requestAccounts' });
-      await switchToArc(ethProvider);
-      const browserProvider = new ethers.BrowserProvider(ethProvider, "any");
-      const newSigner = await browserProvider.getSigner();
-      const newAddress = await newSigner.getAddress();
-      setProvider(browserProvider);
-      setSigner(newSigner);
-      setAddress(newAddress);
-      setWalletName(ethProvider.isMetaMask ? 'MetaMask' : ethProvider.isCoinbaseWallet ? 'Coinbase' : 'Browser Wallet');
-      fetchBalance(newSigner, newAddress);
-      setStatus(null);
-      ethProvider.on('accountsChanged', (accounts) => { if (accounts.length === 0) disconnect(); else setAddress(accounts[0]); });
-    } catch (err) { setStatus({ type: 'error', message: err.message || 'Failed to connect' }); }
+      const bp = new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
+      await bp.send('eth_requestAccounts',[]);
+      await switchToArc(eth);
+      const s = await bp.getSigner();
+      const addr = await s.getAddress();
+      setProvider(bp); setSigner(s); setAddress(addr); setWalletName(walletLabel());
+      setStatus({type:'success',message:`Connected: ${short(addr)}`});
+    } catch(e) { setStatus({type:'error',message:e.message||'Connection failed'}); }
   };
 
-  const connectMobileWallet = async () => {
+  const connectMobile = async () => {
     try {
-      setStatus({ type: 'info', message: 'Opening WalletConnect...' });
-      const ethProvider = await EthereumProvider.init({ projectId: WC_PROJECT_ID, chains: [ARC_CHAIN_ID], showQrModal: true, methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign', 'wallet_addEthereumChain', 'wallet_switchEthereumChain'], events: ['chainChanged', 'accountsChanged'] });
-      await ethProvider.enable();
-      const browserProvider = new ethers.BrowserProvider(ethProvider, "any");
-      const newSigner = await browserProvider.getSigner();
-      const newAddress = await newSigner.getAddress();
-      setWcProvider(ethProvider);
-      setProvider(browserProvider);
-      setSigner(newSigner);
-      setAddress(newAddress);
-      setWalletName('WalletConnect');
-      fetchBalance(newSigner, newAddress);
-      setStatus(null);
-      ethProvider.on('disconnect', () => disconnect());
-    } catch (err) { setStatus({ type: 'error', message: err.message || 'Failed to connect' }); }
+      const wcp = await EthereumProvider.init({
+        projectId:WC_PROJECT_ID, chains:[ARC_CHAIN_ID], showQrModal:true,
+        methods:['eth_sendTransaction','eth_sign','personal_sign','wallet_addEthereumChain','wallet_switchEthereumChain'],
+        events:['chainChanged','accountsChanged'],
+      });
+      await wcp.enable();
+      wcp.on('accountsChanged', accs=>{ if(!accs.length) disconnect(); else setAddress(accs[0]); });
+      wcp.on('disconnect', ()=>disconnect());
+      try { await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_ID_HEX}]}); }
+      catch(e){ if(e.code===4902) await wcp.request({method:'wallet_addEthereumChain',params:[{chainId:ARC_CHAIN_ID_HEX,chainName:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:[ARC_RPC],blockExplorerUrls:[]}]}); }
+      const bp = new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
+      const s = await bp.getSigner();
+      const addr = await s.getAddress();
+      setWcProvider(wcp); setProvider(bp); setSigner(s); setAddress(addr); setWalletName('WalletConnect');
+      setStatus({type:'success',message:`Connected via WalletConnect: ${short(addr)}`});
+    } catch(e) { setStatus({type:'error',message:e.message||'WalletConnect failed'}); }
   };
 
-  const disconnect = useCallback(() => {
-    if (wcProvider) wcProvider.disconnect();
-    setProvider(null); setSigner(null); setAddress(''); setWalletName(''); setWcProvider(null); setStatus(null); setUsdcBalance('0.00');
-  }, [wcProvider]);
+  const disconnect = useCallback(()=>{
+    if(wcProvider) wcProvider.disconnect();
+    setProvider(null); setSigner(null); setAddress(''); setWalletName(''); setWcProvider(null); setStatus(null); setBalance('0.00');
+  },[wcProvider]);
 
-  const getContracts = () => {
-    if (!signer) return null;
-    return { remittance: new ethers.Contract(REMITTANCE_ADDRESS, REMITTANCE_ABI, signer), usdc: new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer) };
+  const fetchBalance = async () => {
+    try {
+      const usdc = new ethers.Contract(USDC_ADDRESS,ERC20_ABI,provider);
+      const b = await usdc.balanceOf(address);
+      setBalance(fmtUSDC(b));
+    } catch {}
   };
 
+  const getContracts = () => ({
+    remittance: new ethers.Contract(REMITTANCE_ADDRESS,REMITTANCE_ABI,signer),
+    usdc: new ethers.Contract(USDC_ADDRESS,ERC20_ABI,signer),
+  });
+
+  /* ─── Actions ───────────────────────────────────────────────────────────── */
   const handleSend = async () => {
-    if (!signer || !sendRecipient || !sendAmount) { setStatus({ type: 'error', message: 'Please fill all fields' }); return; }
+    if(!signer||!sendRecipient||!sendAmount){ setStatus({type:'error',message:'Fill all fields and connect wallet'}); return; }
+    setLoading(true); setStatus({type:'info',message:'Processing...'});
+    try {
+      const {remittance,usdc} = getContracts();
+      const amount = ethers.parseUnits(sendAmount,USDC_DECIMALS);
+      const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
+      if(allowance<amount){
+        setStatus({type:'info',message:'Approving USDC...'});
+        await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
+      }
+      setStatus({type:'info',message:'Sending...'});
+      const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,sendRecipient,amount,sendCountry,{gasLimit:GAS_LIMIT}),setStatus);
+      await tx.wait();
+      setStatus({type:'success',message:`Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
+      setSendRecipient(''); setSendAmount('');
+      fetchBalance();
+    } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
+    finally{ setLoading(false); }
+  };
+
+  const handleMultiSend = async () => {
+    const valid = multiRows.filter(r=>ethers.isAddress(r.addr)&&parseFloat(r.amount)>0);
+    if(!signer||!valid.length){ setStatus({type:'error',message:'Add valid recipients'}); return; }
     setLoading(true);
     try {
-      const { remittance, usdc } = getContracts();
-      const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
-      const recipient = ethers.getAddress(sendRecipient.trim());
-      setStatus({ type: 'info', message: 'Sending USDC...' });
-      const tx = await usdc.transfer(recipient, amount, { gasLimit: 500000 });
-      await tx.wait();
-      setStatus({ type: 'success', message: `Sent ${sendAmount} USDC to ${shortenAddress(recipient)} in ${sendCountry}` });
-      setSendRecipient(''); setSendAmount('');
-      fetchBalance(signer, address);
-    } catch (err) { setStatus({ type: 'error', message: err.reason || err.message || 'Transaction failed' }); }
-    finally { setLoading(false); }
+      const {remittance,usdc} = getContracts();
+      for(const r of valid){
+        const amount = ethers.parseUnits(r.amount,USDC_DECIMALS);
+        const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
+        if(allowance<amount) await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
+        setStatus({type:'info',message:`Sending to ${short(r.addr)}...`});
+        const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:GAS_LIMIT}),setStatus);
+        await tx.wait();
+      }
+      setStatus({type:'success',message:`Sent to ${valid.length} recipients`});
+      setMultiRows([{addr:'',amount:'',country:'Pakistan'}]);
+      fetchBalance();
+    } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
+    finally{ setLoading(false); }
   };
 
   const handleCreateInvoice = async () => {
-    if (!signer || !invoicePayer || !invoiceAmount || !invoiceDescription) { setStatus({ type: 'error', message: 'Please fill all fields' }); return; }
-    setLoading(true);
-    setStatus({ type: 'info', message: 'Creating invoice on-chain...' });
+    if(!signer||!invPayer||!invAmount||!invDesc){ setStatus({type:'error',message:'Fill all fields'}); return; }
+    setLoading(true); setStatus({type:'info',message:'Creating...'});
     try {
-      const { remittance } = getContracts();
-      const amount = ethers.parseUnits(invoiceAmount, USDC_DECIMALS);
-      const payer = ethers.getAddress(invoicePayer.trim());
-      const invoiceId = await remittance.createInvoice.staticCall(payer, amount, invoiceDescription, invoiceCountry);
-      const tx = await remittance.createInvoice(payer, amount, invoiceDescription, invoiceCountry, { gasLimit: GAS_LIMIT });
+      const {remittance} = getContracts();
+      const amount = ethers.parseUnits(invAmount,USDC_DECIMALS);
+      const invoiceId = await remittance.createInvoice.staticCall(invPayer,amount,invDesc,invCountry);
+      const tx = await executeWithRetry(()=>remittance.createInvoice(invPayer,amount,invDesc,invCountry,{gasLimit:GAS_LIMIT}),setStatus);
       await tx.wait();
-      setCreatedInvoiceId(invoiceId);
-      setStatus({ type: 'success', message: 'Invoice created successfully!' });
-      setInvoicePayer(''); setInvoiceAmount(''); setInvoiceDescription('');
-    } catch (err) { setStatus({ type: 'error', message: err.reason || err.message || 'Failed to create invoice' }); }
-    finally { setLoading(false); }
+      setCreatedInvId(invoiceId);
+      // persist
+      const saved = ls('arc_invoices',[]);
+      lsSet('arc_invoices',[{id:invoiceId,payer:invPayer,amount:invAmount,desc:invDesc,country:invCountry,ts:Date.now()},...saved]);
+      setStatus({type:'success',message:'Invoice created!'});
+      setInvPayer(''); setInvAmount(''); setInvDesc('');
+    } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
+    finally{ setLoading(false); }
   };
 
   const handlePayInvoice = async () => {
-    if (!signer || !payInvoiceId) { setStatus({ type: 'error', message: 'Please enter an invoice ID' }); return; }
-    setLoading(true);
-    setStatus({ type: 'info', message: 'Looking up invoice...' });
+    if(!signer||!payId){ setStatus({type:'error',message:'Enter invoice ID'}); return; }
+    setLoading(true); setStatus({type:'info',message:'Looking up invoice...'});
     try {
-      const { remittance, usdc } = getContracts();
-      let invoiceId = payInvoiceId.trim();
-      if (!invoiceId.startsWith('0x')) invoiceId = '0x' + invoiceId;
-      const invoice = await remittance.invoices(invoiceId);
-      if (invoice.creator === ethers.ZeroAddress) { setStatus({ type: 'error', message: 'Invoice not found' }); setLoading(false); return; }
-      if (invoice.paid) { setStatus({ type: 'error', message: 'Invoice already paid' }); setLoading(false); return; }
-      setPayInvoiceDetails({ creator: invoice.creator, amount: invoice.amount, description: invoice.description, country: invoice.country });
-      const amount = invoice.amount;
-      setStatus({ type: 'info', message: 'Approving USDC...' });
-      setStatus({ type: 'info', message: 'Paying invoice...' });
-      const tx = await remittance.payInvoice(USDC_ADDRESS, invoiceId, { gasLimit: GAS_LIMIT });
+      const {remittance,usdc} = getContracts();
+      let id = payId.trim();
+      if(!id.startsWith('0x')) id='0x'+id;
+      const inv = await remittance.invoices(id);
+      if(inv.creator===ethers.ZeroAddress){ setStatus({type:'error',message:'Invoice not found'}); setLoading(false); return; }
+      if(inv.paid){ setStatus({type:'error',message:'Already paid'}); setLoading(false); return; }
+      setPayDetails({creator:inv.creator,amount:inv.amount,description:inv.description,country:inv.country});
+      const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
+      if(allowance<inv.amount){
+        setStatus({type:'info',message:'Approving USDC...'});
+        await (await usdc.approve(REMITTANCE_ADDRESS,inv.amount,{gasLimit:GAS_LIMIT})).wait();
+      }
+      setStatus({type:'info',message:'Paying...'});
+      const tx = await executeWithRetry(()=>remittance.payInvoice(USDC_ADDRESS,id,{gasLimit:GAS_LIMIT}),setStatus);
       await tx.wait();
-      setStatus({ type: 'success', message: `Paid ${formatUSDC(amount)} USDC successfully!` });
-      setPayInvoiceId(''); setPayInvoiceDetails(null);
-      fetchBalance(signer, address);
-    } catch (err) { setStatus({ type: 'error', message: err.reason || err.message || 'Payment failed' }); }
-    finally { setLoading(false); }
+      setStatus({type:'success',message:`Paid ${fmtUSDC(inv.amount)} USDC`});
+      setPayId(''); setPayDetails(null); fetchBalance();
+    } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
+    finally{ setLoading(false); }
   };
 
-  const loadHistory = useCallback(async () => {
-    if (!signer) return;
+  const loadHistory = async () => {
     try {
-      const { remittance } = getContracts();
+      const {remittance} = getContracts();
       const payments = await remittance.getPayments(address);
       setHistory([...payments].reverse());
-    } catch (err) { console.error('History load failed:', err); }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signer, address]);
-
-  useEffect(() => { if (activeTab === 'history' && signer) loadHistory(); }, [activeTab, signer, loadHistory]);
-
-  const copyAddress = () => { navigator.clipboard.writeText(address); setCopied(true); setTimeout(() => setCopied(false), 2000); };
-
-  const statusClass = () => {
-    if (!status) return null;
-    return { success: 'status-success', error: 'status-error', info: 'status-info', warning: 'status-warning' }[status.type] || 'status-info';
+    } catch {}
   };
 
-  const totalSent = history.reduce((sum, p) => sum + parseFloat(formatUSDC(p.amount)), 0).toFixed(2);
-  const uniqueCountries = [...new Set(history.map(p => p.country))].length;
+  /* ─── Derived ───────────────────────────────────────────────────────────── */
+  const convertedAmount = () => {
+    if(!sendAmount||!sendCountry) return null;
+    const cur = CURRENCY[sendCountry];
+    const rate = rates[cur];
+    if(!rate) return null;
+    return (parseFloat(sendAmount)*rate).toLocaleString('en',{maximumFractionDigits:0});
+  };
 
-  const navItems = [
-    { id: 'send', icon: '↑', label: 'Send Money' },
-    { id: 'invoice', icon: '📄', label: 'Create Invoice' },
-    { id: 'pay', icon: '↓', label: 'Pay Invoice' },
-    { id: 'history', icon: '📊', label: 'Analytics' },
-    { id: 'fees', icon: '⚡', label: 'Fee Compare' },
-  ];
-if (!address) {
-    return (
-      <div className="arc-app">
-        <div className="landing">
-          <div className="landing-bg" />
-          <div className="landing-grid" />
-          <div className="landing-content">
-            <div className="landing-badge"><div className="landing-badge-dot" />Arc Testnet · Live</div>
-            <h1 className="landing-title">Send Money<br /><span>Globally.</span><br />Instantly.</h1>
-            <p className="landing-subtitle">Transfer USDC across borders in under a second.<br />Zero hidden fees. Fully on-chain.</p>
-            <div className="landing-stats">
-              <div className="landing-stat"><div className="landing-stat-value">~$0.007</div><div className="landing-stat-label">Per Transfer</div></div>
-              <div className="landing-divider" />
-              <div className="landing-stat"><div className="landing-stat-value">&lt;1s</div><div className="landing-stat-label">Settlement</div></div>
-              <div className="landing-divider" />
-              <div className="landing-stat"><div className="landing-stat-value">20+</div><div className="landing-stat-label">Countries</div></div>
-            </div>
-            {status && <div className={`status-box ${statusClass()}`} style={{ marginBottom: 16, textAlign: 'left' }}>{status.message}</div>}
-            <button className="btn-connect-primary" onClick={connectBrowserWallet}><span>⬡</span> Connect Wallet</button>
-            <button className="btn-connect-secondary" onClick={connectMobileWallet}><span>📱</span> Connect via WalletConnect</button>
-            <div className="landing-trust">🔒 Non-custodial · Your keys, your funds</div>
-          </div>
+  const totalSent = history.reduce((s,t)=>s+parseFloat(fmtUSDC(t.amount)),0);
+  const analytics = buildAnalytics(history);
+
+  /* ─── Status style ──────────────────────────────────────────────────────── */
+  const statusBg = ()=>{
+    if(!status) return null;
+    if(status.type==='success') return {bg:'#f0fdf4',color:'#166534',border:'#bbf7d0'};
+    if(status.type==='error') return {bg:'#fef2f2',color:'#991b1b',border:'#fecaca'};
+    if(status.type==='warning') return {bg:'#fffbeb',color:'#92400e',border:'#fde68a'};
+    return {bg:'#eff6ff',color:'#1e40af',border:'#bfdbfe'};
+  };
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     LANDING PAGE  (same design as screenshot)
+  ══════════════════════════════════════════════════════════════════════════ */
+  if(!address) return (
+    <div style={{minHeight:'100vh',background:'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative',overflow:'hidden'}}>
+      {/* Grid background */}
+      <div style={{position:'absolute',inset:0,backgroundImage:'linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)',backgroundSize:'48px 48px',opacity:0.6,pointerEvents:'none'}} />
+
+      <div style={{position:'relative',zIndex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'40px 24px',textAlign:'center'}}>
+        {/* Live badge */}
+        <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(255,255,255,0.8)',border:'1px solid #e2e8f0',borderRadius:999,padding:'6px 16px',marginBottom:40,backdropFilter:'blur(4px)'}}>
+          <span style={{width:8,height:8,borderRadius:'50%',background:'#6d28d9',display:'inline-block'}} />
+          <span style={{fontSize:12,fontWeight:600,color:'#6d28d9',letterSpacing:'0.1em'}}>ARC TESTNET · LIVE</span>
         </div>
+
+        {/* Hero headline */}
+        <h1 style={{fontSize:'clamp(48px,12vw,80px)',fontWeight:900,lineHeight:1.05,margin:'0 0 24px',color:'#0f172a',letterSpacing:'-2px'}}>
+          Send Money<br />
+          <span style={{color:'#6d28d9'}}>Globally.</span><br />
+          Instantly.
+        </h1>
+        <p style={{fontSize:18,color:'#64748b',margin:'0 0 48px',maxWidth:400,lineHeight:1.6}}>
+          Transfer USDC across borders in under a second.<br />Zero hidden fees. Fully on-chain.
+        </p>
+
+        {/* Stats */}
+        <div style={{display:'flex',gap:0,marginBottom:48,border:'1px solid #e2e8f0',borderRadius:16,overflow:'hidden',background:'#fff'}}>
+          {[['~$0.007','PER TRANSFER'],['<1S','SETTLEMENT'],['20+','COUNTRIES']].map(([v,l],i)=>(
+            <div key={i} style={{padding:'20px 32px',borderRight:i<2?'1px solid #e2e8f0':'none',minWidth:100}}>
+              <div style={{fontSize:22,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'}}>{v}</div>
+              <div style={{fontSize:10,fontWeight:700,color:'#94a3b8',letterSpacing:'0.12em',marginTop:4}}>{l}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Buttons */}
+        <div style={{display:'flex',flexDirection:'column',gap:12,width:'100%',maxWidth:360}}>
+          <button onClick={connectBrowser} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#0f172a',color:'#fff',border:'none',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
+            <span>⬡</span> Connect Wallet
+          </button>
+          <button onClick={connectMobile} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#fff',color:'#0f172a',border:'1.5px solid #e2e8f0',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
+            <span>📱</span> Connect via WalletConnect
+          </button>
+        </div>
+
+        {status && (
+          <div style={{marginTop:16,padding:'10px 16px',borderRadius:10,background:statusBg()?.bg,color:statusBg()?.color,border:`1px solid ${statusBg()?.border}`,fontSize:14,maxWidth:360,width:'100%'}}>
+            {status.message}
+          </div>
+        )}
+
+        <p style={{marginTop:20,fontSize:13,color:'#94a3b8'}}>🔒 Non-custodial · Your keys, your funds</p>
       </div>
-    );
-  }
+    </div>
+  );
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     DASHBOARD  (same design language — white, grid bg, black/purple accents)
+  ══════════════════════════════════════════════════════════════════════════ */
+  const tabs = [
+    {id:'send',    label:'Send',      icon:'↑'},
+    {id:'multi',   label:'Multi-Send',icon:'⇈'},
+    {id:'invoice', label:'Invoice',   icon:'◻'},
+    {id:'pay',     label:'Pay',       icon:'$'},
+    {id:'contacts',label:'Contacts',  icon:'◑'},
+    {id:'schedule',label:'Scheduled', icon:'⊙'},
+    {id:'history', label:'History',   icon:'↺'},
+    {id:'rates',   label:'Rates',     icon:'⟲'},
+    {id:'fees',    label:'Compare',   icon:'≈'},
+  ];
+
+  const C = {
+    wrap: {minHeight:'100vh',background:'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative'},
+    grid: {position:'fixed',inset:0,backgroundImage:'linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)',backgroundSize:'48px 48px',opacity:0.5,pointerEvents:'none',zIndex:0},
+
+    // Top nav
+    nav: {position:'sticky',top:0,zIndex:100,background:'rgba(248,250,255,0.92)',backdropFilter:'blur(12px)',borderBottom:'1px solid #e2e8f0',padding:'0 20px'},
+    navInner: {maxWidth:900,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:60},
+    navLogo: {fontSize:18,fontWeight:900,color:'#0f172a',letterSpacing:'-0.5px'},
+    navRight: {display:'flex',alignItems:'center',gap:12},
+    balPill: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:999,padding:'6px 14px',fontSize:13,fontWeight:700,color:'#0f172a'},
+    addrPill: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:999,padding:'6px 14px',fontSize:13,color:'#64748b',fontFamily:'monospace'},
+    discBtn: {background:'#fef2f2',border:'1px solid #fecaca',borderRadius:999,padding:'6px 14px',fontSize:12,fontWeight:600,color:'#dc2626',cursor:'pointer'},
+
+    // Content
+    content: {position:'relative',zIndex:1,maxWidth:900,margin:'0 auto',padding:'28px 20px'},
+
+    // Status
+    statusBox: (t)=>{
+      const m = {success:{bg:'#f0fdf4',c:'#166534',b:'#bbf7d0'},error:{bg:'#fef2f2',c:'#991b1b',b:'#fecaca'},warning:{bg:'#fffbeb',c:'#92400e',b:'#fde68a'},info:{bg:'#eff6ff',c:'#1e40af',b:'#bfdbfe'}};
+      const s = m[t?.type]||m.info;
+      return {padding:'12px 16px',borderRadius:12,marginBottom:20,fontSize:14,fontWeight:500,background:s.bg,color:s.c,border:`1px solid ${s.b}`};
+    },
+
+    // Tab bar
+    tabBar: {display:'flex',gap:4,overflowX:'auto',marginBottom:24,paddingBottom:2},
+    tab: (active)=>({display:'flex',alignItems:'center',gap:6,padding:'9px 16px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:600,whiteSpace:'nowrap',background:active?'#0f172a':'#fff',color:active?'#fff':'#64748b',border:active?'none':'1px solid #e2e8f0',transition:'all 0.15s'}),
+
+    // Cards
+    card: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:16,padding:'24px',marginBottom:16},
+    cardTitle: {fontSize:20,fontWeight:800,color:'#0f172a',marginBottom:4,letterSpacing:'-0.5px'},
+    cardSub: {fontSize:14,color:'#64748b',marginBottom:20},
+
+    // Stat cards
+    statGrid: {display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12,marginBottom:20},
+    statCard: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:14,padding:'18px'},
+    statVal: {fontSize:26,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'},
+    statLbl: {fontSize:11,fontWeight:700,color:'#94a3b8',letterSpacing:'0.1em',marginTop:4},
+
+    // Form
+    label: {display:'block',fontSize:12,fontWeight:700,color:'#374151',letterSpacing:'0.05em',marginBottom:6,textTransform:'uppercase'},
+    input: {width:'100%',padding:'12px 14px',borderRadius:10,border:'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,fontFamily:'inherit',color:'#0f172a',outline:'none',background:'#fff'},
+    select: {width:'100%',padding:'12px 14px',borderRadius:10,border:'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,background:'#fff',color:'#0f172a',fontFamily:'inherit'},
+
+    // Buttons
+    btnPrimary: {width:'100%',padding:'15px',borderRadius:12,border:'none',background:'#0f172a',color:'#fff',fontSize:15,fontWeight:700,cursor:'pointer',marginTop:4},
+    btnSecondary: {padding:'10px 18px',borderRadius:10,border:'1.5px solid #e2e8f0',background:'#fff',color:'#0f172a',fontSize:13,fontWeight:600,cursor:'pointer'},
+    btnDanger: {padding:'8px 14px',borderRadius:8,border:'1px solid #fecaca',background:'#fef2f2',color:'#dc2626',fontSize:12,fontWeight:600,cursor:'pointer'},
+    btnGhost: {padding:'10px 18px',borderRadius:10,border:'1.5px dashed #e2e8f0',background:'transparent',color:'#94a3b8',fontSize:13,fontWeight:600,cursor:'pointer',width:'100%',marginTop:4},
+
+    // Convert box
+    convertBox: {background:'#faf5ff',border:'1px solid #e9d5ff',borderRadius:12,padding:'14px 16px',marginBottom:14},
+
+    // Table
+    table: {width:'100%',borderCollapse:'collapse',fontSize:14},
+    th: {background:'#f8faff',padding:'12px 14px',textAlign:'left',fontWeight:700,fontSize:12,color:'#64748b',letterSpacing:'0.05em',textTransform:'uppercase',borderBottom:'1px solid #e2e8f0'},
+    td: {padding:'13px 14px',borderBottom:'1px solid #f1f5f9',color:'#374151',fontSize:14},
+
+    // Invoice box
+    invoiceBox: {background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:10,padding:'14px',fontFamily:'monospace',fontSize:12,wordBreak:'break-all',marginTop:12,color:'#374151'},
+
+    // History row
+    histRow: {display:'flex',alignItems:'center',gap:14,padding:'14px 0',borderBottom:'1px solid #f1f5f9'},
+    histIcon: (type)=>({width:40,height:40,borderRadius:12,background:type==='sent'?'#fef2f2':'#f0fdf4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}),
+  };
 
   return (
-    <div className="arc-app">
-      <div className="dashboard">
-        <div className="topbar">
-          <div className="topbar-logo">Arc<span>Pay</span></div>
-          <div className="topbar-right">
-            <div className="topbar-network"><div className="topbar-network-dot" />Arc Testnet</div>
-            <div className="topbar-wallet"><div className="wallet-avatar" />{walletName} · {shortenAddress(address)}</div>
-            <button className="btn-disconnect" onClick={disconnect}>Disconnect</button>
+    <div style={C.wrap}>
+      <div style={C.grid} />
+
+      {/* Nav */}
+      <nav style={C.nav}>
+        <div style={C.navInner}>
+          <div style={C.navLogo}>Arc<span style={{color:'#6d28d9'}}>Pay</span></div>
+          <div style={C.navRight}>
+            <div style={C.balPill}>${balance} USDC</div>
+            <div style={C.addrPill}>{short(address)}</div>
+            <button style={C.discBtn} onClick={disconnect}>Disconnect</button>
+          </div>
+        </div>
+      </nav>
+
+      <div style={C.content}>
+        {/* Status */}
+        {status && <div style={C.statusBox(status)}>{status.message}</div>}
+
+        {/* Stat strip */}
+        <div style={C.statGrid}>
+          <div style={C.statCard}>
+            <div style={C.statVal}>${balance}</div>
+            <div style={C.statLbl}>USDC BALANCE</div>
+          </div>
+          <div style={C.statCard}>
+            <div style={{...C.statVal,color:'#6d28d9'}}>{history.length}</div>
+            <div style={C.statLbl}>TRANSACTIONS</div>
+          </div>
+          <div style={C.statCard}>
+            <div style={C.statVal}>${totalSent.toFixed(0)}</div>
+            <div style={C.statLbl}>TOTAL SENT</div>
+          </div>
+          <div style={C.statCard}>
+            <div style={{...C.statVal,color:'#059669'}}>{contacts.length}</div>
+            <div style={C.statLbl}>CONTACTS</div>
           </div>
         </div>
 
-        <div className="dashboard-body">
-          <div className="dashboard-grid">
-            <div className="sidebar">
-              <div className="balance-card">
-                <div className="balance-label">USDC Balance</div>
-                <div className="balance-amount">${usdcBalance}</div>
-                <div className="balance-currency">USD Coin · Arc Testnet</div>
-                <div className="balance-address">
-                  <span>{shortenAddress(address)}</span>
-                  <button className="copy-btn" onClick={copyAddress}>{copied ? '✓ Copied' : 'Copy'}</button>
+        {/* Tabs */}
+        <div style={C.tabBar}>
+          {tabs.map(t=>(
+            <button key={t.id} style={C.tab(activeTab===t.id)} onClick={()=>setActiveTab(t.id)}>
+              <span>{t.icon}</span>{t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── SEND ─────────────────────────────────────────────────────────── */}
+        {activeTab==='send' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Send USDC</div>
+            <div style={C.cardSub}>Transfer USDC instantly to anyone, anywhere.</div>
+
+            {/* Contact quick-pick */}
+            {contacts.length>0 && (
+              <div style={{marginBottom:16}}>
+                <div style={C.label}>Quick Select</div>
+                <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                  {contacts.map(c=>(
+                    <button key={c.id} style={{...C.btnSecondary,fontSize:12,padding:'7px 12px'}}
+                      onClick={()=>{setSendRecipient(c.address);setSendCountry(c.country);}}>
+                      {FLAG[c.country]} {c.name}
+                    </button>
+                  ))}
                 </div>
               </div>
-              <nav className="sidebar-nav">
-                {navItems.map(item => (
-                  <button key={item.id} className={`nav-item ${activeTab === item.id ? 'active' : ''}`} onClick={() => { setActiveTab(item.id); setStatus(null); }}>
-                    <div className="nav-icon">{item.icon}</div>
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
+            )}
+
+            <label style={C.label}>Recipient Address</label>
+            <input style={C.input} placeholder="0x..." value={sendRecipient} onChange={e=>setSendRecipient(e.target.value)} />
+
+            <label style={C.label}>Amount (USDC)</label>
+            <input style={C.input} type="number" placeholder="0.00" value={sendAmount} onChange={e=>setSendAmount(e.target.value)} />
+
+            <label style={C.label}>Destination Country</label>
+            <select style={C.select} value={sendCountry} onChange={e=>setSendCountry(e.target.value)}>
+              {COUNTRIES.map(c=><option key={c}>{FLAG[c]} {c}</option>)}
+            </select>
+
+            {/* Live conversion */}
+            {convertedAmount() && (
+              <div style={C.convertBox}>
+                <div style={{fontSize:12,color:'#7c3aed',fontWeight:600,marginBottom:4}}>RECIPIENT GETS APPROXIMATELY</div>
+                <div style={{fontSize:24,fontWeight:900,color:'#0f172a'}}>{FLAG[sendCountry]} {convertedAmount()} {CURRENCY[sendCountry]}</div>
+                <div style={{fontSize:12,color:'#94a3b8',marginTop:4}}>1 USDC ≈ {rates[CURRENCY[sendCountry]]?.toFixed(2)} {CURRENCY[sendCountry]} · Live rate</div>
+              </div>
+            )}
+
+            <button style={{...C.btnPrimary,opacity:loading?0.6:1}} onClick={handleSend} disabled={loading}>
+              {loading?'Processing...':'Send USDC →'}
+            </button>
+          </div>
+        )}
+
+        {/* ── MULTI-SEND ───────────────────────────────────────────────────── */}
+        {activeTab==='multi' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Multi-Send</div>
+            <div style={C.cardSub}>Send to multiple recipients in one session.</div>
+            {multiRows.map((r,i)=>(
+              <div key={i} style={{display:'flex',gap:8,marginBottom:10,alignItems:'flex-start'}}>
+                <div style={{flex:2}}>
+                  {i===0 && <label style={C.label}>Address</label>}
+                  <input style={{...C.input,marginBottom:0}} placeholder="0x..." value={r.addr}
+                    onChange={e=>{const n=[...multiRows];n[i].addr=e.target.value;setMultiRows(n);}} />
+                </div>
+                <div style={{flex:1}}>
+                  {i===0 && <label style={C.label}>USDC</label>}
+                  <input style={{...C.input,marginBottom:0}} type="number" placeholder="0.00" value={r.amount}
+                    onChange={e=>{const n=[...multiRows];n[i].amount=e.target.value;setMultiRows(n);}} />
+                </div>
+                <div style={{flex:1}}>
+                  {i===0 && <label style={C.label}>Country</label>}
+                  <select style={{...C.select,marginBottom:0}} value={r.country}
+                    onChange={e=>{const n=[...multiRows];n[i].country=e.target.value;setMultiRows(n);}}>
+                    {COUNTRIES.map(c=><option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                {multiRows.length>1 && (
+                  <button style={{...C.btnDanger,marginTop:i===0?22:0}} onClick={()=>setMultiRows(p=>p.filter((_,j)=>j!==i))}>✕</button>
+                )}
+              </div>
+            ))}
+            <button style={C.btnGhost} onClick={()=>setMultiRows(p=>[...p,{addr:'',amount:'',country:'Pakistan'}])}>+ Add Recipient</button>
+            <div style={{margin:'14px 0',padding:'12px 14px',background:'#f8faff',borderRadius:10,border:'1px solid #e2e8f0',fontSize:14,color:'#374151'}}>
+              Total: <strong>${multiRows.reduce((s,r)=>s+(parseFloat(r.amount)||0),0).toFixed(2)} USDC</strong> to <strong>{multiRows.filter(r=>r.addr&&r.amount).length}</strong> recipient(s)
+            </div>
+            <button style={{...C.btnPrimary,opacity:loading?0.6:1}} onClick={handleMultiSend} disabled={loading}>
+              {loading?'Processing...':'Send All →'}
+            </button>
+          </div>
+        )}
+
+        {/* ── INVOICE ──────────────────────────────────────────────────────── */}
+        {activeTab==='invoice' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Create Invoice</div>
+            <div style={C.cardSub}>Request payment from a client. Share the invoice ID so they can pay via the Pay tab.</div>
+            <label style={C.label}>Client Wallet Address</label>
+            <input style={C.input} placeholder="0x..." value={invPayer} onChange={e=>setInvPayer(e.target.value)} />
+            <label style={C.label}>Amount (USDC)</label>
+            <input style={C.input} type="number" placeholder="500" value={invAmount} onChange={e=>setInvAmount(e.target.value)} />
+            <label style={C.label}>Description</label>
+            <input style={C.input} placeholder="Logo design - March 2026" value={invDesc} onChange={e=>setInvDesc(e.target.value)} />
+            <label style={C.label}>Your Country</label>
+            <select style={C.select} value={invCountry} onChange={e=>setInvCountry(e.target.value)}>
+              {COUNTRIES.map(c=><option key={c}>{FLAG[c]} {c}</option>)}
+            </select>
+            <button style={{...C.btnPrimary,opacity:loading?0.6:1}} onClick={handleCreateInvoice} disabled={loading}>
+              {loading?'Creating...':'Create Invoice'}
+            </button>
+            {createdInvId && (
+              <div>
+                <div style={{marginTop:16,fontSize:14,fontWeight:700,color:'#166534'}}>✓ Invoice created! Share this ID:</div>
+                <div style={C.invoiceBox}>{createdInvId}</div>
+                <button style={{...C.btnSecondary,marginTop:10,fontSize:13}} onClick={()=>{navigator.clipboard?.writeText(createdInvId);}}>
+                  Copy Invoice ID
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PAY ──────────────────────────────────────────────────────────── */}
+        {activeTab==='pay' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Pay Invoice</div>
+            <div style={C.cardSub}>Enter an invoice ID to look it up and pay instantly.</div>
+            <label style={C.label}>Invoice ID</label>
+            <input style={C.input} placeholder="0x..." value={payId} onChange={e=>setPayId(e.target.value)} />
+            {payDetails && (
+              <div style={{...C.convertBox,marginBottom:16}}>
+                <div style={{fontSize:12,color:'#7c3aed',fontWeight:600,marginBottom:8}}>INVOICE DETAILS</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,fontSize:14,color:'#374151'}}>
+                  <div><span style={{color:'#94a3b8'}}>Amount:</span> <strong>{fmtUSDC(payDetails.amount)} USDC</strong></div>
+                  <div><span style={{color:'#94a3b8'}}>Country:</span> {FLAG[payDetails.country]||''} {payDetails.country}</div>
+                  <div style={{gridColumn:'1/-1'}}><span style={{color:'#94a3b8'}}>Description:</span> {payDetails.description}</div>
+                  <div style={{gridColumn:'1/-1'}}><span style={{color:'#94a3b8'}}>From:</span> <span style={{fontFamily:'monospace'}}>{short(payDetails.creator)}</span></div>
+                </div>
+              </div>
+            )}
+            <button style={{...C.btnPrimary,opacity:loading?0.6:1}} onClick={handlePayInvoice} disabled={loading}>
+              {loading?'Processing...':'Pay Invoice →'}
+            </button>
+          </div>
+        )}
+
+        {/* ── CONTACTS ─────────────────────────────────────────────────────── */}
+        {activeTab==='contacts' && (
+          <div>
+            <div style={C.card}>
+              <div style={C.cardTitle}>Add Contact</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div>
+                  <label style={C.label}>Name</label>
+                  <input style={{...C.input,marginBottom:0}} placeholder="e.g. Ahmed" value={cName} onChange={e=>setCName(e.target.value)} />
+                </div>
+                <div>
+                  <label style={C.label}>Country</label>
+                  <select style={{...C.select,marginBottom:0}} value={cCountry} onChange={e=>setCCountry(e.target.value)}>
+                    {COUNTRIES.map(c=><option key={c}>{FLAG[c]} {c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <label style={{...C.label,marginTop:14}}>Wallet Address</label>
+              <input style={C.input} placeholder="0x..." value={cAddr} onChange={e=>setCAddr(e.target.value)} />
+              <button style={C.btnPrimary} onClick={()=>{
+                if(!cName||!ethers.isAddress(cAddr)){setStatus({type:'error',message:'Enter name and valid address'});return;}
+                setContacts(p=>[{id:Date.now(),name:cName,address:cAddr,country:cCountry},...p]);
+                setCName('');setCAddr('');setStatus({type:'success',message:'Contact saved'});
+              }}>Save Contact</button>
             </div>
 
-            <div className="main-content">
-              {status && <div className={`status-box ${statusClass()}`}>{status.message}</div>}
-
-              {activeTab === 'send' && (
-                <div className="card">
-                  <div className="card-title">Send USDC</div>
-                  <div className="card-subtitle">Transfer instantly to any wallet, anywhere in the world.</div>
-                  <div className="form-group">
-                    <label className="form-label">Recipient Wallet Address</label>
-                    <input className="form-input" placeholder="0x..." value={sendRecipient} onChange={e => setSendRecipient(e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Amount (USDC)</label>
-                    <input className="form-input" placeholder="0.00" type="number" value={sendAmount} onChange={e => setSendAmount(e.target.value)} />
-                    {sendAmount && sendCountry && (
-                      <div className="currency-preview">
-                        <div>
-                          <div className="currency-preview-label">Recipient gets approximately</div>
-                          <div className="currency-preview-amount">{formatLocalAmount(sendAmount, sendCountry)}</div>
-                        </div>
-                        <div className="fee-info">⚡ ~$0.007 fee</div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Destination Country</label>
-                    <select className="form-select" value={sendCountry} onChange={e => setSendCountry(e.target.value)}>
-                      {COUNTRIES.map(c => <option key={c} value={c}>{CURRENCY_RATES[c].flag} {c} ({CURRENCY_RATES[c].code})</option>)}
-                    </select>
-                  </div>
-                  <button className={`btn-primary ${loading ? 'loading' : ''}`} onClick={handleSend} disabled={loading}>
-                    {loading ? <><span className="spinner" />Processing...</> : 'Send USDC →'}
-                  </button>
-                </div>
-              )}
-
-              {activeTab === 'invoice' && (
-                <div className="card">
-                  <div className="card-title">Create Invoice</div>
-                  <div className="card-subtitle">Generate an on-chain payment request for your client.</div>
-                  <div className="form-group">
-                    <label className="form-label">Client Wallet Address</label>
-                    <input className="form-input" placeholder="0x..." value={invoicePayer} onChange={e => setInvoicePayer(e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Amount (USDC)</label>
-                    <input className="form-input" placeholder="0.00" type="number" value={invoiceAmount} onChange={e => setInvoiceAmount(e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Description</label>
-                    <input className="form-input" placeholder="e.g. Logo design · March 2026" value={invoiceDescription} onChange={e => setInvoiceDescription(e.target.value)} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Your Country</label>
-                    <select className="form-select" value={invoiceCountry} onChange={e => setInvoiceCountry(e.target.value)}>
-                      {COUNTRIES.map(c => <option key={c} value={c}>{CURRENCY_RATES[c].flag} {c}</option>)}
-                    </select>
-                  </div>
-                  <button className={`btn-primary ${loading ? 'loading' : ''}`} onClick={handleCreateInvoice} disabled={loading}>
-                    {loading ? <><span className="spinner" />Creating...</> : 'Create Invoice →'}
-                  </button>
-                  {createdInvoiceId && (
-                    <div style={{ marginTop: 20 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                        <div style={{ width: 32, height: 32, background: '#F0FDF4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>✓</div>
-                        <div>
-                          <div style={{ fontWeight: 600, fontSize: 14, color: '#16A34A' }}>Invoice Created!</div>
-                          <div style={{ fontSize: 12, color: '#9CA3AF' }}>Share this ID with your client</div>
-                        </div>
-                      </div>
-                      <div className="invoice-id-box">{createdInvoiceId}</div>
+            {contacts.length>0 && (
+              <div style={C.card}>
+                <div style={C.cardTitle}>Contacts ({contacts.length})</div>
+                {contacts.map(c=>(
+                  <div key={c.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 0',borderBottom:'1px solid #f1f5f9'}}>
+                    <div style={{width:42,height:42,borderRadius:12,background:'#f3f4f6',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:800,color:'#0f172a',flexShrink:0}}>
+                      {c.name[0].toUpperCase()}
                     </div>
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'pay' && (
-                <div className="card">
-                  <div className="card-title">Pay Invoice</div>
-                  <div className="card-subtitle">Enter an invoice ID to make an instant on-chain payment.</div>
-                  <div className="form-group">
-                    <label className="form-label">Invoice ID</label>
-                    <input className="form-input" placeholder="0x..." value={payInvoiceId} onChange={e => setPayInvoiceId(e.target.value)} />
-                  </div>
-                  {payInvoiceDetails && (
-                    <div style={{ background: '#F9F9F9', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                      <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Invoice Details</div>
-                      <div style={{ display: 'grid', gap: 8 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}><span style={{ color: '#6B7280' }}>Amount</span><span style={{ fontWeight: 700 }}>{formatUSDC(payInvoiceDetails.amount)} USDC</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}><span style={{ color: '#6B7280' }}>Description</span><span style={{ fontWeight: 500 }}>{payInvoiceDetails.description}</span></div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}><span style={{ color: '#6B7280' }}>From</span><span style={{ fontFamily: 'monospace' }}>{shortenAddress(payInvoiceDetails.creator)}</span></div>
-                      </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,color:'#0f172a',fontSize:15}}>{FLAG[c.country]} {c.name}</div>
+                      <div style={{fontSize:12,color:'#94a3b8',fontFamily:'monospace'}}>{c.address}</div>
                     </div>
-                  )}
-                  <button className={`btn-primary ${loading ? 'loading' : ''}`} onClick={handlePayInvoice} disabled={loading}>
-                    {loading ? <><span className="spinner" />Processing...</> : 'Pay Invoice →'}
-                  </button>
-                </div>
-              )}
+                    <button style={{...C.btnSecondary,fontSize:12}} onClick={()=>{setSendRecipient(c.address);setSendCountry(c.country);setActiveTab('send');}}>Send →</button>
+                    <button style={C.btnDanger} onClick={()=>setContacts(p=>p.filter(x=>x.id!==c.id))}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-              {activeTab === 'history' && (
+        {/* ── SCHEDULED ────────────────────────────────────────────────────── */}
+        {activeTab==='schedule' && (
+          <div>
+            <div style={C.card}>
+              <div style={C.cardTitle}>Schedule Payment</div>
+              <div style={C.cardSub}>Set up recurring USDC transfers. You'll be reminded on the due date.</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
                 <div>
-                  <div className="summary-grid">
-                    <div className="summary-card"><div className="summary-card-label">Total Sent</div><div className="summary-card-value">${totalSent}</div></div>
-                    <div className="summary-card"><div className="summary-card-label">Transactions</div><div className="summary-card-value">{history.length}</div></div>
-                    <div className="summary-card"><div className="summary-card-label">Countries</div><div className="summary-card-value">{uniqueCountries}</div></div>
-                  </div>
-                  <div className="card">
-                    <div className="card-title">Transaction History</div>
-                    <div className="card-subtitle">All your on-chain transfers</div>
-                    {history.length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
-                        <div style={{ fontSize: 40, marginBottom: 12 }}>📭</div>
-                        <div style={{ fontWeight: 600, color: '#374151' }}>No transactions yet</div>
-                        <div style={{ fontSize: 13, marginTop: 4 }}>Your transfers will appear here</div>
-                      </div>
-                    ) : history.map((p, i) => (
-                      <div key={i} className="tx-item">
-                        <div className="tx-icon">{CURRENCY_RATES[p.country]?.flag || '💸'}</div>
-                        <div className="tx-info">
-                          <div className="tx-country">{p.country}</div>
-                          <div className="tx-address">To: {shortenAddress(p.recipient)}</div>
-                        </div>
-                        <div className="tx-amount">
-                          <div className="tx-usdc">${formatUSDC(p.amount)}</div>
-                          <div className="tx-date">{formatDate(p.timestamp)}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <label style={C.label}>Recipient Address</label>
+                  <input style={{...C.input,marginBottom:0}} placeholder="0x..." value={newSched.addr} onChange={e=>setNewSched(s=>({...s,addr:e.target.value}))} />
                 </div>
-              )}
+                <div>
+                  <label style={C.label}>Amount (USDC)</label>
+                  <input style={{...C.input,marginBottom:0}} type="number" placeholder="0.00" value={newSched.amount} onChange={e=>setNewSched(s=>({...s,amount:e.target.value}))} />
+                </div>
+                <div>
+                  <label style={C.label}>Country</label>
+                  <select style={{...C.select,marginBottom:0}} value={newSched.country} onChange={e=>setNewSched(s=>({...s,country:e.target.value}))}>
+                    {COUNTRIES.map(c=><option key={c}>{FLAG[c]} {c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={C.label}>Frequency</label>
+                  <select style={{...C.select,marginBottom:0}} value={newSched.freq} onChange={e=>setNewSched(s=>({...s,freq:e.target.value}))}>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+              <label style={{...C.label,marginTop:14}}>Next Payment Date</label>
+              <input style={C.input} type="date" value={newSched.next} onChange={e=>setNewSched(s=>({...s,next:e.target.value}))} />
+              <button style={C.btnPrimary} onClick={()=>{
+                if(!newSched.addr||!newSched.amount||!newSched.next){setStatus({type:'error',message:'Fill all fields'});return;}
+                setSchedRows(p=>[{id:Date.now(),...newSched},...p]);
+                setNewSched({addr:'',amount:'',country:'Pakistan',freq:'weekly',next:''});
+                setStatus({type:'success',message:'Scheduled payment saved'});
+              }}>Schedule Payment</button>
+            </div>
 
-              {activeTab === 'fees' && (
-                <div className="card">
-                  <div className="card-title">Why Arc Remittance?</div>
-                  <div className="card-subtitle">Sending $100 internationally — live fee comparison</div>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="fees-table">
-                      <thead><tr><th>Service</th><th>Fee</th><th>Speed</th><th>You Save</th></tr></thead>
-                      <tbody>
-                        <tr className="best-row"><td>⚡ Arc Remittance</td><td>~$0.007</td><td>&lt;1 second</td><td>Best Deal</td></tr>
-                        <tr><td>Wise</td><td>$0.50–2.00</td><td>1–2 days</td><td>$1.99</td></tr>
-                        <tr><td>PayPal</td><td>$4.99</td><td>1–3 days</td><td>$4.98</td></tr>
-                        <tr><td>Western Union</td><td>$4.99 + 3%</td><td>1–5 days</td><td>$7.98</td></tr>
-                        <tr><td>SWIFT / Bank</td><td>$25–45</td><td>3–5 days</td><td>$44.99</td></tr>
-                      </tbody>
-                    </table>
+            {schedRows.length>0 && (
+              <div style={C.card}>
+                <div style={C.cardTitle}>Active Schedules</div>
+                {schedRows.map(s=>(
+                  <div key={s.id} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 0',borderBottom:'1px solid #f1f5f9'}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,color:'#0f172a'}}>{FLAG[s.country]} {short(s.addr)}</div>
+                      <div style={{fontSize:13,color:'#94a3b8',marginTop:2}}>${s.amount} USDC · {s.freq} · Next: {s.next}</div>
+                    </div>
+                    <button style={{...C.btnSecondary,fontSize:12}} onClick={()=>{setSendRecipient(s.addr);setSendAmount(s.amount);setSendCountry(s.country);setActiveTab('send');}}>Execute</button>
+                    <button style={C.btnDanger} onClick={()=>setSchedRows(p=>p.filter(x=>x.id!==s.id))}>✕</button>
                   </div>
-                  <div style={{ marginTop: 24, background: 'linear-gradient(135deg,#EEF2FF,#F5F3FF)', borderRadius: 14, padding: 20, textAlign: 'center' }}>
-                    <div style={{ fontFamily: 'Syne,sans-serif', fontSize: 28, fontWeight: 800, color: '#4F46E5' }}>Save up to $44.99</div>
-                    <div style={{ fontSize: 13, color: '#6B7280', marginTop: 4 }}>per $100 transferred vs. traditional banks</div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── HISTORY ──────────────────────────────────────────────────────── */}
+        {activeTab==='history' && (
+          <div>
+            {/* Analytics chart */}
+            {history.length>0 && (
+              <div style={C.card}>
+                <div style={C.cardTitle}>Transfer Volume</div>
+                <ResponsiveContainer width="100%" height={180}>
+                  <AreaChart data={analytics} margin={{top:8,right:8,left:-20,bottom:0}}>
+                    <defs>
+                      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6d28d9" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#6d28d9" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+                    <XAxis dataKey="label" tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false}/>
+                    <YAxis tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false}/>
+                    <Tooltip contentStyle={{borderRadius:10,border:'1px solid #e2e8f0',fontSize:13}}/>
+                    <Area type="monotone" dataKey="sent" stroke="#6d28d9" fill="url(#g)" strokeWidth={2} name="Sent (USDC)"/>
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            <div style={C.card}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                <div style={C.cardTitle}>Transactions</div>
+                <button style={C.btnSecondary} onClick={loadHistory}>Refresh</button>
+              </div>
+              {history.length===0 ? (
+                <div style={{textAlign:'center',color:'#94a3b8',padding:'32px 0',fontSize:15}}>No transactions yet. Send your first payment.</div>
+              ) : (
+                history.map((p,i)=>(
+                  <div key={i} style={C.histRow}>
+                    <div style={C.histIcon('sent')}>↑</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontWeight:700,color:'#0f172a',fontSize:14}}>{FLAG[p.country]||''} {p.country}</div>
+                      <div style={{fontSize:12,color:'#94a3b8',fontFamily:'monospace',marginTop:2}}>{short(p.recipient)}</div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontWeight:800,color:'#0f172a',fontSize:15}}>-${fmtUSDC(p.amount)}</div>
+                      <div style={{fontSize:12,color:'#94a3b8',marginTop:2}}>{fmtDate(p.timestamp)}</div>
+                    </div>
                   </div>
-                </div>
+                ))
               )}
             </div>
           </div>
+        )}
+
+        {/* ── RATES ────────────────────────────────────────────────────────── */}
+        {activeTab==='rates' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Live Exchange Rates</div>
+            <div style={C.cardSub}>1 USDC = 1 USD · {ratesLoaded?'Live rates':'Loading rates...'}</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:10}}>
+              {COUNTRIES.map(country=>{
+                const cur = CURRENCY[country];
+                const rate = rates[cur];
+                return (
+                  <div key={country} style={{background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px'}}>
+                    <div style={{fontSize:22,marginBottom:4}}>{FLAG[country]}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:'#94a3b8',letterSpacing:'0.08em'}}>{cur}</div>
+                    <div style={{fontSize:18,fontWeight:900,color:'#0f172a',marginTop:2}}>{rate?rate.toLocaleString('en',{maximumFractionDigits:1}):'—'}</div>
+                    <div style={{fontSize:11,color:'#94a3b8',marginTop:2}}>{country}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{marginTop:14,fontSize:12,color:'#94a3b8',textAlign:'center'}}>Rates via exchangerate-api.com · Updates every 24h</div>
+          </div>
+        )}
+
+        {/* ── FEE COMPARISON ───────────────────────────────────────────────── */}
+        {activeTab==='fees' && (
+          <div style={C.card}>
+            <div style={C.cardTitle}>Fee Comparison</div>
+            <div style={C.cardSub}>Sending $100 internationally. See what you actually pay.</div>
+            <table style={C.table}>
+              <thead>
+                <tr>
+                  <th style={C.th}>Service</th>
+                  <th style={C.th}>Fee on $100</th>
+                  <th style={C.th}>Speed</th>
+                  <th style={C.th}>You Save</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {name:'ArcPay',fee:'~$0.007',speed:'< 1 sec',save:'$44.99',best:true},
+                  {name:'SWIFT / Bank Wire',fee:'$25–45',speed:'3–5 days',save:'—'},
+                  {name:'Western Union',fee:'$4.99 + 3%',speed:'1–5 days',save:'—'},
+                  {name:'PayPal',fee:'5% (up to $4.99)',speed:'1–3 days',save:'—'},
+                  {name:'Wise',fee:'0.5–2%',speed:'1–2 days',save:'—'},
+                  {name:'MoneyGram',fee:'$3.99 + spread',speed:'1–3 days',save:'—'},
+                ].map((r,i)=>(
+                  <tr key={i} style={r.best?{background:'#faf5ff'}:{}}>
+                    <td style={{...C.td,fontWeight:r.best?800:400,color:r.best?'#6d28d9':'#374151'}}>
+                      {r.best && '⭐ '}{r.name}
+                    </td>
+                    <td style={{...C.td,fontWeight:r.best?700:400,color:r.best?'#166534':'#374151'}}>{r.fee}</td>
+                    <td style={C.td}>{r.speed}</td>
+                    <td style={{...C.td,fontWeight:700,color:r.save!=='—'?'#166534':'#94a3b8'}}>{r.save}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={{marginTop:20,background:'#faf5ff',border:'1px solid #e9d5ff',borderRadius:12,padding:'16px',textAlign:'center'}}>
+              <div style={{fontSize:13,color:'#7c3aed',fontWeight:600,marginBottom:4}}>ANNUAL SAVINGS (sending $500/month)</div>
+              <div style={{fontSize:32,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'}}>$2,699</div>
+              <div style={{fontSize:13,color:'#94a3b8',marginTop:4}}>vs. traditional bank wire</div>
+            </div>
+          </div>
+        )}
+
+        <div style={{textAlign:'center',marginTop:20,fontSize:12,color:'#94a3b8'}}>
+          Powered by Arc Testnet · USDC Native · Chain ID {ARC_CHAIN_ID}
         </div>
       </div>
     </div>
