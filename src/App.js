@@ -288,7 +288,7 @@ export default function App() {
       const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
       if(allowance<amount){
         setStatus({type:'info',message:'Approving USDC...'});
-        await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
+        await Promise.race([(await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
       }
       setStatus({type:'info',message:'Sending...'});
       const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,sendRecipient,amount,sendCountry,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
@@ -309,7 +309,7 @@ export default function App() {
       for(const r of valid){
         const amount = ethers.parseUnits(r.amount,USDC_DECIMALS);
         const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
-        if(allowance<amount) await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
+        if(allowance<amount) await Promise.race([(await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
         setStatus({type:'info',message:`Sending to ${short(r.addr)}...`});
         const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
         await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
@@ -354,7 +354,7 @@ export default function App() {
       const allowance = await usdc.allowance(address,REMITTANCE_ADDRESS);
       if(allowance<inv.amount){
         setStatus({type:'info',message:'Approving USDC...'});
-        await (await usdc.approve(REMITTANCE_ADDRESS,inv.amount,{gasLimit:GAS_LIMIT})).wait();
+        await Promise.race([(await usdc.approve(REMITTANCE_ADDRESS,inv.amount,{gasLimit:GAS_LIMIT})).wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
       }
       setStatus({type:'info',message:'Paying...'});
       const tx = await executeWithRetry(()=>remittance.payInvoice(USDC_ADDRESS,id,{gasLimit:GAS_LIMIT}),setStatus);
