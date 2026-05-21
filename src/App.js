@@ -292,7 +292,7 @@ export default function App() {
       }
       setStatus({type:'info',message:'Sending...'});
       const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,sendRecipient,amount,sendCountry,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
-      await tx.wait();
+      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
       setStatus({type:'success',message:`Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
       setSendRecipient(''); setSendAmount('');
       fetchBalance();
@@ -312,7 +312,7 @@ export default function App() {
         if(allowance<amount) await (await usdc.approve(REMITTANCE_ADDRESS,amount,{gasLimit:GAS_LIMIT})).wait();
         setStatus({type:'info',message:`Sending to ${short(r.addr)}...`});
         const tx = await executeWithRetry(()=>remittance.sendMoney(USDC_ADDRESS,r.addr,amount,r.country,{gasLimit:300000,gasPrice:ethers.parseUnits("1","gwei")}),setStatus);
-        await tx.wait();
+        await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
       }
       setStatus({type:'success',message:`Sent to ${valid.length} recipients`});
       setMultiRows([{addr:'',amount:'',country:'Pakistan'}]);
@@ -329,7 +329,7 @@ export default function App() {
       const amount = ethers.parseUnits(invAmount,USDC_DECIMALS);
       const invoiceId = await remittance.createInvoice.staticCall(invPayer,amount,invDesc,invCountry);
       const tx = await executeWithRetry(()=>remittance.createInvoice(invPayer,amount,invDesc,invCountry,{gasLimit:GAS_LIMIT}),setStatus);
-      await tx.wait();
+      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
       setCreatedInvId(invoiceId);
       // persist
       const saved = ls('arc_invoices',[]);
@@ -358,7 +358,7 @@ export default function App() {
       }
       setStatus({type:'info',message:'Paying...'});
       const tx = await executeWithRetry(()=>remittance.payInvoice(USDC_ADDRESS,id,{gasLimit:GAS_LIMIT}),setStatus);
-      await tx.wait();
+      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),30000))]);
       setStatus({type:'success',message:`Paid ${fmtUSDC(inv.amount)} USDC`});
       setPayId(''); setPayDetails(null); fetchBalance();
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
