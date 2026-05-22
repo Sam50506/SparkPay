@@ -125,6 +125,62 @@ function buildAnalytics(history){
    APP
 ══════════════════════════════════════════════════════════════════════════════ */
 // Fix for ethers v6 tx.wait() hanging on Arc (500ms blocks)
+
+// Detects which wallets are actually installed and shows only those
+function WalletPicker({ onSelect, onClose }) {
+  const eth = window.ethereum;
+  const providers = eth?.providers || (eth ? [eth] : []);
+
+  const wallets = [];
+
+  // Check each provider
+  if (providers.length > 0) {
+    providers.forEach(p => {
+      if (p.isMetaMask && !p.isBraveWallet) {
+        wallets.push({ type: 'metamask', label: 'MetaMask', icon: '🦊', provider: p });
+      }
+      if (p.isBraveWallet) {
+        wallets.push({ type: 'brave', label: 'Brave Wallet', icon: '🦁', provider: p });
+      }
+      if (p.isCoinbaseWallet) {
+        wallets.push({ type: 'coinbase', label: 'Coinbase Wallet', icon: '🔵', provider: p });
+      }
+      if (p.isRabby) {
+        wallets.push({ type: 'rabby', label: 'Rabby', icon: '👛', provider: p });
+      }
+    });
+    // If only one provider and none matched above (generic injected)
+    if (wallets.length === 0 && eth) {
+      wallets.push({ type: 'injected', label: 'Browser Wallet', icon: '⬡', provider: eth });
+    }
+  }
+
+  // Always add WalletConnect
+  wallets.push({ type: 'wc', label: 'WalletConnect', icon: '📱' });
+
+  const btnStyle = {
+    display:'flex', alignItems:'center', gap:12,
+    background:'#f8faff', border:'1px solid #e2e8f0',
+    borderRadius:12, padding:'14px 16px', cursor:'pointer',
+    fontSize:14, fontWeight:600, color:'#0f172a', width:'100%',
+    textAlign:'left'
+  };
+
+  return (
+    <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:16,padding:'20px',display:'flex',flexDirection:'column',gap:10,boxShadow:'0 8px 32px rgba(0,0,0,0.08)'}}>
+      <div style={{fontSize:15,fontWeight:700,color:'#0f172a',marginBottom:4}}>
+        {wallets.length === 1 && wallets[0].type === 'wc' ? 'No browser wallet found' : 'Choose your wallet'}
+      </div>
+      {wallets.map(w => (
+        <button key={w.type} style={btnStyle} onClick={() => onSelect(w.type)}>
+          <span style={{fontSize:22}}>{w.icon}</span> {w.label}
+        </button>
+      ))}
+      <button onClick={onClose} style={{fontSize:13,color:'#94a3b8',background:'none',border:'none',cursor:'pointer',padding:'4px',marginTop:4}}>← Back</button>
+    </div>
+  );
+}
+
 async function waitForTx(provider, hash, timeoutMs=30000){
   const start = Date.now();
   while(Date.now()-start < timeoutMs){
@@ -473,7 +529,7 @@ export default function App() {
           ))}
         </div>
 
-        {/* Wallet Picker */}
+        {/* Smart Wallet Picker - only shows installed wallets */}
         <div style={{width:'100%',maxWidth:360}}>
           {!showWalletPicker ? (
             <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -481,29 +537,14 @@ export default function App() {
                 <span>⬡</span> Connect Wallet
               </button>
               <button onClick={connectMobile} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#fff',color:'#0f172a',border:'1.5px solid #e2e8f0',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
-                <span>📱</span> Connect via WalletConnect
+                <span>📱</span> WalletConnect
               </button>
             </div>
           ) : (
-            <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:16,padding:'20px',display:'flex',flexDirection:'column',gap:10,boxShadow:'0 8px 32px rgba(0,0,0,0.08)'}}>
-              <div style={{fontSize:15,fontWeight:700,color:'#0f172a',marginBottom:4}}>Choose your wallet</div>
-              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('metamask');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
-                <span style={{fontSize:22}}>🦊</span> MetaMask
-              </button>
-              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('brave');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
-                <span style={{fontSize:22}}>🦁</span> Brave Wallet
-              </button>
-              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('coinbase');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
-                <span style={{fontSize:22}}>🔵</span> Coinbase Wallet
-              </button>
-              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('injected');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
-                <span style={{fontSize:22}}>⬡</span> Other Browser Wallet
-              </button>
-              <button onClick={()=>{setShowWalletPicker(false);connectMobile();}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
-                <span style={{fontSize:22}}>📱</span> WalletConnect (Mobile)
-              </button>
-              <button onClick={()=>setShowWalletPicker(false)} style={{fontSize:13,color:'#94a3b8',background:'none',border:'none',cursor:'pointer',padding:'4px',marginTop:4}}>← Back</button>
-            </div>
+            <WalletPicker
+              onSelect={(type)=>{setShowWalletPicker(false); if(type==='wc') connectMobile(); else connectBrowser(type);}}
+              onClose={()=>setShowWalletPicker(false)}
+            />
           )}
         </div>
 
