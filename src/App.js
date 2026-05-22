@@ -264,6 +264,7 @@ export default function App() {
       const bp = new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
       const s = await bp.getSigner();
       const addr = await s.getAddress();
+      bp.pollingInterval = 500;
       setWcProvider(wcp); setProvider(bp); setSigner(s); setAddress(addr); setWalletName('WalletConnect');
       setStatus({type:'success',message:`Connected via WalletConnect: ${short(addr)}`});
     } catch(e) { setStatus({type:'error',message:e.message||'WalletConnect failed'}); }
@@ -294,25 +295,26 @@ export default function App() {
     try {
       const {remittance,usdc} = getContracts();
       const amount = ethers.parseUnits(sendAmount,USDC_DECIMALS);
-      // Step 1: Approve
+      // Step 1: Approve with proper wait
       const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
       if(allowance < amount){
         setStatus({type:'info',message:'Approving USDC... (1/2)'});
         const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, {gasLimit:300000});
-        // Don't wait for receipt - just wait 4s for Arc to process it
-        setStatus({type:'info',message:'Waiting for approval...'});
-        await new Promise(r=>setTimeout(r,4000));
+        setStatus({type:'info',message:'Confirming approval...'});
+        await waitForTx(provider, approveTx.hash);
       }
       // Step 2: Send via remittance contract
-      setStatus({type:'info',message:'Sending... (2/2)'});
+      setStatus({type:'info',message:'Sending USDC... (2/2)'});
       const tx = await remittance.sendMoney(USDC_ADDRESS, sendRecipient, amount, sendCountry, {gasLimit:300000});
-      // Save to local history immediately
+      setStatus({type:'info',message:'Confirming transfer...'});
+      await waitForTx(provider, tx.hash);
+      // Save to localStorage for permanent history
       const newTx = {hash:tx.hash, recipient:sendRecipient, amount:sendAmount, country:sendCountry, timestamp:Math.floor(Date.now()/1000)};
       const saved = ls('arc_txhistory',[]);
       lsSet('arc_txhistory',[newTx,...saved.slice(0,49)]);
       setStatus({type:'success',message:`✓ Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
       setSendRecipient(''); setSendAmount('');
-      setTimeout(()=>fetchBalance(),5000);
+      fetchBalance();
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
     finally{ setLoading(false); }
   };
