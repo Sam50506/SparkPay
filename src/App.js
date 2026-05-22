@@ -41,9 +41,10 @@ const REMITTANCE_ABI = [
 ];
 const ERC20_ABI = [
   'function approve(address spender, uint256 amount) returns (bool)',
-  'function allowance(address owner, address spender) view returns (uint256)','function transfer(address to, uint256 amount) returns (bool)',
+  'function allowance(address owner, address spender) view returns (uint256)',
   'function balanceOf(address owner) view returns (uint256)',
-  'function decimals() view returns (uint8)'
+  'function decimals() view returns (uint8)',
+  'function transfer(address to, uint256 amount) returns (bool)'
 ];
 
 /* ─── Helpers ───────────────────────────────────────────────────────────────── */
@@ -413,19 +414,19 @@ export default function App() {
         </div>
 
         {/* Hero headline */}
-        <h1 style={{fontSize:'clamp(48px,12vw,80px)',fontWeight:800,lineHeight:1.05,margin:'0 0 24px',color:'#0f172a',letterSpacing:'-2px',fontFamily:'"Syne",sans-serif'}}>
+        <h1 style={{fontSize:'clamp(36px,9vw,58px)',fontWeight:800,lineHeight:1.05,margin:'0 0 20px',color:'#0f172a',letterSpacing:'-2px',fontFamily:'"Syne",sans-serif'}}>
           Send Money<br />
           <span style={{color:'#6d28d9'}}>Globally.</span><br />
           Instantly.
         </h1>
-        <p style={{fontSize:18,color:'#64748b',margin:'0 0 48px',maxWidth:400,lineHeight:1.6}}>
+        <p style={{fontSize:16,color:'#64748b',margin:'0 0 36px',maxWidth:380,lineHeight:1.6}}>
           Transfer USDC across borders in under a second.<br />Zero hidden fees. Fully on-chain.
         </p>
 
         {/* Stats */}
         <div style={{display:'flex',gap:0,marginBottom:48,border:'1px solid #e2e8f0',borderRadius:16,overflow:'hidden',background:'#fff'}}>
           {[['~$0.007','PER TRANSFER'],['<1S','SETTLEMENT'],['20+','COUNTRIES']].map(([v,l],i)=>(
-            <div key={i} style={{padding:'20px 32px',borderRight:i<2?'1px solid #e2e8f0':'none',minWidth:100}}>
+            <div key={i} style={{padding:'16px 24px',borderRight:i<2?'1px solid #e2e8f0':'none',minWidth:90}}>
               <div style={{fontSize:22,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'}}>{v}</div>
               <div style={{fontSize:10,fontWeight:700,color:'#94a3b8',letterSpacing:'0.12em',marginTop:4}}>{l}</div>
             </div>
