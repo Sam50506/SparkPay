@@ -290,14 +290,29 @@ export default function App() {
   /* ─── Actions ───────────────────────────────────────────────────────────── */
   const handleSend = async () => {
     if(!signer||!sendRecipient||!sendAmount){ setStatus({type:'error',message:'Fill all fields and connect wallet'}); return; }
-    setLoading(true); setStatus({type:'info',message:'Sending...'});
+    setLoading(true); setStatus({type:'info',message:'Processing...'});
     try {
-      const {usdc} = getContracts();
+      const {remittance,usdc} = getContracts();
       const amount = ethers.parseUnits(sendAmount,USDC_DECIMALS);
-      const tx = await usdc.transfer(sendRecipient, amount, {gasLimit: 300000});
-      setStatus({type:'success',message:`Sent! TX: ${tx.hash.slice(0,10)}... Check explorer.`});
+      // Step 1: Approve
+      const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
+      if(allowance < amount){
+        setStatus({type:'info',message:'Approving USDC... (1/2)'});
+        const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, {gasLimit:300000});
+        // Don't wait for receipt - just wait 4s for Arc to process it
+        setStatus({type:'info',message:'Waiting for approval...'});
+        await new Promise(r=>setTimeout(r,4000));
+      }
+      // Step 2: Send via remittance contract
+      setStatus({type:'info',message:'Sending... (2/2)'});
+      const tx = await remittance.sendMoney(USDC_ADDRESS, sendRecipient, amount, sendCountry, {gasLimit:300000});
+      // Save to local history immediately
+      const newTx = {hash:tx.hash, recipient:sendRecipient, amount:sendAmount, country:sendCountry, timestamp:Math.floor(Date.now()/1000)};
+      const saved = ls('arc_txhistory',[]);
+      lsSet('arc_txhistory',[newTx,...saved.slice(0,49)]);
+      setStatus({type:'success',message:`✓ Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
       setSendRecipient(''); setSendAmount('');
-      setTimeout(()=>fetchBalance(), 3000);
+      setTimeout(()=>fetchBalance(),5000);
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
     finally{ setLoading(false); }
   };
@@ -830,53 +845,61 @@ export default function App() {
         {/* ── HISTORY ──────────────────────────────────────────────────────── */}
         {activeTab==='history' && (
           <div>
-            {/* Analytics chart */}
-            {history.length>0 && (
-              <div style={C.card}>
-                <div style={C.cardTitle}>Transfer Volume</div>
-                <ResponsiveContainer width="100%" height={180}>
-                  <AreaChart data={analytics} margin={{top:8,right:8,left:-20,bottom:0}}>
-                    <defs>
-                      <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6d28d9" stopOpacity={0.15}/>
-                        <stop offset="95%" stopColor="#6d28d9" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
-                    <XAxis dataKey="label" tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false}/>
-                    <YAxis tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false}/>
-                    <Tooltip contentStyle={{borderRadius:10,border:'1px solid #e2e8f0',fontSize:13}}/>
-                    <Area type="monotone" dataKey="sent" stroke="#6d28d9" fill="url(#g)" strokeWidth={2} name="Sent (USDC)"/>
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            <div style={C.card}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                <div style={C.cardTitle}>Transactions</div>
-                <button style={C.btnSecondary} onClick={loadHistory}>Refresh</button>
-              </div>
-              {history.length===0 ? (
-                <div style={{textAlign:'center',color:'#94a3b8',padding:'32px 0',fontSize:15}}>No transactions yet. Send your first payment.</div>
-              ) : (
-                history.map((p,i)=>(
-                  <div key={i} style={C.histRow}>
-                    <div style={C.histIcon('sent')}>↑</div>
-                    <div style={{flex:1}}>
-                      <div style={{fontWeight:700,color:'#0f172a',fontSize:14}}>{FLAG[p.country]||''} {p.country}</div>
-                      <div style={{fontSize:12,color:'#94a3b8',fontFamily:'monospace',marginTop:2}}>{short(p.recipient)}</div>
+            {(() => {
+              const localTxns = ls('arc_txhistory',[]);
+              const allTxns = [...localTxns, ...history.filter(h=>!localTxns.find(l=>l.hash===h.hash))];
+              return (
+                <>
+                  {allTxns.length>0 && (
+                    <div style={C.card}>
+                      <div style={C.cardTitle}>Transfer Volume</div>
+                      <ResponsiveContainer width="100%" height={180}>
+                        <AreaChart data={analytics} margin={{top:8,right:8,left:-20,bottom:0}}>
+                          <defs>
+                            <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%"  stopColor="#6d28d9" stopOpacity={0.15}/>
+                              <stop offset="95%" stopColor="#6d28d9" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+                          <XAxis dataKey="label" tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false}/>
+                          <YAxis tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false}/>
+                          <Tooltip contentStyle={{borderRadius:10,border:'1px solid #e2e8f0',fontSize:13}}/>
+                          <Area type="monotone" dataKey="sent" stroke="#6d28d9" fill="url(#g)" strokeWidth={2} name="Sent (USDC)"/>
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
-                    <div style={{textAlign:'right'}}>
-                      <div style={{fontWeight:800,color:'#0f172a',fontSize:15}}>-${fmtUSDC(p.amount)}</div>
-                      <div style={{fontSize:12,color:'#94a3b8',marginTop:2}}>{fmtDate(p.timestamp)}</div>
+                  )}
+                  <div style={C.card}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                      <div style={C.cardTitle}>Transactions ({allTxns.length})</div>
+                      <button style={C.btnSecondary} onClick={loadHistory}>Refresh</button>
                     </div>
+                    {allTxns.length===0 ? (
+                      <div style={{textAlign:'center',color:'#94a3b8',padding:'32px 0',fontSize:15}}>No transactions yet. Send your first payment.</div>
+                    ) : (
+                      allTxns.map((p,i)=>(
+                        <div key={i} style={C.histRow}>
+                          <div style={C.histIcon}>↑</div>
+                          <div style={{flex:1}}>
+                            <div style={{fontWeight:700,color:'#0f172a',fontSize:14}}>{FLAG[p.country]||''} {p.country||'Transfer'}</div>
+                            <div style={{fontSize:12,color:'#94a3b8',fontFamily:'monospace',marginTop:2}}>{short(p.recipient)}</div>
+                          </div>
+                          <div style={{textAlign:'right'}}>
+                            <div style={{fontWeight:800,color:'#0f172a',fontSize:15}}>-${p.amount||fmtUSDC(p.amount)}</div>
+                            <div style={{fontSize:12,color:'#94a3b8',marginTop:2}}>{fmtDate(p.timestamp)}</div>
+                          </div>
+                          {p.hash && <a href={`https://testnet.arcscan.app/tx/${p.hash}`} target="_blank" rel="noreferrer" style={{fontSize:12,color:'#6d28d9',textDecoration:'none',padding:'4px 8px'}}>↗</a>}
+                        </div>
+                      ))
+                    )}
                   </div>
-                ))
-              )}
-            </div>
+                </>
+              );
+            })()}
           </div>
         )}
+
 
         {/* ── RATES ────────────────────────────────────────────────────────── */}
         {activeTab==='rates' && (
