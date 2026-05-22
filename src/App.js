@@ -294,12 +294,10 @@ export default function App() {
     try {
       const {usdc} = getContracts();
       const amount = ethers.parseUnits(sendAmount,USDC_DECIMALS);
-      const tx = await usdc.transfer(sendRecipient,amount,{gasLimit:300000});
-      setStatus({type:'info',message:'Confirming...'});
-      await tx.wait();
-      setStatus({type:'success',message:`Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
+      const tx = await usdc.transfer(sendRecipient, amount, {gasLimit: 300000});
+      setStatus({type:'success',message:`Sent! TX: ${tx.hash.slice(0,10)}... Check explorer.`});
       setSendRecipient(''); setSendAmount('');
-      fetchBalance();
+      setTimeout(()=>fetchBalance(), 3000);
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
     finally{ setLoading(false); }
   };
