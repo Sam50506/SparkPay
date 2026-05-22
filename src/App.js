@@ -124,6 +124,19 @@ function buildAnalytics(history){
 /* ══════════════════════════════════════════════════════════════════════════════
    APP
 ══════════════════════════════════════════════════════════════════════════════ */
+// Fix for ethers v6 tx.wait() hanging on Arc (500ms blocks)
+async function waitForTx(provider, hash, timeoutMs=30000){
+  const start = Date.now();
+  while(Date.now()-start < timeoutMs){
+    try {
+      const receipt = await provider.getTransactionReceipt(hash);
+      if(receipt && receipt.status !== null) return receipt;
+    } catch(e){}
+    await new Promise(r=>setTimeout(r,500));
+  }
+  throw new Error('Timeout — check: testnet.arcscan.app/tx/'+hash);
+}
+
 export default function App() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -134,6 +147,7 @@ export default function App() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [wcProvider, setWcProvider] = useState(null);
+  const [showWalletPicker, setShowWalletPicker] = useState(false);
   const [rates, setRates] = useState({});
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('arc_dark') === 'true');
@@ -235,9 +249,20 @@ export default function App() {
     return 'Browser Wallet';
   };
 
-  const connectBrowser = async () => {
-    const eth = getEth();
-    if (!eth) { setStatus({type:'error',message:'No browser wallet detected. Install MetaMask.'}); return; }
+  const connectBrowser = async (preferredWallet) => {
+    const { ethereum } = window;
+    if (!ethereum) { setStatus({type:'error',message:'No browser wallet detected. Install MetaMask.'}); return; }
+    let eth;
+    if (preferredWallet === 'metamask' && ethereum.providers?.length) {
+      eth = ethereum.providers.find(p => p.isMetaMask) || ethereum;
+    } else if (preferredWallet === 'brave' && ethereum.providers?.length) {
+      eth = ethereum.providers.find(p => p.isBraveWallet) || ethereum;
+    } else if (preferredWallet === 'coinbase' && ethereum.providers?.length) {
+      eth = ethereum.providers.find(p => p.isCoinbaseWallet) || ethereum;
+    } else {
+      eth = getEth();
+    }
+    if (!eth) { setStatus({type:'error',message:'Selected wallet not found in browser.'}); return; }
     try {
       const bp = new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
       await bp.send('eth_requestAccounts',[]);
@@ -448,15 +473,40 @@ export default function App() {
           ))}
         </div>
 
-        {/* Buttons */}
-        <div style={{display:'flex',flexDirection:'column',gap:12,width:'100%',maxWidth:360}}>
-          <button onClick={connectBrowser} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#0f172a',color:'#fff',border:'none',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
-            <span>⬡</span> Connect Wallet
-          </button>
-          <button onClick={connectMobile} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#fff',color:'#0f172a',border:'1.5px solid #e2e8f0',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
-            <span>📱</span> Connect via WalletConnect
-          </button>
+        {/* Wallet Picker */}
+        <div style={{width:'100%',maxWidth:360}}>
+          {!showWalletPicker ? (
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              <button onClick={()=>setShowWalletPicker(true)} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#0f172a',color:'#fff',border:'none',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
+                <span>⬡</span> Connect Wallet
+              </button>
+              <button onClick={connectMobile} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,background:'#fff',color:'#0f172a',border:'1.5px solid #e2e8f0',borderRadius:14,padding:'18px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>
+                <span>📱</span> Connect via WalletConnect
+              </button>
+            </div>
+          ) : (
+            <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:16,padding:'20px',display:'flex',flexDirection:'column',gap:10,boxShadow:'0 8px 32px rgba(0,0,0,0.08)'}}>
+              <div style={{fontSize:15,fontWeight:700,color:'#0f172a',marginBottom:4}}>Choose your wallet</div>
+              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('metamask');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
+                <span style={{fontSize:22}}>🦊</span> MetaMask
+              </button>
+              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('brave');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
+                <span style={{fontSize:22}}>🦁</span> Brave Wallet
+              </button>
+              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('coinbase');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
+                <span style={{fontSize:22}}>🔵</span> Coinbase Wallet
+              </button>
+              <button onClick={()=>{setShowWalletPicker(false);connectBrowser('injected');}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
+                <span style={{fontSize:22}}>⬡</span> Other Browser Wallet
+              </button>
+              <button onClick={()=>{setShowWalletPicker(false);connectMobile();}} style={{display:'flex',alignItems:'center',gap:12,background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:12,padding:'14px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'#0f172a',width:'100%'}}>
+                <span style={{fontSize:22}}>📱</span> WalletConnect (Mobile)
+              </button>
+              <button onClick={()=>setShowWalletPicker(false)} style={{fontSize:13,color:'#94a3b8',background:'none',border:'none',cursor:'pointer',padding:'4px',marginTop:4}}>← Back</button>
+            </div>
+          )}
         </div>
+
 
         {status && (
           <div style={{marginTop:16,padding:'10px 16px',borderRadius:10,background:statusBg()?.bg,color:statusBg()?.color,border:`1px solid ${statusBg()?.border}`,fontSize:14,maxWidth:360,width:'100%'}}>
@@ -628,7 +678,8 @@ export default function App() {
 
             <label style={C.label}>Destination Country</label>
             <select style={C.select} value={sendCountry} onChange={e=>setSendCountry(e.target.value)}>
-              {COUNTRIES.map(c=><option key={c}>{FLAG[c]} {c}</option>)}
+              <option value=''>— Select destination country —</option>
+              {COUNTRIES.map(c=><option key={c} value={c}>{FLAG[c]} {c}</option>)}
             </select>
 
             {/* Live conversion */}
