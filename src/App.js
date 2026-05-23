@@ -126,32 +126,31 @@ function buildAnalytics(history){
 ══════════════════════════════════════════════════════════════════════════════ */
 // Fix for ethers v6 tx.wait() hanging on Arc (500ms blocks)
 
-// Detects which wallets are actually installed and shows only those
+// Detects ALL injected wallet providers and shows them
 function WalletPicker({ onSelect, onClose }) {
   const eth = window.ethereum;
-  const providers = eth?.providers || (eth ? [eth] : []);
-
   const wallets = [];
 
-  // Check each provider
-  if (providers.length > 0) {
-    providers.forEach(p => {
-      if (p.isMetaMask && !p.isBraveWallet) {
-        wallets.push({ type: 'metamask', label: 'MetaMask', icon: '🦊', provider: p });
-      }
-      if (p.isBraveWallet) {
-        wallets.push({ type: 'brave', label: 'Brave Wallet', icon: '🦁', provider: p });
-      }
-      if (p.isCoinbaseWallet) {
-        wallets.push({ type: 'coinbase', label: 'Coinbase Wallet', icon: '🔵', provider: p });
-      }
-      if (p.isRabby) {
-        wallets.push({ type: 'rabby', label: 'Rabby', icon: '👛', provider: p });
-      }
-    });
-    // If only one provider and none matched above (generic injected)
-    if (wallets.length === 0 && eth) {
-      wallets.push({ type: 'injected', label: 'Browser Wallet', icon: '⬡', provider: eth });
+  function getWalletInfo(p, index) {
+    if (p.isMetaMask && !p.isBraveWallet) return { type: 'p_'+index, label: 'MetaMask', icon: '🦊' };
+    if (p.isBraveWallet) return { type: 'p_'+index, label: 'Brave Wallet', icon: '🦁' };
+    if (p.isCoinbaseWallet) return { type: 'p_'+index, label: 'Coinbase Wallet', icon: '🔵' };
+    if (p.isRabby) return { type: 'p_'+index, label: 'Rabby', icon: '👛' };
+    if (p.isTrust) return { type: 'p_'+index, label: 'Trust Wallet', icon: '💙' };
+    if (p.isOkxWallet) return { type: 'p_'+index, label: 'OKX Wallet', icon: '⚫' };
+    // Generic — could be Mises, Opera, or any other injected wallet
+    return { type: 'p_'+index, label: 'Browser Wallet', icon: '🌐' };
+  }
+
+  if (eth) {
+    if (eth.providers && eth.providers.length > 0) {
+      // Multiple providers installed — show each one
+      eth.providers.forEach((p, i) => {
+        wallets.push({ ...getWalletInfo(p, i), provider: p });
+      });
+    } else {
+      // Single provider (most common case — Mises, MetaMask solo, etc)
+      wallets.push({ ...getWalletInfo(eth, 0), provider: eth });
     }
   }
 
@@ -171,8 +170,8 @@ function WalletPicker({ onSelect, onClose }) {
       <div style={{fontSize:15,fontWeight:700,color:'#0f172a',marginBottom:4}}>
         {wallets.length === 1 && wallets[0].type === 'wc' ? 'No browser wallet found' : 'Choose your wallet'}
       </div>
-      {wallets.map(w => (
-        <button key={w.type} style={btnStyle} onClick={() => onSelect(w.type)}>
+      {wallets.map((w,i) => (
+        <button key={i} style={btnStyle} onClick={() => onSelect(w.type, w.provider)}>
           <span style={{fontSize:22}}>{w.icon}</span> {w.label}
         </button>
       ))}
@@ -181,16 +180,16 @@ function WalletPicker({ onSelect, onClose }) {
   );
 }
 
-async function waitForTx(provider, hash, timeoutMs=30000){
+async function waitForTx(provider, hash, timeoutMs=60000){
   const start = Date.now();
   while(Date.now()-start < timeoutMs){
     try {
       const receipt = await provider.getTransactionReceipt(hash);
       if(receipt && receipt.status !== null) return receipt;
     } catch(e){}
-    await new Promise(r=>setTimeout(r,500));
+    await new Promise(r=>setTimeout(r,1000));
   }
-  throw new Error('Timeout — check: testnet.arcscan.app/tx/'+hash);
+  console.warn('Receipt timeout for', hash); return null; // Don't throw - tx may still confirm
 }
 
 export default function App() {
@@ -305,20 +304,10 @@ export default function App() {
     return 'Browser Wallet';
   };
 
-  const connectBrowser = async (preferredWallet) => {
-    const { ethereum } = window;
-    if (!ethereum) { setStatus({type:'error',message:'No browser wallet detected. Install MetaMask.'}); return; }
-    let eth;
-    if (preferredWallet === 'metamask' && ethereum.providers?.length) {
-      eth = ethereum.providers.find(p => p.isMetaMask) || ethereum;
-    } else if (preferredWallet === 'brave' && ethereum.providers?.length) {
-      eth = ethereum.providers.find(p => p.isBraveWallet) || ethereum;
-    } else if (preferredWallet === 'coinbase' && ethereum.providers?.length) {
-      eth = ethereum.providers.find(p => p.isCoinbaseWallet) || ethereum;
-    } else {
-      eth = getEth();
-    }
-    if (!eth) { setStatus({type:'error',message:'Selected wallet not found in browser.'}); return; }
+  const connectBrowser = async (preferredWallet, providerObj) => {
+    // If a specific provider object was passed (from WalletPicker), use it directly
+    const eth = providerObj || window.ethereum;
+    if (!eth) { setStatus({type:'error',message:'No browser wallet detected. Install MetaMask or use a Web3 browser.'}); return; }
     try {
       const bp = new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
       await bp.send('eth_requestAccounts',[]);
@@ -383,16 +372,21 @@ export default function App() {
         const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, {gasLimit:300000});
         setStatus({type:'info',message:'Confirming approval...'});
         await waitForTx(provider, approveTx.hash);
+        // Brief pause to ensure approval is processed
+        await new Promise(r=>setTimeout(r,2000));
       }
       // Step 2: Send via remittance contract
       setStatus({type:'info',message:'Sending USDC... (2/2)'});
       const tx = await remittance.sendMoney(USDC_ADDRESS, sendRecipient, amount, sendCountry, {gasLimit:300000});
-      setStatus({type:'info',message:'Confirming transfer...'});
-      await waitForTx(provider, tx.hash);
-      // Save to localStorage for permanent history
-      const newTx = {hash:tx.hash, recipient:sendRecipient, amount:sendAmount, country:sendCountry, timestamp:Math.floor(Date.now()/1000)};
+      // Save to history immediately when TX is submitted (before confirmation)
+      const newTx = {hash:tx.hash, recipient:sendRecipient, amount:sendAmount, country:sendCountry, timestamp:Math.floor(Date.now()/1000), status:'pending'};
       const saved = ls('arc_txhistory',[]);
       lsSet('arc_txhistory',[newTx,...saved.slice(0,49)]);
+      setStatus({type:'info',message:'Confirming... (check explorer if this takes long)'});
+      const receipt = await waitForTx(provider, tx.hash);
+      // Update status in history
+      const updated = ls('arc_txhistory',[]).map(t=>t.hash===tx.hash?{...t,status:receipt?'confirmed':'submitted'}:t);
+      lsSet('arc_txhistory',updated);
       setStatus({type:'success',message:`✓ Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
       setSendRecipient(''); setSendAmount('');
       fetchBalance();
@@ -542,7 +536,7 @@ export default function App() {
             </div>
           ) : (
             <WalletPicker
-              onSelect={(type)=>{setShowWalletPicker(false); if(type==='wc') connectMobile(); else connectBrowser(type);}}
+              onSelect={(type, providerObj)=>{setShowWalletPicker(false); if(type==='wc') connectMobile(); else connectBrowser(type, providerObj);}}
               onClose={()=>setShowWalletPicker(false)}
             />
           )}
@@ -719,8 +713,7 @@ export default function App() {
 
             <label style={C.label}>Destination Country</label>
             <select style={C.select} value={sendCountry} onChange={e=>setSendCountry(e.target.value)}>
-              <option value=''>— Select destination country —</option>
-              {COUNTRIES.map(c=><option key={c} value={c}>{FLAG[c]} {c}</option>)}
+              <option value=''>— Select destination country —</option>{COUNTRIES.map(c=><option key={c} value={c}>{FLAG[c]} {c}</option>)}
             </select>
 
             {/* Live conversion */}
@@ -981,7 +974,7 @@ export default function App() {
                           </div>
                           <div style={{textAlign:'right'}}>
                             <div style={{fontWeight:800,color:'#0f172a',fontSize:15}}>-${p.amount||fmtUSDC(p.amount)}</div>
-                            <div style={{fontSize:12,color:'#94a3b8',marginTop:2}}>{fmtDate(p.timestamp)}</div>
+                            <div style={{fontSize:12,color:'#94a3b8',marginTop:2}}>{fmtDate(p.timestamp)} {p.status==='pending'?'⏳':p.status==='confirmed'?'✓':''}</div>
                           </div>
                           {p.hash && <a href={`https://testnet.arcscan.app/tx/${p.hash}`} target="_blank" rel="noreferrer" style={{fontSize:12,color:'#6d28d9',textDecoration:'none',padding:'4px 8px'}}>↗</a>}
                         </div>
