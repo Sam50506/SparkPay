@@ -116,7 +116,12 @@ function buildAnalytics(history){
     const d = new Date(Number(tx.timestamp)*1000);
     const label = d.toLocaleDateString('en',{weekday:'short'});
     const slot = days.find(x=>x.label===label);
-    if(slot){ slot.sent += parseFloat(fmtUSDC(tx.amount)); slot.count++; }
+    if(slot){
+      const amt = (typeof tx.amount==='string'||typeof tx.amount==='number')
+        ? parseFloat(tx.amount)
+        : parseFloat(fmtUSDC(tx.amount));
+      slot.sent += isNaN(amt)?0:amt;
+    }
   });
   return days;
 }
@@ -566,15 +571,15 @@ export default function App() {
 
   const C = {
     wrap: {minHeight:'100vh',background:darkMode?'#0f172a':'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative',color:darkMode?'#e2e8f0':'#0f172a'},
-    grid: {position:'fixed',inset:0,backgroundImage:'linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)',backgroundSize:'48px 48px',opacity:0.5,pointerEvents:'none',zIndex:0},
+    grid: {position:'fixed',inset:0,backgroundImage:darkMode?'linear-gradient(#1e293b 1px,transparent 1px),linear-gradient(90deg,#1e293b 1px,transparent 1px)':'linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)',backgroundSize:'48px 48px',opacity:0.5,pointerEvents:'none',zIndex:0},
 
     // Top nav
     nav: {position:'sticky',top:0,zIndex:100,background:darkMode?'rgba(15,23,42,0.97)':'rgba(248,250,255,0.92)',backdropFilter:'blur(12px)',borderBottom:darkMode?'1px solid #1e293b':'1px solid #e2e8f0',padding:'0 20px'},
     navInner: {maxWidth:900,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:60},
-    navLogo: {fontSize:18,fontWeight:900,color:'#0f172a',letterSpacing:'-0.5px'},
+    navLogo: {fontSize:18,fontWeight:900,color:darkMode?'#fff':'#0f172a',letterSpacing:'-0.5px',whiteSpace:'nowrap'},
     navRight: {display:'flex',alignItems:'center',gap:12},
-    balPill: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:999,padding:'6px 14px',fontSize:13,fontWeight:700,color:'#0f172a'},
-    addrPill: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:999,padding:'6px 14px',fontSize:13,color:'#64748b',fontFamily:'monospace'},
+    balPill: {background:darkMode?'#1e293b':'#fff',border:darkMode?'1px solid #334155':'1px solid #e2e8f0',borderRadius:999,padding:'6px 14px',fontSize:13,fontWeight:700,color:darkMode?'#f1f5f9':'#0f172a'},
+    addrPill: {background:darkMode?'#1e293b':'#fff',border:darkMode?'1px solid #334155':'1px solid #e2e8f0',borderRadius:999,padding:'6px 14px',fontSize:13,color:darkMode?'#94a3b8':'#64748b',fontFamily:'monospace'},
     discBtn: {background:'#fef2f2',border:'1px solid #fecaca',borderRadius:999,padding:'6px 14px',fontSize:12,fontWeight:600,color:'#dc2626',cursor:'pointer'},
 
     // Content
@@ -603,7 +608,7 @@ export default function App() {
     statLbl: {fontSize:11,fontWeight:700,color:'#94a3b8',letterSpacing:'0.1em',marginTop:4},
 
     // Form
-    label: {display:'block',fontSize:12,fontWeight:700,color:'#374151',letterSpacing:'0.05em',marginBottom:6,textTransform:'uppercase'},
+    label: {display:'block',fontSize:12,fontWeight:700,color:darkMode?'#94a3b8':'#374151',letterSpacing:'0.05em',marginBottom:6,textTransform:'uppercase'},
     input: {width:'100%',padding:'12px 14px',borderRadius:10,border:darkMode?'1.5px solid #334155':'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,fontFamily:'inherit',color:darkMode?'#e2e8f0':'#0f172a',outline:'none',background:darkMode?'#0f172a':'#fff'},
     select: {width:'100%',padding:'12px 14px',borderRadius:10,border:darkMode?'1.5px solid #334155':'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,background:darkMode?'#0f172a':'#fff',color:darkMode?'#e2e8f0':'#0f172a',fontFamily:'inherit'},
 
@@ -625,7 +630,7 @@ export default function App() {
     invoiceBox: {background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:10,padding:'14px',fontFamily:'monospace',fontSize:12,wordBreak:'break-all',marginTop:12,color:'#374151'},
 
     // History row
-    histRow: {display:'flex',alignItems:'center',gap:14,padding:'14px 0',borderBottom:'1px solid #f1f5f9'},
+    histRow: {display:'flex',alignItems:'center',gap:14,padding:'14px 0',borderBottom:darkMode?'1px solid #334155':'1px solid #f1f5f9'},
     histIcon: {width:40,height:40,borderRadius:12,background:'#fef2f2',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0},
   };
 
@@ -973,7 +978,7 @@ export default function App() {
                             <div style={{fontSize:12,color:'#94a3b8',fontFamily:'monospace',marginTop:2}}>{short(p.recipient)}</div>
                           </div>
                           <div style={{textAlign:'right'}}>
-                            <div style={{fontWeight:800,color:'#0f172a',fontSize:15}}>-${p.amount||fmtUSDC(p.amount)}</div>
+                            <div style={{fontWeight:800,color:darkMode?'#f1f5f9':'#0f172a',fontSize:15}}>-${typeof p.amount==='string'||typeof p.amount==='number'?parseFloat(p.amount).toFixed(2):fmtUSDC(p.amount)}</div>
                             <div style={{fontSize:12,color:'#94a3b8',marginTop:2}}>{fmtDate(p.timestamp)} {p.status==='pending'?'⏳':p.status==='confirmed'?'✓':''}</div>
                           </div>
                           {p.hash && <a href={`https://testnet.arcscan.app/tx/${p.hash}`} target="_blank" rel="noreferrer" style={{fontSize:12,color:'#6d28d9',textDecoration:'none',padding:'4px 8px'}}>↗</a>}
