@@ -361,35 +361,29 @@ export default function App() {
   /* ─── Actions ───────────────────────────────────────────────────────────── */
   const handleSend = async () => {
     if(!signer||!sendRecipient||!sendAmount){ setStatus({type:'error',message:'Fill all fields and connect wallet'}); return; }
-    setLoading(true); setStatus({type:'info',message:'Processing...'});
+    if(!ethers.isAddress(sendRecipient)){ setStatus({type:'error',message:'Invalid recipient address'}); return; }
+    setLoading(true); setStatus({type:'info',message:'Sending USDC...'});
     try {
-      const {remittance,usdc} = getContracts();
-      const amount = ethers.parseUnits(sendAmount,USDC_DECIMALS);
-      // Step 1: Approve with proper wait
-      const allowance = await usdc.allowance(address, REMITTANCE_ADDRESS);
-      if(allowance < amount){
-        setStatus({type:'info',message:'Approving USDC... (1/2)'});
-        const approveTx = await usdc.approve(REMITTANCE_ADDRESS, amount, {gasLimit:300000});
-        setStatus({type:'info',message:'Confirming approval...'});
-        await waitForTx(provider, approveTx.hash);
-        // Brief pause to ensure approval is processed
-        await new Promise(r=>setTimeout(r,2000));
-      }
-      // Step 2: Send via remittance contract
-      setStatus({type:'info',message:'Sending USDC... (2/2)'});
-      const tx = await remittance.sendMoney(USDC_ADDRESS, sendRecipient, amount, sendCountry, {gasLimit:300000});
-      // Save to history immediately when TX is submitted (before confirmation)
-      const newTx = {hash:tx.hash, recipient:sendRecipient, amount:sendAmount, country:sendCountry, timestamp:Math.floor(Date.now()/1000), status:'pending'};
+      const {usdc} = getContracts();
+      const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
+      // Direct transfer — no approve needed, no remittance contract
+      // This is what works on Arc: usdc.transfer(to, amount, {gasLimit})
+      const tx = await usdc.transfer(sendRecipient, amount, {gasLimit: 300000});
+      // Record to permanent history immediately
+      const newTx = {
+        hash: tx.hash,
+        recipient: sendRecipient,
+        amount: sendAmount,
+        country: sendCountry,
+        timestamp: Math.floor(Date.now()/1000),
+        status: 'submitted'
+      };
       const saved = ls('arc_txhistory',[]);
       lsSet('arc_txhistory',[newTx,...saved.slice(0,49)]);
-      setStatus({type:'info',message:'Confirming... (check explorer if this takes long)'});
-      const receipt = await waitForTx(provider, tx.hash);
-      // Update status in history
-      const updated = ls('arc_txhistory',[]).map(t=>t.hash===tx.hash?{...t,status:receipt?'confirmed':'submitted'}:t);
-      lsSet('arc_txhistory',updated);
-      setStatus({type:'success',message:`✓ Sent ${sendAmount} USDC to ${short(sendRecipient)}`});
+      setStatus({type:'success',message:`✓ Sent ${sendAmount} USDC! TX: ${tx.hash.slice(0,10)}...`});
       setSendRecipient(''); setSendAmount('');
-      fetchBalance();
+      // Refresh balance after 5s to let chain update
+      setTimeout(fetchBalance, 5000);
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
     finally{ setLoading(false); }
   };
@@ -571,11 +565,11 @@ export default function App() {
   ];
 
   const C = {
-    wrap: {minHeight:'100vh',background:'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative'},
+    wrap: {minHeight:'100vh',background:darkMode?'#0f172a':'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative',color:darkMode?'#e2e8f0':'#0f172a'},
     grid: {position:'fixed',inset:0,backgroundImage:'linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)',backgroundSize:'48px 48px',opacity:0.5,pointerEvents:'none',zIndex:0},
 
     // Top nav
-    nav: {position:'sticky',top:0,zIndex:100,background:'rgba(248,250,255,0.92)',backdropFilter:'blur(12px)',borderBottom:'1px solid #e2e8f0',padding:'0 20px'},
+    nav: {position:'sticky',top:0,zIndex:100,background:darkMode?'rgba(15,23,42,0.97)':'rgba(248,250,255,0.92)',backdropFilter:'blur(12px)',borderBottom:darkMode?'1px solid #1e293b':'1px solid #e2e8f0',padding:'0 20px'},
     navInner: {maxWidth:900,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:60},
     navLogo: {fontSize:18,fontWeight:900,color:'#0f172a',letterSpacing:'-0.5px'},
     navRight: {display:'flex',alignItems:'center',gap:12},
@@ -598,20 +592,20 @@ export default function App() {
     tab: (active)=>({display:'flex',alignItems:'center',gap:6,padding:'9px 16px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:600,whiteSpace:'nowrap',background:active?'#0f172a':'#fff',color:active?'#fff':'#64748b',border:active?'none':'1px solid #e2e8f0',transition:'all 0.15s'}),
 
     // Cards
-    card: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:16,padding:'24px',marginBottom:16},
+    card: {background:darkMode?'#1e293b':'#fff',border:darkMode?'1px solid #334155':'1px solid #e2e8f0',borderRadius:16,padding:'24px',marginBottom:16},
     cardTitle: {fontSize:20,fontWeight:800,color:'#0f172a',marginBottom:4,letterSpacing:'-0.5px'},
     cardSub: {fontSize:14,color:'#64748b',marginBottom:20},
 
     // Stat cards
     statGrid: {display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12,marginBottom:20},
-    statCard: {background:'#fff',border:'1px solid #e2e8f0',borderRadius:14,padding:'18px'},
+    statCard: {background:darkMode?'#1e293b':'#fff',border:darkMode?'1px solid #334155':'1px solid #e2e8f0',borderRadius:14,padding:'18px'},
     statVal: {fontSize:26,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'},
     statLbl: {fontSize:11,fontWeight:700,color:'#94a3b8',letterSpacing:'0.1em',marginTop:4},
 
     // Form
     label: {display:'block',fontSize:12,fontWeight:700,color:'#374151',letterSpacing:'0.05em',marginBottom:6,textTransform:'uppercase'},
-    input: {width:'100%',padding:'12px 14px',borderRadius:10,border:'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,fontFamily:'inherit',color:'#0f172a',outline:'none',background:'#fff'},
-    select: {width:'100%',padding:'12px 14px',borderRadius:10,border:'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,background:'#fff',color:'#0f172a',fontFamily:'inherit'},
+    input: {width:'100%',padding:'12px 14px',borderRadius:10,border:darkMode?'1.5px solid #334155':'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,fontFamily:'inherit',color:darkMode?'#e2e8f0':'#0f172a',outline:'none',background:darkMode?'#0f172a':'#fff'},
+    select: {width:'100%',padding:'12px 14px',borderRadius:10,border:darkMode?'1.5px solid #334155':'1.5px solid #e2e8f0',fontSize:14,boxSizing:'border-box',marginBottom:14,background:darkMode?'#0f172a':'#fff',color:darkMode?'#e2e8f0':'#0f172a',fontFamily:'inherit'},
 
     // Buttons
     btnPrimary: {width:'100%',padding:'15px',borderRadius:12,border:'none',background:'#0f172a',color:'#fff',fontSize:15,fontWeight:700,cursor:'pointer',marginTop:4},
@@ -632,7 +626,7 @@ export default function App() {
 
     // History row
     histRow: {display:'flex',alignItems:'center',gap:14,padding:'14px 0',borderBottom:'1px solid #f1f5f9'},
-    histIcon: (type)=>({width:40,height:40,borderRadius:12,background:type==='sent'?'#fef2f2':'#f0fdf4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}),
+    histIcon: {width:40,height:40,borderRadius:12,background:'#fef2f2',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0},
   };
 
   return (
@@ -920,8 +914,14 @@ export default function App() {
                       <div style={{fontWeight:700,color:'#0f172a'}}>{FLAG[s.country]} {short(s.addr)}</div>
                       <div style={{fontSize:13,color:'#94a3b8',marginTop:2}}>${s.amount} USDC · {s.freq} · Next: {s.next}</div>
                     </div>
-                    <button style={{...C.btnSecondary,fontSize:12}} onClick={()=>{setSendRecipient(s.addr);setSendAmount(s.amount);setSendCountry(s.country);setActiveTab('send');}}>Execute</button>
-                    <button style={C.btnDanger} onClick={()=>setSchedRows(p=>p.filter(x=>x.id!==s.id))}>✕</button>
+                    <button style={{...C.btnSecondary,fontSize:12}} onClick={()=>{
+                      setSendRecipient(s.addr);
+                      setSendAmount(s.amount);
+                      setSendCountry(s.country);
+                      setActiveTab('send');
+                      setStatus({type:'info',message:`Scheduled payment pre-filled. Review and click Send USDC.`});
+                    }}>Execute →</button>
+                    <button style={C.btnDanger} onClick={()=>setSchedRows(p=>p.filter(x=>x.id!==s.id))}>Remove</button>
                   </div>
                 ))}
               </div>
