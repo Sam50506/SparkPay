@@ -13,7 +13,7 @@ document.head.appendChild(_f);
 const ARC_CHAIN_ID     = 5042002;
 const ARC_CHAIN_HEX    = '0x4CEF52';
 const ARC_RPC          = 'https://rpc.testnet.arc.network';
-const REMIT_ADDR       = '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44';
+const REMIT_ADDR       = '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44'; // v2 deployed 2026-05-25
 const USDC_ADDR        = '0x3600000000000000000000000000000000000000';
 const WC_ID            = '8bb24a433758c9a403057e2e3f2c371b';
 
@@ -112,6 +112,7 @@ function WalletPicker({ onPick, onClose, dm }) {
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
+console.log('ArcPay v2 | Contract:', '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44');
 export default function App() {
   // wallet
   const [provider,  setProvider]  = useState(null);
