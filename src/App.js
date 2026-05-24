@@ -317,25 +317,20 @@ export default function App() {
     try {
       const {remit} = getC();
       const amount = ethers.parseUnits(invAmt, 6);
-      // Get the invoice ID via staticCall BEFORE sending - this is the correct approach
-      // staticCall simulates the tx locally and returns the exact ID the contract will store
+      // Step 1: Get deterministic ID via staticCall (instant, no waiting)
       const predictedId = await remit.createInvoice.staticCall(invPayer, amount, invDesc, invCtry);
-      // Send the actual transaction
+      // Step 2: Send transaction
       const tx = await remit.createInvoice(invPayer, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("2","gwei")});
-      setStatus({type:'info',msg:'Confirming on-chain…'});
-      // Wait for receipt to confirm it succeeded
-      const receipt = await awaitReceipt(provider, tx.hash);
-      if (!receipt) {
-        // Tx submitted but receipt timed out - still show the ID
-        setStatus({type:'warning',msg:'Transaction submitted. Use the ID below (may take a moment to confirm).'});
-      } else {
-        setStatus({type:'success',msg:'Invoice created!'});
-      }
-      // predictedId from staticCall IS the correct ID - it's deterministic
+      // Step 3: Show ID IMMEDIATELY - don't wait for receipt
       setInvId(predictedId);
       const savedInvs = ls('arc_invoices',[]);
-      lsSave('arc_invoices',[{id:predictedId,payer:invPayer,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now()},...savedInvs.slice(0,49)]);
+      lsSave('arc_invoices',[{id:predictedId,payer:invPayer,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now(),txHash:tx.hash},...savedInvs.slice(0,49)]);
+      setStatus({type:'success',msg:'✓ Invoice created! Share this ID with your client. TX confirming in background…'});
       setInvPayer(''); setInvAmt(''); setInvDesc('');
+      // Confirm in background silently
+      awaitReceipt(provider, tx.hash).then(r => {
+        if (r) console.log('Invoice confirmed on-chain:', predictedId);
+      });
     } catch(e) { setStatus({type:'error',msg:e.reason||e.message||'Failed'}); }
     finally { setLoading(false); }
   };
@@ -343,23 +338,29 @@ export default function App() {
   // ── PAY INVOICE ────────────────────────────────────────────────────────────
   const handlePayInv = async () => {
     if (!signer||!payId) { setStatus({type:'error',msg:'Enter invoice ID'}); return; }
-    // Validate invoice ID format - must be bytes32 (66 chars with 0x)
     let id = payId.trim().replace(/\s+/g,'');
     if (!id.startsWith('0x')) id = '0x' + id;
-    // Pad to bytes32 if needed
-    const hexPart = id.slice(2);
-    if (hexPart.length < 64) {
-      id = '0x' + hexPart.padEnd(64, '0');
-    }
     if (id.length !== 66) {
-      setStatus({type:'error',msg:`Invalid invoice ID length (${id.length} chars, need 66)`}); return;
+      setStatus({type:'error',msg:`Invalid ID - must be 66 characters, yours is ${id.length}`}); return;
     }
     setLoading(true); setStatus({type:'info',msg:'Looking up invoice…'});
     try {
       const {remit,usdc} = getC();
-      const inv = await remit.invoices(id);
+      // Retry up to 10 times with 3s delay - invoice tx may still be confirming
+      let inv = null;
+      for (let i = 0; i < 10; i++) {
+        const result = await remit.invoices(id);
+        if (result && result.creator !== ethers.ZeroAddress) {
+          inv = result;
+          break;
+        }
+        if (i < 9) {
+          setStatus({type:'info',msg:`Waiting for invoice to confirm on-chain… (${i+1}/10)`});
+          await new Promise(r => setTimeout(r, 3000));
+        }
+      }
       if (!inv || inv.creator===ethers.ZeroAddress) {
-        setStatus({type:'error',msg:'Invoice not found. Check the ID and make sure the invoice was created on this contract.'});
+        setStatus({type:'error',msg:'Invoice not found after 30s. The creation tx may have failed. Please create a new invoice.'});
         return;
       }
       if (inv.paid) { setStatus({type:'error',msg:'Already paid'}); return; }
