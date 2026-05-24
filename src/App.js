@@ -280,7 +280,7 @@ export default function App() {
     setLoading(true); setStatus({type:'info',msg:'Sending USDC…'});
     try {
       const value = ethers.parseUnits(sendAmt, 18); // native = 18 dec
-      const tx = await signer.sendTransaction({ to: sendToNorm, value, gasLimit: 21000, gasPrice: ethers.parseUnits("2","gwei") });
+      const tx = await signer.sendTransaction({ to: sendToNorm, value, gasLimit: 21000, gasPrice: ethers.parseUnits("50","gwei") });
       // Save to history immediately — don't wait for receipt
       const rec = { hash:tx.hash, recipient:sendToNorm, amount:amt, country:sendCtry, timestamp:Math.floor(Date.now()/1000), status:'pending' };
       setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
@@ -300,7 +300,7 @@ export default function App() {
       for (const r of valid) {
         setStatus({type:'info',msg:`Sending to ${short(r.addr)}…`});
         const value = ethers.parseUnits(r.amount, 18);
-        const tx = await signer.sendTransaction({ to: r.addr, value, gasLimit: 21000, gasPrice: ethers.parseUnits("2","gwei") });
+        const tx = await signer.sendTransaction({ to: r.addr, value, gasLimit: 21000, gasPrice: ethers.parseUnits("50","gwei") });
         const rec = { hash:tx.hash, recipient:r.addr, amount:parseFloat(r.amount), country:r.country, timestamp:Math.floor(Date.now()/1000), status:'pending' };
         setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
       }
@@ -323,7 +323,7 @@ export default function App() {
       // Step 1: Get deterministic ID via staticCall (instant, no waiting)
       const predictedId = await remit.createInvoice.staticCall(payerAddr, amount, invDesc, invCtry);
       // Step 2: Send transaction
-      const tx = await remit.createInvoice(payerAddr, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("2","gwei")});
+      const tx = await remit.createInvoice(payerAddr, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("50","gwei")});
       // Show ID immediately so user can see it
       setInvId(predictedId);
       const savedInvs = ls('arc_invoices',[]);
@@ -377,12 +377,12 @@ export default function App() {
       const allowance = await usdc.allowance(address, REMIT_ADDR);
       if (allowance < inv.amount) {
         setStatus({type:'info',msg:'Approving USDC…'});
-        const aTx = await usdc.approve(REMIT_ADDR, inv.amount, {gasLimit:300000, gasPrice: ethers.parseUnits("2","gwei")});
+        const aTx = await usdc.approve(REMIT_ADDR, inv.amount, {gasLimit:300000, gasPrice: ethers.parseUnits("50","gwei")});
         setStatus({type:'info',msg:'Waiting for approval…'});
         await awaitReceipt(provider, aTx.hash);
       }
       setStatus({type:'info',msg:'Paying invoice…'});
-      const tx = await remit.payInvoice(USDC_ADDR, id, {gasLimit:300000, gasPrice: ethers.parseUnits("2","gwei")});
+      const tx = await remit.payInvoice(USDC_ADDR, id, {gasLimit:300000, gasPrice: ethers.parseUnits("50","gwei")});
       setStatus({type:'info',msg:'Confirming payment…'});
       await awaitReceipt(provider, tx.hash);
       setStatus({type:'success',msg:`✓ Paid ${fmtUsdc(inv.amount)} USDC`});
