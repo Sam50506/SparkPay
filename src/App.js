@@ -6,7 +6,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 // ─── Google Fonts ─────────────────────────────────────────────────────────────
 const _f = document.createElement('link');
 _f.rel = 'stylesheet';
-_f.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap';
+_f.href = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
 document.head.appendChild(_f);
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -97,7 +97,7 @@ function WalletPicker({ onPick, onClose, dm }) {
   const tc = dm ? '#f1f5f9' : '#0f172a';
   return (
     <div style={{background:bg,border:`1px solid ${br}`,borderRadius:16,padding:20,display:'flex',flexDirection:'column',gap:10,boxShadow:'0 8px 40px rgba(0,0,0,0.15)'}}>
-      <div style={{fontSize:15,fontWeight:700,color:tc,fontFamily:'Syne,sans-serif'}}>Choose your wallet</div>
+      <div style={{fontSize:15,fontWeight:700,color:tc,fontFamily:'"Bricolage Grotesque",sans-serif'}}>Choose your wallet</div>
       {options.map((o,i) => (
         <button key={i} onClick={() => onPick(o.type, o.p)}
           style={{display:'flex',alignItems:'center',gap:12,background:dm?'#0f172a':'#f8faff',border:`1px solid ${br}`,borderRadius:12,padding:'13px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:tc,width:'100%',textAlign:'left'}}>
@@ -379,15 +379,15 @@ export default function App() {
   const acc  = '#6d28d9';
 
   const S = {
-    root:  {minHeight:'100vh',background:bg,fontFamily:'"DM Sans",sans-serif',color:txt,backgroundImage:`linear-gradient(${grid} 1px,transparent 1px),linear-gradient(90deg,${grid} 1px,transparent 1px)`,backgroundSize:'48px 48px'},
+    root:  {minHeight:'100vh',background:bg,fontFamily:'"Plus Jakarta Sans",sans-serif',color:txt,backgroundImage:`linear-gradient(${grid} 1px,transparent 1px),linear-gradient(90deg,${grid} 1px,transparent 1px)`,backgroundSize:'48px 48px'},
     nav:   {position:'sticky',top:0,zIndex:100,background:dm?'rgba(13,17,23,0.95)':'rgba(248,250,255,0.95)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${bdr}`,padding:'0 20px'},
     navi:  {maxWidth:960,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',height:58},
-    logo:  {fontSize:20,fontWeight:800,fontFamily:'Syne,sans-serif',color:txt,letterSpacing:'-0.5px'},
+    logo:  {fontSize:19,fontWeight:800,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,letterSpacing:'-0.3px'},
     pill:  {background:bg2,border:`1px solid ${bdr}`,borderRadius:999,padding:'6px 14px',fontSize:13,fontWeight:600,color:txt},
     discB: {background:'#fef2f2',border:'1px solid #fecaca',borderRadius:999,padding:'6px 14px',fontSize:12,fontWeight:700,color:'#dc2626',cursor:'pointer'},
     wrap:  {maxWidth:960,margin:'0 auto',padding:'28px 20px'},
     card:  {background:bg2,border:`1px solid ${bdr}`,borderRadius:16,padding:24,marginBottom:16},
-    cTitle:{fontSize:18,fontWeight:800,fontFamily:'Syne,sans-serif',color:txt,marginBottom:4},
+    cTitle:{fontSize:17,fontWeight:700,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,marginBottom:4},
     cSub:  {fontSize:14,color:txt2,marginBottom:20},
     lbl:   {display:'block',fontSize:11,fontWeight:700,color:txt2,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:6},
     inp:   {width:'100%',padding:'11px 14px',borderRadius:10,border:`1.5px solid ${bdr}`,fontSize:14,color:txt,background:dm?'#0d1117':bg,boxSizing:'border-box',marginBottom:14,fontFamily:'inherit',outline:'none'},
@@ -400,7 +400,7 @@ export default function App() {
     tab:   (a) => ({display:'flex',alignItems:'center',gap:5,padding:'8px 14px',borderRadius:10,border:a?'none':`1px solid ${bdr}`,cursor:'pointer',fontSize:13,fontWeight:600,whiteSpace:'nowrap',background:a?acc:bg2,color:a?'#fff':txt2}),
     stats: {display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:12,marginBottom:20},
     stat:  {background:bg2,border:`1px solid ${bdr}`,borderRadius:14,padding:'16px 20px'},
-    sVal:  {fontSize:24,fontWeight:900,fontFamily:'Syne,sans-serif',color:txt,letterSpacing:'-1px'},
+    sVal:  {fontSize:24,fontWeight:900,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,letterSpacing:'-1px'},
     sLbl:  {fontSize:11,fontWeight:700,color:txt2,letterSpacing:'0.08em',textTransform:'uppercase',marginTop:4},
     convB: {background:dm?'#1a1f35':'#faf5ff',border:`1px solid ${dm?'#3d2c8d':'#e9d5ff'}`,borderRadius:12,padding:'14px 16px',marginBottom:14},
     hRow:  {display:'flex',alignItems:'center',gap:14,padding:'13px 0',borderBottom:`1px solid ${bdr}`},
@@ -448,14 +448,14 @@ export default function App() {
           <span style={{width:8,height:8,borderRadius:'50%',background:acc,display:'inline-block'}}/>
           <span style={{fontSize:12,fontWeight:700,color:acc,letterSpacing:'0.1em'}}>ARC TESTNET · LIVE</span>
         </div>
-        <h1 style={{fontSize:'clamp(40px,10vw,64px)',fontWeight:900,fontFamily:'Syne,sans-serif',lineHeight:1.05,margin:'0 0 20px',color:txt,letterSpacing:'-2px'}}>
+        <h1 style={{fontSize:'clamp(36px,9vw,56px)',fontWeight:800,fontFamily:'"Bricolage Grotesque",sans-serif',lineHeight:1.08,margin:'0 0 20px',color:txt,letterSpacing:'-1.5px'}}>
           Send Money<br/><span style={{color:acc}}>Globally.</span><br/>Instantly.
         </h1>
         <p style={{fontSize:16,color:txt2,margin:'0 0 40px',lineHeight:1.6}}>Transfer USDC across borders in under a second.<br/>Zero hidden fees. Fully on-chain.</p>
         <div style={{display:'flex',gap:0,marginBottom:40,border:`1px solid ${bdr}`,borderRadius:14,overflow:'hidden',background:bg2}}>
           {[['~$0.007','PER TRANSFER'],['<1S','SETTLEMENT'],['20+','COUNTRIES']].map(([v,l],i)=>(
             <div key={i} style={{padding:'18px 24px',borderRight:i<2?`1px solid ${bdr}`:'none',flex:1}}>
-              <div style={{fontSize:20,fontWeight:900,fontFamily:'Syne,sans-serif',color:txt,letterSpacing:'-0.5px'}}>{v}</div>
+              <div style={{fontSize:20,fontWeight:900,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,letterSpacing:'-0.5px'}}>{v}</div>
               <div style={{fontSize:10,fontWeight:700,color:txt2,letterSpacing:'0.1em',marginTop:3}}>{l}</div>
             </div>
           ))}
@@ -537,7 +537,7 @@ export default function App() {
             {converted()&&(
               <div style={S.convB}>
                 <div style={{fontSize:12,color:acc,fontWeight:700,marginBottom:4}}>RECIPIENT GETS APPROXIMATELY</div>
-                <div style={{fontSize:22,fontWeight:900,fontFamily:'Syne,sans-serif',color:txt}}>{FLAG[sendCtry]} {converted()} {CURRENCY[sendCtry]}</div>
+                <div style={{fontSize:22,fontWeight:900,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt}}>{FLAG[sendCtry]} {converted()} {CURRENCY[sendCtry]}</div>
                 <div style={{fontSize:12,color:txt2,marginTop:4}}>1 USDC ≈ {rates[CURRENCY[sendCtry]]?.toFixed(2)} {CURRENCY[sendCtry]} · Live rate</div>
               </div>
             )}
@@ -750,7 +750,7 @@ export default function App() {
                   <div key={c} style={{background:bg3,border:`1px solid ${bdr}`,borderRadius:12,padding:'13px 15px'}}>
                     <div style={{fontSize:20,marginBottom:4}}>{FLAG[c]}</div>
                     <div style={{fontSize:11,fontWeight:700,color:txt2,letterSpacing:'0.08em'}}>{cur}</div>
-                    <div style={{fontSize:17,fontWeight:900,fontFamily:'Syne,sans-serif',color:txt,marginTop:2}}>{rate?rate.toLocaleString('en',{maximumFractionDigits:1}):'—'}</div>
+                    <div style={{fontSize:17,fontWeight:900,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,marginTop:2}}>{rate?rate.toLocaleString('en',{maximumFractionDigits:1}):'—'}</div>
                     <div style={{fontSize:11,color:txt2,marginTop:2}}>{c}</div>
                   </div>
                 );
@@ -786,7 +786,7 @@ export default function App() {
             </table>
             <div style={{marginTop:20,background:dm?'#1a1f35':'#faf5ff',border:`1px solid ${dm?'#3d2c8d':'#e9d5ff'}`,borderRadius:12,padding:20,textAlign:'center'}}>
               <div style={{fontSize:12,color:acc,fontWeight:700,marginBottom:4}}>ANNUAL SAVINGS · $500/month vs bank wire</div>
-              <div style={{fontSize:34,fontWeight:900,fontFamily:'Syne,sans-serif',color:txt,letterSpacing:'-1px'}}>$2,699</div>
+              <div style={{fontSize:34,fontWeight:900,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,letterSpacing:'-1px'}}>$2,699</div>
             </div>
           </div>
         )}
