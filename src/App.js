@@ -324,16 +324,19 @@ export default function App() {
       const predictedId = await remit.createInvoice.staticCall(payerAddr, amount, invDesc, invCtry);
       // Step 2: Send transaction
       const tx = await remit.createInvoice(payerAddr, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("2","gwei")});
-      // Step 3: Show ID IMMEDIATELY - don't wait for receipt
+      // Show ID immediately so user can see it
       setInvId(predictedId);
       const savedInvs = ls('arc_invoices',[]);
       lsSave('arc_invoices',[{id:predictedId,payer:payerAddr,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now(),txHash:tx.hash},...savedInvs.slice(0,49)]);
-      setStatus({type:'success',msg:'✓ Invoice created! Share this ID with your client. TX confirming in background…'});
+      setStatus({type:'info',msg:'⏳ Confirming on-chain… do not pay yet.'});
+      // Wait for actual confirmation before allowing payment
+      const receipt = await awaitReceipt(provider, tx.hash, 60000);
+      if (receipt && receipt.status === 1) {
+        setStatus({type:'success',msg:'✓ Invoice confirmed! Share this ID with your client — they can now pay it.'});
+      } else {
+        setStatus({type:'warning',msg:'⚠️ TX submitted but confirmation timed out. Wait 1-2 min before paying.'});
+      }
       setInvPayer(''); setInvAmt(''); setInvDesc('');
-      // Confirm in background silently
-      awaitReceipt(provider, tx.hash).then(r => {
-        if (r) console.log('Invoice confirmed on-chain:', predictedId);
-      });
     } catch(e) { 
       console.error('createInvoice error:', e);
       setStatus({type:'error',msg:e.reason||e.shortMessage||e.message||JSON.stringify(e)}); 
