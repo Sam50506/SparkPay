@@ -352,10 +352,16 @@ export default function App() {
 
   const fetchBalance = async () => {
     try {
-      const usdc = new ethers.Contract(USDC_ADDRESS,ERC20_ABI,provider);
-      const b = await usdc.balanceOf(address);
-      setBalance(fmtUSDC(b));
-    } catch {}
+      // Arc USDC is the native token — use getBalance (18 decimals)
+      const b = await provider.getBalance(address);
+      setBalance(parseFloat(ethers.formatUnits(b, 18)).toFixed(2));
+    } catch {
+      try {
+        const usdc = new ethers.Contract(USDC_ADDRESS,ERC20_ABI,provider);
+        const b = await usdc.balanceOf(address);
+        setBalance(fmtUSDC(b));
+      } catch {}
+    }
   };
 
   const getContracts = () => ({
@@ -369,25 +375,29 @@ export default function App() {
     if(!ethers.isAddress(sendRecipient)){ setStatus({type:'error',message:'Invalid recipient address'}); return; }
     setLoading(true); setStatus({type:'info',message:'Sending USDC...'});
     try {
-      const {usdc} = getContracts();
-      const amount = ethers.parseUnits(sendAmount, USDC_DECIMALS);
-      // Direct transfer — no approve needed, no remittance contract
-      // This is what works on Arc: usdc.transfer(to, amount, {gasLimit})
-      const tx = await usdc.transfer(sendRecipient, amount, {gasLimit: 300000});
+      // Arc USDC is the NATIVE token (like ETH on Ethereum).
+      // The correct way to transfer is a native send with 18-decimal value.
+      // ERC-20 transfer() interface works but MetaMask may route it wrong.
+      // Native send is the most reliable method on Arc.
+      const amount18 = ethers.parseUnits(sendAmount, 18); // native = 18 decimals
+      const tx = await signer.sendTransaction({
+        to: sendRecipient,
+        value: amount18,
+        gasLimit: 50000
+      });
       // Record to permanent history immediately
       const newTx = {
         hash: tx.hash,
         recipient: sendRecipient,
-        amount: sendAmount,
+        amount: parseFloat(sendAmount),
         country: sendCountry,
         timestamp: Math.floor(Date.now()/1000),
         status: 'submitted'
       };
       const saved = ls('arc_txhistory',[]);
-      lsSet('arc_txhistory',[newTx,...saved.slice(0,49)]);
+      lsSet('arc_txhistory',[newTx,...saved.slice(0,500)]);
       setStatus({type:'success',message:`✓ Sent ${sendAmount} USDC! TX: ${tx.hash.slice(0,10)}...`});
       setSendRecipient(''); setSendAmount('');
-      // Refresh balance after 5s to let chain update
       setTimeout(fetchBalance, 5000);
     } catch(e){ setStatus({type:'error',message:e.reason||e.message||'Failed'}); }
     finally{ setLoading(false); }
@@ -570,7 +580,7 @@ export default function App() {
   ];
 
   const C = {
-    wrap: {minHeight:'100vh',background:darkMode?'#0f172a':'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative',color:darkMode?'#e2e8f0':'#0f172a'},
+    wrap: {minHeight:'100vh',background:darkMode?'#0d1117':'#f8faff',fontFamily:'"Inter",sans-serif',position:'relative',color:darkMode?'#e2e8f0':'#0f172a'},
     grid: {position:'fixed',inset:0,backgroundImage:darkMode?'linear-gradient(#1e293b 1px,transparent 1px),linear-gradient(90deg,#1e293b 1px,transparent 1px)':'linear-gradient(#e2e8f0 1px,transparent 1px),linear-gradient(90deg,#e2e8f0 1px,transparent 1px)',backgroundSize:'48px 48px',opacity:0.5,pointerEvents:'none',zIndex:0},
 
     // Top nav
@@ -583,7 +593,7 @@ export default function App() {
     discBtn: {background:'#fef2f2',border:'1px solid #fecaca',borderRadius:999,padding:'6px 14px',fontSize:12,fontWeight:600,color:'#dc2626',cursor:'pointer'},
 
     // Content
-    content: {position:'relative',zIndex:1,maxWidth:900,margin:'0 auto',padding:'28px 20px'},
+    content: {position:'relative',zIndex:1,maxWidth:900,margin:'0 auto',padding:'28px 20px',minHeight:'80vh'},
 
     // Status
     statusBox: (t)=>{
@@ -597,15 +607,15 @@ export default function App() {
     tab: (active)=>({display:'flex',alignItems:'center',gap:6,padding:'9px 16px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:600,whiteSpace:'nowrap',background:active?'#0f172a':'#fff',color:active?'#fff':'#64748b',border:active?'none':'1px solid #e2e8f0',transition:'all 0.15s'}),
 
     // Cards
-    card: {background:darkMode?'#1e293b':'#fff',border:darkMode?'1px solid #334155':'1px solid #e2e8f0',borderRadius:16,padding:'24px',marginBottom:16},
+    card: {background:darkMode?'#161b27':'#fff',border:darkMode?'1px solid #30363d':'1px solid #e2e8f0',borderRadius:16,padding:'24px',marginBottom:16},
     cardTitle: {fontSize:20,fontWeight:800,color:'#0f172a',marginBottom:4,letterSpacing:'-0.5px'},
-    cardSub: {fontSize:14,color:'#64748b',marginBottom:20},
+    cardSub: {fontSize:14,color:darkMode?'#8b949e':'#64748b',marginBottom:20},
 
     // Stat cards
     statGrid: {display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12,marginBottom:20},
-    statCard: {background:darkMode?'#1e293b':'#fff',border:darkMode?'1px solid #334155':'1px solid #e2e8f0',borderRadius:14,padding:'18px'},
+    statCard: {background:darkMode?'#161b27':'#fff',border:darkMode?'1px solid #30363d':'1px solid #e2e8f0',borderRadius:14,padding:'18px'},
     statVal: {fontSize:26,fontWeight:900,color:'#0f172a',letterSpacing:'-1px'},
-    statLbl: {fontSize:11,fontWeight:700,color:'#94a3b8',letterSpacing:'0.1em',marginTop:4},
+    statLbl: {fontSize:11,fontWeight:700,color:darkMode?'#8b949e':'#94a3b8',letterSpacing:'0.1em',marginTop:4},
 
     // Form
     label: {display:'block',fontSize:12,fontWeight:700,color:darkMode?'#94a3b8':'#374151',letterSpacing:'0.05em',marginBottom:6,textTransform:'uppercase'},
@@ -614,17 +624,17 @@ export default function App() {
 
     // Buttons
     btnPrimary: {width:'100%',padding:'15px',borderRadius:12,border:'none',background:'#0f172a',color:'#fff',fontSize:15,fontWeight:700,cursor:'pointer',marginTop:4},
-    btnSecondary: {padding:'10px 18px',borderRadius:10,border:'1.5px solid #e2e8f0',background:'#fff',color:'#0f172a',fontSize:13,fontWeight:600,cursor:'pointer'},
+    btnSecondary: {padding:'10px 18px',borderRadius:10,border:darkMode?'1.5px solid #30363d':'1.5px solid #e2e8f0',background:darkMode?'#161b27':'#fff',color:darkMode?'#e6edf3':'#0f172a',fontSize:13,fontWeight:600,cursor:'pointer'},
     btnDanger: {padding:'8px 14px',borderRadius:8,border:'1px solid #fecaca',background:'#fef2f2',color:'#dc2626',fontSize:12,fontWeight:600,cursor:'pointer'},
     btnGhost: {padding:'10px 18px',borderRadius:10,border:'1.5px dashed #e2e8f0',background:'transparent',color:'#94a3b8',fontSize:13,fontWeight:600,cursor:'pointer',width:'100%',marginTop:4},
 
     // Convert box
-    convertBox: {background:'#faf5ff',border:'1px solid #e9d5ff',borderRadius:12,padding:'14px 16px',marginBottom:14},
+    convertBox: {background:darkMode?'#1a1f35':'#faf5ff',border:darkMode?'1px solid #3d2c8d':'1px solid #e9d5ff',borderRadius:12,padding:'14px 16px',marginBottom:14},
 
     // Table
     table: {width:'100%',borderCollapse:'collapse',fontSize:14},
-    th: {background:'#f8faff',padding:'12px 14px',textAlign:'left',fontWeight:700,fontSize:12,color:'#64748b',letterSpacing:'0.05em',textTransform:'uppercase',borderBottom:'1px solid #e2e8f0'},
-    td: {padding:'13px 14px',borderBottom:'1px solid #f1f5f9',color:'#374151',fontSize:14},
+    th: {background:darkMode?'#161b27':'#f8faff',padding:'12px 14px',textAlign:'left',fontWeight:700,fontSize:12,color:'#64748b',letterSpacing:'0.05em',textTransform:'uppercase',borderBottom:'1px solid #e2e8f0'},
+    td: {padding:'13px 14px',borderBottom:darkMode?'1px solid #30363d':'1px solid #f1f5f9',color:darkMode?'#c9d1d9':'#374151',fontSize:14},
 
     // Invoice box
     invoiceBox: {background:'#f8faff',border:'1px solid #e2e8f0',borderRadius:10,padding:'14px',fontFamily:'monospace',fontSize:12,wordBreak:'break-all',marginTop:12,color:'#374151'},
@@ -974,7 +984,7 @@ export default function App() {
                         <div key={i} style={C.histRow}>
                           <div style={C.histIcon}>↑</div>
                           <div style={{flex:1}}>
-                            <div style={{fontWeight:700,color:'#0f172a',fontSize:14}}>{FLAG[p.country]||''} {p.country||'Transfer'}</div>
+                            <div style={{fontWeight:700,color:darkMode?'#e6edf3':'#0f172a',fontSize:14}}>{FLAG[p.country]||''} {p.country||'Transfer'}</div>
                             <div style={{fontSize:12,color:'#94a3b8',fontFamily:'monospace',marginTop:2}}>{short(p.recipient)}</div>
                           </div>
                           <div style={{textAlign:'right'}}>
