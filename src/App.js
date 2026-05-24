@@ -334,7 +334,10 @@ export default function App() {
       awaitReceipt(provider, tx.hash).then(r => {
         if (r) console.log('Invoice confirmed on-chain:', predictedId);
       });
-    } catch(e) { setStatus({type:'error',msg:e.reason||e.message||'Failed'}); }
+    } catch(e) { 
+      console.error('createInvoice error:', e);
+      setStatus({type:'error',msg:e.reason||e.shortMessage||e.message||JSON.stringify(e)}); 
+    }
     finally { setLoading(false); }
   };
 
