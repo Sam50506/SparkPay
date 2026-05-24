@@ -314,34 +314,24 @@ export default function App() {
     try {
       const {remit} = getC();
       const amount = ethers.parseUnits(invAmt, 6);
-      const tx = await remit.createInvoice(invPayer, amount, invDesc, invCtry, {gasLimit:300000});
-      setStatus({type:'info',msg:'Confirming… (this takes ~15s)'});
+      // Get the invoice ID via staticCall BEFORE sending - this is the correct approach
+      // staticCall simulates the tx locally and returns the exact ID the contract will store
+      const predictedId = await remit.createInvoice.staticCall(invPayer, amount, invDesc, invCtry);
+      // Send the actual transaction
+      const tx = await remit.createInvoice(invPayer, amount, invDesc, invCtry, {gasLimit:500000});
+      setStatus({type:'info',msg:'Confirming on-chain…'});
+      // Wait for receipt to confirm it succeeded
       const receipt = await awaitReceipt(provider, tx.hash);
-      // Parse the real invoice ID from the InvoiceCreated event in the receipt
-      let realId = null;
-      if (receipt && receipt.logs) {
-        const iface = new ethers.Interface([
-          'event InvoiceCreated(bytes32 indexed invoiceId, address indexed creator, address indexed payer, uint256 amount)'
-        ]);
-        for (const log of receipt.logs) {
-          try {
-            const parsed = iface.parseLog(log);
-            if (parsed && parsed.name === 'InvoiceCreated') {
-              realId = parsed.args.invoiceId;
-              break;
-            }
-          } catch {}
-        }
+      if (!receipt) {
+        // Tx submitted but receipt timed out - still show the ID
+        setStatus({type:'warning',msg:'Transaction submitted. Use the ID below (may take a moment to confirm).'});
+      } else {
+        setStatus({type:'success',msg:'Invoice created!'});
       }
-      // Fallback: use staticCall prediction if event parsing fails
-      if (!realId) {
-        try { realId = await remit.createInvoice.staticCall(invPayer, amount, invDesc, invCtry); }
-        catch { realId = tx.hash; } // last resort
-      }
-      setInvId(realId);
+      // predictedId from staticCall IS the correct ID - it's deterministic
+      setInvId(predictedId);
       const savedInvs = ls('arc_invoices',[]);
-      lsSave('arc_invoices',[{id:realId,payer:invPayer,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now()},...savedInvs.slice(0,49)]);
-      setStatus({type:'success',msg:'Invoice created!'});
+      lsSave('arc_invoices',[{id:predictedId,payer:invPayer,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now()},...savedInvs.slice(0,49)]);
       setInvPayer(''); setInvAmt(''); setInvDesc('');
     } catch(e) { setStatus({type:'error',msg:e.reason||e.message||'Failed'}); }
     finally { setLoading(false); }
@@ -350,22 +340,37 @@ export default function App() {
   // ── PAY INVOICE ────────────────────────────────────────────────────────────
   const handlePayInv = async () => {
     if (!signer||!payId) { setStatus({type:'error',msg:'Enter invoice ID'}); return; }
+    // Validate invoice ID format - must be bytes32 (66 chars with 0x)
+    let id = payId.trim().replace(/\s+/g,'');
+    if (!id.startsWith('0x')) id = '0x' + id;
+    // Pad to bytes32 if needed
+    const hexPart = id.slice(2);
+    if (hexPart.length < 64) {
+      id = '0x' + hexPart.padEnd(64, '0');
+    }
+    if (id.length !== 66) {
+      setStatus({type:'error',msg:`Invalid invoice ID length (${id.length} chars, need 66)`}); return;
+    }
     setLoading(true); setStatus({type:'info',msg:'Looking up invoice…'});
     try {
       const {remit,usdc} = getC();
-      let id = payId.trim().replace(/\s+/g,''); if (!id.startsWith('0x')) id='0x'+id; id = id.toLowerCase();
       const inv = await remit.invoices(id);
-      if (inv.creator===ethers.ZeroAddress) { setStatus({type:'error',msg:'Invoice not found'}); return; }
+      if (!inv || inv.creator===ethers.ZeroAddress) {
+        setStatus({type:'error',msg:'Invoice not found. Check the ID and make sure the invoice was created on this contract.'});
+        return;
+      }
       if (inv.paid) { setStatus({type:'error',msg:'Already paid'}); return; }
       setPayDet({creator:inv.creator,amount:inv.amount,description:inv.description,country:inv.country});
       const allowance = await usdc.allowance(address, REMIT_ADDR);
       if (allowance < inv.amount) {
         setStatus({type:'info',msg:'Approving USDC…'});
         const aTx = await usdc.approve(REMIT_ADDR, inv.amount, {gasLimit:300000});
+        setStatus({type:'info',msg:'Waiting for approval…'});
         await awaitReceipt(provider, aTx.hash);
       }
-      setStatus({type:'info',msg:'Paying…'});
+      setStatus({type:'info',msg:'Paying invoice…'});
       const tx = await remit.payInvoice(USDC_ADDR, id, {gasLimit:300000});
+      setStatus({type:'info',msg:'Confirming payment…'});
       await awaitReceipt(provider, tx.hash);
       setStatus({type:'success',msg:`✓ Paid ${fmtUsdc(inv.amount)} USDC`});
       setPayId(''); setPayDet(null); refreshBal();
