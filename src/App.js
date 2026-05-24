@@ -274,14 +274,15 @@ export default function App() {
   const handleSend = async () => {
     if (!signer||!sendTo||!sendAmt) { setStatus({type:'error',msg:'Fill all fields'}); return; }
     if (!ethers.isAddress(sendTo))  { setStatus({type:'error',msg:'Invalid address'}); return; }
+    const sendToNorm = ethers.getAddress(sendTo.trim().toLowerCase());
     const amt = parseFloat(sendAmt);
     if (isNaN(amt)||amt<=0)         { setStatus({type:'error',msg:'Invalid amount'}); return; }
     setLoading(true); setStatus({type:'info',msg:'Sending USDC…'});
     try {
       const value = ethers.parseUnits(sendAmt, 18); // native = 18 dec
-      const tx = await signer.sendTransaction({ to: sendTo, value, gasLimit: 21000, gasPrice: ethers.parseUnits("2","gwei") });
+      const tx = await signer.sendTransaction({ to: sendToNorm, value, gasLimit: 21000, gasPrice: ethers.parseUnits("2","gwei") });
       // Save to history immediately — don't wait for receipt
-      const rec = { hash:tx.hash, recipient:sendTo, amount:amt, country:sendCtry, timestamp:Math.floor(Date.now()/1000), status:'pending' };
+      const rec = { hash:tx.hash, recipient:sendToNorm, amount:amt, country:sendCtry, timestamp:Math.floor(Date.now()/1000), status:'pending' };
       setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
       setStatus({type:'success',msg:`✓ Sent ${sendAmt} USDC → ${short(sendTo)}`});
       setSendTo(''); setSendAmt('');
@@ -317,14 +318,16 @@ export default function App() {
     try {
       const {remit} = getC();
       const amount = ethers.parseUnits(invAmt, 6);
+      // Normalize address to avoid checksum errors
+      const payerAddr = ethers.getAddress(invPayer.trim().toLowerCase());
       // Step 1: Get deterministic ID via staticCall (instant, no waiting)
-      const predictedId = await remit.createInvoice.staticCall(invPayer, amount, invDesc, invCtry);
+      const predictedId = await remit.createInvoice.staticCall(payerAddr, amount, invDesc, invCtry);
       // Step 2: Send transaction
-      const tx = await remit.createInvoice(invPayer, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("2","gwei")});
+      const tx = await remit.createInvoice(payerAddr, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("2","gwei")});
       // Step 3: Show ID IMMEDIATELY - don't wait for receipt
       setInvId(predictedId);
       const savedInvs = ls('arc_invoices',[]);
-      lsSave('arc_invoices',[{id:predictedId,payer:invPayer,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now(),txHash:tx.hash},...savedInvs.slice(0,49)]);
+      lsSave('arc_invoices',[{id:predictedId,payer:payerAddr,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now(),txHash:tx.hash},...savedInvs.slice(0,49)]);
       setStatus({type:'success',msg:'✓ Invoice created! Share this ID with your client. TX confirming in background…'});
       setInvPayer(''); setInvAmt(''); setInvDesc('');
       // Confirm in background silently
