@@ -314,11 +314,33 @@ export default function App() {
     try {
       const {remit} = getC();
       const amount = ethers.parseUnits(invAmt, 6);
-      const id = await remit.createInvoice.staticCall(invPayer, amount, invDesc, invCtry);
       const tx = await remit.createInvoice(invPayer, amount, invDesc, invCtry, {gasLimit:300000});
-      setStatus({type:'info',msg:'Confirming…'});
-      await awaitReceipt(provider, tx.hash);
-      setInvId(id);
+      setStatus({type:'info',msg:'Confirming… (this takes ~15s)'});
+      const receipt = await awaitReceipt(provider, tx.hash);
+      // Parse the real invoice ID from the InvoiceCreated event in the receipt
+      let realId = null;
+      if (receipt && receipt.logs) {
+        const iface = new ethers.Interface([
+          'event InvoiceCreated(bytes32 indexed invoiceId, address indexed creator, address indexed payer, uint256 amount)'
+        ]);
+        for (const log of receipt.logs) {
+          try {
+            const parsed = iface.parseLog(log);
+            if (parsed && parsed.name === 'InvoiceCreated') {
+              realId = parsed.args.invoiceId;
+              break;
+            }
+          } catch {}
+        }
+      }
+      // Fallback: use staticCall prediction if event parsing fails
+      if (!realId) {
+        try { realId = await remit.createInvoice.staticCall(invPayer, amount, invDesc, invCtry); }
+        catch { realId = tx.hash; } // last resort
+      }
+      setInvId(realId);
+      const savedInvs = ls('arc_invoices',[]);
+      lsSave('arc_invoices',[{id:realId,payer:invPayer,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now()},...savedInvs.slice(0,49)]);
       setStatus({type:'success',msg:'Invoice created!'});
       setInvPayer(''); setInvAmt(''); setInvDesc('');
     } catch(e) { setStatus({type:'error',msg:e.reason||e.message||'Failed'}); }
@@ -331,7 +353,7 @@ export default function App() {
     setLoading(true); setStatus({type:'info',msg:'Looking up invoice…'});
     try {
       const {remit,usdc} = getC();
-      let id = payId.trim(); if (!id.startsWith('0x')) id='0x'+id;
+      let id = payId.trim().replace(/\s+/g,''); if (!id.startsWith('0x')) id='0x'+id; id = id.toLowerCase();
       const inv = await remit.invoices(id);
       if (inv.creator===ethers.ZeroAddress) { setStatus({type:'error',msg:'Invoice not found'}); return; }
       if (inv.paid) { setStatus({type:'error',msg:'Already paid'}); return; }
@@ -582,9 +604,27 @@ export default function App() {
             <button style={{...S.btnP,opacity:loading?0.6:1}} onClick={handleCreateInv} disabled={loading}>{loading?'Creating…':'Create Invoice'}</button>
             {invId&&(
               <div>
-                <div style={{marginTop:16,fontSize:14,fontWeight:700,color:'#166534'}}>✓ Invoice created! Share this ID:</div>
+                <div style={{marginTop:16,fontSize:14,fontWeight:700,color:'#166534'}}>✓ Invoice created!</div>
                 <div style={S.invB}>{invId}</div>
-                <button style={{...S.btnS,marginTop:10}} onClick={()=>navigator.clipboard?.writeText(invId)}>Copy ID</button>
+                <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
+                  <button style={S.btnS} onClick={()=>navigator.clipboard?.writeText(invId)}>Copy ID</button>
+                  <button style={{...S.btnP,width:'auto',padding:'9px 16px',marginTop:0}} onClick={()=>{setPayId(invId);setTab('pay');}}>Pay this Invoice →</button>
+                </div>
+              </div>
+            )}
+            {/* Saved invoices */}
+            {ls('arc_invoices',[]).length>0&&(
+              <div style={{marginTop:20}}>
+                <div style={{fontSize:13,fontWeight:700,color:txt2,marginBottom:10,letterSpacing:'0.05em',textTransform:'uppercase'}}>Recent Invoices</div>
+                {ls('arc_invoices',[]).slice(0,5).map((inv,i)=>(
+                  <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${bdr}`}}>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:600,color:txt}}>${inv.amount} USDC · {inv.desc?.slice(0,30)}</div>
+                      <div style={{fontSize:11,fontFamily:'monospace',color:txt2}}>{inv.id?.slice(0,16)}…</div>
+                    </div>
+                    <button style={{...S.btnS,fontSize:12,padding:'6px 10px'}} onClick={()=>{setPayId(inv.id);setTab('pay');}}>Pay →</button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
