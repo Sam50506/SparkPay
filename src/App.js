@@ -13,7 +13,7 @@ document.head.appendChild(_f);
 const ARC_CHAIN_ID     = 5042002;
 const ARC_CHAIN_HEX    = '0x4CEF52';
 const ARC_RPC          = 'https://rpc.testnet.arc.network';
-const REMIT_ADDR       = '0x8c4C0C64Ea3bE42b905486d25BBe30aa49F68118';
+const REMIT_ADDR       = '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44';
 const USDC_ADDR        = '0x3600000000000000000000000000000000000000';
 const WC_ID            = '8bb24a433758c9a403057e2e3f2c371b';
 
@@ -23,11 +23,13 @@ const CURRENCY = {Pakistan:'PKR',Nigeria:'NGN',India:'INR',Philippines:'PHP',Ban
 
 // ─── ABIs ─────────────────────────────────────────────────────────────────────
 const REMIT_ABI = [
-  {inputs:[{name:'token',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'}],name:'sendMoney',outputs:[],stateMutability:'nonpayable',type:'function'},
   {inputs:[{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'}],name:'createInvoice',outputs:[{name:'',type:'bytes32'}],stateMutability:'nonpayable',type:'function'},
   {inputs:[{name:'token',type:'address'},{name:'invoiceId',type:'bytes32'}],name:'payInvoice',outputs:[],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:'user',type:'address'}],name:'getPayments',outputs:[{components:[{name:'sender',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'},{name:'timestamp',type:'uint256'}],name:'',type:'tuple[]'}],stateMutability:'view',type:'function'},
-  {inputs:[{name:'',type:'bytes32'}],name:'invoices',outputs:[{name:'creator',type:'address'},{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'},{name:'paid',type:'bool'},{name:'timestamp',type:'uint256'}],stateMutability:'view',type:'function'}
+  {inputs:[{name:'token',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'}],name:'sendMoney',outputs:[],stateMutability:'nonpayable',type:'function'},
+  {inputs:[{name:'user',type:'address'}],name:'getPayments',outputs:[{components:[{name:'sender',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'},{name:'timestamp',type:'uint256'},{name:'invoiceId',type:'bytes32'}],name:'',type:'tuple[]'}],stateMutability:'view',type:'function'},
+  {inputs:[{name:'user',type:'address'}],name:'getUserInvoices',outputs:[{name:'',type:'bytes32[]'}],stateMutability:'view',type:'function'},
+  {inputs:[{name:'',type:'bytes32'}],name:'invoices',outputs:[{name:'creator',type:'address'},{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'},{name:'paid',type:'bool'},{name:'createdAt',type:'uint256'},{name:'nonce',type:'uint256'}],stateMutability:'view',type:'function'},
+  {inputs:[{name:'',type:'address'}],name:'nonces',outputs:[{name:'',type:'uint256'}],stateMutability:'view',type:'function'}
 ];
 const ERC20_ABI = [
   'function balanceOf(address) view returns (uint256)',
