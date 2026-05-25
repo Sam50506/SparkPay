@@ -9,6 +9,38 @@ _f.rel = 'stylesheet';
 _f.href = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
 document.head.appendChild(_f);
 
+// ─── Wait for MetaMask to be ready (fixes Mises browser conflict) ─────────────
+function getProvider() {
+  return new Promise((resolve) => {
+    // If ethereum already exists and has MetaMask
+    if (window.ethereum) {
+      if (window.ethereum.providers?.length) {
+        const mm = window.ethereum.providers.find(p => p.isMetaMask);
+        if (mm) return resolve(mm);
+      }
+      if (window.ethereum.isMetaMask) return resolve(window.ethereum);
+      return resolve(window.ethereum);
+    }
+    // Wait for ethereum to be injected (up to 3 seconds)
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (window.ethereum) {
+        clearInterval(interval);
+        if (window.ethereum.providers?.length) {
+          const mm = window.ethereum.providers.find(p => p.isMetaMask);
+          return resolve(mm || window.ethereum.providers[0]);
+        }
+        return resolve(window.ethereum);
+      }
+      if (attempts > 30) {
+        clearInterval(interval);
+        resolve(null);
+      }
+    }, 100);
+  });
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ARC_CHAIN_ID     = 5042002;
 const ARC_CHAIN_HEX    = '0x4CEF52';
@@ -243,11 +275,13 @@ export default function App() {
   };
 
   const connectBrowser = async (type, provObj) => {
-    const eth = provObj || window.ethereum;
-    if (!eth) { setStatus({type:'error',msg:'No wallet found. Use a Web3 browser.'}); return; }
     try {
+      // Use passed provider or detect automatically
+      // getProvider() handles Mises browser conflict by waiting for MetaMask
+      const eth = provObj || await getProvider();
+      if (!eth) { setStatus({type:'error',msg:'No wallet found. Install MetaMask.'}); return; }
+      await eth.request({method:'eth_requestAccounts'});
       const bp = new ethers.BrowserProvider(eth, {name:'Arc Testnet',chainId:ARC_CHAIN_ID});
-      await bp.send('eth_requestAccounts', []);
       await ensureArc(eth);
       let name = '🌐 Browser Wallet';
       if (eth.isMetaMask && !eth.isBraveWallet) name = '🦊 MetaMask';
