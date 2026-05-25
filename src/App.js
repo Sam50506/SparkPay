@@ -16,6 +16,21 @@ const ARC_RPC          = 'https://rpc.drpc.testnet.arc.network';
 const REMIT_ADDR       = '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44'; // v2 deployed 2026-05-25
 const USDC_ADDR        = '0x3600000000000000000000000000000000000000';
 const WC_ID            = '8bb24a433758c9a403057e2e3f2c371b';
+const SB_URL           = 'https://iwxwcyuabtasghfmqrpi.supabase.co';
+const SB_KEY           = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3eHdjeXVhYnRhc2doZm1xcnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDcyMzAsImV4cCI6MjA5NTI4MzIzMH0.fFTTD8BNGfcnHV8H3jZuZ4nnyUe_pypjoQYyx6HAKL8';
+
+// Supabase helpers
+const sbFetch = async (path, opts={}) => {
+  const r = await fetch(SB_URL + path, {
+    ...opts,
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...(opts.headers||{}) }
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+};
+const sbInsert = (table, data) => sbFetch('/rest/v1/' + table, { method:'POST', body: JSON.stringify(data) });
+const sbSelect = (table, query) => sbFetch('/rest/v1/' + table + '?' + query);
+const sbUpdate = (table, query, data) => sbFetch('/rest/v1/' + table + '?' + query, { method:'PATCH', body: JSON.stringify(data) });
 
 const COUNTRIES = ['Pakistan','Nigeria','India','Philippines','Bangladesh','Mexico','Brazil','Indonesia','Vietnam','Ghana','Kenya','Egypt','Turkey','Argentina','Colombia','Ukraine','Ethiopia','Tanzania','Uganda','Nepal'];
 const FLAG = {Pakistan:'🇵🇰',Nigeria:'🇳🇬',India:'🇮🇳',Philippines:'🇵🇭',Bangladesh:'🇧🇩',Mexico:'🇲🇽',Brazil:'🇧🇷',Indonesia:'🇮🇩',Vietnam:'🇻🇳',Ghana:'🇬🇭',Kenya:'🇰🇪',Egypt:'🇪🇬',Turkey:'🇹🇷',Argentina:'🇦🇷',Colombia:'🇨🇴',Ukraine:'🇺🇦',Ethiopia:'🇪🇹',Tanzania:'🇹🇿',Uganda:'🇺🇬',Nepal:'🇳🇵'};
@@ -162,6 +177,25 @@ export default function App() {
   useEffect(() => lsSave('arc_txhistory',txns),      [txns]);
   useEffect(() => lsSave('arc_dm',       dm),        [dm]);
   useEffect(() => lsSave('arc_ctry',     defCtry),   [defCtry]);
+
+  // Handle incoming invoice link (?inv=base64data)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const invParam = params.get('inv');
+    if (invParam) {
+      try {
+        const inv = JSON.parse(atob(invParam));
+        // Save to localStorage so payer can pay it
+        const saved = ls('arc_invoices',[]);
+        if (!saved.find(i=>i.id===inv.id)) {
+          lsSave('arc_invoices',[inv,...saved]);
+        }
+        setPayId(inv.id);
+        setTab('pay');
+        setStatus({type:'info',msg:`Invoice from ${short(inv.creator)}: ${inv.amount} USDC for "${inv.desc}"`});
+      } catch {}
+    }
+  }, []);
 
   // rates
   useEffect(() => {
@@ -313,33 +347,30 @@ export default function App() {
 
   // ── INVOICE ────────────────────────────────────────────────────────────────
   const handleCreateInv = async () => {
-    if (!signer||!invPayer||!invAmt||!invDesc) { setStatus({type:'error',msg:'Fill all fields'}); return; }
+    if (!address||!invPayer||!invAmt||!invDesc) { setStatus({type:'error',msg:'Fill all fields and connect wallet'}); return; }
     setLoading(true); setStatus({type:'info',msg:'Creating invoice…'});
     try {
-      const {remit} = getC();
-      const amount = ethers.parseUnits(invAmt, 6);
-      // Normalize address to avoid checksum errors
-      const payerAddr = ethers.getAddress(invPayer.trim().toLowerCase());
-      // Step 1: Get deterministic ID via staticCall (instant, no waiting)
-      const predictedId = await remit.createInvoice.staticCall(payerAddr, amount, invDesc, invCtry);
-      // Step 2: Send transaction
-      const tx = await remit.createInvoice(payerAddr, amount, invDesc, invCtry, {gasLimit:500000, gasPrice: ethers.parseUnits("50","gwei")});
-      // Show ID immediately so user can see it
-      setInvId(predictedId);
-      const savedInvs = ls('arc_invoices',[]);
-      lsSave('arc_invoices',[{id:predictedId,payer:payerAddr,amount:invAmt,desc:invDesc,country:invCtry,ts:Date.now(),txHash:tx.hash},...savedInvs.slice(0,49)]);
-      setStatus({type:'info',msg:'⏳ Confirming on-chain… do not pay yet.'});
-      // Wait for actual confirmation before allowing payment
-      const receipt = await awaitReceipt(provider, tx.hash, 60000);
-      if (receipt && receipt.status === 1) {
-        setStatus({type:'success',msg:'✓ Invoice confirmed! Share this ID with your client — they can now pay it.'});
-      } else {
-        setStatus({type:'warning',msg:'⚠️ TX submitted but confirmation timed out. Wait 1-2 min before paying.'});
-      }
+      const id = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map(b => b.toString(16).padStart(2,'0')).join('');
+      const invoice = {
+        id,
+        creator: address,
+        payer: invPayer.trim(),
+        amount: invAmt,
+        description: invDesc,
+        country: invCtry,
+        paid: false
+      };
+      // Save to Supabase — works across all devices
+      await sbInsert('invoices', invoice);
+      // Also save locally as cache
+      const saved = ls('arc_invoices',[]);
+      lsSave('arc_invoices',[{...invoice,desc:invDesc,ts:Math.floor(Date.now()/1000)},...saved.slice(0,99)]);
+      setInvId(id);
+      setStatus({type:'success',msg:'✓ Invoice created! Share this ID with your client — they can pay from any device.'});
       setInvPayer(''); setInvAmt(''); setInvDesc('');
-    } catch(e) { 
-      console.error('createInvoice error:', e);
-      setStatus({type:'error',msg:e.reason||e.shortMessage||e.message||JSON.stringify(e)}); 
+    } catch(e) {
+      setStatus({type:'error',msg:'Failed to create invoice: ' + e.message});
     }
     finally { setLoading(false); }
   };
@@ -347,46 +378,32 @@ export default function App() {
   // ── PAY INVOICE ────────────────────────────────────────────────────────────
   const handlePayInv = async () => {
     if (!signer||!payId) { setStatus({type:'error',msg:'Enter invoice ID'}); return; }
-    let id = payId.trim().replace(/\s+/g,'');
-    if (!id.startsWith('0x')) id = '0x' + id;
-    if (id.length !== 66) {
-      setStatus({type:'error',msg:`Invalid ID - must be 66 characters, yours is ${id.length}`}); return;
-    }
+    const id = payId.trim();
     setLoading(true); setStatus({type:'info',msg:'Looking up invoice…'});
     try {
-      const {remit,usdc} = getC();
-      // Retry up to 10 times with 3s delay - invoice tx may still be confirming
-      let inv = null;
-      for (let i = 0; i < 10; i++) {
-        const result = await remit.invoices(id);
-        if (result && result.creator !== ethers.ZeroAddress) {
-          inv = result;
-          break;
-        }
-        if (i < 9) {
-          setStatus({type:'info',msg:`Waiting for invoice to confirm on-chain… (${i+1}/10)`});
-          await new Promise(r => setTimeout(r, 3000));
-        }
-      }
-      if (!inv || inv.creator===ethers.ZeroAddress) {
-        setStatus({type:'error',msg:'Invoice not found after 30s. The creation tx may have failed. Please create a new invoice.'});
-        return;
-      }
-      if (inv.paid) { setStatus({type:'error',msg:'Already paid'}); return; }
-      setPayDet({creator:inv.creator,amount:inv.amount,description:inv.description,country:inv.country});
-      const allowance = await usdc.allowance(address, REMIT_ADDR);
-      if (allowance < inv.amount) {
-        setStatus({type:'info',msg:'Approving USDC…'});
-        const aTx = await usdc.approve(REMIT_ADDR, inv.amount, {gasLimit:300000, gasPrice: ethers.parseUnits("50","gwei")});
-        setStatus({type:'info',msg:'Waiting for approval…'});
-        await awaitReceipt(provider, aTx.hash);
-      }
-      setStatus({type:'info',msg:'Paying invoice…'});
-      const tx = await remit.payInvoice(USDC_ADDR, id, {gasLimit:300000, gasPrice: ethers.parseUnits("50","gwei")});
-      setStatus({type:'info',msg:'Confirming payment…'});
-      await awaitReceipt(provider, tx.hash);
-      setStatus({type:'success',msg:`✓ Paid ${fmtUsdc(inv.amount)} USDC`});
-      setPayId(''); setPayDet(null); refreshBal();
+      // Fetch invoice from Supabase
+      const rows = await sbSelect('invoices', `id=eq.${id}&select=*`);
+      if (!rows || rows.length === 0) { setStatus({type:'error',msg:'Invoice not found.'}); setLoading(false); return; }
+      const inv = rows[0];
+      if (inv.paid) { setStatus({type:'error',msg:'This invoice has already been paid.'}); setLoading(false); return; }
+      setPayDet({creator:inv.creator, amount:ethers.parseUnits(inv.amount,6), description:inv.description, country:inv.country});
+      setStatus({type:'info',msg:`Invoice found: ${inv.amount} USDC for "${inv.description}". Sending payment…`});
+      // Pay via direct native USDC transfer
+      const value = ethers.parseUnits(inv.amount, 18);
+      const tx = await signer.sendTransaction({
+        to: inv.creator,
+        value,
+        gasLimit: 21000,
+        gasPrice: ethers.parseUnits('50','gwei')
+      });
+      // Mark as paid in Supabase
+      await sbUpdate('invoices', `id=eq.${id}`, { paid: true, paid_by: address, paid_tx: tx.hash });
+      // Save to tx history
+      const rec = {hash:tx.hash, recipient:inv.creator, amount:inv.amount, country:inv.country, timestamp:Math.floor(Date.now()/1000), status:'submitted'};
+      setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
+      setStatus({type:'success',msg:`✓ Paid ${inv.amount} USDC! TX: ${tx.hash.slice(0,10)}…`});
+      setPayId(''); setPayDet(null);
+      setTimeout(refreshBal, 5000);
     } catch(e) { setStatus({type:'error',msg:e.reason||e.message||'Failed'}); }
     finally { setLoading(false); }
   };
