@@ -6,7 +6,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 // ─── Google Fonts ─────────────────────────────────────────────────────────────
 const _f = document.createElement('link');
 _f.rel = 'stylesheet';
-_f.href = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
+_f.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
 document.head.appendChild(_f);
 
 // ─── Provider detection - works in Mises, MetaMask, Brave, all browsers ───────
@@ -202,7 +202,18 @@ export default function App() {
   const [payId,  setPayId]  = useState('');
   const [payDet, setPayDet] = useState(null);
   // history (localStorage + contract)
-  const [txns,   setTxns]   = useState(() => ls('arc_txhistory',[]));
+  const [txns,   setTxns]   = useState(() => {
+    const saved = ls('arc_txhistory',[]);
+    // Add demo data if empty (for presentation)
+    if (saved.length === 0) {
+      return [
+        {hash:'0xdemo1',recipient:'0xda526902d606493403a0e7048790280cfbb8ee56',amount:50,country:'Pakistan',timestamp:Math.floor(Date.now()/1000)-86400,status:'confirmed'},
+        {hash:'0xdemo2',recipient:'0x742d35Cc6634C0532925a3b8D4C9C6A21B2D4C1',amount:25,country:'India',timestamp:Math.floor(Date.now()/1000)-172800,status:'confirmed'},
+        {hash:'0xdemo3',recipient:'0x8ba1f109551bD432803012645Ac136ddd64DBA72',amount:100,country:'Nigeria',timestamp:Math.floor(Date.now()/1000)-259200,status:'confirmed'},
+      ];
+    }
+    return saved;
+  });
   const [contractTxns, setContractTxns] = useState([]);
   // contacts
   const [contacts, setContacts] = useState(() => ls('arc_contacts',[]));
@@ -543,34 +554,75 @@ export default function App() {
 
   // ─── LANDING ───────────────────────────────────────────────────────────────
   if (!address) return (
-    <div style={{...S.root,display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:24,textAlign:'center'}}>
-      <div style={{maxWidth:420,width:'100%'}}>
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,background:dm?'rgba(255,255,255,0.06)':'rgba(255,255,255,0.8)',border:`1px solid ${bdr}`,borderRadius:999,padding:'6px 16px',marginBottom:36,backdropFilter:'blur(4px)'}}>
-          <span style={{width:8,height:8,borderRadius:'50%',background:acc,display:'inline-block'}}/>
-          <span style={{fontSize:12,fontWeight:700,color:acc,letterSpacing:'0.1em'}}>ARC TESTNET · LIVE</span>
+    <div style={{...S.root,display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'24px 20px'}}>
+      <div style={{maxWidth:400,width:'100%'}}>
+        {/* Logo */}
+        <div style={{textAlign:'center',marginBottom:40}}>
+          <div style={{fontSize:28,fontWeight:800,color:txt,letterSpacing:'-1px',marginBottom:4}}>
+            Arc<span style={{color:acc}}>Pay</span>
+          </div>
+          <div style={{display:'inline-flex',alignItems:'center',gap:6,background:bg3,border:`1px solid ${bdr}`,borderRadius:6,padding:'4px 10px'}}>
+            <span style={{width:6,height:6,borderRadius:'50%',background:'#22c55e',display:'inline-block'}}/>
+            <span style={{fontSize:11,fontWeight:600,color:txt2,letterSpacing:'0.08em'}}>TESTNET</span>
+          </div>
         </div>
-        <h1 style={{fontSize:'clamp(36px,9vw,56px)',fontWeight:800,fontFamily:'"Bricolage Grotesque",sans-serif',lineHeight:1.08,margin:'0 0 20px',color:txt,letterSpacing:'-1.5px'}}>
-          Send Money<br/><span style={{color:acc}}>Globally.</span><br/>Instantly.
-        </h1>
-        <p style={{fontSize:16,color:txt2,margin:'0 0 40px',lineHeight:1.6}}>Transfer USDC across borders in under a second.<br/>Zero hidden fees. Fully on-chain.</p>
-        <div style={{display:'flex',gap:0,marginBottom:40,border:`1px solid ${bdr}`,borderRadius:14,overflow:'hidden',background:bg2}}>
-          {[['~$0.007','PER TRANSFER'],['<1S','SETTLEMENT'],['20+','COUNTRIES']].map(([v,l],i)=>(
-            <div key={i} style={{padding:'18px 24px',borderRight:i<2?`1px solid ${bdr}`:'none',flex:1}}>
-              <div style={{fontSize:20,fontWeight:900,fontFamily:'"Bricolage Grotesque",sans-serif',color:txt,letterSpacing:'-0.5px'}}>{v}</div>
-              <div style={{fontSize:10,fontWeight:700,color:txt2,letterSpacing:'0.1em',marginTop:3}}>{l}</div>
+
+        {/* Hero */}
+        <div style={{textAlign:'center',marginBottom:32}}>
+          <h1 style={{fontSize:'clamp(32px,8vw,48px)',fontWeight:800,lineHeight:1.1,margin:'0 0 12px',color:txt,letterSpacing:'-1px'}}>
+            Send money<br/><span style={{color:acc}}>globally</span>, instantly.
+          </h1>
+          <p style={{fontSize:15,color:txt2,lineHeight:1.6,margin:0}}>
+            Transfer USDC across borders in under a second. Zero hidden fees.
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:28}}>
+          {[['~$0.007','Per transfer'],['< 1s','Settlement'],['20+','Countries']].map(([v,l],i)=>(
+            <div key={i} style={{background:bg2,border:`1px solid ${bdr}`,borderRadius:10,padding:'12px 8px',textAlign:'center'}}>
+              <div style={{fontSize:16,fontWeight:700,color:txt}}>{v}</div>
+              <div style={{fontSize:11,color:txt2,marginTop:2}}>{l}</div>
             </div>
           ))}
         </div>
+
+        {/* Connect */}
         {!showPicker ? (
-          <div style={{display:'flex',flexDirection:'column',gap:12}}>
-            <button onClick={()=>setShowPicker(true)} style={{...S.btnP,fontSize:16,padding:'16px 24px',borderRadius:14}}>⬡ Connect Wallet</button>
-            <button onClick={connectWC} style={{...S.btnS,fontSize:16,padding:'16px 24px',borderRadius:14,width:'100%'}}>📱 WalletConnect</button>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            <button onClick={()=>setShowPicker(true)} style={{...S.btnP,padding:'13px',fontSize:15,borderRadius:10}}>
+              Connect Wallet
+            </button>
+            <button onClick={connectWC} style={{...S.btnS,padding:'13px',fontSize:15,borderRadius:10,width:'100%',textAlign:'center'}}>
+              WalletConnect
+            </button>
           </div>
         ) : (
           <WalletPicker dm={dm} onPick={(t,p)=>{setShowPicker(false);connectBrowser(t,p);}} onClose={()=>setShowPicker(false)}/>
         )}
-        {status && <Toast s={status}/>}
-        <p style={{marginTop:20,fontSize:13,color:txt2}}>🔒 Non-custodial · Your keys, your funds</p>
+
+        {status && <div style={{marginTop:12}}><Toast s={status}/></div>}
+
+        <p style={{textAlign:'center',marginTop:16,fontSize:12,color:txt2}}>
+          Non-custodial · Your keys, your funds
+        </p>
+
+        {/* Feature list */}
+        <div style={{marginTop:32,display:'flex',flexDirection:'column',gap:8}}>
+          {[
+            ['⚡','Instant settlement','Transactions confirm in under 1 second'],
+            ['🔒','Non-custodial','You control your keys and funds always'],
+            ['🌍','Global reach','Send to 20+ countries with live FX rates'],
+          ].map(([icon,title,desc],i)=>(
+            <div key={i} style={{display:'flex',gap:12,alignItems:'flex-start',padding:'12px',background:bg2,border:`1px solid ${bdr}`,borderRadius:10}}>
+              <span style={{fontSize:20,flexShrink:0}}>{icon}</span>
+              <div>
+                <div style={{fontSize:13,fontWeight:600,color:txt}}>{title}</div>
+                <div style={{fontSize:12,color:txt2,marginTop:2}}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -582,9 +634,9 @@ export default function App() {
       <nav style={S.nav}>
         <div style={S.navi}>
           <div style={S.logo}>Arc<span style={{color:acc}}>Pay</span></div>
-          <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
-            <div style={S.pill}>${balance} USDC</div>
-            <div style={{...S.pill,fontFamily:'monospace',fontWeight:500}}>{short(address)}</div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{...S.pill,background:acc+'15',border:`1px solid ${acc}30`,color:acc,fontWeight:600}}>${balance}</div>
+            <div style={{...S.pill,fontFamily:'monospace',fontSize:12}}>{short(address)}</div>
             <button style={S.discB} onClick={doDisconnect}>Disconnect</button>
           </div>
         </div>
