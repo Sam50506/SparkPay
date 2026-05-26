@@ -9,34 +9,40 @@ _f.rel = 'stylesheet';
 _f.href = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
 document.head.appendChild(_f);
 
-// ─── Wait for MetaMask to be ready (fixes Mises browser conflict) ─────────────
+// ─── Provider detection - works in Mises, MetaMask, Brave, all browsers ───────
 function getProvider() {
   return new Promise((resolve) => {
-    // If ethereum already exists and has MetaMask
-    if (window.ethereum) {
-      if (window.ethereum.providers?.length) {
-        const mm = window.ethereum.providers.find(p => p.isMetaMask);
-        if (mm) return resolve(mm);
+    const tryResolve = () => {
+      const { ethereum } = window;
+      if (!ethereum) return null;
+
+      // Multiple providers (e.g. MetaMask + another extension)
+      if (ethereum.providers?.length > 0) {
+        // Prefer MetaMask
+        const mm = ethereum.providers.find(p => p.isMetaMask && !p.isBraveWallet);
+        if (mm) return mm;
+        return ethereum.providers[0];
       }
-      if (window.ethereum.isMetaMask) return resolve(window.ethereum);
-      return resolve(window.ethereum);
-    }
-    // Wait for ethereum to be injected (up to 3 seconds)
+
+      // Mises browser: ethereum exists but may be wrapped by evmAsk
+      // Access the raw provider via _metamask or directly
+      if (ethereum.isMetaMask) return ethereum;
+      if (ethereum._metamask) return ethereum;
+
+      // Generic injected wallet (Mises without MetaMask, Opera, etc)
+      return ethereum;
+    };
+
+    const result = tryResolve();
+    if (result) return resolve(result);
+
+    // Wait up to 3 seconds for wallet to inject
     let attempts = 0;
-    const interval = setInterval(() => {
+    const timer = setInterval(() => {
       attempts++;
-      if (window.ethereum) {
-        clearInterval(interval);
-        if (window.ethereum.providers?.length) {
-          const mm = window.ethereum.providers.find(p => p.isMetaMask);
-          return resolve(mm || window.ethereum.providers[0]);
-        }
-        return resolve(window.ethereum);
-      }
-      if (attempts > 30) {
-        clearInterval(interval);
-        resolve(null);
-      }
+      const r = tryResolve();
+      if (r) { clearInterval(timer); return resolve(r); }
+      if (attempts > 30) { clearInterval(timer); resolve(null); }
     }, 100);
   });
 }
@@ -137,8 +143,12 @@ function WalletPicker({ onPick, onClose, dm }) {
       else if (p.isCoinbaseWallet) label = '🔵 Coinbase Wallet';
       else if (p.isRabby)  label = '👛 Rabby';
       else if (p.isTrust)  label = '💙 Trust Wallet';
+      else label = '🌐 Browser Wallet (Mises/Other)';
       options.push({ type, label, p });
     });
+  } else {
+    // No ethereum found - show install message but still show WC
+    options.push({ type:'install', label:'🦊 Install MetaMask' });
   }
   options.push({ type:'wc', label:'📱 WalletConnect' });
   const bg = dm ? '#1e293b' : '#fff';
