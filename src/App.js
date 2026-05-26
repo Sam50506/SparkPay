@@ -554,8 +554,8 @@ export default function App() {
 
   // ─── LANDING ───────────────────────────────────────────────────────────────
   if (!address) return (
-    <div style={{...S.root,display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'24px 20px'}}>
-      <div style={{maxWidth:400,width:'100%'}}>
+    <div style={{...S.root,display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'40px 24px'}}>
+      <div style={{maxWidth:440,width:'100%'}}>
         {/* Logo */}
         <div style={{textAlign:'center',marginBottom:40}}>
           <div style={{fontSize:28,fontWeight:800,color:txt,letterSpacing:'-1px',marginBottom:4}}>
@@ -569,11 +569,14 @@ export default function App() {
 
         {/* Hero */}
         <div style={{textAlign:'center',marginBottom:32}}>
-          <h1 style={{fontSize:'clamp(32px,8vw,48px)',fontWeight:800,lineHeight:1.1,margin:'0 0 12px',color:txt,letterSpacing:'-1px'}}>
-            Send money<br/><span style={{color:acc}}>globally</span>, instantly.
+          <h1 style={{fontSize:'clamp(30px,6vw,44px)',fontWeight:800,lineHeight:1.1,margin:'0 0 14px',color:txt,letterSpacing:'-1px'}}>
+            The fastest way to send<br/>money across borders
           </h1>
-          <p style={{fontSize:15,color:txt2,lineHeight:1.6,margin:0}}>
-            Transfer USDC across borders in under a second. Zero hidden fees.
+          <p style={{fontSize:15,color:txt2,lineHeight:1.6,margin:'0 0 6px'}}>
+            USDC transfers on Arc — confirmed in under a second.
+          </p>
+          <p style={{fontSize:13,color:txt2,lineHeight:1.5,margin:0}}>
+            No banks. No hidden fees. Fully on-chain.
           </p>
         </div>
 
@@ -607,21 +610,20 @@ export default function App() {
           Non-custodial · Your keys, your funds
         </p>
 
-        {/* Feature list */}
-        <div style={{marginTop:32,display:'flex',flexDirection:'column',gap:8}}>
-          {[
-            ['⚡','Instant settlement','Transactions confirm in under 1 second'],
-            ['🔒','Non-custodial','You control your keys and funds always'],
-            ['🌍','Global reach','Send to 20+ countries with live FX rates'],
-          ].map(([icon,title,desc],i)=>(
-            <div key={i} style={{display:'flex',gap:12,alignItems:'flex-start',padding:'12px',background:bg2,border:`1px solid ${bdr}`,borderRadius:10}}>
-              <span style={{fontSize:20,flexShrink:0}}>{icon}</span>
-              <div>
-                <div style={{fontSize:13,fontWeight:600,color:txt}}>{title}</div>
-                <div style={{fontSize:12,color:txt2,marginTop:2}}>{desc}</div>
+        {/* Clean feature list - no emojis */}
+        <div style={{marginTop:28,borderTop:`1px solid ${bdr}`,paddingTop:24}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:16,textAlign:'center'}}>
+            {[
+              ['Instant','Sub-second finality on Arc'],
+              ['Zero fees','~$0.007 per transfer'],
+              ['Non-custodial','Your keys, your funds'],
+            ].map(([t,d],i)=>(
+              <div key={i}>
+                <div style={{fontSize:13,fontWeight:600,color:txt,marginBottom:3}}>{t}</div>
+                <div style={{fontSize:11,color:txt2,lineHeight:1.4}}>{d}</div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
