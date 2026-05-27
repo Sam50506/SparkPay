@@ -207,36 +207,8 @@ const SplashScreen = ({ onDone }) => {
       <div className="ap-splash-bar-wrap"><div className="ap-splash-bar"/></div>
       <div className="ap-splash-ver">Arc Testnet &nbsp;&middot;&nbsp; Chain 5042002</div>
     </div>
-      </div>}
-    </>
   );
 };
-
-/* ─── Main App ─── */
-
-const SplashScreen = ({ onDone }) => {
-  const [exit, setExit] = useState(false);
-  useEffect(() => {
-    const t1 = setTimeout(() => setExit(true), 2800);
-    const t2 = setTimeout(() => onDone(), 3300);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [onDone]);
-  return (
-    <div className={`ap-splash${exit ? ' exit' : ''}`}>
-      <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',width:96,height:96,animation:'fadeIn .4s ease both'}}>
-        <ArcLogo size={96} animated />
-      </div>
-      <div className="ap-splash-title">ArcPay</div>
-      <div className="ap-splash-sub">Decentralized Remittance Protocol</div>
-      <div className="ap-splash-bar-wrap"><div className="ap-splash-bar"/></div>
-      <div className="ap-splash-ver">Arc Testnet &nbsp;&middot;&nbsp; Chain 5042002</div>
-    </div>
-      </div>}
-    </>
-  );
-};
-
-
 
 // ─── Provider detection - works in Mises, MetaMask, Brave, all browsers ───────
 function getProvider() {
@@ -394,8 +366,6 @@ function WalletPicker({ onPick, onClose, dm }) {
       ))}
       <button onClick={onClose} style={{fontSize:13,color:'#94a3b8',background:'none',border:'none',cursor:'pointer',marginTop:4}}>← Back</button>
     </div>
-      </div>}
-    </>
   );
 }
 
