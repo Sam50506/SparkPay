@@ -378,6 +378,7 @@ export default function App() {
   const [balance,   setBalance]   = useState('0.00');
   const [walletName,setWalletName]= useState('');
   const [wcProv,    setWcProv]    = useState(null);
+  const wcProvRef = useRef(null);
   const [showPicker,setShowPicker]= useState(false);
   const [splash,    setSplash]    = useState(true);
   // ui
@@ -527,16 +528,16 @@ export default function App() {
       try { await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]}); }
       catch(e){ if(e.code===4902) await wcp.request({method:'wallet_addEthereumChain',params:[addArc({})]}); }
       const bp = new ethers.BrowserProvider(wcp, {name:'Arc Testnet',chainId:ARC_CHAIN_ID});
-      setWcProv(wcp); setWalletName('📱 WalletConnect');
+      setWcProv(wcp); wcProvRef.current = wcp; setWalletName('📱 WalletConnect');
       await finaliseConnect(bp, wcp);
     } catch(e) { setStatus({type:'error',msg:e.message||'WalletConnect failed'}); }
   };
 
   const doDisconnect = useCallback(() => {
-    if (wcProv) wcProv.disconnect();
+    if (wcProvRef.current) { wcProvRef.current.disconnect(); wcProvRef.current = null; }
     setProvider(null); setSigner(null); setAddress(''); setWalletName(''); setWcProv(null);
     setStatus(null); setBalance('0.00');
-  }, [wcProv]);
+  }, []);
 
   const refreshBal = useCallback(async () => {
     if (!provider || !address) return;
@@ -578,6 +579,14 @@ export default function App() {
       setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
       setStatus({type:'success',msg:`✓ Sent ${sendAmt} USDC → ${short(sendTo)}`});
       setSendTo(''); setSendAmt('');
+      // Poll for receipt and update status
+      awaitReceipt(provider, tx.hash).then(receipt => {
+        const confirmed = receipt && receipt.status === 1 ? 'confirmed' : 'failed';
+        setTxns(prev => {
+          const u = prev.map(t => t.hash === tx.hash ? {...t, status: confirmed} : t);
+          lsSave('arc_txhistory', u); return u;
+        });
+      });
       setTimeout(refreshBal, 6000);
     } catch(e) { setStatus({type:'error',msg:e.reason||e.message||'Failed'}); }
     finally { setLoading(false); }
@@ -597,6 +606,13 @@ export default function App() {
         const tx = await signer.sendTransaction({ to: r.addr, value, gasLimit: 21000, gasPrice });
         const rec = { hash:tx.hash, recipient:r.addr, amount:parseFloat(r.amount), country:r.country, timestamp:Math.floor(Date.now()/1000), status:'pending' };
         setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
+        awaitReceipt(provider, tx.hash).then(receipt => {
+          const confirmed = receipt && receipt.status === 1 ? 'confirmed' : 'failed';
+          setTxns(prev => {
+            const u = prev.map(t => t.hash === tx.hash ? {...t, status: confirmed} : t);
+            lsSave('arc_txhistory', u); return u;
+          });
+        });
       }
       setStatus({type:'success',msg:`✓ Sent to ${valid.length} recipients`});
       setMulti([{addr:'',amount:'',country:'Pakistan'}]);
@@ -663,6 +679,13 @@ export default function App() {
       // Save to tx history
       const rec = {hash:tx.hash, recipient:inv.creator, amount:inv.amount, country:inv.country, timestamp:Math.floor(Date.now()/1000), status:'submitted'};
       setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
+      awaitReceipt(provider, tx.hash).then(receipt => {
+        const confirmed = receipt && receipt.status === 1 ? 'confirmed' : 'failed';
+        setTxns(prev => {
+          const u = prev.map(t => t.hash === tx.hash ? {...t, status: confirmed} : t);
+          lsSave('arc_txhistory', u); return u;
+        });
+      });
       setStatus({type:'success',msg:`✓ Paid ${inv.amount} USDC! TX: ${tx.hash.slice(0,10)}…`});
       setPayId(''); setPayDet(null);
       setTimeout(refreshBal, 5000);
@@ -793,7 +816,8 @@ export default function App() {
           </div>
         </div>
       )}
-      {!splash && address && <div style={S.root}>
+      {!splash && address && (
+      <div style={S.root}>
       {/* Nav */}
       <nav style={S.nav}>
         <div style={S.navi}>
@@ -1174,7 +1198,8 @@ export default function App() {
         </div>
       </div>
     </div>
-      </div>}
+      </div>
+      )}
     </>
   );
 }
