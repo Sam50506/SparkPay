@@ -251,12 +251,12 @@ function getProvider() {
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ARC_CHAIN_ID     = 5042002;
 const ARC_CHAIN_HEX    = '0x4CEF52';
-const ARC_RPC          = 'https://bitter-bitter-spring.arc-testnet.quiknode.pro/f2ba4c49b3dfe5b37f32f3404c666f3f596bd43c/';
-const REMIT_ADDR       = '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44'; // v2 deployed 2026-05-25
-const USDC_ADDR        = '0x3600000000000000000000000000000000000000';
-const WC_ID            = '8bb24a433758c9a403057e2e3f2c371b';
-const SB_URL           = 'https://iwxwcyuabtasghfmqrpi.supabase.co';
-const SB_KEY           = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3eHdjeXVhYnRhc2doZm1xcnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3MDcyMzAsImV4cCI6MjA5NTI4MzIzMH0.fFTTD8BNGfcnHV8H3jZuZ4nnyUe_pypjoQYyx6HAKL8';
+const ARC_RPC          = process.env.REACT_APP_ARC_RPC          || '';
+const REMIT_ADDR       = process.env.REACT_APP_REMIT_ADDR        || '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44'; // v2 deployed 2026-05-25
+const USDC_ADDR        = process.env.REACT_APP_USDC_ADDR         || '0x3600000000000000000000000000000000000000';
+const WC_ID            = process.env.REACT_APP_WC_ID             || '';
+const SB_URL           = process.env.REACT_APP_SUPABASE_URL      || '';
+const SB_KEY           = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
 
 // Supabase helpers
 const sbFetch = async (path, opts={}) => {
@@ -370,7 +370,6 @@ function WalletPicker({ onPick, onClose, dm }) {
 }
 
 // ─── Main App ─────────────────────────────────────────────────────────────────
-console.log('ArcPay v2 | Contract:', '0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44');
 export default function App() {
   // wallet
   const [provider,  setProvider]  = useState(null);
@@ -467,14 +466,14 @@ export default function App() {
     window.ethereum.on('accountsChanged', onAcc);
     window.ethereum.on('chainChanged', onChain);
     return () => { window.ethereum.removeListener('accountsChanged',onAcc); window.ethereum.removeListener('chainChanged',onChain); };
-  }, []);
+  }, [doDisconnect]);
 
   // load contract history when tab opens
   useEffect(() => {
     if (tab === 'history' && signer) loadContractHistory();
-  }, [tab, signer]);
+  }, [tab, signer, loadContractHistory]);
 
-  useEffect(() => { if (signer && address) refreshBal(); }, [signer, address]);
+  useEffect(() => { if (signer && address) refreshBal(); }, [signer, address, refreshBal]);
 
   // ── wallet helpers ──────────────────────────────────────────────────────────
   const addArc = params => ({
@@ -539,7 +538,7 @@ export default function App() {
     setStatus(null); setBalance('0.00');
   }, [wcProv]);
 
-  const refreshBal = async () => {
+  const refreshBal = useCallback(async () => {
     if (!provider || !address) return;
     try {
       // Use native balance (Arc USDC = native token, 18 decimals)
@@ -552,7 +551,7 @@ export default function App() {
         setBalance(fmtUsdc(b));
       } catch {}
     }
-  };
+  }, [provider, address]);
 
   const getC = () => ({
     remit: new ethers.Contract(REMIT_ADDR, REMIT_ABI, signer),
@@ -565,13 +564,15 @@ export default function App() {
   const handleSend = async () => {
     if (!signer||!sendTo||!sendAmt) { setStatus({type:'error',msg:'Fill all fields'}); return; }
     if (!ethers.isAddress(sendTo))  { setStatus({type:'error',msg:'Invalid address'}); return; }
-    const sendToNorm = ethers.getAddress(sendTo.trim().toLowerCase());
+    const sendToNorm = ethers.getAddress(sendTo.trim());
     const amt = parseFloat(sendAmt);
     if (isNaN(amt)||amt<=0)         { setStatus({type:'error',msg:'Invalid amount'}); return; }
     setLoading(true); setStatus({type:'info',msg:'Sending USDC…'});
     try {
       const value = ethers.parseUnits(sendAmt, 18); // native = 18 dec
-      const tx = await signer.sendTransaction({ to: sendToNorm, value, gasLimit: 21000, gasPrice: ethers.parseUnits("50","gwei") });
+      const feeData = await provider.getFeeData();
+      const gasPrice = feeData.gasPrice ?? ethers.parseUnits('50','gwei');
+      const tx = await signer.sendTransaction({ to: sendToNorm, value, gasLimit: 21000, gasPrice });
       // Save to history immediately — don't wait for receipt
       const rec = { hash:tx.hash, recipient:sendToNorm, amount:amt, country:sendCtry, timestamp:Math.floor(Date.now()/1000), status:'pending' };
       setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
@@ -591,7 +592,9 @@ export default function App() {
       for (const r of valid) {
         setStatus({type:'info',msg:`Sending to ${short(r.addr)}…`});
         const value = ethers.parseUnits(r.amount, 18);
-        const tx = await signer.sendTransaction({ to: r.addr, value, gasLimit: 21000, gasPrice: ethers.parseUnits("50","gwei") });
+        const feeData = await provider.getFeeData();
+        const gasPrice = feeData.gasPrice ?? ethers.parseUnits('50','gwei');
+        const tx = await signer.sendTransaction({ to: r.addr, value, gasLimit: 21000, gasPrice });
         const rec = { hash:tx.hash, recipient:r.addr, amount:parseFloat(r.amount), country:r.country, timestamp:Math.floor(Date.now()/1000), status:'pending' };
         setTxns(prev => { const u=[rec,...prev.slice(0,499)]; lsSave('arc_txhistory',u); return u; });
       }
@@ -643,15 +646,17 @@ export default function App() {
       if (!rows || rows.length === 0) { setStatus({type:'error',msg:'Invoice not found.'}); setLoading(false); return; }
       const inv = rows[0];
       if (inv.paid) { setStatus({type:'error',msg:'This invoice has already been paid.'}); setLoading(false); return; }
-      setPayDet({creator:inv.creator, amount:ethers.parseUnits(inv.amount,6), description:inv.description, country:inv.country});
+      setPayDet({creator:inv.creator, amount:ethers.parseUnits(inv.amount,18), description:inv.description, country:inv.country});
       setStatus({type:'info',msg:`Invoice found: ${inv.amount} USDC for "${inv.description}". Sending payment…`});
       // Pay via direct native USDC transfer
       const value = ethers.parseUnits(inv.amount, 18);
+      const feeData = await provider.getFeeData();
+      const gasPrice = feeData.gasPrice ?? ethers.parseUnits('50','gwei');
       const tx = await signer.sendTransaction({
         to: inv.creator,
         value,
         gasLimit: 21000,
-        gasPrice: ethers.parseUnits('50','gwei')
+        gasPrice
       });
       // Mark as paid in Supabase
       await sbUpdate('invoices', `id=eq.${id}`, { paid: true, paid_by: address, paid_tx: tx.hash });
@@ -666,13 +671,13 @@ export default function App() {
   };
 
   // ── HISTORY ────────────────────────────────────────────────────────────────
-  const loadContractHistory = async () => {
+  const loadContractHistory = useCallback(async () => {
     try {
       const {remit} = getC();
       const p = await remit.getPayments(address);
       setContractTxns([...p].reverse());
     } catch {}
-  };
+  }, [signer, address]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // merge local + contract history, dedup by hash
   const allTxns = [
@@ -864,9 +869,9 @@ export default function App() {
             <div style={S.cSub}>Send USDC to multiple recipients in one session.</div>
             {multi.map((r,i)=>(
               <div key={i} style={{display:'flex',gap:8,marginBottom:10,alignItems:'flex-start'}}>
-                <div style={{flex:2}}>{i===0&&<label style={S.lbl}>Address</label>}<input style={{...S.inp,marginBottom:0}} placeholder="0x…" value={r.addr} onChange={e=>{const n=[...multi];n[i].addr=e.target.value;setMulti(n);}}/></div>
-                <div style={{flex:1}}>{i===0&&<label style={S.lbl}>USDC</label>}<input style={{...S.inp,marginBottom:0}} type="number" placeholder="0.00" value={r.amount} onChange={e=>{const n=[...multi];n[i].amount=e.target.value;setMulti(n);}}/></div>
-                <div style={{flex:1}}>{i===0&&<label style={S.lbl}>Country</label>}<select style={{...S.sel,marginBottom:0}} value={r.country} onChange={e=>{const n=[...multi];n[i].country=e.target.value;setMulti(n);}}>{COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+                <div style={{flex:2}}>{i===0&&<label style={S.lbl}>Address</label>}<input style={{...S.inp,marginBottom:0}} placeholder="0x…" value={r.addr} onChange={e=>{const v=e.target.value;setMulti(p=>p.map((x,j)=>j===i?{...x,addr:v}:x));}}/></div>
+                <div style={{flex:1}}>{i===0&&<label style={S.lbl}>USDC</label>}<input style={{...S.inp,marginBottom:0}} type="number" placeholder="0.00" value={r.amount} onChange={e=>{const v=e.target.value;setMulti(p=>p.map((x,j)=>j===i?{...x,amount:v}:x));}}/></div>
+                <div style={{flex:1}}>{i===0&&<label style={S.lbl}>Country</label>}<select style={{...S.sel,marginBottom:0}} value={r.country} onChange={e=>{const v=e.target.value;setMulti(p=>p.map((x,j)=>j===i?{...x,country:v}:x));}}>{COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
                 {multi.length>1&&<button style={{...S.btnD,marginTop:i===0?22:0}} onClick={()=>setMulti(p=>p.filter((_,j)=>j!==i))}>✕</button>}
               </div>
             ))}
@@ -1173,4 +1178,3 @@ export default function App() {
     </>
   );
 }
-// rebuild Wed May 27 12:41:03 IST 2026
