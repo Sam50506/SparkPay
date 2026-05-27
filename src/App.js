@@ -459,6 +459,36 @@ export default function App() {
       .catch(()=>setRates({PKR:279,NGN:1371,INR:96.7,PHP:61.8,BDT:122.8,MXN:17.4,BRL:5.03,IDR:17713,VND:26222,GHS:11.5,KES:129,EGP:53.1,TRY:45.6,ARS:1399,COP:3795,UAH:44.2,ETB:155.9,TZS:2572,UGX:3734,NPR:154.6}));
   },[]);
 
+  const doDisconnect = useCallback(() => {
+    if (wcProvRef.current) { wcProvRef.current.disconnect(); wcProvRef.current = null; }
+    setProvider(null); setSigner(null); setAddress(''); setWalletName(''); setWcProv(null);
+    setStatus(null); setBalance('0.00');
+  }, []);
+
+  const refreshBal = useCallback(async () => {
+    if (!provider || !address) return;
+    try {
+      // Use native balance (Arc USDC = native token, 18 decimals)
+      const b = await provider.getBalance(address);
+      setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));
+    } catch {
+      try {
+        const c = new ethers.Contract(USDC_ADDR,ERC20_ABI,provider);
+        const b = await c.balanceOf(address);
+        setBalance(fmtUsdc(b));
+      } catch {}
+    }
+  }, [provider, address]);
+
+  // ── HISTORY ────────────────────────────────────────────────────────────────
+  const loadContractHistory = useCallback(async () => {
+    try {
+      const {remit} = getC();
+      const p = await remit.getPayments(address);
+      setContractTxns([...p].reverse());
+    } catch {}
+  }, [signer, address]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // account listener
   useEffect(() => {
     if (!window.ethereum) return;
@@ -533,26 +563,7 @@ export default function App() {
     } catch(e) { setStatus({type:'error',msg:e.message||'WalletConnect failed'}); }
   };
 
-  const doDisconnect = useCallback(() => {
-    if (wcProvRef.current) { wcProvRef.current.disconnect(); wcProvRef.current = null; }
-    setProvider(null); setSigner(null); setAddress(''); setWalletName(''); setWcProv(null);
-    setStatus(null); setBalance('0.00');
-  }, []);
 
-  const refreshBal = useCallback(async () => {
-    if (!provider || !address) return;
-    try {
-      // Use native balance (Arc USDC = native token, 18 decimals)
-      const b = await provider.getBalance(address);
-      setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));
-    } catch {
-      try {
-        const c = new ethers.Contract(USDC_ADDR,ERC20_ABI,provider);
-        const b = await c.balanceOf(address);
-        setBalance(fmtUsdc(b));
-      } catch {}
-    }
-  }, [provider, address]);
 
   const getC = () => ({
     remit: new ethers.Contract(REMIT_ADDR, REMIT_ABI, signer),
@@ -693,14 +704,6 @@ export default function App() {
     finally { setLoading(false); }
   };
 
-  // ── HISTORY ────────────────────────────────────────────────────────────────
-  const loadContractHistory = useCallback(async () => {
-    try {
-      const {remit} = getC();
-      const p = await remit.getPayments(address);
-      setContractTxns([...p].reverse());
-    } catch {}
-  }, [signer, address]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // merge local + contract history, dedup by hash
   const allTxns = [
