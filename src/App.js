@@ -265,9 +265,16 @@ const SplashScreen = ({ onDone }) => {
 function getProvider() {
   return new Promise((resolve) => {
     const tryResolve = () => {
+      if(window.mises?.ethereum) return window.mises.ethereum;
       const {ethereum}=window; if(!ethereum) return null;
-      if(ethereum.providers?.length>0){const mm=ethereum.providers.find(p=>p.isMetaMask&&!p.isBraveWallet);if(mm)return mm;return ethereum.providers[0];}
-      if(ethereum.isMetaMask||ethereum._metamask) return ethereum; return ethereum;
+      if(ethereum.providers?.length>0){
+        const mises=ethereum.providers.find(p=>p.isMises);if(mises)return mises;
+        const mm=ethereum.providers.find(p=>p.isMetaMask&&!p.isBraveWallet);if(mm)return mm;
+        return ethereum.providers[0];
+      }
+      if(ethereum.isMises) return ethereum;
+      if(ethereum.isMetaMask||ethereum._metamask) return ethereum;
+      return ethereum;
     };
     const result=tryResolve(); if(result) return resolve(result);
     let attempts=0; const timer=setInterval(()=>{attempts++;const r=tryResolve();if(r){clearInterval(timer);return resolve(r);}if(attempts>30){clearInterval(timer);resolve(null);}},100);
@@ -483,7 +490,7 @@ export default function App() {
   const ensureArc=async eth=>{try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902)await eth.request({method:'wallet_addEthereumChain',params:[addArc({})]});else throw e;}};
   const finaliseConnect=async bp=>{bp.pollingInterval=800;const s=await bp.getSigner();const addr=await s.getAddress();setProvider(bp);setSigner(s);setAddress(addr);setIsResumed(false);setStatus({type:'success',msg:'Connected: '+short(addr)});};
 
-  const connectBrowser=async(type,provObj)=>{try{const eth=provObj||await getProvider();if(!eth){setStatus({type:'error',msg:'No wallet found. Install MetaMask.'});return;}await eth.request({method:'eth_requestAccounts'});const bp=new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});await ensureArc(eth);let name='Browser Wallet';if(eth.isMetaMask&&!eth.isBraveWallet)name='MetaMask';else if(eth.isBraveWallet)name='Brave';else if(eth.isCoinbaseWallet)name='Coinbase';setWalletName(name);await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'Connection failed'});}};
+  const connectBrowser=async(type,provObj)=>{try{const eth=provObj||await getProvider();if(!eth){setStatus({type:'error',msg:'No wallet found. Install MetaMask.'});return;}await eth.request({method:'eth_requestAccounts'});const bp=new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});await ensureArc(eth);let name='Browser Wallet';if(eth.isMises||(window.mises?.ethereum===eth))name='Mises';else if(eth.isMetaMask&&!eth.isBraveWallet)name='MetaMask';else if(eth.isBraveWallet)name='Brave';else if(eth.isCoinbaseWallet)name='Coinbase';setWalletName(name);await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'Connection failed'});}};
 
   const connectWC=async()=>{try{const wcp=await EthereumProvider.init({projectId:WC_ID,chains:[ARC_CHAIN_ID],showQrModal:true,methods:['eth_sendTransaction','personal_sign','wallet_addEthereumChain','wallet_switchEthereumChain'],events:['chainChanged','accountsChanged']});await wcp.enable();wcp.on('accountsChanged',a=>{if(!a.length)doDisconnect();else setAddress(a[0]);});wcp.on('disconnect',doDisconnect);try{await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902)await wcp.request({method:'wallet_addEthereumChain',params:[addArc({})]});}const bp=new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});wcProvRef.current=wcp;setWalletName('WalletConnect');await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'WalletConnect failed'});}};
 
