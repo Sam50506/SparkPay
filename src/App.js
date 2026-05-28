@@ -291,7 +291,7 @@ const SplashScreen = ({ onDone }) => {
   useEffect(() => { const t1=setTimeout(()=>setExit(true),2800); const t2=setTimeout(()=>onDone(),3300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
   return (
     <div className={`ap-splash${exit?' exit':''}`}>
-      <div style={{position:'relative',width:'100vw',height:'100vh'}}><Lottie animationData={arcpayAnimation} loop={false} style={{width:'100%',height:'100%',objectFit:'cover'}}/><div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom, #000 0%, transparent 25%, transparent 75%, #000 100%), linear-gradient(to right, #000 0%, transparent 20%, transparent 80%, #000 100%)',pointerEvents:'none'}}/></div>
+      <div style={{position:'relative',width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><Lottie animationData={arcpayAnimation} loop={false} style={{position:'absolute',width:'100%',height:'auto',top:'50%',transform:'translateY(-50%)'}}/><div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom, #000 0%, transparent 30%, transparent 70%, #000 100%), linear-gradient(to right, #000 0%, transparent 15%, transparent 85%, #000 100%)',pointerEvents:'none'}}/></div>
       <div className="ap-splash-ver">Arc Testnet &nbsp; Chain 5042002</div>
     </div>
   );
