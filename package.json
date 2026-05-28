@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@craco/craco": "^7.1.0",
-    "@hcaptcha/react-hcaptcha": "^2.0.2",
     "@walletconnect/ethereum-provider": "^2.23.9",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",

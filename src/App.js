@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
