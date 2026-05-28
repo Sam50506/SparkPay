@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
 import arcpayLogo from './arcpay-logo.png';
@@ -671,14 +671,13 @@ function AppInner() {
   const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><img src={arcpayLogo} alt="ArcPay" style={{width:48,height:48,borderRadius:12,objectFit:"cover"}}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, near-zero-cost cross-border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
   const renderFaucet=()=>{
-  const {executeRecaptcha}=useGoogleReCaptcha();
   const claimFaucet=async()=>{
     if(!address){setFaucetMsg({type:'error',msg:'Connect your wallet first'});return;}
     const now=Date.now();const cooldown=2*60*60*1000;
     if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
     setFaucetLoading(true);setFaucetMsg(null);
     try{
-      const captchaToken=executeRecaptcha?await executeRecaptcha('faucet'):'';
+      const captchaToken=await new Promise(r=>{window.grecaptcha?.ready(()=>{window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_KEY,{action:'faucet'}).then(r);})});
       const res=await fetch('/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,captchaToken})});
       const data=await res.json();
       const result=data?.data?.requestToken;
@@ -784,10 +783,4 @@ function AppInner() {
   );
 }
 
-export default function App() {
-  return (
-    <GoogleReCaptchaProvider reCaptchaKey={process.env.REACT_APP_RECAPTCHA_KEY}>
-      <AppInner/>
-    </GoogleReCaptchaProvider>
-  );
-}
+export default function App(){return <AppInner/>;}
