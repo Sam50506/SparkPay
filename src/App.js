@@ -524,7 +524,7 @@ export default function App() {
     {title:'Tools',items:[{id:'schedule',label:'Scheduled',ICN:IC.Schedule,info:'Set up recurring payment reminders and pre-fill the Send form'},{id:'receive',label:'Receive',ICN:IC.Receive,info:'Generate a QR code or shareable payment link for your wallet'}]},
     {title:'More',items:[{id:'rewards',label:'Rewards',ICN:IC.Rewards,info:'Earn cashback on every confirmed transaction. Claim at 10 USDC'},{id:'settings',label:'Settings',ICN:IC.Settings,info:'Customize your ArcPay experience'},{id:'about',label:'About Arc',ICN:IC.About,info:'Learn more about the Arc protocol and network details'}]},
   ];
-  const BOTTOM_TABS=[{id:'multi',label:'Multi',ICN:IC.Multi},{id:'invoice',label:'Invoice',ICN:IC.Invoice},{id:'send',label:'Send',ICN:IC.Send,fab:true},{id:'pay',label:'Pay',ICN:IC.Pay},{id:'rewards',label:'Rewards',ICN:IC.Rewards}];
+  const BOTTOM_TABS=[{id:'history',label:'History',ICN:IC.History},{id:'receive',label:'Receive',ICN:IC.Receive},{id:'send',label:'Send',ICN:IC.Send,fab:true},{id:'contacts',label:'Contacts',ICN:IC.Contacts},{id:'rewards',label:'Rewards',ICN:IC.Rewards}];
   const PAGE_TITLES={send:'Send USDC',multi:'Multi Send',invoice:'Invoice',pay:'Pay Invoice',contacts:'Contacts',schedule:'Scheduled',history:'History',rates:'Exchange Rates',fees:'Fee Comparison',rewards:'Rewards',settings:'Settings',about:'About Arc',receive:'Receive'};
 
   const renderSend=()=>(<>
