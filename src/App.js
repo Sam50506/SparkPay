@@ -622,7 +622,7 @@ export default function App() {
   return(
     <div className={'ap-root'+(dm?'':' light')}>
       <style>{CSS}</style>
-      {splash&&<SplashScreen onDone={()=>setSplash(false)}/}}{!splash&&showOnboarding&&<OnboardingModal onDone={()=>{lsSave('arc_onboarded',true);setShowOnboarding(false);}}/>}
+      {splash&&<SplashScreen onDone={()=>setSplash(false)}/>}{!splash&&showOnboarding&&<OnboardingModal onDone={()=>{lsSave('arc_onboarded',true);setShowOnboarding(false);}}/>}
       {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={()=>{setShowResumeModal(false);const wt=savedSession.walletType||'';if(wt&&wt!=='WalletConnect'){connectBrowser(wt);}else if(wt==='WalletConnect'){connectWC();}else{connectBrowser();}}} onNew={()=>setShowResumeModal(false)}/>}
       {showConfirm&&confirmData&&<ConfirmModal data={confirmData} onConfirm={()=>{if(confirmAction)confirmAction()();}} onCancel={()=>{setShowConfirm(false);setConfirmData(null);setConfirmAction(null);}}/>}
       {showQR&&address&&<QRModal address={address} onClose={()=>setShowQR(false)}/>}
