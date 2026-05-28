@@ -9,29 +9,36 @@ export default async function handler(req, res) {
   const userIP = req.headers['x-forwarded-for']?.split(',')[0] || '';
 
   try {
-    const response = await fetch('https://faucet.circle.com/api/faucet', {
+    const response = await fetch('https://faucet.circle.com/api/graphql', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Origin': 'https://faucet.circle.com',
         'Referer': 'https://faucet.circle.com/',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0',
         'X-Forwarded-For': userIP,
       },
-      body: JSON.stringify({ 
-        address, 
-        chain: 'ARC-TESTNET',
-        token: 'USDC'
+      body: JSON.stringify({
+        query: `mutation RequestTokens($input: RequestTokensInput!) {
+          requestTokens(input: $input) {
+            success
+            message
+            txHash
+          }
+        }`,
+        variables: {
+          input: {
+            address,
+            chain: 'ARC',
+            currency: 'USDC'
+          }
+        }
       })
     });
-    const text = await response.text();
-    console.log('Faucet response:', response.status, text);
-    try {
-      res.status(response.status).json(JSON.parse(text));
-    } catch {
-      res.status(response.status).json({ message: text });
-    }
+    const data = await response.json();
+    console.log('Faucet response:', response.status, JSON.stringify(data));
+    res.status(response.status).json(data);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
