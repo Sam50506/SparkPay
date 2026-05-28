@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         }`,
         variables: {
           input: {
-            address,
+            destinationAddress: address,
             chain: 'ARC',
             currency: 'USDC'
           }
