@@ -574,7 +574,7 @@ export default function App() {
     <div className={'ap-root'+(dm?'':' light')}>
       <style>{CSS}</style>
       {splash&&<SplashScreen onDone={()=>setSplash(false)}/>}
-      {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={()=>{setAddress(savedSession.address);setWalletName(savedSession.walletType||'');setIsResumed(true);setShowResumeModal(false);}} onNew={()=>setShowResumeModal(false)}/>}
+      {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={()=>{const addr=savedSession.address;setAddress(addr);setWalletName(savedSession.walletType||'');setIsResumed(true);setShowResumeModal(false);try{const rp=new ethers.JsonRpcProvider(ARC_RPC,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});setProvider(rp);rp.getBalance(addr).then(b=>setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2))).catch(()=>{const c=new ethers.Contract(USDC_ADDR,ERC20_ABI,rp);c.balanceOf(addr).then(b=>setBalance(fmtUsdc(b))).catch(()=>{});});}catch{}}} onNew={()=>setShowResumeModal(false)}/>}
       {showConfirm&&confirmData&&<ConfirmModal data={confirmData} onConfirm={()=>{if(confirmAction)confirmAction()();}} onCancel={()=>{setShowConfirm(false);setConfirmData(null);setConfirmAction(null);}}/>}
       {showQR&&address&&<QRModal address={address} onClose={()=>setShowQR(false)}/>}
       {showCashbackToast&&cashbackToastData&&<CashbackToast amount={cashbackToastData.amount} rarity={cashbackToastData.rarity} onClose={()=>setShowCashbackToast(false)}/>}
