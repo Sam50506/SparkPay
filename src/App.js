@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
+import arcpayLogo from './arcpay-logo.png';
 import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -449,7 +450,7 @@ function ResumeModal({session,onResume,onNew}){
   return(
     <div className="ap-modal-bg">
       <div className="ap-modal" style={{textAlign:'center'}}>
-        <ArcLogo size={44}/>
+        <img src={arcpayLogo} alt="ArcPay" style={{width:44,height:44,borderRadius:12,objectFit:"cover"}}/>
         <div className="ap-modal-title" style={{marginTop:14}}>Welcome Back</div>
         <div className="ap-modal-sub">Your previous session was saved</div>
         <div className="ap-resume-addr">{short(session.address)}</div>
@@ -614,7 +615,7 @@ export default function App() {
 
   const renderSettings=()=>(<div className="ap-card"><div className="ap-card-title">Settings</div><div className="ap-div"/><div className="ap-setting-row"><div><div className="ap-setting-label">Dark Mode</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>Toggle between dark and light interface</div></div><button className="ap-toggle" style={{width:42,height:24,borderRadius:999,background:dm?'var(--ac)':'var(--b1)'}} onClick={()=>setDm(d=>!d)}><div className="ap-toggle-knob" style={{left:dm?22:4,width:16,height:16}}/></button></div><div className="ap-setting-row"><div><div className="ap-setting-label">Default Country</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>Pre-selected when you open Send</div></div><select className="ap-select" style={{width:'auto',minWidth:140,marginBottom:0}} value={defCtry} onChange={e=>{setDefCtry(e.target.value);setSendCtry(e.target.value);}}><option value="">None</option>{COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}</select></div><div className="ap-setting-row"><div><div className="ap-setting-label">Customer Support</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>Chat with us on Telegram</div></div><a href="https://t.me/Sam50506" target="_blank" rel="noreferrer" className="ap-btn ap-btn-sec" style={{textDecoration:'none',fontSize:13}}>Open Telegram</a></div><div className="ap-setting-row"><div><div className="ap-setting-label">Developer</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>Sam on X</div></div><a href="https://x.com/Sam_50506" target="_blank" rel="noreferrer" className="ap-btn ap-btn-icon" style={{textDecoration:'none',color:'var(--tx1)'}}><IC.XLogo/></a></div><div className="ap-setting-row" style={{borderBottom:'none'}}><div><div className="ap-setting-label">Clear Local Data</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>Removes all saved contacts, history, and schedules</div></div><button className="ap-btn ap-btn-danger" onClick={()=>{if(window.confirm('Clear all local data? This cannot be undone.')){setContacts([]);setScheds([]);setTxns([]);setCashbackPending(0);setCashbackHistory([]);setStatus({type:'success',msg:'Local data cleared'})}}}>Clear</button></div></div>);
 
-  const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><ArcLogo size={48}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, near-zero-cost cross-border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
+  const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><img src={arcpayLogo} alt="ArcPay" style={{width:48,height:48,borderRadius:12,objectFit:"cover"}}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, near-zero-cost cross-border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
   const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return renderMulti();case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();default:return renderSend();}};
 
@@ -630,7 +631,7 @@ export default function App() {
       {!splash&&!address&&(
         <div className="ap-connect">
           <div className="ap-connect-card">
-            <ArcLogo size={56}/>
+            <img src={arcpayLogo} alt="ArcPay" style={{width:56,height:56,borderRadius:16,objectFit:"cover"}}/>
             <div className="ap-connect-title">ArcPay</div>
             <div className="ap-connect-sub">Cross-border USDC remittance on Arc Testnet. Near zero fees, instant settlement.</div>
             <div className="ap-connect-btns">
@@ -650,7 +651,7 @@ export default function App() {
         <div className="ap-app">
           {mobOpen&&<div className="ap-mob-overlay on" onClick={()=>setMobOpen(false)}/>}
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
-            <div className="ap-logo-area"><ArcLogo size={34}/><div><div className="ap-logo-name">ArcPay</div><div className="ap-logo-tag">Remittance</div></div></div>
+            <div className="ap-logo-area"><img src={arcpayLogo} alt="ArcPay" style={{width:34,height:34,borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">ArcPay</div><div className="ap-logo-tag">Remittance</div></div></div>
             <nav className="ap-nav">
               {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title}><div className="ap-nav-sec">{sec.title}</div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
             </nav>
