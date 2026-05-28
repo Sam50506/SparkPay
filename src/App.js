@@ -309,9 +309,14 @@ const fmtDate=ts=>ts?new Date(Number(ts)*1000).toLocaleDateString('en',{month:'s
 const ls     =(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
 const lsSave =(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
-async function awaitReceipt(provider,hash,ms=45000){
+async function awaitReceipt(provider,hash,ms=90000){
   const end=Date.now()+ms;
-  while(Date.now()<end){try{const r=await provider.getTransactionReceipt(hash);if(r)return r;}catch(_){}await new Promise(res=>setTimeout(res,1500));}
+  let rpcProvider=null;
+  try{if(ARC_RPC)rpcProvider=new ethers.JsonRpcProvider(ARC_RPC,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});}catch(_){}
+  while(Date.now()<end){
+    try{const p=rpcProvider||provider;const r=await p.getTransactionReceipt(hash);if(r)return r;}catch(_){}
+    await new Promise(res=>setTimeout(res,2000));
+  }
   return null;
 }
 
