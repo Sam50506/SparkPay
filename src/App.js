@@ -678,9 +678,10 @@ function AppInner() {
     if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
     setFaucetLoading(true);setFaucetMsg(null);
     try{
-      lsSave('arc_faucet_last_'+address,Date.now());setLastClaim(Date.now());
+      navigator.clipboard?.writeText(address);
+    lsSave('arc_faucet_last_'+address,Date.now());setLastClaim(Date.now());
     window.open('https://faucet.circle.com','_blank');
-    setFaucetMsg({type:'success',msg:'Circle Faucet opened! Enter your address: '+address.slice(0,10)+'...'});
+    setFaucetMsg({type:'success',msg:'Address copied! Paste it in the faucet page that just opened.'});
     setFaucetLoading(false);
     return;
       const data=await res.json();
