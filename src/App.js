@@ -20,11 +20,13 @@ const CSS = `
   --sh:0 2px 20px rgba(0,0,0,.35);--shl:0 8px 40px rgba(0,0,0,.5);
 }
 .ap-root.light{
-  --bg:#F7F7F5;--surf:#FFFFFF;--card:#FFFFFF;--elev:#FFFFFF;--hov:#F2F2F0;
-  --b0:#EBEBEB;--b1:#E0E0E0;--b2:#D0D0D0;--b3:#BBBBBB;
-  --tx1:#111111;--tx2:#555555;--tx3:#999999;
-  --ac:#3B82C4;--ac2:#5BA3D9;--acd:rgba(59,130,196,.08);--acs:rgba(59,130,196,.16);
-  --sh:0 1px 8px rgba(0,0,0,.06);--shl:0 4px 24px rgba(0,0,0,.08);
+  --bg:#F9F9F9;--surf:#FFFFFF;--card:#FFFFFF;--elev:#F4F4F4;--hov:#EFEFEF;
+  --b0:#E4E4E4;--b1:#D8D8D8;--b2:#C8C8C8;--b3:#AAAAAA;
+  --tx1:#0A0A0A;--tx2:#444444;--tx3:#888888;
+  --ac:#2563EB;--ac2:#3B82F6;--acd:rgba(37,99,235,.08);--acs:rgba(37,99,235,.18);
+  --cy:#059669;--re:#DC2626;--ye:#D97706;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --sh:0 1px 6px rgba(0,0,0,.07);--shl:0 4px 20px rgba(0,0,0,.09);
 }
 html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb);overflow-x:hidden}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
