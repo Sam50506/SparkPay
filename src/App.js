@@ -678,10 +678,25 @@ function AppInner() {
     setFaucetLoading(true);setFaucetMsg(null);
     try{
       navigator.clipboard?.writeText(address);
-    lsSave('arc_faucet_last_'+address,Date.now());setLastClaim(Date.now());
     window.open('https://faucet.circle.com','_blank');
-    setFaucetMsg({type:'success',msg:'Address copied! Paste it in the faucet page that just opened.'});
+    setFaucetMsg({type:'info',msg:'Address copied! Paste it in the faucet. Waiting to confirm your claim...'});
     setFaucetLoading(false);
+    const prevBal=parseFloat(balance);
+    let attempts=0;
+    const poll=setInterval(async()=>{
+      attempts++;
+      await refreshBal();
+      const newBal=parseFloat(balance);
+      if(newBal>=prevBal+19){
+        clearInterval(poll);
+        lsSave('arc_faucet_last_'+address,Date.now());
+        setLastClaim(Date.now());
+        setFaucetMsg({type:'success',msg:'20 USDC received! Next claim in 2 hours.'});
+      } else if(attempts>=20){
+        clearInterval(poll);
+        setFaucetMsg({type:'error',msg:'Claim not detected. Try again when ready.'});
+      }
+    },30000);
     return;
       const data=await res.json();
       const result=data?.data?.requestToken;
