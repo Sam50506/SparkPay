@@ -105,7 +105,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-card-sub{font-size:13px;color:var(--tx2);margin-bottom:20px;line-height:1.5}
 .ap-div{height:1px;background:var(--b0);margin:16px 0}
 .ap-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.ap-input{background:#FFFFFF;border:1.5px solid #E5E7EB;border-radius:12px;padding:12px 14px;font-family:var(--fb);font-size:14px;color:var(--tx1);outline:none;transition:border .15s,box-shadow .15s;width:100%;display:block}
+.ap-input{background:var(--elev);border:1.5px solid var(--b1);border-radius:12px;padding:12px 14px;font-family:var(--fb);font-size:14px;color:var(--tx1);outline:none;transition:border .15s,box-shadow .15s;width:100%;display:block}
 .ap-input:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(59,130,196,.1)}
 .ap-input::placeholder{color:var(--tx3)}
 .ap-select{background:var(--elev);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;font-family:var(--fb);font-size:14px;color:var(--tx1);outline:none;width:100%;cursor:pointer;appearance:none;transition:border .15s;display:block}
@@ -115,7 +115,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-send-panel.recv{background:var(--elev);border-top:1px solid var(--b0)}
 .ap-send-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
 .ap-send-row{display:flex;align-items:center;gap:12px}
-.ap-amount-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--fd);font-size:28px;font-weight:700;color:var(--tx1);width:100%;min-width:0}
+.ap-amount-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--fb);font-size:32px;font-weight:800;color:var(--tx1);width:100%;min-width:0;letter-spacing:-.5px}
 .ap-amount-input::placeholder{color:var(--tx3)}
 .ap-token-pill{display:flex;align-items:center;gap:7px;background:var(--elev);border:1px solid var(--b1);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--tx1);white-space:nowrap;flex-shrink:0}
 .ap-recv-divider{display:flex;align-items:center;justify-content:center;position:relative;height:0;z-index:2}
@@ -532,7 +532,7 @@ function WalletPicker({onPick,onClose}){
 function AppInner() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
   const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
-  const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',true));
+  const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',false));
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
   const[showQR,setShowQR]=useState(false);const[rates,setRates]=useState({});
