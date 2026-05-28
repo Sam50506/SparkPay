@@ -530,7 +530,7 @@ function WalletPicker({onPick,onClose}){
 }
 export default function App() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
-  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));
+  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(()=>ls('arc_faucet_last',0));
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',true));
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
@@ -670,9 +670,6 @@ export default function App() {
   const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><img src={arcpayLogo} alt="ArcPay" style={{width:48,height:48,borderRadius:12,objectFit:"cover"}}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, near-zero-cost cross-border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
   const renderFaucet=()=>{
-  const[faucetLoading,setFaucetLoading]=React.useState(false);
-  const[faucetMsg,setFaucetMsg]=React.useState(null);
-  const[lastClaim,setLastClaim]=React.useState(()=>ls('arc_faucet_last',0));
   const claimFaucet=async()=>{
     if(!address){setFaucetMsg({type:'error',msg:'Connect your wallet first'});return;}
     const now=Date.now();const cooldown=2*60*60*1000;
