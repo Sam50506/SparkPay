@@ -302,25 +302,29 @@ const SplashScreen = ({ onDone }) => {
         @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         @keyframes energyFlow{0%{stroke-dashoffset:1000}100%{stroke-dashoffset:0}}
       `}</style>
-      {/* Orbit rings with text inside */}
-      <div style={{position:'relative',width:280,height:280,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:40}}>
-        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',background:'radial-gradient(circle, rgba(0,100,255,0.12) 0%, transparent 70%)',animation:'glowPulse 2s ease-in-out infinite'}}/>
-        <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',border:'2px solid transparent',borderTop:'2px solid rgba(0,160,255,0.9)',borderRight:'2px solid rgba(0,160,255,0.3)',boxShadow:'0 0 20px rgba(0,160,255,0.5)',animation:'orbitSpin 2s linear infinite'}}/>
-        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',border:'1.5px solid transparent',borderBottom:'1.5px solid rgba(0,210,255,0.8)',borderLeft:'1.5px solid rgba(0,210,255,0.2)',boxShadow:'0 0 12px rgba(0,210,255,0.4)',animation:'orbitSpinRev 1.5s linear infinite'}}/>
-        <div style={{position:'absolute',width:180,height:180,borderRadius:'50%',border:'1px solid transparent',borderTop:'1px solid rgba(100,230,255,0.5)',animation:'orbitSpin 3s linear infinite'}}/>
-        <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',animation:'orbitSpin 2s linear infinite'}}>
-          <div style={{position:'absolute',top:-5,left:'50%',width:10,height:10,borderRadius:'50%',background:'#00d4ff',boxShadow:'0 0 16px 6px rgba(0,212,255,0.9)',transform:'translateX(-50%)'}}/>
+      <div style={{position:'relative',width:220,height:220,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:32}}>
+        {/* Outer glow */}
+        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',background:'radial-gradient(circle, rgba(0,120,255,0.15) 0%, transparent 70%)',animation:'glowPulse 2s ease-in-out infinite'}}/>
+        {/* Orbit ring 1 */}
+        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',border:'2px solid transparent',borderTop:'2px solid rgba(0,160,255,0.9)',borderRight:'2px solid rgba(0,160,255,0.4)',boxShadow:'0 0 15px rgba(0,160,255,0.6)',animation:'orbitSpin 2s linear infinite'}}/>
+        {/* Orbit ring 2 */}
+        <div style={{position:'absolute',width:170,height:170,borderRadius:'50%',border:'1.5px solid transparent',borderBottom:'1.5px solid rgba(0,200,255,0.8)',borderLeft:'1.5px solid rgba(0,200,255,0.3)',boxShadow:'0 0 10px rgba(0,200,255,0.5)',animation:'orbitSpinRev 1.5s linear infinite'}}/>
+        {/* Orbit ring 3 */}
+        <div style={{position:'absolute',width:140,height:140,borderRadius:'50%',border:'1px solid transparent',borderTop:'1px solid rgba(100,220,255,0.6)',borderRight:'1px solid rgba(100,220,255,0.2)',animation:'orbitSpin 3s linear infinite'}}/>
+        {/* Energy dots */}
+        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',animation:'orbitSpin 2s linear infinite'}}>
+          <div style={{position:'absolute',top:-4,left:'50%',width:8,height:8,borderRadius:'50%',background:'#00c8ff',boxShadow:'0 0 12px 4px rgba(0,200,255,0.9)',transform:'translateX(-50%)'}}/>
         </div>
-        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',animation:'orbitSpinRev 1.5s linear infinite'}}>
-          <div style={{position:'absolute',bottom:-5,left:'50%',width:8,height:8,borderRadius:'50%',background:'#0088ff',boxShadow:'0 0 12px 4px rgba(0,136,255,0.9)',transform:'translateX(-50%)'}}/>
+        <div style={{position:'absolute',width:170,height:170,borderRadius:'50%',animation:'orbitSpinRev 1.5s linear infinite'}}>
+          <div style={{position:'absolute',bottom:-4,left:'50%',width:6,height:6,borderRadius:'50%',background:'#0080ff',boxShadow:'0 0 10px 3px rgba(0,128,255,0.9)',transform:'translateX(-50%)'}}/>
         </div>
-        {/* ArcPay text inside rings */}
-        <div style={{position:'relative',zIndex:2,textAlign:'center'}}>
-          <div style={{fontFamily:'var(--fd)',fontSize:42,fontWeight:900,background:'linear-gradient(180deg, #ffffff 0%, #a0c8ff 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'textReveal .8s .3s both',letterSpacing:'-0.03em',lineHeight:1}}>ArcPay</div>
-        </div>
+        {/* Logo center */}
+        <img src={arcpayLogo} alt="ArcPay" style={{width:80,height:80,borderRadius:20,objectFit:'cover',position:'relative',zIndex:2,animation:'glowPulse 2s ease-in-out infinite'}}/>
       </div>
-      <div style={{fontSize:12,color:'rgba(0,180,255,0.7)',letterSpacing:'0.25em',textTransform:'uppercase',fontWeight:600,animation:'fadeInUp .6s .8s both'}}>Decentralized Remittance</div>
-      <div style={{position:'absolute',bottom:32,fontSize:11,color:'rgba(255,255,255,0.2)',animation:'fadeInUp .6s 1.2s both'}}>Arc Testnet &nbsp;·&nbsp; Chain 5042002</div>
+      {/* Metallic text */}
+      <div style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,background:'linear-gradient(90deg, #888 0%, #fff 30%, #aaa 50%, #fff 70%, #888 100%)',backgroundSize:'200% auto',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'textReveal .8s .5s both, shimmer 3s 1.3s linear infinite',letterSpacing:'-0.02em'}}>ArcPay</div>
+      <div style={{fontSize:11,color:'rgba(0,160,255,0.7)',letterSpacing:'0.2em',textTransform:'uppercase',fontWeight:600,marginTop:8,animation:'fadeInUp .6s 1s both'}}>Decentralized Remittance</div>
+      <div style={{position:'absolute',bottom:32,fontSize:11,color:'rgba(255,255,255,0.2)',animation:'fadeInUp .6s 1.5s both'}}>Arc Testnet &nbsp;·&nbsp; Chain 5042002</div>
     </div>
   );
 };
