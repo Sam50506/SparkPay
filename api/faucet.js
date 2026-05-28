@@ -22,13 +22,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         query: `mutation RequestToken($input: RequestTokenInput!) {
           requestToken(input: $input) {
-            txHash
-            transactionHash
             hash
-            id
-            status
-            amount
-            error
           }
         }`,
         variables: {
