@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Lottie from 'lottie-react';
+import arcpayAnimation from './arcpay-animation.json';
 import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -289,10 +291,7 @@ const SplashScreen = ({ onDone }) => {
   useEffect(() => { const t1=setTimeout(()=>setExit(true),2800); const t2=setTimeout(()=>onDone(),3300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
   return (
     <div className={`ap-splash${exit?' exit':''}`}>
-      <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',width:96,height:96,animation:'fadeIn .4s ease both'}}><ArcLogo size={96} animated/></div>
-      <div className="ap-splash-title">ArcPay</div>
-      <div className="ap-splash-sub">Decentralized Remittance Protocol</div>
-      <div className="ap-splash-bar-wrap"><div className="ap-splash-bar"/></div>
+      <Lottie animationData={arcpayAnimation} loop={false} style={{width:320,height:180}}/>
       <div className="ap-splash-ver">Arc Testnet &nbsp; Chain 5042002</div>
     </div>
   );
