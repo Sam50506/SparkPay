@@ -289,11 +289,42 @@ const OnboardingModal=({onDone})=>{
 
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
-  useEffect(() => { const t1=setTimeout(()=>setExit(true),2800); const t2=setTimeout(()=>onDone(),3300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
+  useEffect(() => { const t1=setTimeout(()=>setExit(true),3200); const t2=setTimeout(()=>onDone(),3700); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
   return (
-    <div className={`ap-splash${exit?' exit':''}`}>
-      <div style={{position:'fixed',inset:0,width:'100vw',height:'100vh',overflow:'hidden',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><Lottie animationData={arcpayAnimation} loop={false} style={{position:'absolute',width:'100%',height:'auto',top:'50%',transform:'translateY(-50%)'}}/><div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom, #000 0%, transparent 30%, transparent 70%, #000 100%), linear-gradient(to right, #000 0%, transparent 15%, transparent 85%, #000 100%)',pointerEvents:'none'}}/></div>
-      <div className="ap-splash-ver">Arc Testnet &nbsp; Chain 5042002</div>
+    <div className={`ap-splash${exit?' exit':''}`} style={{background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'fixed',inset:0}}>
+      <style>{`
+        @keyframes orbitSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes orbitSpinRev{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+        @keyframes pulse{0%,100%{opacity:.6;filter:blur(2px)}50%{opacity:1;filter:blur(0px)}}
+        @keyframes glowPulse{0%,100%{box-shadow:0 0 30px 8px rgba(0,120,255,.4)}50%{box-shadow:0 0 60px 20px rgba(0,180,255,.8)}}
+        @keyframes textReveal{0%{opacity:0;letter-spacing:0.5em;filter:blur(8px)}100%{opacity:1;letter-spacing:-0.02em;filter:blur(0)}}
+        @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes energyFlow{0%{stroke-dashoffset:1000}100%{stroke-dashoffset:0}}
+      `}</style>
+      <div style={{position:'relative',width:220,height:220,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:32}}>
+        {/* Outer glow */}
+        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',background:'radial-gradient(circle, rgba(0,120,255,0.15) 0%, transparent 70%)',animation:'glowPulse 2s ease-in-out infinite'}}/>
+        {/* Orbit ring 1 */}
+        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',border:'2px solid transparent',borderTop:'2px solid rgba(0,160,255,0.9)',borderRight:'2px solid rgba(0,160,255,0.4)',boxShadow:'0 0 15px rgba(0,160,255,0.6)',animation:'orbitSpin 2s linear infinite'}}/>
+        {/* Orbit ring 2 */}
+        <div style={{position:'absolute',width:170,height:170,borderRadius:'50%',border:'1.5px solid transparent',borderBottom:'1.5px solid rgba(0,200,255,0.8)',borderLeft:'1.5px solid rgba(0,200,255,0.3)',boxShadow:'0 0 10px rgba(0,200,255,0.5)',animation:'orbitSpinRev 1.5s linear infinite'}}/>
+        {/* Orbit ring 3 */}
+        <div style={{position:'absolute',width:140,height:140,borderRadius:'50%',border:'1px solid transparent',borderTop:'1px solid rgba(100,220,255,0.6)',borderRight:'1px solid rgba(100,220,255,0.2)',animation:'orbitSpin 3s linear infinite'}}/>
+        {/* Energy dots */}
+        <div style={{position:'absolute',width:200,height:200,borderRadius:'50%',animation:'orbitSpin 2s linear infinite'}}>
+          <div style={{position:'absolute',top:-4,left:'50%',width:8,height:8,borderRadius:'50%',background:'#00c8ff',boxShadow:'0 0 12px 4px rgba(0,200,255,0.9)',transform:'translateX(-50%)'}}/>
+        </div>
+        <div style={{position:'absolute',width:170,height:170,borderRadius:'50%',animation:'orbitSpinRev 1.5s linear infinite'}}>
+          <div style={{position:'absolute',bottom:-4,left:'50%',width:6,height:6,borderRadius:'50%',background:'#0080ff',boxShadow:'0 0 10px 3px rgba(0,128,255,0.9)',transform:'translateX(-50%)'}}/>
+        </div>
+        {/* Logo center */}
+        <img src={arcpayLogo} alt="ArcPay" style={{width:80,height:80,borderRadius:20,objectFit:'cover',position:'relative',zIndex:2,animation:'glowPulse 2s ease-in-out infinite'}}/>
+      </div>
+      {/* Metallic text */}
+      <div style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,background:'linear-gradient(90deg, #888 0%, #fff 30%, #aaa 50%, #fff 70%, #888 100%)',backgroundSize:'200% auto',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'textReveal .8s .5s both, shimmer 3s 1.3s linear infinite',letterSpacing:'-0.02em'}}>ArcPay</div>
+      <div style={{fontSize:11,color:'rgba(0,160,255,0.7)',letterSpacing:'0.2em',textTransform:'uppercase',fontWeight:600,marginTop:8,animation:'fadeInUp .6s 1s both'}}>Decentralized Remittance</div>
+      <div style={{position:'absolute',bottom:32,fontSize:11,color:'rgba(255,255,255,0.2)',animation:'fadeInUp .6s 1.5s both'}}>Arc Testnet &nbsp;·&nbsp; Chain 5042002</div>
     </div>
   );
 };
