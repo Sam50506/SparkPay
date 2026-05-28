@@ -20,8 +20,8 @@ export default async function handler(req, res) {
         'X-Forwarded-For': userIP,
       },
       body: JSON.stringify({
-        query: `mutation RequestTokens($input: RequestTokensInput!) {
-          requestTokens(input: $input) {
+        query: `mutation RequestToken($input: RequestTokenInput!) {
+          requestToken(input: $input) {
             success
             message
             txHash
