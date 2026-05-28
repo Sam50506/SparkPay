@@ -6,11 +6,6 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   
   const { address, captchaToken } = req.body;
-  
-  console.log('Request body:', JSON.stringify(req.body));
-  console.log('Address:', address);
-  console.log('Token length:', captchaToken?.length);
-  
   if (!address) return res.status(400).json({ error: 'Address required' });
   if (!captchaToken) return res.status(400).json({ error: 'Captcha required' });
 
@@ -54,8 +49,7 @@ export default async function handler(req, res) {
           input: {
             destinationAddress: address,
             blockchain: 'ARC',
-            token: 'USDC',
-            captchaToken: captchaToken
+            token: 'USDC'
           }
         }
       })
