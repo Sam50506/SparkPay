@@ -12,13 +12,13 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Inter:wght@400;500;600;700;800;900&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#060912;--surf:#0B0F1C;--card:#0F1524;--elev:#141A2E;--hov:#192038;
-  --b0:#141D30;--b1:#1A2440;--b2:#202C4E;--b3:#2A3A64;
-  --tx1:#E8EEFF;--tx2:#6E7E9A;--tx3:#2E3D58;
-  --ac:#3B82C4;--ac2:#5BA3D9;--acd:rgba(59,130,196,.12);--acs:rgba(59,130,196,.22);
+  --bg:#0A0E1A;--surf:#111827;--card:#1A2235;--elev:#1F2A3F;--hov:#243048;
+  --b0:#2A3550;--b1:#334060;--b2:#3D4D72;--b3:#4F6090;
+  --tx1:#F0F4FF;--tx2:#A0AECA;--tx3:#5A6A8A;
+  --ac:#4D9FE0;--ac2:#70B8F0;--acd:rgba(77,159,224,.15);--acs:rgba(77,159,224,.3);
   --cy:#17E5B0;--re:#FF4F61;--ye:#F0C43F;
   --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
-  --sh:0 2px 20px rgba(0,0,0,.35);--shl:0 8px 40px rgba(0,0,0,.5);
+  --sh:0 2px 20px rgba(0,0,0,.4);--shl:0 8px 40px rgba(0,0,0,.6);
 }
 .ap-root.light{
   --bg:#FFFFFF;--surf:#F3F4F6;--card:#FFFFFF;--elev:#F9FAFB;--hov:#F3F4F6;
@@ -532,7 +532,7 @@ function WalletPicker({onPick,onClose}){
 function AppInner() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
   const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
-  const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',false));
+  const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(false);
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
   const[showQR,setShowQR]=useState(false);const[rates,setRates]=useState({});
