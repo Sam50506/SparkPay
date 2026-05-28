@@ -29,7 +29,7 @@ export default async function handler(req, res) {
           input: {
             destinationAddress: address,
             blockchain: 'ARC',
-            currency: 'USDC'
+            token: 'USDC'
           }
         }
       })
