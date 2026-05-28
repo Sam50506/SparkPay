@@ -5,24 +5,24 @@ export default async function handler(req, res) {
   
   const { address, captchaToken } = req.body;
   if (!address) return res.status(400).json({ error: 'Address required' });
+  if (!captchaToken) return res.status(400).json({ error: 'Captcha required' });
 
   const userIP = req.headers['x-forwarded-for']?.split(',')[0] || '';
 
-  // Verify reCAPTCHA if token provided
-  let captchaValid = false;
-  if (captchaToken) {
-    try {
-      const captchaRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`
-      });
-      const captchaData = await captchaRes.json();
-      console.log('Captcha:', JSON.stringify(captchaData));
-      captchaValid = captchaData.success && captchaData.score >= 0.3;
-    } catch(e) {
-      console.log('Captcha error:', e.message);
+  // Verify hCaptcha
+  try {
+    const captchaRes = await fetch('https://api.hcaptcha.com/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${process.env.HCAPTCHA_SECRET}&response=${captchaToken}`
+    });
+    const captchaData = await captchaRes.json();
+    console.log('hCaptcha:', JSON.stringify(captchaData));
+    if (!captchaData.success) {
+      return res.status(400).json({ error: 'Captcha verification failed' });
     }
+  } catch(e) {
+    console.log('Captcha error:', e.message);
   }
 
   try {
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         'Referer': 'https://faucet.circle.com/',
         'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0',
         'X-Forwarded-For': userIP,
-        'X-Captcha-Token': captchaToken||'',
+        'X-Captcha-Token': captchaToken,
       },
       body: JSON.stringify({
         query: `mutation RequestToken($input: RequestTokenInput!) {
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
             destinationAddress: address,
             blockchain: 'ARC',
             token: 'USDC',
-            captchaToken: captchaToken||''
+            captchaToken: captchaToken
           }
         }
       })

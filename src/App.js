@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
@@ -671,14 +672,15 @@ function AppInner() {
   const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><img src={arcpayLogo} alt="ArcPay" style={{width:48,height:48,borderRadius:12,objectFit:"cover"}}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, near-zero-cost cross-border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
   const renderFaucet=()=>{
+  const hcaptchaRef=useRef(null);
+  const[captchaToken,setCaptchaToken]=useState('');
   const claimFaucet=async()=>{
     if(!address){setFaucetMsg({type:'error',msg:'Connect your wallet first'});return;}
     const now=Date.now();const cooldown=2*60*60*1000;
     if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
     setFaucetLoading(true);setFaucetMsg(null);
     try{
-      let captchaToken='';
-      try{captchaToken=await Promise.race([new Promise(r=>{window.grecaptcha?.ready(()=>{window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_KEY,{action:'faucet'}).then(r);})}),new Promise((_,r)=>setTimeout(()=>r('timeout'),5000))]);}catch(e){console.log('captcha failed',e);}
+      if(!captchaToken){setFaucetMsg({type:'error',msg:'Please complete the captcha'});setFaucetLoading(false);return;}
       const res=await fetch('/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,captchaToken})});
       const data=await res.json();
       const result=data?.data?.requestToken;
@@ -686,7 +688,7 @@ function AppInner() {
       else if(data?.errors){setFaucetMsg({type:'error',msg:data.errors[0]?.message||'Claim failed'});}
       else{setFaucetMsg({type:'error',msg:'Claim failed. Try again later.'});}
     }catch(e){setFaucetMsg({type:'error',msg:'Network error. Try again.'});}
-    setFaucetLoading(false);
+    setFaucetLoading(false);hcaptchaRef.current?.resetCaptcha();setCaptchaToken('');
   };
   const cooldownLeft=Math.max(0,Math.ceil((2*60*60*1000-(Date.now()-lastClaim))/60000));
   const canClaim=cooldownLeft===0;
@@ -706,7 +708,8 @@ function AppInner() {
       </div>
       {faucetMsg&&<div className={faucetMsg.type==='success'?'ap-status ap-status-success':'ap-status ap-status-error'} style={{marginBottom:12}}>{faucetMsg.msg}</div>}
       {!canClaim&&<div style={{fontSize:13,color:'var(--tx2)',marginBottom:12,textAlign:'center',padding:'10px',background:'var(--elev)',borderRadius:10}}>Next claim in {cooldownLeft} minutes</div>}
-      <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={claimFaucet} disabled={faucetLoading||!canClaim}>
+      <div style={{marginBottom:12,display:'flex',justifyContent:'center'}}><HCaptcha sitekey={process.env.REACT_APP_HCAPTCHA_KEY} onVerify={t=>setCaptchaToken(t)} ref={hcaptchaRef} theme="light"/></div>
+      <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={claimFaucet} disabled={faucetLoading||!canClaim||!captchaToken}>
         {faucetLoading?'Claiming...':(canClaim?'Claim 20 USDC':'Cooldown Active')}
       </button>
     </div>
