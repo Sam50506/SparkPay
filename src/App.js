@@ -609,11 +609,11 @@ export default function App() {
   const SIDEBAR_SECTIONS=[
     {title:'Transfers',items:[{id:'send',label:'Send',ICN:IC.Send,info:'Transfer USDC to any wallet instantly on Arc Testnet'},{id:'multi',label:'Multi Send',ICN:IC.Multi,info:'Send USDC to multiple recipients in one session'},{id:'invoice',label:'Invoice',ICN:IC.Invoice,info:'Create USDC payment requests stored on Supabase'},{id:'pay',label:'Pay Invoice',ICN:IC.Pay,info:'Look up and pay an invoice using its unique ID'}]},
     {title:'Analytics',items:[{id:'rates',label:'Exchange Rates',ICN:IC.Rates,info:'Live USDC to local currency conversion rates for 20 countries'},{id:'fees',label:'Fee Compare',ICN:IC.Compare,info:'See how ArcPay compares to banks and other transfer services'}]},
-    {title:'Tools',items:[{id:'schedule',label:'Scheduled',ICN:IC.Schedule,info:'Set up recurring payment reminders and pre-fill the Send form'}]},
+    {title:'Tools',items:[{id:'schedule',label:'Scheduled',ICN:IC.Schedule,info:'Set up recurring payment reminders and pre-fill the Send form'},{id:'faucet',label:'Faucet',ICN:IC.Receive,info:'Claim 20 free testnet USDC every 2 hours via Circle Faucet'}]},
     {title:'More',items:[{id:'settings',label:'Settings',ICN:IC.Settings,info:'Customize your ArcPay experience'},{id:'about',label:'About Arc',ICN:IC.About,info:'Learn more about the Arc protocol and network details'}]},
   ];
   const BOTTOM_TABS=[{id:'history',label:'History',ICN:IC.History},{id:'receive',label:'Receive',ICN:IC.Receive},{id:'send',label:'Send',ICN:IC.Send,fab:true},{id:'contacts',label:'Contacts',ICN:IC.Contacts},{id:'rewards',label:'Rewards',ICN:IC.Rewards}];
-  const PAGE_TITLES={send:'Send USDC',multi:'Multi Send',invoice:'Invoice',pay:'Pay Invoice',contacts:'Contacts',schedule:'Scheduled',history:'History',rates:'Exchange Rates',fees:'Fee Comparison',rewards:'Rewards',settings:'Settings',about:'About Arc',receive:'Receive'};
+  const PAGE_TITLES={send:'Send USDC',multi:'Multi Send',invoice:'Invoice',pay:'Pay Invoice',contacts:'Contacts',schedule:'Scheduled',history:'History',rates:'Exchange Rates',fees:'Fee Comparison',rewards:'Rewards',settings:'Settings',about:'About Arc',receive:'Receive',faucet:'Faucet'};
 
   const renderSend=()=>(<>
     
@@ -669,7 +669,61 @@ export default function App() {
 
   const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><img src={arcpayLogo} alt="ArcPay" style={{width:48,height:48,borderRadius:12,objectFit:"cover"}}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, near-zero-cost cross-border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
-  const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return renderMulti();case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();default:return renderSend();}};
+  const renderFaucet=()=>{
+  const[faucetLoading,setFaucetLoading]=React.useState(false);
+  const[faucetMsg,setFaucetMsg]=React.useState(null);
+  const[lastClaim,setLastClaim]=React.useState(()=>ls('arc_faucet_last',0));
+  const claimFaucet=async()=>{
+    if(!address){setFaucetMsg({type:'error',msg:'Connect your wallet first'});return;}
+    const now=Date.now();const cooldown=2*60*60*1000;
+    if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
+    setFaucetLoading(true);setFaucetMsg(null);
+    try{
+      const res=await fetch('https://api.circle.com/v1/faucet/drips',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','Authorization':'Bearer '+process.env.REACT_APP_CIRCLE_API_KEY},body:JSON.stringify({address,blockchain:'ARC-TESTNET',usdc:true})});
+      const data=await res.json();
+      if(res.ok){lsSave('arc_faucet_last',Date.now());setLastClaim(Date.now());setFaucetMsg({type:'success',msg:'20 USDC claimed! It will arrive in your wallet shortly.'});setTimeout(refreshBal,8000);}
+      else{setFaucetMsg({type:'error',msg:data.message||'Claim failed. Try again later.'});}
+    }catch(e){setFaucetMsg({type:'error',msg:'Network error. Try again.'});}
+    setFaucetLoading(false);
+  };
+  const cooldownLeft=Math.max(0,Math.ceil((2*60*60*1000-(Date.now()-lastClaim))/60000));
+  const canClaim=cooldownLeft===0;
+  const steps=[
+    {color:'var(--ac)',path:'M12 2a10 10 0 110 20A10 10 0 0112 2zm0 5v5h5',title:'Claim',desc:'Request 20 USDC from Circle faucet'},
+    {color:'var(--ye)',path:'M12 2a10 10 0 110 20A10 10 0 0112 2zm0 6v4l3 3',title:'Wait',desc:'2 hour cooldown between claims'},
+    {color:'var(--cy)',path:'M12 2a10 10 0 110 20A10 10 0 0112 2zm-2 10l2 2 4-4',title:'Receive',desc:'USDC arrives in your wallet'},
+  ];
+  return(<div>
+    <div className="ap-card">
+      <div className="ap-card-title">Circle Testnet Faucet</div>
+      <div className="ap-card-sub">Claim 20 free USDC on Arc Testnet every 2 hours. Powered by Circle.</div>
+      <div style={{textAlign:'center',padding:'24px 0'}}>
+        <div style={{fontSize:56,fontWeight:900,color:'var(--ac)',fontFamily:'var(--fd)',lineHeight:1}}>20</div>
+        <div style={{fontSize:14,color:'var(--tx2)',marginTop:6}}>USDC per claim</div>
+        <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>Every 2 hours per address</div>
+      </div>
+      {faucetMsg&&<div className={faucetMsg.type==='success'?'ap-status ap-status-success':'ap-status ap-status-error'} style={{marginBottom:12}}>{faucetMsg.msg}</div>}
+      {!canClaim&&<div style={{fontSize:13,color:'var(--tx2)',marginBottom:12,textAlign:'center',padding:'10px',background:'var(--elev)',borderRadius:10}}>Next claim in {cooldownLeft} minutes</div>}
+      <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={claimFaucet} disabled={faucetLoading||!canClaim}>
+        {faucetLoading?'Claiming...':(canClaim?'Claim 20 USDC':'Cooldown Active')}
+      </button>
+    </div>
+    <div className="ap-card" style={{marginTop:16}}>
+      <div className="ap-card-title">How it works</div>
+      <div className="ap-div"/>
+      {steps.map(({color,path,title,desc})=>(
+        <div key={title} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid var(--b0)'}}>
+          <div style={{width:38,height:38,borderRadius:10,background:color.replace(')',',0.12)').replace('var(','rgba('),display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={path}/></svg>
+          </div>
+          <div><div style={{fontWeight:600,color:'var(--tx1)',fontSize:14}}>{title}</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>{desc}</div></div>
+        </div>
+      ))}
+    </div>
+  </div>);
+};
+
+  const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return renderMulti();case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faucet':return renderFaucet();default:return renderSend();}};
 
   return(
     <div className={'ap-root'+(dm?'':' light')}>
