@@ -8,7 +8,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { QRCodeSVG } from 'qrcode.react';
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Inter:wght@400;500;600;700;800;900&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#060912;--surf:#0B0F1C;--card:#0F1524;--elev:#141A2E;--hov:#192038;
@@ -25,7 +25,7 @@ const CSS = `
   --tx1:#0A0A0A;--tx2:#444444;--tx3:#888888;
   --ac:#2563EB;--ac2:#3B82F6;--acd:rgba(37,99,235,.08);--acs:rgba(37,99,235,.18);
   --cy:#059669;--re:#DC2626;--ye:#D97706;
-  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --fd:'Inter',sans-serif;--fb:'Inter',sans-serif;
   --sh:0 1px 6px rgba(0,0,0,.07);--shl:0 4px 20px rgba(0,0,0,.09);
 }
 html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb);overflow-x:hidden}
