@@ -713,7 +713,7 @@ export default function App() {
       <div className="ap-div"/>
       {steps.map(({color,path,title,desc})=>(
         <div key={title} style={{display:'flex',gap:12,padding:'12px 0',borderBottom:'1px solid var(--b0)'}}>
-          <div style={{width:38,height:38,borderRadius:10,background:color.replace(')',',0.12)').replace('var(','rgba('),display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+          <div style={{width:38,height:38,borderRadius:10,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={path}/></svg>
           </div>
           <div><div style={{fontWeight:600,color:'var(--tx1)',fontSize:14}}>{title}</div><div style={{fontSize:12,color:'var(--tx2)',marginTop:2}}>{desc}</div></div>
