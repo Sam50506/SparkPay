@@ -15,8 +15,10 @@ export default async function handler(req, res) {
       body: JSON.stringify({ address, blockchain: 'ARC-TESTNET', usdc: true })
     });
     const data = await response.json();
+    console.log('Circle response:', response.status, JSON.stringify(data));
     res.status(response.status).json(data);
   } catch (e) {
+    console.log('Error:', e.message);
     res.status(500).json({ error: e.message });
   }
 }
