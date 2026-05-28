@@ -678,8 +678,8 @@ export default function App() {
     try{
       const res=await fetch('/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
       const data=await res.json();
-      if(res.ok){lsSave('arc_faucet_last',Date.now());setLastClaim(Date.now());setFaucetMsg({type:'success',msg:'20 USDC claimed! It will arrive in your wallet shortly.'});setTimeout(refreshBal,8000);}
-      else{setFaucetMsg({type:'error',msg:data.message||'Claim failed. Try again later.'});}
+      if(res.ok){lsSave('arc_faucet_last',Date.now());setLastClaim(Date.now());const msg=data.message||data.txHash||data.transactionHash||'20 USDC claimed! It will arrive in your wallet shortly.';setFaucetMsg({type:'success',msg:String(msg)});setTimeout(refreshBal,8000);}
+      else{setFaucetMsg({type:'error',msg:JSON.stringify(data)});}
     }catch(e){setFaucetMsg({type:'error',msg:'Network error. Try again.'});}
     setFaucetLoading(false);
   };
