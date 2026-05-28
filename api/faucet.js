@@ -9,7 +9,8 @@ export default async function handler(req, res) {
   const userIP = req.headers['x-forwarded-for']?.split(',')[0] || '';
 
   try {
-    const response = await fetch('https://faucet.circle.com/api/graphql', {
+    // First introspect to find available fields
+    const introResponse = await fetch('https://faucet.circle.com/api/graphql', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -17,27 +18,14 @@ export default async function handler(req, res) {
         'Origin': 'https://faucet.circle.com',
         'Referer': 'https://faucet.circle.com/',
         'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/120.0.0.0',
-        'X-Forwarded-For': userIP,
       },
       body: JSON.stringify({
-        query: `mutation RequestToken($input: RequestTokenInput!) {
-          requestToken(input: $input) {
-            message
-            txHash
-          }
-        }`,
-        variables: {
-          input: {
-            address,
-            chain: 'ARC',
-            currency: 'USDC'
-          }
-        }
+        query: `{ __type(name: "RequestTokenResponse") { fields { name } } }`
       })
     });
-    const data = await response.json();
-    console.log('Faucet response:', response.status, JSON.stringify(data));
-    res.status(response.status).json(data);
+    const introData = await introResponse.json();
+    console.log('Schema:', JSON.stringify(introData));
+    res.status(200).json(introData);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
