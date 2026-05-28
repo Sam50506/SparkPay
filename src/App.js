@@ -530,7 +530,7 @@ function WalletPicker({onPick,onClose}){
 }
 export default function App() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
-  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(()=>ls('arc_faucet_last',0));
+  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(()=>ls('arc_faucet_last_'+address,0));
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',true));
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
@@ -678,7 +678,7 @@ export default function App() {
     try{
       const res=await fetch('/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
       const data=await res.json();
-      if(res.ok){lsSave('arc_faucet_last',Date.now());setLastClaim(Date.now());const msg=data.message||data.txHash||data.transactionHash||'20 USDC claimed! It will arrive in your wallet shortly.';setFaucetMsg({type:'success',msg:String(msg)});setTimeout(refreshBal,8000);}
+      if(res.ok){lsSave('arc_faucet_last_'+address,Date.now());setLastClaim(Date.now());const msg=data.message||data.txHash||data.transactionHash||'20 USDC claimed! It will arrive in your wallet shortly.';setFaucetMsg({type:'success',msg:String(msg)});setTimeout(refreshBal,8000);}
       else{setFaucetMsg({type:'error',msg:JSON.stringify(data)});}
     }catch(e){setFaucetMsg({type:'error',msg:'Network error. Try again.'});}
     setFaucetLoading(false);
