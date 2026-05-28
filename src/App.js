@@ -20,11 +20,11 @@ const CSS = `
   --sh:0 2px 20px rgba(0,0,0,.35);--shl:0 8px 40px rgba(0,0,0,.5);
 }
 .ap-root.light{
-  --bg:#EFF2F8;--surf:#E6E9F2;--card:#FFFFFF;--elev:#F3F5FC;--hov:#EBEEF8;
-  --b0:#DDE2EF;--b1:#CDD4E6;--b2:#BCC6DB;--b3:#A8B4CC;
-  --tx1:#0D1829;--tx2:#4A5672;--tx3:#8A96B0;
-  --acd:rgba(59,130,196,.08);--acs:rgba(59,130,196,.16);
-  --sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 32px rgba(0,0,0,.1);
+  --bg:#F7F7F5;--surf:#FFFFFF;--card:#FFFFFF;--elev:#FFFFFF;--hov:#F2F2F0;
+  --b0:#EBEBEB;--b1:#E0E0E0;--b2:#D0D0D0;--b3:#BBBBBB;
+  --tx1:#111111;--tx2:#555555;--tx3:#999999;
+  --ac:#3B82C4;--ac2:#5BA3D9;--acd:rgba(59,130,196,.08);--acs:rgba(59,130,196,.16);
+  --sh:0 1px 8px rgba(0,0,0,.06);--shl:0 4px 24px rgba(0,0,0,.08);
 }
 html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb);overflow-x:hidden}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
