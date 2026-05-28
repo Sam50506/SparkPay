@@ -248,6 +248,42 @@ const ArcLogo = ({ size = 36, animated = false }) => (
   </svg>
 );
 
+
+const ONBOARDING_SLIDES=[
+  {icon:'📤',title:'Send USDC',desc:'Transfer USDC instantly to any wallet on Arc Testnet. Near-zero fees, confirmed in seconds.'},
+  {icon:'📥',title:'Receive',desc:'Generate your QR code or payment link. Share it with anyone to get paid instantly.'},
+  {icon:'📋',title:'History',desc:'Track all your transactions with real-time status. Export as CSV anytime.'},
+  {icon:'👥',title:'Contacts',desc:'Save frequent wallet addresses for quick access when sending.'},
+  {icon:'⭐',title:'Rewards',desc:'Earn cashback on every confirmed transaction. Claim when you reach 10 USDC.'},
+  {icon:'📄',title:'Invoice',desc:'Create USDC payment requests stored on Supabase. Share the ID with your client.'},
+  {icon:'💳',title:'Pay Invoice',desc:'Enter an invoice ID to look it up and pay instantly from anywhere.'},
+  {icon:'🔀',title:'Multi Send',desc:'Send USDC to multiple recipients in one session. Perfect for payroll or batch payments.'},
+  {icon:'📅',title:'Scheduled',desc:'Set up recurring payment reminders and pre-fill the Send form automatically.'},
+];
+
+const OnboardingModal=({onDone})=>{
+  const[slide,setSlide]=useState(0);
+  const last=slide===ONBOARDING_SLIDES.length-1;
+  const s=ONBOARDING_SLIDES[slide];
+  return(
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:998,display:'flex',alignItems:'center',justifyContent:'center',padding:'24px'}}>
+      <div style={{background:'var(--card)',borderRadius:24,padding:'32px 24px',maxWidth:360,width:'100%',textAlign:'center',boxShadow:'0 8px 40px rgba(0,0,0,0.4)'}}>
+        <div style={{fontSize:56,marginBottom:16}}>{s.icon}</div>
+        <div style={{fontFamily:'var(--fd)',fontSize:22,fontWeight:800,color:'var(--tx1)',marginBottom:10}}>{s.title}</div>
+        <div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6,marginBottom:28,minHeight:60}}>{s.desc}</div>
+        <div style={{display:'flex',justifyContent:'center',gap:6,marginBottom:24}}>
+          {ONBOARDING_SLIDES.map((_,i)=><div key={i} style={{width:i===slide?20:6,height:6,borderRadius:3,background:i===slide?'var(--ac)':'var(--b1)',transition:'all .3s'}}/>)}
+        </div>
+        <div style={{display:'flex',gap:10}}>
+          {slide>0&&<button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>setSlide(s=>s-1)}>Back</button>}
+          <button className="ap-btn ap-btn-primary" style={{flex:2}} onClick={()=>last?onDone():setSlide(s=>s+1)}>{last?'Get Started':'Next'}</button>
+        </div>
+        {!last&&<div style={{marginTop:14,fontSize:12,color:'var(--tx3)',cursor:'pointer'}} onClick={onDone}>Skip</div>}
+      </div>
+    </div>
+  );
+};
+
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
   useEffect(() => { const t1=setTimeout(()=>setExit(true),2800); const t2=setTimeout(()=>onDone(),3300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
@@ -442,7 +478,7 @@ function WalletPicker({onPick,onClose}){
 }
 export default function App() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
-  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);
+  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',true));
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
@@ -586,7 +622,7 @@ export default function App() {
   return(
     <div className={'ap-root'+(dm?'':' light')}>
       <style>{CSS}</style>
-      {splash&&<SplashScreen onDone={()=>setSplash(false)}/>}
+      {splash&&<SplashScreen onDone={()=>setSplash(false)}/}}{!splash&&showOnboarding&&<OnboardingModal onDone={()=>{lsSave('arc_onboarded',true);setShowOnboarding(false);}}/>}
       {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={()=>{setShowResumeModal(false);const wt=savedSession.walletType||'';if(wt&&wt!=='WalletConnect'){connectBrowser(wt);}else if(wt==='WalletConnect'){connectWC();}else{connectBrowser();}}} onNew={()=>setShowResumeModal(false)}/>}
       {showConfirm&&confirmData&&<ConfirmModal data={confirmData} onConfirm={()=>{if(confirmAction)confirmAction()();}} onCancel={()=>{setShowConfirm(false);setConfirmData(null);setConfirmAction(null);}}/>}
       {showQR&&address&&<QRModal address={address} onClose={()=>setShowQR(false)}/>}
