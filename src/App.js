@@ -676,7 +676,7 @@ export default function App() {
     if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
     setFaucetLoading(true);setFaucetMsg(null);
     try{
-      const res=await fetch('https://api.circle.com/v1/faucet/drips',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','Authorization':'Bearer '+process.env.REACT_APP_CIRCLE_API_KEY},body:JSON.stringify({address,blockchain:'ARC-TESTNET',usdc:true})});
+      const res=await fetch('/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
       const data=await res.json();
       if(res.ok){lsSave('arc_faucet_last',Date.now());setLastClaim(Date.now());setFaucetMsg({type:'success',msg:'20 USDC claimed! It will arrive in your wallet shortly.'});setTimeout(refreshBal,8000);}
       else{setFaucetMsg({type:'error',msg:data.message||'Claim failed. Try again later.'});}
