@@ -416,7 +416,7 @@ function ConfirmModal({data,onConfirm,onCancel,walletName}){
     <div className="ap-modal-bg" onClick={onCancel}>
       <div className="ap-modal" onClick={e=>e.stopPropagation()}>
         <div className="ap-modal-title">Review Transfer</div>
-        {walletName==='OKX'&&<div style={{background:'rgba(255,165,0,.1)',border:'1px solid rgba(255,165,0,.3)',borderRadius:10,padding:'8px 12px',fontSize:12,color:'#FFA500',marginBottom:8}}>OKX Wallet fires transaction on first confirmation. This screen is your only review — proceed carefully.</div>}
+        {(walletName==='OKX'||walletName==='OKX Wallet')&&<div style={{background:'rgba(255,165,0,.1)',border:'1px solid rgba(255,165,0,.3)',borderRadius:10,padding:'8px 12px',fontSize:12,color:'#FFA500',marginBottom:8}}>OKX Wallet fires transaction on first confirmation. This screen is your only review — proceed carefully.</div>}
         <div className="ap-modal-sub">Please confirm the details before proceeding</div>
         {data.rows.map((r,i)=><div key={i} className="ap-conf-row"><span className="ap-conf-key">{r.k}</span><span className="ap-conf-val" style={r.highlight?{color:'var(--cy)'}:{}}>{r.v}</span></div>)}
         <div className="ap-modal-btns">
@@ -512,7 +512,7 @@ function WalletPicker({onPick,onClose}){
   return(
     <div style={{background:'var(--elev)',border:'1px solid var(--b2)',borderRadius:16,padding:20,display:'flex',flexDirection:'column',gap:10,boxShadow:'var(--shl)'}}>
       <div style={{fontSize:14,fontWeight:700,color:'var(--tx1)',fontFamily:'var(--fd)',marginBottom:4}}>Choose wallet</div>
-      {options.map((o,i)=><button key={i} onClick={()=>onPick(o.type,o.p)} style={{display:'flex',alignItems:'center',gap:12,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'13px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'var(--tx1)',width:'100%',textAlign:'left',transition:'all .14s'}}>
+      {options.map((o,i)=><button key={i} onClick={()=>onPick(o.type,o.p,o.label)} style={{display:'flex',alignItems:'center',gap:12,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'13px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'var(--tx1)',width:'100%',textAlign:'left',transition:'all .14s'}}>
         {o.icon?<img src={o.icon} style={{width:24,height:24,borderRadius:6}} alt={o.label}/>:<IC.Wallet/>} {o.label}
       </button>)}
       <button onClick={()=>onPick('wc',null)} style={{display:'flex',alignItems:'center',gap:12,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'13px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'var(--tx1)',width:'100%',textAlign:'left'}}><IC.WC/> WalletConnect</button>
@@ -761,7 +761,7 @@ function AppInner() {
             <div className="ap-connect-title">ArcPay</div>
             <div className="ap-connect-sub">Cross-border USDC remittance on Arc Testnet. Near zero fees, instant settlement.</div>
             <div className="ap-connect-btns">
-              {showPicker?<WalletPicker onPick={(type,p)=>{setShowPicker(false);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button></>}
+              {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button></>}
             </div>
             {status&&<div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'var(--acd)',border:'1px solid var(--acs)',fontSize:13,color:'var(--ac2)'}}>{status.msg}</div>}
             <div className="ap-connect-footer">
