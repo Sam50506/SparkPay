@@ -683,14 +683,21 @@ function AppInner() {
     setFaucetLoading(false);
     const prevBal=parseFloat(balance);
     let attempts=0;
+    const getBal=async()=>{
+      try{
+        const rp=new ethers.JsonRpcProvider(ARC_RPC||ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
+        const b=await rp.getBalance(address);
+        return parseFloat(ethers.formatUnits(b,18));
+      }catch{return prevBal;}
+    };
     const poll=setInterval(async()=>{
       attempts++;
-      await refreshBal();
-      const newBal=parseFloat(balance);
+      const newBal=await getBal();
       if(newBal>=prevBal+19){
         clearInterval(poll);
         lsSave('arc_faucet_last_'+address,Date.now());
         setLastClaim(Date.now());
+        setBalance(newBal.toFixed(2));
         setFaucetMsg({type:'success',msg:'20 USDC received! Next claim in 2 hours.'});
       } else if(attempts>=20){
         clearInterval(poll);
