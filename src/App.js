@@ -11,20 +11,20 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#FAFAF8;--surf:#F5F4F0;--card:#FFFFFF;--elev:#F0EEE8;--hov:#EAE8E0;
-  --b0:#E8E5DC;--b1:#DDD9CE;--b2:#CECCBE;--b3:#BCBAA8;
-  --tx1:#1A1A16;--tx2:#5C5A50;--tx3:#9C9A8C;
-  --ac:#F97316;--ac2:#FB923C;--acd:rgba(249,115,22,.1);--acs:rgba(249,115,22,.2);
-  --cy:#16A34A;--re:#DC2626;--ye:#D97706;
+  --bg:#060912;--surf:#0B0F1C;--card:#0F1524;--elev:#141A2E;--hov:#192038;
+  --b0:#141D30;--b1:#1A2440;--b2:#202C4E;--b3:#2A3A64;
+  --tx1:#E8EEFF;--tx2:#6E7E9A;--tx3:#2E3D58;
+  --ac:#3B82C4;--ac2:#5BA3D9;--acd:rgba(59,130,196,.12);--acs:rgba(59,130,196,.22);
+  --cy:#17E5B0;--re:#FF4F61;--ye:#F0C43F;
   --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
   --sh:0 2px 20px rgba(0,0,0,.35);--shl:0 8px 40px rgba(0,0,0,.5);
 }
 .ap-root.light{
-  --bg:#FAFAF8;--surf:#F5F4F0;--card:#FFFFFF;--elev:#F0EEE8;--hov:#EAE8E0;
-  --b0:#E8E5DC;--b1:#DDD9CE;--b2:#CECCBE;--b3:#BCBAA8;
-  --tx1:#1A1A16;--tx2:#5C5A50;--tx3:#9C9A8C;
-  --ac:#F97316;--ac2:#FB923C;--acd:rgba(249,115,22,.1);--acs:rgba(249,115,22,.2);
-  --sh:0 2px 16px rgba(0,0,0,.06);--shl:0 8px 32px rgba(0,0,0,.08);
+  --bg:#EFF2F8;--surf:#E6E9F2;--card:#FFFFFF;--elev:#F3F5FC;--hov:#EBEEF8;
+  --b0:#DDE2EF;--b1:#CDD4E6;--b2:#BCC6DB;--b3:#A8B4CC;
+  --tx1:#0D1829;--tx2:#4A5672;--tx3:#8A96B0;
+  --acd:rgba(59,130,196,.08);--acs:rgba(59,130,196,.16);
+  --sh:0 2px 16px rgba(0,0,0,.07);--shl:0 8px 32px rgba(0,0,0,.1);
 }
 html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb);overflow-x:hidden}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
@@ -45,7 +45,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-splash-bar-wrap{width:160px;height:2px;background:var(--b1);border-radius:1px;overflow:hidden;margin-top:44px;animation:fadeIn .4s .65s both}
 .ap-splash-bar{height:100%;border-radius:1px;background:linear-gradient(90deg,var(--ac),var(--cy));animation:fillBar 2s .7s cubic-bezier(.4,0,.15,1) both}
 .ap-splash-ver{position:absolute;bottom:28px;font-size:11px;color:var(--tx3);font-weight:500;animation:fadeIn .5s 1s both}
-.ap-connect{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg);background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(249,115,22,.07) 0%,transparent 70%)}
+.ap-connect{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg);background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(59,130,196,.09) 0%,transparent 70%)}
 .ap-connect-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--b0);border-radius:24px;padding:40px 32px;text-align:center;animation:scaleIn .3s ease both;box-shadow:var(--shl)}
 .ap-connect-title{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-.3px;margin-top:18px;color:var(--tx1)}
 .ap-connect-sub{font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.6}
@@ -304,22 +304,22 @@ const SplashScreen = ({ onDone }) => {
       `}</style>
       {/* Orbit rings with text inside */}
       <div style={{position:'relative',width:280,height:280,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:40}}>
-        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',background:'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)',animation:'glowPulse 2s ease-in-out infinite'}}/>
-        <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',border:'2px solid transparent',borderTop:'2px solid rgba(249,115,22,0.9)',borderRight:'2px solid rgba(249,115,22,0.3)',boxShadow:'0 0 20px rgba(249,115,22,0.5)',animation:'orbitSpin 2s linear infinite'}}/>
-        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',border:'1.5px solid transparent',borderBottom:'1.5px solid rgba(251,146,60,0.8)',borderLeft:'1.5px solid rgba(251,146,60,0.2)',boxShadow:'0 0 12px rgba(251,146,60,0.4)',animation:'orbitSpinRev 1.5s linear infinite'}}/>
-        <div style={{position:'absolute',width:180,height:180,borderRadius:'50%',border:'1px solid transparent',borderTop:'1px solid rgba(253,186,116,0.5)',animation:'orbitSpin 3s linear infinite'}}/>
+        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',background:'radial-gradient(circle, rgba(0,100,255,0.12) 0%, transparent 70%)',animation:'glowPulse 2s ease-in-out infinite'}}/>
+        <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',border:'2px solid transparent',borderTop:'2px solid rgba(0,160,255,0.9)',borderRight:'2px solid rgba(0,160,255,0.3)',boxShadow:'0 0 20px rgba(0,160,255,0.5)',animation:'orbitSpin 2s linear infinite'}}/>
+        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',border:'1.5px solid transparent',borderBottom:'1.5px solid rgba(0,210,255,0.8)',borderLeft:'1.5px solid rgba(0,210,255,0.2)',boxShadow:'0 0 12px rgba(0,210,255,0.4)',animation:'orbitSpinRev 1.5s linear infinite'}}/>
+        <div style={{position:'absolute',width:180,height:180,borderRadius:'50%',border:'1px solid transparent',borderTop:'1px solid rgba(100,230,255,0.5)',animation:'orbitSpin 3s linear infinite'}}/>
         <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',animation:'orbitSpin 2s linear infinite'}}>
-          <div style={{position:'absolute',top:-5,left:'50%',width:10,height:10,borderRadius:'50%',background:'#F97316',boxShadow:'0 0 16px 6px rgba(249,115,22,0.9)',transform:'translateX(-50%)'}}/>
+          <div style={{position:'absolute',top:-5,left:'50%',width:10,height:10,borderRadius:'50%',background:'#00d4ff',boxShadow:'0 0 16px 6px rgba(0,212,255,0.9)',transform:'translateX(-50%)'}}/>
         </div>
         <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',animation:'orbitSpinRev 1.5s linear infinite'}}>
-          <div style={{position:'absolute',bottom:-5,left:'50%',width:8,height:8,borderRadius:'50%',background:'#FB923C',boxShadow:'0 0 12px 4px rgba(251,146,60,0.9)',transform:'translateX(-50%)'}}/>
+          <div style={{position:'absolute',bottom:-5,left:'50%',width:8,height:8,borderRadius:'50%',background:'#0088ff',boxShadow:'0 0 12px 4px rgba(0,136,255,0.9)',transform:'translateX(-50%)'}}/>
         </div>
         {/* ArcPay text inside rings */}
         <div style={{position:'relative',zIndex:2,textAlign:'center'}}>
-          <div style={{fontFamily:'var(--fd)',fontSize:42,fontWeight:900,background:'linear-gradient(180deg, #1A1A16 0%, #F97316 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'textReveal .8s .3s both',letterSpacing:'-0.03em',lineHeight:1}}>ArcPay</div>
+          <div style={{fontFamily:'var(--fd)',fontSize:42,fontWeight:900,background:'linear-gradient(180deg, #ffffff 0%, #a0c8ff 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'textReveal .8s .3s both',letterSpacing:'-0.03em',lineHeight:1}}>ArcPay</div>
         </div>
       </div>
-      <div style={{fontSize:12,color:'rgba(249,115,22,0.8)',letterSpacing:'0.25em',textTransform:'uppercase',fontWeight:600,animation:'fadeInUp .6s .8s both'}}>Decentralized Remittance</div>
+      <div style={{fontSize:12,color:'rgba(0,180,255,0.7)',letterSpacing:'0.25em',textTransform:'uppercase',fontWeight:600,animation:'fadeInUp .6s .8s both'}}>Decentralized Remittance</div>
       <div style={{position:'absolute',bottom:32,fontSize:11,color:'rgba(255,255,255,0.2)',animation:'fadeInUp .6s 1.2s both'}}>Arc Testnet &nbsp;·&nbsp; Chain 5042002</div>
     </div>
   );
@@ -506,7 +506,7 @@ function WalletPicker({onPick,onClose}){
 export default function App() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
   const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));
-  const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',false));
+  const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>ls('arc_dm',true));
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
   const[showQR,setShowQR]=useState(false);const[rates,setRates]=useState({});
