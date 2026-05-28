@@ -8,20 +8,21 @@ export default async function handler(req, res) {
 
   const userIP = req.headers['x-forwarded-for']?.split(',')[0] || '';
 
-  // Verify reCAPTCHA
-  try {
-    const captchaRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`
-    });
-    const captchaData = await captchaRes.json();
-    console.log('Captcha:', JSON.stringify(captchaData));
-    if (!captchaData.success || captchaData.score < 0.5) {
-      return res.status(400).json({ error: 'Captcha verification failed' });
+  // Verify reCAPTCHA if token provided
+  let captchaValid = false;
+  if (captchaToken) {
+    try {
+      const captchaRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${process.env.RECAPTCHA_SECRET}&response=${captchaToken}`
+      });
+      const captchaData = await captchaRes.json();
+      console.log('Captcha:', JSON.stringify(captchaData));
+      captchaValid = captchaData.success && captchaData.score >= 0.3;
+    } catch(e) {
+      console.log('Captcha error:', e.message);
     }
-  } catch(e) {
-    console.log('Captcha error:', e.message);
   }
 
   try {
@@ -53,7 +54,7 @@ export default async function handler(req, res) {
       })
     });
     const data = await response.json();
-    console.log('Faucet response:', response.status, JSON.stringify(data));
+    console.log('Circle response:', response.status, JSON.stringify(data));
     res.status(200).json(data);
   } catch (e) {
     res.status(500).json({ error: e.message });

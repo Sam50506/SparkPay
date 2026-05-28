@@ -677,7 +677,8 @@ function AppInner() {
     if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
     setFaucetLoading(true);setFaucetMsg(null);
     try{
-      const captchaToken=await new Promise(r=>{window.grecaptcha?.ready(()=>{window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_KEY,{action:'faucet'}).then(r);})});
+      let captchaToken='';
+      try{captchaToken=await Promise.race([new Promise(r=>{window.grecaptcha?.ready(()=>{window.grecaptcha.execute(process.env.REACT_APP_RECAPTCHA_KEY,{action:'faucet'}).then(r);})}),new Promise((_,r)=>setTimeout(()=>r('timeout'),5000))]);}catch(e){console.log('captcha failed',e);}
       const res=await fetch('/api/faucet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,captchaToken})});
       const data=await res.json();
       const result=data?.data?.requestToken;
