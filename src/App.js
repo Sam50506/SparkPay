@@ -679,7 +679,9 @@ function AppInner() {
     setFaucetLoading(true);setFaucetMsg(null);
     try{
       lsSave('arc_faucet_last_'+address,Date.now());setLastClaim(Date.now());
-    setShowFaucetFrame(true);
+    window.open('https://faucet.circle.com','_blank');
+    setFaucetMsg({type:'success',msg:'Circle Faucet opened! Enter your address: '+address.slice(0,10)+'...'});
+    setFaucetLoading(false);
     return;
       const data=await res.json();
       const result=data?.data?.requestToken;
