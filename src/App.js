@@ -291,7 +291,7 @@ const SplashScreen = ({ onDone }) => {
   useEffect(() => { const t1=setTimeout(()=>setExit(true),2800); const t2=setTimeout(()=>onDone(),3300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
   return (
     <div className={`ap-splash${exit?' exit':''}`}>
-      <Lottie animationData={arcpayAnimation} loop={false} style={{width:'100vw',height:'100vh',objectFit:'cover'}}/>
+      <div style={{position:'relative',width:'100vw',height:'100vh'}}><Lottie animationData={arcpayAnimation} loop={false} style={{width:'100%',height:'100%',objectFit:'cover'}}/><div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at center, transparent 40%, #000 100%)',pointerEvents:'none'}}/></div>
       <div className="ap-splash-ver">Arc Testnet &nbsp; Chain 5042002</div>
     </div>
   );
