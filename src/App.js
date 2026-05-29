@@ -393,11 +393,11 @@ function buildChart(txns){
 function CountrySelect({value,onChange}){
   return(
     <div style={{position:'relative',display:'inline-block',flexShrink:0}}>
-      <div className={`ap-country-pill${!value?' empty':''}`} style={{pointerEvents:'none',userSelect:'none'}}>
-        {value?<><span className="ap-cc">{CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis'}}>{value}</span></>:<span>Select country</span>}
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:2,flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
+      <div className={`ap-country-pill${!value?' empty':''}`} style={{pointerEvents:'none',userSelect:'none',position:'absolute',inset:0,display:'flex',alignItems:'center',paddingLeft:10,paddingRight:6,gap:4,zIndex:0}}>
+        {value?<><span className="ap-cc">{CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <select value={value} onChange={e=>onChange(e.target.value)} style={{position:'absolute',inset:0,opacity:0,cursor:'pointer',width:'100%',height:'100%',fontSize:16}}>
+      <select value={value} onChange={e=>onChange(e.target.value)} style={{position:'relative',zIndex:1,opacity:0.01,cursor:'pointer',width:140,height:40,fontSize:16,border:'none',background:'transparent'}}>
         <option value="">None (Optional)</option>
         {COUNTRIES.map(c=><option key={c} value={c}>{c} ({CURRENCY[c]})</option>)}
       </select>
