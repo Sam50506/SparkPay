@@ -670,7 +670,8 @@ function AppInner() {
     setFaucetLoading(true);setFaucetMsg(null);
     try{
       navigator.clipboard?.writeText(address);
-    window.open('https://faucet.circle.com','_blank');
+    const w=window.open('https://faucet.circle.com','_blank');
+    if(!w||w.closed)window.location.href='https://faucet.circle.com';
     setFaucetMsg({type:'info',msg:'Address copied! Paste it in the faucet. Waiting to confirm your claim...'});
     setFaucetLoading(false);
     const prevBal=parseFloat(balance);
