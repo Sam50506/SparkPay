@@ -61,7 +61,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-sidebar.mob-open{transform:translateX(0)!important;box-shadow:0 0 60px rgba(0,0,0,.65)}
 .ap-content{flex:1;margin-left:256px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
 .ap-topbar{height:62px;border-bottom:1px solid var(--b0);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
-.ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px}
+.ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px;background:var(--bg);min-height:100%}
 .ap-page-enter{animation:scaleIn .22s ease both;max-width:580px}
 .ap-logo-area{padding:20px 16px 17px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:11px}
 .ap-logo-name{font-family:var(--fd);font-weight:800;font-size:17px;letter-spacing:-.3px;line-height:1;color:var(--tx1)}
