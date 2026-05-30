@@ -282,7 +282,7 @@ const OnboardingModal=({onDone})=>{
 
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
-  useEffect(() => { const t1=setTimeout(()=>setExit(true),3200); const t2=setTimeout(()=>onDone(),3700); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
+  useEffect(() => { const t1=setTimeout(()=>setExit(true),1800); const t2=setTimeout(()=>onDone(),2300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
   return (
     <div className={`ap-splash${exit?' exit':''}`} style={{background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'fixed',inset:0}}>
       <style>{`
