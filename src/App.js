@@ -599,8 +599,10 @@ function AppInner() {
   const statusCls=s=>!s?null:({success:'ap-status ap-status-success',error:'ap-status ap-status-error',warning:'ap-status ap-status-warning',info:'ap-status ap-status-info'}[s.type]||'ap-status ap-status-info');
   const txBadge=st=>({confirmed:'ap-tx-badge ap-tx-confirmed',pending:'ap-tx-badge ap-tx-pending',failed:'ap-tx-badge ap-tx-failed',submitted:'ap-tx-badge ap-tx-submitted'}[st]||'ap-tx-badge ap-tx-pending');
 
+  const isDesktop=window.innerWidth>=769;
   const SIDEBAR_SECTIONS=[
     {title:'Transfers',items:[{id:'send',label:'Send',ICN:IC.Send,info:'Transfer USDC to any wallet instantly on Arc Testnet'},{id:'multi',label:'Multi Send',ICN:IC.Multi,info:'Send USDC to multiple recipients in one session'},{id:'invoice',label:'Invoice',ICN:IC.Invoice,info:'Create USDC payment requests stored on Supabase'},{id:'pay',label:'Pay Invoice',ICN:IC.Pay,info:'Look up and pay an invoice using its unique ID'}]},
+    ...(isDesktop?[{title:'My Account',items:[{id:'history',label:'History',ICN:IC.History,info:'View all your transactions',dot:hasPendingTx},{id:'receive',label:'Receive',ICN:IC.Receive,info:'Generate QR code or payment link'},{id:'contacts',label:'Contacts',ICN:IC.Contacts,info:'Save wallet addresses for quick access'},{id:'rewards',label:'Rewards',ICN:IC.Rewards,info:'Earn cashback on every confirmed transaction'}]}]:[]),
     {title:'Analytics',items:[{id:'rates',label:'Exchange Rates',ICN:IC.Rates,info:'Live USDC to local currency conversion rates for 20 countries'},{id:'fees',label:'Fee Compare',ICN:IC.Compare,info:'See how ArcPay compares to banks and other transfer services'}]},
     {title:'Tools',items:[{id:'schedule',label:'Scheduled',ICN:IC.Schedule,info:'Set up recurring payment reminders and pre-fill the Send form'},{id:'faucet',label:'Faucet',ICN:IC.Receive,info:'Claim 20 free testnet USDC every 2 hours via Circle Faucet'}]},
     {title:'More',items:[{id:'settings',label:'Settings',ICN:IC.Settings,info:'Customize your ArcPay experience'},{id:'about',label:'About Arc',ICN:IC.About,info:'Learn more about the Arc protocol and network details'}]},
