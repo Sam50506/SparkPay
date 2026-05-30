@@ -73,7 +73,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-nav-item.active{background:var(--acd);color:var(--ac2);border-color:var(--acs)}
 .ap-nav-item .ni{margin-left:auto;width:16px;height:16px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--tx3);flex-shrink:0;cursor:pointer;transition:all .14s;font-style:italic;border:1px solid var(--b2);line-height:1}
 .ap-nav-item .ni:hover{background:var(--hov);color:var(--tx1);border-color:var(--b3)}
-.ap-tip-pop{position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:var(--elev);border:1px solid var(--b2);border-radius:12px;padding:11px 14px;font-size:12px;color:var(--tx2);line-height:1.55;width:210px;z-index:400;box-shadow:var(--shl);animation:scaleIn .15s ease;pointer-events:none}
+.ap-tip-pop{position:fixed;left:264px;top:auto;transform:none;background:var(--elev);border:1px solid var(--b2);border-radius:12px;padding:11px 14px;font-size:12px;color:var(--tx2);line-height:1.55;width:220px;z-index:400;box-shadow:var(--shl);animation:scaleIn .15s ease;pointer-events:none}
 .ap-sidebar-foot{padding:14px;border-top:1px solid var(--b0)}
 .ap-net-badge{display:flex;align-items:center;gap:6px;background:rgba(23,229,176,.06);border:1px solid rgba(23,229,176,.16);border-radius:999px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--cy);margin-bottom:10px}
 .ap-net-dot{width:6px;height:6px;border-radius:50%;background:var(--cy);animation:pulse 2s ease infinite}
