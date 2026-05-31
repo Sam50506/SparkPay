@@ -433,9 +433,11 @@ function OKXSelect({value, onChange, options, style}){
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>setOpen(false)}>
-        <div style={{background:'var(--card)',width:'100%',height:'55vh',overflowY:'auto',borderRadius:'20px 20px 0 0',paddingBottom:'16px'}} onClick={e=>e.stopPropagation()}>
-          <div style={{textAlign:'center',fontWeight:700,fontSize:15,padding:'0 16px 12px',borderBottom:'1px solid var(--b0)',color:'var(--tx1)'}}>Select</div>
+        <div style={{background:'var(--card)',width:'100%',maxHeight:'55vh',borderRadius:'20px 20px 0 0',display:'flex',flexDirection:'column'}} onClick={e=>e.stopPropagation()}>
+          <div style={{textAlign:'center',fontWeight:700,fontSize:15,padding:'12px 16px',borderBottom:'1px solid var(--b0)',color:'var(--tx1)',flexShrink:0,position:'sticky',top:0,background:'var(--card)',zIndex:1}}>Select</div>
+          <div style={{overflowY:'auto',flex:1}}>
           {options.map(o=><div key={o.value} onClick={()=>{onChange(o.value);setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',background:value===o.value?'var(--acd)':'transparent'}}>{o.label}</div>)}
+          </div>
         </div>
       </div>}
     </>);
