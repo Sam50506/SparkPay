@@ -396,7 +396,7 @@ function CountrySelect({value,onChange}){
   const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
   if(isOKX){
     return(<>
-      <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>{setOpen(o=>!o);setTimeout(()=>{if(sheetRef.current)sheetRef.current.scrollTop=0;},0);}} style={{cursor:'pointer'}}>
+      <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>setOpen(o=>!o)} style={{cursor:'pointer'}}>
         {value?<><span className="ap-cc">{CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4,flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
@@ -407,7 +407,7 @@ function CountrySelect({value,onChange}){
             <span style={{fontWeight:700,fontSize:15,color:'var(--tx1)'}}>Select Country</span>
             <span style={{width:56}}/>
           </div>
-          <div ref={sheetRef} style={{overflowY:'auto',flex:1}}>
+          <div ref={el=>{if(el)el.scrollTop=0;}} style={{overflowY:'auto',flex:1}}>
             <div onClick={()=>{onChange('');setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
             {COUNTRIES.map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{CC[c]}</span>{c} <span style={{color:'var(--tx3)',fontSize:12}}>({CURRENCY[c]})</span></div>)}
           </div>
