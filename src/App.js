@@ -409,7 +409,7 @@ function CountrySelect({value,onChange}){
     </>);
   }
   return(
-    <div style={{position:'relative',display:'inline-block',flexShrink:0}}>
+    <div style={{position:'relative',display:'block',width:'100%'}}>
       <div className={`ap-country-pill${!value?' empty':''}`} style={{pointerEvents:'none',userSelect:'none',position:'absolute',inset:0,display:'flex',alignItems:'center',paddingLeft:10,paddingRight:6,gap:4,zIndex:0}}>
         {value?<><span className="ap-cc">{CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
