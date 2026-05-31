@@ -396,7 +396,7 @@ function CountrySelect({value,onChange}){
   const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
   if(isOKX){
     return(<>
-      <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>setOpen(o=>!o)} style={{cursor:'pointer'}}>
+      <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>{setOpen(o=>!o);window.scrollTo(0,0);}} style={{cursor:'pointer'}}>
         {value?<><span className="ap-cc">{CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4,flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
