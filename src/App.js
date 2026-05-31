@@ -391,6 +391,23 @@ function buildChart(txns){
 }
 
 function CountrySelect({value,onChange}){
+  const[open,setOpen]=React.useState(false);
+  const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
+  if(isOKX){
+    return(<>
+      <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>setOpen(o=>!o)} style={{cursor:'pointer'}}>
+        {value?<><span className="ap-cc">{CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4,flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>setOpen(false)}>
+        <div style={{background:'var(--card)',width:'100%',maxHeight:'60vh',overflowY:'auto',borderRadius:'20px 20px 0 0',padding:'16px 0'}} onClick={e=>e.stopPropagation()}>
+          <div style={{textAlign:'center',fontWeight:700,fontSize:15,padding:'0 16px 12px',borderBottom:'1px solid var(--b0)',color:'var(--tx1)'}}>Select Country</div>
+          <div onClick={()=>{onChange('');setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
+          {COUNTRIES.map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{CC[c]}</span>{c} <span style={{color:'var(--tx3)',fontSize:12}}>({CURRENCY[c]})</span></div>)}
+        </div>
+      </div>}
+    </>);
+  }
   return(
     <div style={{position:'relative',display:'inline-block',flexShrink:0}}>
       <div className={`ap-country-pill${!value?' empty':''}`} style={{pointerEvents:'none',userSelect:'none',position:'absolute',inset:0,display:'flex',alignItems:'center',paddingLeft:10,paddingRight:6,gap:4,zIndex:0}}>
