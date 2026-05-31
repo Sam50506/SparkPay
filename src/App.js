@@ -423,13 +423,29 @@ function CountrySelect({value,onChange}){
 }
 
 function OKXSelect({value, onChange, options, style}){
+  const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
+  if(isOKX){
+    const[open,setOpen]=React.useState(false);
+    return(<>
+      <div style={{...style,padding:'10px 14px',borderRadius:12,border:'1px solid var(--b1)',background:'var(--elev)',fontSize:14,color:value?'var(--tx1)':'var(--tx3)',cursor:'pointer',display:'flex',alignItems:'center',gap:4,minHeight:44}} onClick={()=>setOpen(o=>!o)}>
+        <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{options.find(o=>o.value===value)?.label||'Select...'}</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>setOpen(false)}>
+        <div style={{background:'var(--card)',width:'100%',height:'55vh',overflowY:'auto',borderRadius:'20px 20px 0 0',paddingBottom:16}} onClick={e=>e.stopPropagation()}>
+          <div style={{textAlign:'center',fontWeight:700,fontSize:15,padding:'12px 16px',borderBottom:'1px solid var(--b0)',color:'var(--tx1)'}}>Select Country</div>
+          {options.map(o=><div key={o.value} onClick={()=>{onChange(o.value);setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',background:value===o.value?'var(--acd)':'transparent'}}>{o.label}</div>)}
+        </div>
+      </div>}
+    </>);
+  }
   return(
-    <div style={{position:'relative',display:'block'}}>
+    <div style={{position:'relative',display:'inline-block',width:'100%'}}>
       <div style={{pointerEvents:'none',userSelect:'none',position:'absolute',inset:0,display:'flex',alignItems:'center',paddingLeft:14,paddingRight:14,gap:4,zIndex:0,background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:12}}>
         <span style={{fontSize:14,color:value?'var(--tx1)':'var(--tx3)',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{options.find(o=>o.value===value)?.label||'Select...'}</span>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <select value={value} onChange={e=>onChange(e.target.value)} style={{...style,position:'relative',zIndex:1,opacity:0.01,cursor:'pointer',width:'100%',height:48,fontSize:16,border:'none',background:'transparent',display:'block'}}>
+      <select value={value} onChange={e=>onChange(e.target.value)} style={{...style,position:'relative',zIndex:1,opacity:0.01,cursor:'pointer',width:'100%',height:44,fontSize:16,border:'none',background:'transparent',display:'block'}}>
         {options.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </div>
