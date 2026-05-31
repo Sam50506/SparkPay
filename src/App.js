@@ -583,12 +583,12 @@ function AppInner() {
   const[showQR,setShowQR]=useState(false);const[rates,setRates]=useState({});
   const[sendTo,setSendTo]=useState('');const[sendAmt,setSendAmt]=useState('');const[sendCtry,setSendCtry]=useState(()=>ls('arc_ctry',''));
   const[multi,setMulti]=useState([{addr:'',amount:'',country:''}]);
-  const[invPayer,setInvPayer]=useState('');const[invAmt,setInvAmt]=useState('');const[invDesc,setInvDesc]=useState('');const[invCtry,setInvCtry]=useState('Pakistan');const[invId,setInvId]=useState('');
+  const[invPayer,setInvPayer]=useState('');const[invAmt,setInvAmt]=useState('');const[invDesc,setInvDesc]=useState('');const[invCtry,setInvCtry]=useState('');const[invId,setInvId]=useState('');
   const[payId,setPayId]=useState('');const[payDet,setPayDet]=useState(null);
   const[txns,setTxns]=useState([]);
   const[contractTxns,setContractTxns]=useState([]);
-  const[contacts,setContacts]=useState(()=>ls('arc_contacts',[]));const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('Pakistan');
-  const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'Pakistan',freq:'weekly',next:''});
+  const[contacts,setContacts]=useState(()=>ls('arc_contacts',[]));const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('');
+  const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'',freq:'weekly',next:''});
   const[defCtry,setDefCtry]=useState(()=>ls('arc_ctry',''));
   const[cashbackPending,setCashbackPending]=useState(()=>ls('arc_cashback_pending',0));const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
   const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);
