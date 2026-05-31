@@ -23,3 +23,10 @@ yarn-debug.log*
 yarn-error.log*
 .vercel
 .env*
+upload.py
+write_app.py
+deploy.js
+deploy.mjs
+deployed_address.txt
+artifacts/
+src/App.js.backup
