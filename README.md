@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# ArcPay — Cross Border USDC Remittance
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A cross border USDC remittance dApp built on Arc Testnet. Send USDC to 20+ countries instantly with zero fees, no KYC, and instant settlement.
 
-## Available Scripts
+**Live:** https://arc-remittance.vercel.app
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **Send USDC** — Instant transfers to any wallet on Arc Testnet
+- **Multi Send** — Send to multiple recipients in one session
+- **Invoice System** — Create and pay USDC invoices stored on Supabase
+- **Faucet** — Claim free testnet USDC via Circle Faucet
+- **Transaction History** — Real time status with on-chain confirmation
+- **Exchange Rates** — Live conversion rates for 20+ countries
+- **Fee Comparison** — ArcPay vs banks and other services
+- **Cashback Rewards** — Earn on every confirmed transaction
+- **Contacts** — Save frequent wallet addresses
+- **Scheduled Payments** — Set up recurring payment reminders
+- **QR Receive** — Generate QR code and payment links
+- **Dark and Light Mode** — Full theme support
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Supported Wallets
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- MetaMask, Brave, OKX, Rabby, Coinbase, Mises Browser
+- WalletConnect (300+ wallets)
 
-### `npm test`
+## Network Details
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| | |
+|---|---|
+| Network | Arc Testnet |
+| Chain ID | 5042002 |
+| RPC | rpc.testnet.arc.network |
+| USDC Contract | 0x3600000000000000000000000000000000000000 |
+| Remittance Contract | 0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44 |
+| Block Explorer | testnet.arcscan.app |
 
-### `npm run build`
+## Tech Stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+React, ethers.js v6, Supabase, WalletConnect v2, Recharts, Vercel
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Getting Started
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    git clone https://github.com/Sam50506/arc-remittance.git
+    cd arc-remittance
+    npm install
 
-### `npm run eject`
+Create a .env file with:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    REACT_APP_SUPABASE_URL=your_supabase_url
+    REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+    REACT_APP_ARC_RPC=https://rpc.testnet.arc.network
+    REACT_APP_WC_ID=your_walletconnect_project_id
+    REACT_APP_CIRCLE_API_KEY=your_circle_api_key
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Then run: npm start
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Built By
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Sam — https://x.com/Sam_50506
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Built on Arc Testnet as part of the Arc ecosystem.
