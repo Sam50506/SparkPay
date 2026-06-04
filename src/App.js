@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Faucet from './components/Faucet';
 
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
@@ -799,7 +800,7 @@ function AppInner() {
   </div>);
 };
 
-  const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return renderMulti();case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faucet':return renderFaucet();default:return renderSend();}};
+  const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return renderMulti();case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faucet':return <Faucet address={address} balance={balance} setBalance={setBalance} faucetLoading={faucetLoading} setFaucetLoading={setFaucetLoading} faucetMsg={faucetMsg} setFaucetMsg={setFaucetMsg} lastClaim={lastClaim} setLastClaim={setLastClaim}/>;default:return renderSend();}};
 
   return(
     <div className={'ap-root'+(dm?'':' light')}>
