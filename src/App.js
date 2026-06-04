@@ -719,27 +719,6 @@ function AppInner() {
 
   const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><ArcPayLogo size={48}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, zero cost cross border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
-  const renderFaucet=()=>{
-  const claimFaucet=async()=>{
-    if(!address){setFaucetMsg({type:'error',msg:'Connect your wallet first'});return;}
-    const now=Date.now();const cooldown=2*60*60*1000;
-    if(now-lastClaim<cooldown){const mins=Math.ceil((cooldown-(now-lastClaim))/60000);setFaucetMsg({type:'error',msg:'Wait '+mins+' more minutes before claiming again'});return;}
-    setFaucetLoading(true);setFaucetMsg(null);
-    try{
-      navigator.clipboard?.writeText(address);
-    const w=window.open('https://faucet.circle.com','_blank');
-    if(!w||w.closed)window.location.href='https://faucet.circle.com';
-    setFaucetMsg({type:'info',msg:'Address copied! Paste it in the faucet. Waiting to confirm your claim...'});
-    setFaucetLoading(false);
-    const prevBal=parseFloat(balance);
-    let attempts=0;
-    const getBal=async()=>{
-      try{
-        const rp=new ethers.JsonRpcProvider(ARC_RPC||ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
-        const b=await rp.getBalance(address);
-        return parseFloat(ethers.formatUnits(b,18));
-      }catch{return prevBal;}
-    };
     const poll=setInterval(async()=>{
       attempts++;
       const newBal=await getBal();
