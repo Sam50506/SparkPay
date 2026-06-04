@@ -820,7 +820,7 @@ function AppInner() {
               <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>ArcPay</span>
             </div>
             <div style={{fontSize:13,fontWeight:600,color:'var(--ac)',background:'var(--acd)',border:'1px solid var(--acs)',borderRadius:999,padding:'4px 12px',display:'inline-block',marginBottom:20}}>Live on Arc Testnet</div>
-            <h1 style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,color:'var(--tx1)',lineHeight:1.15,letterSpacing:'-0.5px',margin:'0 0 16px'}}>Send USDC across borders.<br/>Instantly.</h1>
+            <h1 style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,color:'var(--tx1)',lineHeight:1.15,letterSpacing:'-0.5px',margin:'0 0 16px'}}>Send USDC across borders.<br/><span style={{color:'var(--ac)'}}>Instantly.</span></h1>
             <p style={{fontSize:15,color:'var(--tx2)',lineHeight:1.7,marginBottom:32}}>Cross border remittance on Arc Testnet. Zero fees, no KYC, instant settlement to 20+ countries.</p>
             {/* Stats */}
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:40}}>
@@ -835,9 +835,9 @@ function AppInner() {
             <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:40}}>
               {[
                 {icon:'M12 2a10 10 0 110 20A10 10 0 0112 2zm-1 5v6l4 2',title:'Instant Transfers',desc:'Send USDC to any wallet in seconds on Arc Testnet'},
-                {icon:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',title:'No KYC Required',desc:'Connect your wallet and start sending — no sign up needed'},
+                {icon:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',title:'No KYC Required',desc:'Connect your wallet and start sending. No sign up needed.'},
                 {icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',title:'Earn Cashback',desc:'Get rewarded on every confirmed transaction'},
-                {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'Invoice & Pay',desc:'Create and pay invoices — perfect for freelancers'},
+                {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'Invoice & Pay',desc:'Create and pay invoices. Perfect for freelancers.'},
               ].map(({icon,title,desc})=>(
                 <div key={title} style={{display:'flex',gap:14,alignItems:'flex-start',padding:'16px',background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16}}>
                   <div style={{width:36,height:36,borderRadius:10,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
