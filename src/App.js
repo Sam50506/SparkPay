@@ -812,19 +812,54 @@ function AppInner() {
       {showCashbackToast&&cashbackToastData&&<CashbackToast amount={cashbackToastData.amount} rarity={cashbackToastData.rarity} onClose={()=>setShowCashbackToast(false)}/>}
 
       {!splash&&!address&&(
-        <div className="ap-connect">
-          <div className="ap-connect-card">
-            <ArcPayLogo size={56}/>
-            <div className="ap-connect-title">ArcPay</div>
-            <div className="ap-connect-sub">Cross-border USDC remittance on Arc Testnet. Near zero fees, instant settlement.</div>
-            <div className="ap-connect-btns">
-              {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button></>}
+        <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto'}}>
+          {/* Hero Section */}
+          <div style={{maxWidth:480,margin:'0 auto',padding:'48px 24px 0'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:40}}>
+              <ArcPayLogo size={32}/>
+              <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>ArcPay</span>
             </div>
-            {status&&<div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'var(--acd)',border:'1px solid var(--acs)',fontSize:13,color:'var(--ac2)'}}>{status.msg}</div>}
-            <div className="ap-connect-footer">
-              <div className="ap-connect-row"><span>Network</span><span style={{color:'var(--cy)',fontWeight:600}}>Arc Testnet</span></div>
-              <div className="ap-connect-row"><span>Chain ID</span><span style={{fontFamily:'monospace'}}>5042002</span></div>
-              <div className="ap-connect-row"><span>Contract</span><span style={{fontFamily:'monospace'}}>{REMIT_ADDR.slice(0,10)}...</span></div>
+            <div style={{fontSize:13,fontWeight:600,color:'var(--ac)',background:'var(--acd)',border:'1px solid var(--acs)',borderRadius:999,padding:'4px 12px',display:'inline-block',marginBottom:20}}>Live on Arc Testnet</div>
+            <h1 style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,color:'var(--tx1)',lineHeight:1.15,letterSpacing:'-0.5px',margin:'0 0 16px'}}>Send USDC across borders.<br/>Instantly.</h1>
+            <p style={{fontSize:15,color:'var(--tx2)',lineHeight:1.7,marginBottom:32}}>Cross-border remittance on Arc Testnet. Near-zero fees, no KYC, instant settlement to 20+ countries.</p>
+            {/* Stats */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:40}}>
+              {[['20+','Countries'],['~0','Fees'],['Instant','Settlement']].map(([v,l])=>(
+                <div key={l} style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'16px 12px',textAlign:'center'}}>
+                  <div style={{fontFamily:'var(--fd)',fontSize:20,fontWeight:900,color:'var(--ac)'}}>{v}</div>
+                  <div style={{fontSize:11,color:'var(--tx3)',marginTop:4,fontWeight:600}}>{l}</div>
+                </div>
+              ))}
+            </div>
+            {/* Features */}
+            <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:40}}>
+              {[
+                {icon:'M12 2a10 10 0 110 20A10 10 0 0112 2zm-1 5v6l4 2',title:'Instant Transfers',desc:'Send USDC to any wallet in seconds on Arc Testnet'},
+                {icon:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',title:'No KYC Required',desc:'Connect your wallet and start sending — no sign up needed'},
+                {icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',title:'Earn Cashback',desc:'Get rewarded on every confirmed transaction'},
+                {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'Invoice & Pay',desc:'Create and pay invoices — perfect for freelancers'},
+              ].map(({icon,title,desc})=>(
+                <div key={title} style={{display:'flex',gap:14,alignItems:'flex-start',padding:'16px',background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16}}>
+                  <div style={{width:36,height:36,borderRadius:10,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={icon}/></svg>
+                  </div>
+                  <div><div style={{fontWeight:700,color:'var(--tx1)',fontSize:14,marginBottom:2}}>{title}</div><div style={{fontSize:12,color:'var(--tx2)',lineHeight:1.5}}>{desc}</div></div>
+                </div>
+              ))}
+            </div>
+            {/* Connect Card */}
+            <div className="ap-connect-card" style={{marginBottom:48}}>
+              <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
+              <div style={{fontSize:13,color:'var(--tx2)',marginBottom:20}}>Connect your wallet to start sending USDC</div>
+              <div className="ap-connect-btns">
+                {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button></>}
+              </div>
+              {status&&<div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'var(--acd)',border:'1px solid var(--acs)',fontSize:13,color:'var(--ac2)'}}>{status.msg}</div>}
+              <div className="ap-connect-footer">
+                <div className="ap-connect-row"><span>Network</span><span style={{color:'var(--cy)',fontWeight:600}}>Arc Testnet</span></div>
+                <div className="ap-connect-row"><span>Chain ID</span><span style={{fontFamily:'monospace'}}>5042002</span></div>
+                <div className="ap-connect-row"><span>Contract</span><span style={{fontFamily:'monospace'}}>{REMIT_ADDR.slice(0,10)}...</span></div>
+              </div>
             </div>
           </div>
         </div>
