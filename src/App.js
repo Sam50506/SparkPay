@@ -719,29 +719,6 @@ function AppInner() {
 
   const renderAbout=()=>(<div><div className="ap-card"><div style={{display:'flex',alignItems:'center',gap:14,marginBottom:20}}><ArcPayLogo size={48}/><div><div className="ap-card-title">Arc Protocol</div><div style={{fontSize:13,color:'var(--tx2)'}}>Decentralized Remittance Infrastructure</div></div></div><div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7,marginBottom:20}}>Arc is a next-generation blockchain protocol for fast, zero cost cross border payments. ArcPay is the remittance interface built on Arc Testnet, enabling instant USDC transfers to 20 countries.</div><div className="ap-div"/><a href="https://x.com/arc" target="_blank" rel="noreferrer" className="ap-about-link"><IC.XLogo/><span style={{flex:1,fontWeight:600}}>Arc on X</span><IC.Ext/></a><a href="https://www.arc.io/blog" target="_blank" rel="noreferrer" className="ap-about-link"><IC.Blog/><span style={{flex:1,fontWeight:600}}>Arc Blog</span><IC.Ext/></a></div><div className="ap-card"><div className="ap-card-title">Network Details</div><div className="ap-div"/>{[['Chain ID','5042002'],['RPC','rpc.testnet.arc.network'],['USDC Contract',USDC_ADDR.slice(0,14)+'...'],['Remittance Contract',REMIT_ADDR.slice(0,14)+'...'],['Block Explorer','testnet.arcscan.app']].map(([k,v])=>(<div key={k} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}><span style={{fontSize:13,color:'var(--tx2)',fontWeight:500}}>{k}</span><span style={{fontSize:12,fontFamily:'monospace',color:'var(--tx1)'}}>{v}</span></div>))}</div></div>);
 
-    const poll=setInterval(async()=>{
-      attempts++;
-      const newBal=await getBal();
-      if(newBal>=prevBal+19){
-        clearInterval(poll);
-        lsSave('arc_faucet_last_'+address,Date.now());
-        setLastClaim(Date.now());
-        setBalance(newBal.toFixed(2));
-        setFaucetMsg({type:'success',msg:'20 USDC received! Next claim in 2 hours.'});
-      } else if(attempts>=20){
-        clearInterval(poll);
-        setFaucetMsg({type:'error',msg:'Claim not detected. Try again when ready.'});
-      }
-    },30000);
-    return;
-      const data=await res.json();
-      const result=data?.data?.requestToken;
-      if(result?.hash){lsSave('arc_faucet_last_'+address,Date.now());setLastClaim(Date.now());setFaucetMsg({type:'success',msg:'20 USDC claimed! It will arrive shortly.'});setTimeout(refreshBal,8000);}
-      else if(data?.errors){setFaucetMsg({type:'error',msg:data.errors[0]?.message||'Claim failed'});}
-      else{setFaucetMsg({type:'error',msg:'Claim failed. Try again later.'});}
-    }catch(e){setFaucetMsg({type:'error',msg:'Network error. Try again.'});}
-    setFaucetLoading(false);hcaptchaRef.current?.resetCaptcha();setCaptchaToken('');
-  };
   const cooldownLeft=Math.max(0,Math.ceil((2*60*60*1000-(Date.now()-lastClaim))/60000));
   const canClaim=cooldownLeft===0;
   const steps=[
