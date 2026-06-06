@@ -342,7 +342,7 @@ function getProvider() {
 const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
 const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
-const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44';
+const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xE8095BC93B2208B42d1cBc5d9A3aC1E8670ae1D6';
 const USDC_ADDR  = process.env.REACT_APP_USDC_ADDR||'0x3600000000000000000000000000000000000000';
 const WC_ID      = process.env.REACT_APP_WC_ID||'';
 const SB_URL     = process.env.REACT_APP_SUPABASE_URL||'';
@@ -362,6 +362,7 @@ const REMIT_ABI=[
   {inputs:[{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'}],name:'createInvoice',outputs:[{name:'',type:'bytes32'}],stateMutability:'nonpayable',type:'function'},
   {inputs:[{name:'token',type:'address'},{name:'invoiceId',type:'bytes32'}],name:'payInvoice',outputs:[],stateMutability:'nonpayable',type:'function'},
   {inputs:[{name:'token',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'}],name:'sendMoney',outputs:[],stateMutability:'nonpayable',type:'function'},
+  {inputs:[{name:"token",type:"address"},{name:"recipients",type:"address[]"},{name:"amounts",type:"uint256[]"},{name:"countries",type:"string[]"}],name:"batchSend",outputs:[],stateMutability:"nonpayable",type:"function"},
   {inputs:[{name:'user',type:'address'}],name:'getPayments',outputs:[{components:[{name:'sender',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'},{name:'timestamp',type:'uint256'},{name:'invoiceId',type:'bytes32'}],name:'',type:'tuple[]'}],stateMutability:'view',type:'function'},
   {inputs:[{name:'user',type:'address'}],name:'getUserInvoices',outputs:[{name:'',type:'bytes32[]'}],stateMutability:'view',type:'function'},
   {inputs:[{name:'',type:'bytes32'}],name:'invoices',outputs:[{name:'creator',type:'address'},{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'},{name:'paid',type:'bool'},{name:'createdAt',type:'uint256'},{name:'nonce',type:'uint256'}],stateMutability:'view',type:'function'},
