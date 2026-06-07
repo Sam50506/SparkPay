@@ -371,7 +371,7 @@ const REMIT_ABI=[
 const ERC20_ABI=['function balanceOf(address) view returns (uint256)','function allowance(address,address) view returns (uint256)','function approve(address,uint256) returns (bool)','function transfer(address,uint256) returns (bool)','function decimals() view returns (uint8)'];
 
 const short  =a=>a?a.slice(0,6)+'...'+a.slice(-4):'';
-const fmtUsdc=v=>v!=null?parseFloat(ethers.formatUnits(BigInt(v.toString()),6)).toFixed(2):'0.00';
+const fmtUsdc=v=>v!=null?parseFloat(ethers.formatUnits(BigInt(v.toString()),18)).toFixed(2):'0.00';
 const fmtDate=ts=>ts?new Date(Number(ts)*1000).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
 const ls     =(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
 const lsSave =(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
