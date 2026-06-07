@@ -4,20 +4,15 @@
   "description": "Cross border USDC remittance on Arc Testnet",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
+      "src": "https://i.ibb.co/xKRjNdtZ/Polish-20260530-022145393.png",
       "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo512.png",
-      "type": "image/png",
+      "src": "https://i.ibb.co/xKRjNdtZ/Polish-20260530-022145393.png",
       "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
