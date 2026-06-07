@@ -579,7 +579,7 @@ function WalletPicker({onPick,onClose}){
 }
 function AppInner() {
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
-  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(true);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
+  const wcProvRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const[splash,setSplash]=useState(()=>!ls('arc_launched',false));const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(false);
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
@@ -726,7 +726,7 @@ function AppInner() {
   return(
     <div className={'ap-root'+(dm?'':' light')}>
       <style>{CSS}</style>
-      {splash&&<SplashScreen onDone={()=>setSplash(false)}/>}{!splash&&showOnboarding&&<OnboardingModal onDone={()=>{lsSave('arc_onboarded',true);setShowOnboarding(false);}}/>}
+      {splash&&<SplashScreen onDone={()=>{lsSave('arc_launched',true);setSplash(false);}}/>}{!splash&&showOnboarding&&<OnboardingModal onDone={()=>{lsSave('arc_onboarded',true);setShowOnboarding(false);}}/>}
       {showFaucetFrame&&<div style={{position:'fixed',inset:0,zIndex:999,background:'#000',display:'flex',flexDirection:'column'}}><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',background:'#111'}}><span style={{color:'#fff',fontWeight:700}}>Circle Faucet</span><button onClick={()=>setShowFaucetFrame(false)} style={{background:'none',border:'none',color:'#fff',fontSize:20,cursor:'pointer'}}>×</button></div><iframe src={'https://faucet.circle.com/?address='+address+'&blockchain=ARC&token=USDC'} style={{flex:1,border:'none',width:'100%'}} title="Circle Faucet"/></div>}
       {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={()=>{setShowResumeModal(false);const wt=savedSession.walletType||'';if(wt&&wt!=='WalletConnect'){connectBrowser(wt);}else{setShowPicker(true);}}} onNew={()=>setShowResumeModal(false)}/>}
       {showConfirm&&confirmData&&<ConfirmModal data={confirmData} walletName={walletName} onConfirm={()=>{if(confirmAction)confirmAction()();}} onCancel={()=>{setShowConfirm(false);setConfirmData(null);setConfirmAction(null);}}/>}
