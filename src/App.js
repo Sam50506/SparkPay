@@ -617,7 +617,7 @@ function AppInner() {
   useEffect(()=>{if(signer&&address)refreshBal();},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
-  const loadContractHistory=useCallback(async()=>{try{const{remit}=getC();const p=await remit.getPayments(address);setContractTxns([...p].reverse().map(t=>({...t,hash:t.transactionHash||t.hash,status:'confirmed'})));}catch{}},[signer,address]);// eslint-disable-line
+  const loadContractHistory=useCallback(async()=>{},[signer,address]);// eslint-disable-line
   useEffect(()=>{if(tab==='history'&&signer)loadContractHistory();},[tab,signer,loadContractHistory]);
 
   const awardCashback=useCallback((txHash)=>{const rand=Math.random();let amount,rarity;if(rand<0.6){amount=(Math.random()*.2+.1).toFixed(3);rarity='Common';}else if(rand<0.9){amount=(Math.random()*.3+.3).toFixed(3);rarity='Rare';}else{amount=(Math.random()*.4+.6).toFixed(3);rarity='Epic';}const amt=parseFloat(amount);setCashbackPending(p=>parseFloat((p+amt).toFixed(3)));setCashbackHistory(prev=>[{amount:amt,rarity,txHash,ts:Date.now()},...prev.slice(0,49)]);setCashbackToastData({amount,rarity});setShowCashbackToast(true);},[]);
