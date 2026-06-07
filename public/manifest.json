@@ -1,7 +1,7 @@
 {
   "short_name": "ArcPay",
-  "name": "ArcPay \u2014 USDC Remittance",
-  "description": "Cross border USDC remittance on Arc Testnet. Zero fees, instant settlement.",
+  "name": "ArcPay",
+  "description": "Cross border USDC remittance on Arc Testnet",
   "icons": [
     {
       "src": "favicon.ico",
