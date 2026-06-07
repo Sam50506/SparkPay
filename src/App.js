@@ -389,7 +389,7 @@ async function awaitReceipt(provider,hash,ms=90000){
 
 function buildChart(txns){
   const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return{label:d.toLocaleDateString('en',{weekday:'short'}),sent:0};});
-  txns.forEach(tx=>{const label=new Date(Number(tx.timestamp)*1000).toLocaleDateString('en',{weekday:'short'});const slot=days.find(d=>d.label===label);if(slot){const n=parseFloat(typeof tx.amount==='object'?fmtUsdc(tx.amount):tx.amount);slot.sent+=isNaN(n)?0:n;}});
+  txns.forEach(tx=>{const label=new Date(Number(tx.timestamp)*1000).toLocaleDateString('en',{weekday:'short'});const slot=days.find(d=>d.label===label);if(slot){let n;if(typeof tx.amount==='bigint'||typeof tx.amount==='object'){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
   return days;
 }
 
