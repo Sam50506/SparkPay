@@ -644,7 +644,7 @@ function AppInner() {
       setTxns(updated);
     }catch(_){}
   },[address]);
-  useEffect(()=>{if(tab==='history'&&signer)loadContractHistory();},[tab,signer,loadContractHistory]);useEffect(()=>{if(tab==='rewards'&&address)fetchMyClaims();},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
+  useEffect(()=>{if(tab==='history'&&signer)loadContractHistory();},[tab,signer,loadContractHistory]);useEffect(()=>{if(tab==='rewards'&&address){fetchMyClaims();setClaimSubmitted(s=>s===true?s:false);}},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
 
   const awardCashback=useCallback((txHash)=>{const rand=Math.random();let amount,rarity;if(rand<0.6){amount=(Math.random()*.2+.1).toFixed(3);rarity='Common';}else if(rand<0.9){amount=(Math.random()*.3+.3).toFixed(3);rarity='Rare';}else{amount=(Math.random()*.4+.6).toFixed(3);rarity='Epic';}const amt=parseFloat(amount);setCashbackPending(p=>parseFloat((p+amt).toFixed(3)));setCashbackHistory(prev=>[{amount:amt,rarity,txHash,ts:Date.now()},...prev.slice(0,49)]);setCashbackToastData({amount,rarity});setShowCashbackToast(true);},[]);
 
