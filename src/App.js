@@ -371,7 +371,7 @@ const REMIT_ABI=[
 const ERC20_ABI=['function balanceOf(address) view returns (uint256)','function allowance(address,address) view returns (uint256)','function approve(address,uint256) returns (bool)','function transfer(address,uint256) returns (bool)','function decimals() view returns (uint8)'];
 
 const short  =a=>a?a.slice(0,6)+'...'+a.slice(-4):'';
-const sendNotif=(title,body)=>{if('Notification' in window&&Notification.permission==='granted'){new Notification(title,{body,icon:'/logo192.png'});}};
+const sendNotif=(title,body)=>{if('Notification' in window&&Notification.permission==='granted'){if(navigator.serviceWorker?.controller){navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,icon:'/logo192.png'}));}else{try{new Notification(title,{body,icon:'/logo192.png'});}catch(_){}}}};
 const requestNotifPermission=async()=>{if('Notification' in window&&Notification.permission==='default'){await Notification.requestPermission();}};
 const fmtUsdc=v=>v!=null?parseFloat(ethers.formatUnits(BigInt(v.toString()),18)).toFixed(2):'0.00';
 const fmtDate=ts=>ts?new Date(Number(ts)*1000).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
