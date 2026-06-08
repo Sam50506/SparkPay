@@ -604,7 +604,7 @@ function AppInner() {
 
   useEffect(()=>lsSave('arc_contacts',contacts),[contacts]);
   useEffect(()=>lsSave('arc_scheds',scheds),[scheds]);
-  useEffect(()=>{if(address)setTxns(ls('arc_txhistory_'+address,[]));},[address]);
+  useEffect(()=>{if(address){const cutoff=Math.floor(Date.now()/1000)-(30*24*60*60);const all=ls('arc_txhistory_'+address,[]);const recent=all.filter(t=>!t.timestamp||t.timestamp>cutoff);if(recent.length<all.length){lsSave('arc_txhistory_'+address,recent);setStatus({type:'info',msg:'Transactions older than 30 days have been removed to keep your app running smoothly.'});}setTxns(recent);}},[address]);
   useEffect(()=>{if(address)lsSave('arc_txhistory_'+address,txns);},[txns,address]);
   useEffect(()=>lsSave('arc_dm',dm),[dm]);
   useEffect(()=>lsSave('arc_ctry',defCtry),[defCtry]);
