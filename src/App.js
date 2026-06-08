@@ -378,12 +378,15 @@ const fmtDate=ts=>ts?new Date(Number(ts)*1000).toLocaleDateString('en',{month:'s
 const ls     =(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
 const lsSave =(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
-async function awaitReceipt(provider,hash,ms=90000){
+async function awaitReceipt(provider,hash,ms=120000){
   const end=Date.now()+ms;
   let rpcProvider=null;
   try{rpcProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});}catch(_){}
   while(Date.now()<end){
-    try{const p=rpcProvider||provider;const r=await p.getTransactionReceipt(hash);if(r){return r;}}catch(_){}
+    try{
+      if(rpcProvider){const r=await rpcProvider.getTransactionReceipt(hash);if(r&&r.blockNumber)return r;}
+      const r2=await provider.getTransactionReceipt(hash);if(r2&&r2.blockNumber)return r2;
+    }catch(_){}
     await new Promise(res=>setTimeout(res,3000));
   }
   return null;
