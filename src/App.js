@@ -234,21 +234,8 @@ const IC = {
 };
 
 const ArcPayLogo = ({ size = 36 }) => (
-  <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="100" rx="22" fill="#0F1A2E"/>
-    <defs>
-      <linearGradient id="ag" x1="50" y1="10" x2="50" y2="90" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stopColor="#FFFFFF"/>
-        <stop offset="100%" stopColor="#7AAFD4"/>
-      </linearGradient>
-    </defs>
-    <path d="M50 14C29 14 17 30 17 47L17 54L27 54L27 47C27 34 37 24 50 24C63 24 73 34 73 47L73 54L83 54L83 47C83 30 71 14 50 14Z" fill="url(#ag)"/>
-    <rect x="34" y="54" width="10" height="22" rx="2" fill="url(#ag)"/>
-    <rect x="56" y="54" width="10" height="22" rx="2" fill="url(#ag)"/>
-    <rect x="44" y="60" width="12" height="16" rx="2" fill="url(#ag)" opacity="0.5"/>
-  </svg>
-);
-const ONBOARDING_SLIDES=[
+  <img src='/logo192.png' width={size} height={size} style={{borderRadius:10,objectFit:'cover'}}/>
+);const ONBOARDING_SLIDES=[
   {icon:'📤',title:'Send USDC',desc:'Transfer USDC instantly to any wallet on Arc Testnet. Zero fees, confirmed in seconds.'},
   {icon:'📥',title:'Receive',desc:'Generate your QR code or payment link. Share it with anyone to get paid instantly.'},
   {icon:'📋',title:'History',desc:'Track all your transactions with real-time status. Export as CSV anytime.'},
