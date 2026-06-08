@@ -675,7 +675,7 @@ function AppInner() {
 
   const exportCSV=()=>{const rows=[['Type','Hash','Recipient','Amount (USDC)','Country','Date','Status'],...txns.map(t=>['Send',t.hash||'',t.recipient||'',t.amount||'',t.country||'',fmtDate(t.timestamp),t.status||'']),...ls('arc_invoices',[]).map(i=>['Invoice',i.id||'',i.payer||'',i.amount||'',i.country||'',fmtDate(i.ts),i.paid?'Paid':'Unpaid']),...scheds.map(s=>['Scheduled','',s.addr||'',s.amount||'',s.country||'',s.next||'',s.freq||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='arcpay-history.csv';a.click();URL.revokeObjectURL(url);};
 
-  const allTxns=[...txns,...contractTxns.filter(c=>!txns.find(l=>l.hash===c.transactionHash||l.hash===c.hash))];
+  const allTxns=[...txns];
   const chartData=buildChart(allTxns);const totalSent=allTxns.reduce((s,t)=>{const n=typeof t.amount==='bigint'||typeof t.amount==='object'?parseFloat(ethers.formatUnits(BigInt(t.amount.toString()),18)):parseFloat(t.amount);return s+(isNaN(n)?0:n);},0);
   const hasPendingTx=txns.some(t=>t.status==='pending'||t.status==='submitted');
   const recentRecipients=[...new Set(txns.filter(t=>t.recipient&&!t.hash?.startsWith('0xdemo')).map(t=>t.recipient))].slice(0,5);
