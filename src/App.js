@@ -18,7 +18,7 @@ const CSS = `
   --tx1:#F0F4FF;--tx2:#A0AECA;--tx3:#5A6A8A;
   --ac:#4D9FE0;--ac2:#70B8F0;--acd:rgba(77,159,224,.15);--acs:rgba(77,159,224,.3);
   --cy:#17E5B0;--re:#FF4F61;--ye:#F0C43F;
-  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --fd:'Inter',sans-serif;--fb:'Inter',sans-serif;
   --sh:0 2px 20px rgba(0,0,0,.4);--shl:0 8px 40px rgba(0,0,0,.6);
 }
 .ap-root.light{
