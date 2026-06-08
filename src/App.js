@@ -137,7 +137,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-conf-val{color:var(--tx1);font-weight:600;text-align:right;max-width:220px;word-break:break-all}
 .ap-modal-btns{display:flex;gap:10px;margin-top:20px}
 .ap-botnav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surf);border-top:1px solid var(--b0);padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:100;align-items:flex-end}
-.ap-bot-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;cursor:pointer;font-size:10px;font-weight:600;color:var(--tx2);transition:color .14s;position:relative}
+.ap-bot-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 2px;cursor:pointer;font-size:10px;font-weight:600;color:var(--tx2);transition:color .14s;position:relative}
 .ap-bot-item.active{color:var(--ac)}
 .ap-bot-fab-wrap{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-size:10px;font-weight:600;color:var(--tx3);transition:color .14s}
 .ap-bot-fab-wrap.active{color:var(--ac)}
