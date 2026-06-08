@@ -623,7 +623,7 @@ function AppInner() {
   useEffect(()=>{if(signer&&address)refreshBal();},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
-  const loadContractHistory=useCallback(async()=>{try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const remitRO=new ethers.Contract(REMIT_ADDR,REMIT_ABI,rp);const p=await remitRO.getPayments(address);setContractTxns([...p].reverse());}catch{}},[address]);// eslint-disable-line
+  const loadContractHistory=useCallback(async()=>{if(!address)return;try{const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+address+'&sort=desc');const d=await r.json();if(d.message!=='OK'||!d.result)return;const received=d.result.filter(t=>t.to.toLowerCase()===address.toLowerCase()&&t.from.toLowerCase()!==address.toLowerCase()&&t.input==='0x'&&t.isError==='0').map(t=>({hash:t.hash,recipient:address,sender:t.from,amount:parseFloat(ethers.formatUnits(t.value,18)).toFixed(2),country:'',timestamp:parseInt(t.timeStamp),status:'confirmed',received:true}));setContractTxns(received);}catch(e){console.log('explorer fetch failed:',e);}},[address]);// eslint-disable-line
   const refreshPendingTxns=useCallback(async()=>{
     try{
       const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
