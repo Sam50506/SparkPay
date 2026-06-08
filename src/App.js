@@ -622,7 +622,7 @@ function AppInner() {
   useEffect(()=>{if(signer&&address)refreshBal();},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
-  const loadContractHistory=useCallback(async()=>{},[signer,address]);// eslint-disable-line
+  const loadContractHistory=useCallback(async()=>{try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const remitRO=new ethers.Contract(REMIT_ADDR,REMIT_ABI,rp);const p=await remitRO.getPayments(address);setContractTxns([...p].reverse());}catch{}},[address]);// eslint-disable-line
   const refreshPendingTxns=useCallback(async()=>{
     try{
       const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
