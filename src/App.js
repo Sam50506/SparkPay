@@ -599,7 +599,7 @@ function AppInner() {
   const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'',freq:'weekly',next:''});
   const[defCtry,setDefCtry]=useState(()=>ls('arc_ctry',''));
   const[cashbackPending,setCashbackPending]=useState(()=>ls('arc_cashback_pending',0));const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
-  const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);
+  const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);const[manageTxns,setManageTxns]=useState(false);
 
   useEffect(()=>lsSave('arc_contacts',contacts),[contacts]);
   useEffect(()=>lsSave('arc_scheds',scheds),[scheds]);
