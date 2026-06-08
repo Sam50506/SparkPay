@@ -381,10 +381,10 @@ const lsSave =(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 async function awaitReceipt(provider,hash,ms=90000){
   const end=Date.now()+ms;
   let rpcProvider=null;
-  try{if(ARC_RPC)rpcProvider=new ethers.JsonRpcProvider(ARC_RPC,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});}catch(_){}
+  try{rpcProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});}catch(_){}
   while(Date.now()<end){
-    try{const p=rpcProvider||provider;const r=await p.getTransactionReceipt(hash);if(r)return r;}catch(_){}
-    await new Promise(res=>setTimeout(res,2000));
+    try{const p=rpcProvider||provider;const r=await p.getTransactionReceipt(hash);if(r){return r;}}catch(_){}
+    await new Promise(res=>setTimeout(res,3000));
   }
   return null;
 }
