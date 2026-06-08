@@ -42,6 +42,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
 
   const total = multi.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
   const validCount = multi.filter(r => r.addr && r.amount).length;
+  const invalidAddrs = multi.filter(r => r.addr && !r.addr.match(/^0x[0-9a-fA-F]{40}$/));
 
   return (
     <div className="ap-card">
@@ -113,6 +114,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
         + Add Recipient
       </button>
 
+      {invalidAddrs.length > 0 && <div style={{background:'rgba(255,79,97,.1)',border:'1px solid rgba(255,79,97,.3)',borderRadius:10,padding:'8px 12px',fontSize:12,color:'var(--re)',marginBottom:8}}>{invalidAddrs.length} invalid address(es) will be skipped</div>}
       <div style={{ padding: '12px 14px', background: 'var(--elev)', borderRadius: 12, border: '1px solid var(--b1)', fontSize: 14, color: 'var(--tx1)', marginBottom: 8 }}>
         Total: <strong>{total.toFixed(2)} USDC</strong> to <strong>{validCount}</strong> recipients
       </div>
