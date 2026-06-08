@@ -695,7 +695,7 @@ function AppInner() {
       <div className="ap-label">Recipient Address</div>
       <input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:recentRecipients.length?12:14}}/>
       {recentRecipients.length>0&&<div style={{marginBottom:14}}><div style={{fontSize:10,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Recent</div><div className="ap-quick-wrap">{recentRecipients.map((r,i)=><button key={i} className="ap-quick-pill" onClick={()=>setSendTo(r)}>{short(r)}</button>)}</div></div>}
-      <div className="ap-fee-note"><IC.Check/> Estimated fee: ~0.001 USDC on Arc Testnet</div>
+      <div className="ap-fee-note"><IC.Check/> Estimated fee: ~0.01 USDC on Arc Testnet</div>
       <button className="ap-btn ap-btn-primary" onClick={handleSendReview} disabled={loading||!sendTo||!sendAmt}>{loading?'Processing...':'Review Transfer'}</button>
     </div>
   </>);
