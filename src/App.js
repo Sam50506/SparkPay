@@ -567,7 +567,7 @@ function WalletPicker({onPick,onClose}){
       {options.map((o,i)=><button key={i} onClick={()=>onPick(o.type,o.p,o.label)} style={{display:'flex',alignItems:'center',gap:12,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'13px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'var(--tx1)',width:'100%',textAlign:'left',transition:'all .14s'}}>
         {o.icon?<img src={o.icon} style={{width:24,height:24,borderRadius:6}} alt={o.label}/>:<IC.Wallet/>} {o.label}
       </button>)}
-      <button onClick={()=>onPick('wc',null)} style={{display:'flex',alignItems:'center',gap:12,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'13px 16px',cursor:'pointer',fontSize:14,fontWeight:600,color:'var(--tx1)',width:'100%',textAlign:'left'}}><IC.WC/> WalletConnect</button>
+      
       <button onClick={onClose} style={{fontSize:13,color:'var(--tx2)',background:'none',border:'none',cursor:'pointer',marginTop:4}}>Back</button>
     </div>
   );
