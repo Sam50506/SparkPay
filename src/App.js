@@ -554,7 +554,7 @@ function WalletPicker({onPick,onClose}){
 
   const options=[];
   if(eip6963.length>0){
-    eip6963.forEach((w,i)=>options.push({type:'eip6963_'+i,label:w.info.name,icon:w.info.icon,p:w.provider}));
+    eip6963.forEach((w,i)=>{const name=w.info.name.toLowerCase();if(name.includes('phantom')||name.includes('solflare')||name.includes('solana'))return;options.push({type:'eip6963_'+i,label:w.info.name,icon:w.info.icon,p:w.provider});});
   } else {
     const eth=window.ethereum;
     if(eth){const providers=eth.providers?.length?eth.providers:[eth];providers.forEach((p,i)=>{let label='Browser Wallet',type='p_'+i;if(p.isMetaMask&&!p.isBraveWallet)label='MetaMask';else if(p.isBraveWallet)label='Brave Wallet';else if(p.isCoinbaseWallet)label='Coinbase Wallet';else if(p.isRabby)label='Rabby';else if(p.isOkxWallet||p.isOKExWallet)label='OKX Wallet';else if(p.isTrust)label='Trust Wallet';options.push({type,label,p});});}
