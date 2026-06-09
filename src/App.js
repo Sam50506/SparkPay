@@ -794,7 +794,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
               <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
               <div style={{fontSize:13,color:'var(--tx2)',marginBottom:20}}>Connect your wallet to start sending USDC</div>
               <div className="ap-connect-btns">
-                {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<>{window.ethereum?<button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>:<button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={connectWC}><IC.WC/> Connect Wallet</button>}</>}
+                {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button></>}
               </div>
               {status&&<div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'var(--acd)',border:'1px solid var(--acs)',fontSize:13,color:'var(--ac2)'}}>{status.msg}</div>}
               <div className="ap-connect-footer">
