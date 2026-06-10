@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Faucet from './components/Faucet';
 import MultiSend from './components/MultiSend';
@@ -428,9 +429,9 @@ function CountrySelect({value,onChange}){
 }
 
 function OKXSelect({value, onChange, options, style}){
+  const[open,setOpen]=React.useState(false);
   const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
   if(isOKX){
-    const[open,setOpen]=React.useState(false);
     return(<>
       <div style={{...style,padding:'10px 14px',borderRadius:12,border:'1px solid var(--b1)',background:'var(--elev)',fontSize:14,color:value?'var(--tx1)':'var(--tx3)',cursor:'pointer',display:'flex',alignItems:'center',gap:4,minHeight:44}} onClick={()=>setOpen(o=>!o)}>
         <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{options.find(o=>o.value===value)?.label||'Select...'}</span>
