@@ -5,8 +5,9 @@
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "@supabase/supabase-js": "^2.107.0",
-    "@walletconnect/ethereum-provider": "^2.23.9",
+    "@walletconnect/ethereum-provider": "^2.17.0",
     "@walletconnect/modal": "^2.7.0",
+    "@web3modal/standalone": "^2.4.3",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
