@@ -609,7 +609,7 @@ function AppInner() {
 
   useEffect(()=>{if(!window.ethereum)return;const onAcc=a=>{if(!a.length){setTimeout(()=>{if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(accounts=>{if(!accounts.length)doDisconnect();})},1000);}else setAddress(a[0]);};const onChain=(chainId)=>{};window.ethereum.on('accountsChanged',onAcc);window.ethereum.on('chainChanged',onChain);return()=>{window.ethereum.removeListener('accountsChanged',onAcc);window.ethereum.removeListener('chainChanged',onChain);};},[doDisconnect]);
 
-  const refreshBal=useCallback(async()=>{if(!provider||!address)return;try{const b=await provider.getBalance(address);setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));}catch{try{const c=new ethers.Contract(USDC_ADDR,ERC20_ABI,provider);const b=await c.balanceOf(address);setBalance(fmtUsdc(b));}catch{}}},[provider,address]);
+  const refreshBal=useCallback(async()=>{if(!address)return;try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const b=await rp.getBalance(address);setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));}catch{}},[address]);
   useEffect(()=>{if(signer&&address)refreshBal();},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
