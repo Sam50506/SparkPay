@@ -272,39 +272,35 @@ const OnboardingModal=({onDone})=>{
 };
 
 const SplashScreen = ({ onDone }) => {
+  const [phase, setPhase] = useState(0);
   const [exit, setExit] = useState(false);
-  useEffect(() => { const t1=setTimeout(()=>setExit(true),1800); const t2=setTimeout(()=>onDone(),2300); return()=>{clearTimeout(t1);clearTimeout(t2);}; }, [onDone]);
+  useEffect(() => {
+    const t0=setTimeout(()=>setPhase(1),100);
+    const t1=setTimeout(()=>setPhase(2),600);
+    const t2=setTimeout(()=>setPhase(3),1000);
+    const t3=setTimeout(()=>setExit(true),1800);
+    const t4=setTimeout(()=>onDone(),2200);
+    return()=>{[t0,t1,t2,t3,t4].forEach(clearTimeout);}
+  }, [onDone]);
   return (
-    <div className={`ap-splash${exit?' exit':''}`} style={{background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'fixed',inset:0}}>
+    <div style={{position:'fixed',inset:0,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:999,opacity:exit?0:1,transform:exit?'scale(1.03)':'scale(1)',transition:'opacity .4s ease, transform .4s ease'}}>
       <style>{`
-        @keyframes orbitSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        @keyframes orbitSpinRev{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
-        @keyframes pulse{0%,100%{opacity:.6;filter:blur(2px)}50%{opacity:1;filter:blur(0px)}}
-        @keyframes glowPulse{0%,100%{box-shadow:0 0 30px 8px rgba(0,120,255,.4)}50%{box-shadow:0 0 60px 20px rgba(0,180,255,.8)}}
-        @keyframes textReveal{0%{opacity:0;letter-spacing:0.5em;filter:blur(8px)}100%{opacity:1;letter-spacing:-0.02em;filter:blur(0)}}
-        @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
-        @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes energyFlow{0%{stroke-dashoffset:1000}100%{stroke-dashoffset:0}}
+        @keyframes lineExpand{from{width:0;opacity:0}to{width:120px;opacity:1}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes dotPulse{0%,100%{opacity:0.3}50%{opacity:1}}
       `}</style>
-      {/* Orbit rings with text inside */}
-      <div style={{position:'relative',width:280,height:280,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:40}}>
-        <div style={{position:'absolute',width:280,height:280,borderRadius:'50%',background:'radial-gradient(circle, rgba(0,100,255,0.12) 0%, transparent 70%)',animation:'glowPulse 2s ease-in-out infinite'}}/>
-        <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',border:'2px solid transparent',borderTop:'2px solid rgba(0,160,255,0.9)',borderRight:'2px solid rgba(0,160,255,0.3)',boxShadow:'0 0 20px rgba(0,160,255,0.5)',animation:'orbitSpin 2s linear infinite'}}/>
-        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',border:'1.5px solid transparent',borderBottom:'1.5px solid rgba(0,210,255,0.8)',borderLeft:'1.5px solid rgba(0,210,255,0.2)',boxShadow:'0 0 12px rgba(0,210,255,0.4)',animation:'orbitSpinRev 1.5s linear infinite'}}/>
-        <div style={{position:'absolute',width:180,height:180,borderRadius:'50%',border:'1px solid transparent',borderTop:'1px solid rgba(100,230,255,0.5)',animation:'orbitSpin 3s linear infinite'}}/>
-        <div style={{position:'absolute',width:260,height:260,borderRadius:'50%',animation:'orbitSpin 2s linear infinite'}}>
-          <div style={{position:'absolute',top:-5,left:'50%',width:10,height:10,borderRadius:'50%',background:'#00d4ff',boxShadow:'0 0 16px 6px rgba(0,212,255,0.9)',transform:'translateX(-50%)'}}/>
+      <div style={{textAlign:'center'}}>
+        <div style={{opacity:phase>=1?1:0,transform:phase>=1?'translateY(0)':'translateY(16px)',transition:'opacity .5s ease, transform .5s ease'}}>
+          <div style={{fontFamily:'var(--fd)',fontSize:52,fontWeight:900,color:'#fff',letterSpacing:'-0.04em',lineHeight:1}}>ArcPay</div>
         </div>
-        <div style={{position:'absolute',width:220,height:220,borderRadius:'50%',animation:'orbitSpinRev 1.5s linear infinite'}}>
-          <div style={{position:'absolute',bottom:-5,left:'50%',width:8,height:8,borderRadius:'50%',background:'#0088ff',boxShadow:'0 0 12px 4px rgba(0,136,255,0.9)',transform:'translateX(-50%)'}}/>
-        </div>
-        {/* ArcPay text inside rings */}
-        <div style={{position:'relative',zIndex:2,textAlign:'center'}}>
-          <div style={{fontFamily:'var(--fd)',fontSize:42,fontWeight:900,background:'linear-gradient(180deg, #ffffff 0%, #a0c8ff 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',animation:'textReveal .8s .3s both',letterSpacing:'-0.03em',lineHeight:1}}>ArcPay</div>
+        <div style={{height:2,background:'#2563eb',borderRadius:1,margin:'16px auto 0',animation:phase>=2?'lineExpand .5s cubic-bezier(.4,0,.2,1) forwards':'none',width:phase>=2?120:0}}/>
+        <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',letterSpacing:'0.2em',textTransform:'uppercase',fontWeight:500,marginTop:14,opacity:phase>=3?1:0,transform:phase>=3?'translateY(0)':'translateY(8px)',transition:'opacity .4s ease, transform .4s ease'}}>
+          Global Remittance
         </div>
       </div>
-      <div style={{fontSize:12,color:'rgba(0,180,255,0.7)',letterSpacing:'0.25em',textTransform:'uppercase',fontWeight:600,animation:'fadeInUp .6s .8s both'}}>Decentralized Remittance</div>
-      <div style={{position:'absolute',bottom:32,fontSize:11,color:'rgba(255,255,255,0.2)',animation:'fadeInUp .6s 1.2s both'}}>Arc Testnet &nbsp;·&nbsp; Chain 5042002</div>
+      <div style={{position:'absolute',bottom:36,display:'flex',gap:6,alignItems:'center'}}>
+        {[0,1,2].map(i=><div key={i} style={{width:4,height:4,borderRadius:'50%',background:'#2563eb',animation:`dotPulse 1.2s ${i*0.2}s ease-in-out infinite`}}/>)}
+      </div>
     </div>
   );
 };
