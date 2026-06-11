@@ -771,7 +771,6 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
               ))}
             </div>
             {/* Connect Card */}
-            {/* Connect Card */}
             <div className="ap-connect-card" style={{marginBottom:48}}>
               <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
               <div style={{fontSize:13,color:'var(--tx2)',marginBottom:20}}>Connect your wallet to start sending USDC</div>
@@ -779,8 +778,13 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
                 {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button></>}
               </div>
               {status&&<div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'var(--acd)',border:'1px solid var(--acs)',fontSize:13,color:'var(--ac2)'}}>{status.msg}</div>}
-              <div style={{marginTop:20,display:"flex",justifyContent:"center",gap:20,flexWrap:"wrap"}}><div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"var(--tx3)"}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Non-custodial</div><div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"var(--tx3)"}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>No KYC</div><div style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"var(--tx3)"}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Open Source</div></div>
+              <div style={{marginTop:20,display:'flex',justifyContent:'center',gap:20,flexWrap:'wrap'}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--tx3)'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Non-custodial</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--tx3)'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>No KYC</div>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--tx3)'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Open Source</div>
               </div>
+            </div>
+          </div>
         </div>
       )}
 
