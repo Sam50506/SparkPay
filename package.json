@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "eslint-webpack-plugin": "^6.0.0",
     "hardhat": "^3.4.5",
     "solc": "^0.8.35"
   }
