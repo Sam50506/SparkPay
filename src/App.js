@@ -124,7 +124,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-recv-icon{width:30px;height:30px;border-radius:50%;background:var(--card);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;color:var(--tx3)}
 .ap-conv-amount{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--tx1);margin-bottom:4px}
 .ap-conv-rate{font-size:12px;color:var(--tx3)}
-.ap-country-pill{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--b1);border-radius:999px;padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600;color:var(--tx1);white-space:nowrap;transition:all .14s;flex-shrink:0;position:relative}
+.ap-country-pill{display:flex;align-items:center;gap:7px;background:var(--elev);border:1.5px solid var(--b1);border-radius:12px;padding:12px 14px;cursor:pointer;font-size:14px;font-weight:600;color:var(--tx1);transition:all .14s;width:100%;box-sizing:border-box}
 .ap-country-pill:hover{border-color:var(--ac)}
 .ap-country-pill.empty{color:var(--tx3)}
 .ap-cc{font-size:10px;font-weight:800;background:var(--acd);color:var(--ac2);border-radius:4px;padding:2px 5px;letter-spacing:.04em}
