@@ -35,7 +35,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes scaleIn{from{opacity:0}to{opacity:1}}
 @keyframes spinCW{to{transform:rotate(360deg)}}
 @keyframes spinCCW{to{transform:rotate(-360deg)}}
 @keyframes fillBar{from{width:0}to{width:100%}}

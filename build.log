@@ -1,0 +1,33 @@
+
+> arc-remittance@1.0.0 build
+> craco build
+
+Cannot find ESLint plugin (ESLintWebpackPlugin).
+(node:2323) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Compiled successfully.
+
+File sizes after gzip:
+
+  587.16 kB  build/static/js/main.e1b9bec5.js
+  44.44 kB   build/static/js/316.871fe30b.chunk.js
+  4.94 kB    build/static/js/348.cf9de1b9.chunk.js
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
