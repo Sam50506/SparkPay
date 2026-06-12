@@ -12,7 +12,7 @@ function CountrySelect({ value, onChange }) {
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', flexShrink: 0 }}><polyline points="6 9 12 15 18 9" /></svg>
       </div>
       {open && <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>{setOpen(false);setSearch('');}}>
-        <div style={{background:'var(--card)',width:'100%',maxHeight:'60vh',display:'flex',flexDirection:'column',borderRadius:'20px 20px 0 0'}} onClick={e=>e.stopPropagation()}>
+        <div style={{background:'var(--card)',width:'100%',maxHeight:'40vh',display:'flex',flexDirection:'column',borderRadius:'20px 20px 0 0'}} onClick={e=>e.stopPropagation()}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
             <button onClick={()=>{setOpen(false);setSearch('');}} style={{background:'none',border:'none',fontSize:14,color:'var(--ac)',cursor:'pointer',fontWeight:600}}>Cancel</button>
             <span style={{fontWeight:700,fontSize:15,color:'var(--tx1)'}}>Select Country</span>
