@@ -418,18 +418,28 @@ function CountrySelect({value,onChange}){
       </div>}
     </>);
   }
-  return(
-    <div style={{position:'relative',display:'block',width:'100%'}}>
-      <div className={`ap-country-pill${!value?' empty':''}`} style={{pointerEvents:'none',userSelect:'none',position:'absolute',inset:0,display:'flex',alignItems:'center',paddingLeft:10,paddingRight:6,gap:4,zIndex:0}}>
-        {value?<><span className="ap-cc">{ALL_CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-      <select value={value} onChange={e=>onChange(e.target.value)} style={{position:'relative',zIndex:1,opacity:0.01,cursor:'pointer',width:'100%',minWidth:100,height:40,fontSize:16,border:'none',background:'transparent'}}>
-        <option value="">None (Optional)</option>
-        {ALL_COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
-      </select>
+  return(<>
+    <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>setOpen(o=>!o)} style={{cursor:'pointer',position:'relative',width:'100%'}}>
+      {value?<><span className="ap-cc">{ALL_CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-  );
+    {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>{setOpen(false);setCtrySearch('');}}>
+      <div style={{background:'var(--card)',width:'100%',maxHeight:'60vh',display:'flex',flexDirection:'column',borderRadius:'20px 20px 0 0'}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
+          <button onClick={()=>{setOpen(false);setCtrySearch('');}} style={{background:'none',border:'none',fontSize:14,color:'var(--ac)',cursor:'pointer',fontWeight:600}}>Cancel</button>
+          <span style={{fontWeight:700,fontSize:15,color:'var(--tx1)'}}>Select Country</span>
+          <span style={{width:56}}/>
+        </div>
+        <div style={{padding:'10px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
+          <input value={ctrySearch} onChange={e=>setCtrySearch(e.target.value)} placeholder="Search country..." autoFocus style={{width:'100%',padding:'10px 12px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:14,outline:'none',boxSizing:'border-box'}}/>
+        </div>
+        <div style={{overflowY:'auto',flex:1}}>
+          <div onClick={()=>{onChange('');setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
+          {ALL_COUNTRIES.filter(c=>!ctrySearch||c.toLowerCase().includes(ctrySearch.toLowerCase())).map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{ALL_CC[c]}</span>{c}</div>)}
+        </div>
+      </div>
+    </div>}
+  </>);
 }
 
 function OKXSelect({value, onChange, options, style}){
