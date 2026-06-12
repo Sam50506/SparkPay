@@ -391,6 +391,7 @@ function addrColor(addr){const colors=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','
 function isValidAddr(a){return a.trim().length===42&&a.trim().slice(0,2).toLowerCase()==='0x';}
 function CountrySelect({value,onChange}){
   const[open,setOpen]=React.useState(false);
+  const[ctrySearch,setCtrySearch]=React.useState('');
   const sheetRef=React.useRef(null);
   const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
   if(isOKX){
@@ -406,9 +407,12 @@ function CountrySelect({value,onChange}){
             <span style={{fontWeight:700,fontSize:15,color:'var(--tx1)'}}>Select Country</span>
             <span style={{width:56}}/>
           </div>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
+            <input value={ctrySearch} onChange={e=>setCtrySearch(e.target.value)} placeholder="Search country..." autoFocus style={{width:'100%',padding:'10px 12px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:14,outline:'none',boxSizing:'border-box'}}/>
+          </div>
           <div ref={el=>{if(el)el.scrollTop=0;}} style={{overflowY:'auto',flex:1}}>
-            <div onClick={()=>{onChange('');setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
-            {ALL_COUNTRIES.map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{ALL_CC[c]}</span>{c} <span style={{color:'var(--tx3)',fontSize:12}}>({CURRENCY[c]})</span></div>)}
+            <div onClick={()=>{onChange('');setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
+            {ALL_COUNTRIES.filter(c=>!ctrySearch||c.toLowerCase().includes(ctrySearch.toLowerCase())).map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{ALL_CC[c]}</span>{c}</div>)}
           </div>
         </div>
       </div>}
@@ -422,7 +426,7 @@ function CountrySelect({value,onChange}){
       </div>
       <select value={value} onChange={e=>onChange(e.target.value)} style={{position:'relative',zIndex:1,opacity:0.01,cursor:'pointer',width:'100%',minWidth:100,height:40,fontSize:16,border:'none',background:'transparent'}}>
         <option value="">None (Optional)</option>
-        {ALL_COUNTRIES.map(c=><option key={c} value={c}>{c} ({CURRENCY[c]})</option>)}
+        {ALL_COUNTRIES.map(c=><option key={c} value={c}>{c}</option>)}
       </select>
     </div>
   );
