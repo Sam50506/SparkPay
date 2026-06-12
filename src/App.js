@@ -396,9 +396,9 @@ function CountrySelect({value,onChange}){
   const isOKX=navigator.userAgent.includes('OKApp')||navigator.userAgent.includes('OKX');
   if(isOKX){
     return(<>
-      <div className={`ap-country-pill${!value?' empty':''}`} onClick={()=>{setOpen(o=>!o);window.scrollTo(0,0);}} style={{cursor:'pointer'}}>
-        {value?<><span className="ap-cc">{ALL_CC[value]}</span><span style={{maxWidth:72,overflow:'hidden',textOverflow:'ellipsis',fontSize:13}}>{value}</span></>:<span style={{fontSize:13}}>Select country</span>}
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:4,flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '7px 10px', background: 'var(--card)', border: '1px solid var(--b1)', borderRadius: 999, cursor: 'pointer', fontSize: 13, color: value ? 'var(--tx1)' : 'var(--tx3)', whiteSpace: 'nowrap', minWidth: 100, display: 'inline-flex' }} onClick={()=>{setOpen(o=>!o);window.scrollTo(0,0);}}>
+        {value?<span style={{maxWidth:90,overflow:'hidden',textOverflow:'ellipsis'}}>{value}</span>:<span>Country</span>}
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>setOpen(false)}>
         <div style={{background:'var(--card)',width:'100%',maxHeight:'60vh',display:'flex',flexDirection:'column',borderRadius:'20px 20px 0 0'}} onClick={e=>e.stopPropagation()}>
