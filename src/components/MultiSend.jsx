@@ -3,18 +3,31 @@ import React, { useRef } from 'react';
 const MS_COUNTRIES=['Afghanistan','Albania','Algeria','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cambodia','Cameroon','Canada','Chad','Chile','China','Colombia','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Dominican Republic','Ecuador','Egypt','El Salvador','Estonia','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Guatemala','Guinea','Haiti','Honduras','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Ivory Coast','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Mauritania','Mauritius','Mexico','Moldova','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Macedonia','Norway','Oman','Pakistan','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saudi Arabia','Senegal','Serbia','Singapore','Slovakia','Slovenia','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Togo','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
 
 function CountrySelect({ value, onChange }) {
+  const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState('');
   return (
-    <div style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }}>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', paddingLeft: 10, paddingRight: 6, gap: 4, zIndex: 0, pointerEvents: 'none', fontSize: 13, color: 'var(--tx1)' }}>
-        {value ? <span>{value}</span> : <span style={{ color: 'var(--tx3)' }}>Country</span>}
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '7px 10px', background: 'var(--card)', border: '1px solid var(--b1)', borderRadius: 999, cursor: 'pointer', fontSize: 13, color: value ? 'var(--tx1)' : 'var(--tx3)', whiteSpace: 'nowrap', minWidth: 100 }} onClick={() => setOpen(true)}>
+        {value ? <span style={{maxWidth:90,overflow:'hidden',textOverflow:'ellipsis'}}>{value}</span> : <span>Country</span>}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', flexShrink: 0 }}><polyline points="6 9 12 15 18 9" /></svg>
       </div>
-      <select value={value} onChange={e => { onChange(e.target.value); setSearch(''); }} style={{ position: 'relative', zIndex: 1, opacity: 0.01, cursor: 'pointer', width: 120, height: 40, fontSize: 16, border: 'none', background: 'transparent' }}>
-        <option value="">None</option>
-        {MS_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-      </select>
-    </div>
+      {open && <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-end'}} onClick={()=>{setOpen(false);setSearch('');}}>
+        <div style={{background:'var(--card)',width:'100%',maxHeight:'60vh',display:'flex',flexDirection:'column',borderRadius:'20px 20px 0 0'}} onClick={e=>e.stopPropagation()}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
+            <button onClick={()=>{setOpen(false);setSearch('');}} style={{background:'none',border:'none',fontSize:14,color:'var(--ac)',cursor:'pointer',fontWeight:600}}>Cancel</button>
+            <span style={{fontWeight:700,fontSize:15,color:'var(--tx1)'}}>Select Country</span>
+            <span style={{width:56}}/>
+          </div>
+          <div style={{padding:'10px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search country..." autoFocus style={{width:'100%',padding:'10px 12px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:14,outline:'none',boxSizing:'border-box'}}/>
+          </div>
+          <div style={{overflowY:'auto',flex:1}}>
+            <div onClick={()=>{onChange('');setOpen(false);setSearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None</div>
+            {MS_COUNTRIES.filter(c=>!search||c.toLowerCase().includes(search.toLowerCase())).map(c => <div key={c} onClick={()=>{onChange(c);setOpen(false);setSearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',background:value===c?'var(--acd)':'transparent'}}>{c}</div>)}
+          </div>
+        </div>
+      </div>}
+    </>
   );
 }
 
