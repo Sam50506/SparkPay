@@ -412,7 +412,7 @@ function CountrySelect({value,onChange}){
           </div>
           <div ref={el=>{if(el)el.scrollTop=0;}} style={{overflowY:'auto',flex:1}}>
             <div onClick={()=>{onChange('');setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
-            {ALL_COUNTRIES.filter(c=>!ctrySearch||c.toLowerCase().includes(ctrySearch.toLowerCase())).map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{ALL_CC[c]}</span>{c}</div>)}
+            {ALL_COUNTRIES.filter(c=>!ctrySearch||c.toLowerCase().includes(ctrySearch.toLowerCase())).map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}>{c}</div>)}
           </div>
         </div>
       </div>}
@@ -435,7 +435,7 @@ function CountrySelect({value,onChange}){
         </div>
         <div style={{overflowY:'auto',flex:1}}>
           <div onClick={()=>{onChange('');setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx2)',borderBottom:'1px solid var(--b0)'}}>None (Optional)</div>
-          {ALL_COUNTRIES.filter(c=>!ctrySearch||c.toLowerCase().includes(ctrySearch.toLowerCase())).map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}><span className="ap-cc">{ALL_CC[c]}</span>{c}</div>)}
+          {ALL_COUNTRIES.filter(c=>!ctrySearch||c.toLowerCase().includes(ctrySearch.toLowerCase())).map(c=><div key={c} onClick={()=>{onChange(c);setOpen(false);setCtrySearch('');}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:8,background:value===c?'var(--acd)':'transparent'}}>{c}</div>)}
         </div>
       </div>
     </div>}
