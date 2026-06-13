@@ -1,4 +1,7 @@
 import React, { useRef } from 'react';
+import * as XLSX from 'xlsx';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.0.227/pdf.worker.min.mjs';
 
 const MS_COUNTRIES=['Afghanistan','Albania','Algeria','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cambodia','Cameroon','Canada','Chad','Chile','China','Colombia','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Dominican Republic','Ecuador','Egypt','El Salvador','Estonia','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Guatemala','Guinea','Haiti','Honduras','Hong Kong','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Ivory Coast','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Mauritania','Mauritius','Mexico','Moldova','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Macedonia','Norway','Oman','Pakistan','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saudi Arabia','Senegal','Serbia','Singapore','Slovakia','Slovenia','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Togo','Tunisia','Turkey','Turkmenistan','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
 
@@ -37,22 +40,73 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
   const handleCSV = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const lines = ev.target.result.split('\n').filter(l => l.trim());
-      const parsed = [];
-      for (const line of lines) {
-        const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
-        const addr = parts[0];
-        const amount = parts[1];
-        const country = parts[2] || '';
-        if (addr && amount) parsed.push({ addr, amount, country });
-      }
-      if (parsed.length > 0) {
-        setMulti(parsed);
-      }
-    };
-    reader.readAsText(file);
+    const name = file.name.toLowerCase();
+
+    if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const wb = XLSX.read(ev.target.result, { type: 'array' });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          const parsed = [];
+          for (const row of rows) {
+            const addr = String(row[0] || '').trim();
+            const amount = String(row[1] || '').trim();
+            const country = String(row[2] || '').trim();
+            if (addr && amount && addr.match(/^0x[0-9a-fA-F]{40}$/)) parsed.push({ addr, amount, country });
+          }
+          if (parsed.length > 0) setMulti(parsed);
+          else alert('No valid rows found in spreadsheet.');
+        } catch (err) {
+          alert('Could not read spreadsheet file.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (name.endsWith('.pdf')) {
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const pdf = await pdfjsLib.getDocument({ data: ev.target.result }).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(it => it.str).join(' ') + '\n';
+          }
+          const parsed = [];
+          for (const line of text.split('\n')) {
+            const addrMatch = line.match(/0x[0-9a-fA-F]{40}/);
+            if (!addrMatch) continue;
+            const numMatches = line.match(/\d+(\.\d+)?/g) || [];
+            const amount = numMatches.find(n => parseFloat(n) > 0);
+            if (!amount) continue;
+            const country = MS_COUNTRIES.find(c => line.includes(c)) || '';
+            parsed.push({ addr: addrMatch[0], amount, country });
+          }
+          if (parsed.length > 0) setMulti(parsed);
+          else alert('Could not find recipient rows in PDF. Try CSV or XLSX instead.');
+        } catch (err) {
+          alert('Could not read PDF file.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const lines = ev.target.result.split('\n').filter(l => l.trim());
+        const parsed = [];
+        for (const line of lines) {
+          const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
+          const addr = parts[0];
+          const amount = parts[1];
+          const country = parts[2] || '';
+          if (addr && amount) parsed.push({ addr, amount, country });
+        }
+        if (parsed.length > 0) setMulti(parsed);
+      };
+      reader.readAsText(file);
+    }
     e.target.value = '';
   };
 
@@ -72,13 +126,13 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           style={{ fontSize: 12, padding: '7px 12px', flexShrink: 0, marginTop: 0 }}
           onClick={() => fileRef.current?.click()}
         >
-          Import CSV
+          Import File
         </button>
-        <input ref={fileRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleCSV} />
+        <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
       </div>
 
       <div style={{ background: 'var(--elev)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: 'var(--tx3)', marginBottom: 14 }}>
-        CSV format: <span style={{ fontFamily: 'monospace', color: 'var(--tx2)' }}>address, amount, country</span>
+        Formats: CSV, XLSX (address, amount, country columns). PDF supported on a best-effort basis — review results before sending.
       </div>
 
       {multi.map((r, i) => (
