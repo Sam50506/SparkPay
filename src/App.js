@@ -278,8 +278,8 @@ const SplashScreen = ({ onDone }) => {
     const t0=setTimeout(()=>setPhase(1),100);
     const t1=setTimeout(()=>setPhase(2),600);
     const t2=setTimeout(()=>setPhase(3),1000);
-    const t3=setTimeout(()=>setExit(true),1800);
-    const t4=setTimeout(()=>onDone(),2200);
+    const t3=setTimeout(()=>setExit(true),2100);
+    const t4=setTimeout(()=>onDone(),2500);
     return()=>{[t0,t1,t2,t3,t4].forEach(clearTimeout);}
   }, [onDone]);
   return (
