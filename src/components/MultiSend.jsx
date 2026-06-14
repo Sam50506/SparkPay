@@ -72,16 +72,31 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            text += content.items.map(it => it.str).join(' ') + '\n';
+            const rows = {};
+            content.items.forEach(it => {
+              const y = Math.round(it.transform[5]);
+              (rows[y] = rows[y] || []).push(it);
+            });
+            const lines = Object.keys(rows)
+              .map(Number)
+              .sort((a, b) => b - a)
+              .map(y => rows[y]
+                .sort((a, b) => a.transform[4] - b.transform[4])
+                .map(it => it.str)
+                .join(' ')
+                .replace(/\s+/g, ' ')
+                .trim());
+            text += lines.join('\n') + '\n';
           }
           const parsed = [];
           for (const line of text.split('\n')) {
             const addrMatch = line.match(/0x[0-9a-fA-F]{40}/);
             if (!addrMatch) continue;
-            const numMatches = line.match(/\d+(\.\d+)?/g) || [];
+            const rest = line.slice(addrMatch.index + addrMatch[0].length);
+            const numMatches = rest.match(/\d+(\.\d+)?/g) || [];
             const amount = numMatches.find(n => parseFloat(n) > 0);
             if (!amount) continue;
-            const country = MS_COUNTRIES.find(c => line.includes(c)) || '';
+            const country = MS_COUNTRIES.find(c => rest.includes(c)) || '';
             parsed.push({ addr: addrMatch[0], amount, country });
           }
           if (parsed.length > 0) setMulti(parsed);
