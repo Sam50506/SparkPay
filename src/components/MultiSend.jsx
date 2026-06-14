@@ -36,10 +36,12 @@ function CountrySelect({ value, onChange }) {
 
 export default function MultiSend({ multi, setMulti, loading, handleMultiReview }) {
   const fileRef = useRef(null);
+  const [fileError, setFileError] = React.useState(null);
 
   const handleCSV = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setFileError(null);
     const name = file.name.toLowerCase();
 
     if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
@@ -57,9 +59,9 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             if (addr && amount && addr.match(/^0x[0-9a-fA-F]{40}$/)) parsed.push({ addr, amount, country });
           }
           if (parsed.length > 0) setMulti(parsed);
-          else alert('No valid rows found in spreadsheet.');
+          else setFileError('No valid rows found in spreadsheet.');
         } catch (err) {
-          alert('Could not read spreadsheet file.');
+          setFileError('Could not read spreadsheet file.');
         }
       };
       reader.readAsArrayBuffer(file);
@@ -100,10 +102,10 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             parsed.push({ addr: addrMatch[0], amount, country });
           }
           if (parsed.length > 0) setMulti(parsed);
-          else alert('Could not find recipient rows in PDF. Try CSV or XLSX instead.');
+          else setFileError('Could not find recipient rows in PDF. Try CSV or XLSX instead.');
         } catch (err) {
           console.error('PDF parse error:', err);
-          alert('Could not read PDF file: ' + err.message);
+          setFileError('Could not read PDF file: ' + err.message);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -146,6 +148,13 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
         </button>
         <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
       </div>
+
+      {fileError && (
+        <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#ef4444', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <span>{fileError}</span>
+          <button onClick={() => setFileError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 16, fontWeight: 700, padding: 0, lineHeight: 1, flexShrink: 0 }}>\u00d7</button>
+        </div>
+      )}
 
       <div style={{ background: 'var(--elev)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: 'var(--tx3)', marginBottom: 14 }}>
         Format required: wallet address, amount, country (optional)
