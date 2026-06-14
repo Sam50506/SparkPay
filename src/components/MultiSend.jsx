@@ -148,7 +148,9 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
       </div>
 
       <div style={{ background: 'var(--elev)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: 'var(--tx3)', marginBottom: 14 }}>
-        Format: address, amount, country. CSV and XLSX are reliable. PDF import is experimental, please review before sending.
+        Format required: wallet address, amount, country (optional)
+        <br /><br />
+        CSV/XLSX and PDF files are allowed
       </div>
 
       {multi.map((r, i) => (
