@@ -87,7 +87,8 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           if (parsed.length > 0) setMulti(parsed);
           else alert('Could not find recipient rows in PDF. Try CSV or XLSX instead.');
         } catch (err) {
-          alert('Could not read PDF file.');
+          console.error('PDF parse error:', err);
+          alert('Could not read PDF file: ' + err.message);
         }
       };
       reader.readAsArrayBuffer(file);
