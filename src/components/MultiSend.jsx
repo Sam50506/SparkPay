@@ -59,8 +59,9 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             if (addr && amount && addr.match(/^0x[0-9a-fA-F]{40}$/)) parsed.push({ addr, amount, country });
           }
           if (parsed.length > 0) setMulti(parsed);
-          else setFileError('No valid rows found in spreadsheet.');
+          else { setMulti([]); setFileError('No valid rows found in spreadsheet.'); }
         } catch (err) {
+          setMulti([]);
           setFileError('Could not read spreadsheet file.');
         }
       };
@@ -102,9 +103,10 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             parsed.push({ addr: addrMatch[0], amount, country });
           }
           if (parsed.length > 0) setMulti(parsed);
-          else setFileError('Could not find recipient rows in PDF. Try CSV or XLSX instead.');
+          else { setMulti([]); setFileError('Could not find recipient rows in PDF. Try CSV or XLSX instead.'); }
         } catch (err) {
           console.error('PDF parse error:', err);
+          setMulti([]);
           setFileError('Could not read PDF file: ' + err.message);
         }
       };
