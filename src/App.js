@@ -590,6 +590,7 @@ function WalletPicker({onPick,onClose}){
   );
 }
 function AppInner() {
+  const isAdminRoute = window.location.hash === '#admin';
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
   const wcProvRef=useRef(null);const wcInitRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const isPWA=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;const[splash,setSplash]=useState(!isPWA);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[showWalletPrompt,setShowWalletPrompt]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(false);
@@ -759,6 +760,9 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
 
   const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return <MultiSend multi={multi} setMulti={setMulti} loading={loading} handleMultiReview={handleMultiReview}/>;case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faucet':return <Faucet address={address} balance={balance} setBalance={setBalance} faucetLoading={faucetLoading} setFaucetLoading={setFaucetLoading} faucetMsg={faucetMsg} setFaucetMsg={setFaucetMsg} lastClaim={lastClaim} setLastClaim={setLastClaim}/>;default:return renderSend();}};
 
+  if(isAdminRoute){
+    return(<div className={'ap-root'+(dm?'':' light')}><style>{CSS}</style><AdminPanel address={address}/>{!address&&<div style={{position:'fixed',bottom:24,left:0,right:0,display:'flex',justifyContent:'center'}}><div className="ap-connect-card" style={{maxWidth:360,width:'calc(100% - 48px)'}}><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:16,color:'var(--tx1)',marginBottom:12}}>Connect Wallet</div><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>{showPicker&&<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>}</div></div>}</div>);
+  }
   return(
     <div className={'ap-root'+(dm?'':' light')}>
       <style>{CSS}</style>
@@ -841,6 +845,97 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
       )}
     </div>
   );
+}
+
+
+function AdminPanel({address}){
+  const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
+  const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
+  const[loading,setLoading]=useState(true);
+  const[maintenanceOn,setMaintenanceOn]=useState(MAINTENANCE_MODE);
+
+  useEffect(()=>{
+    if(!isAdmin)return;
+    (async()=>{
+      try{
+        const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+ADMIN_ADDRESS+'&sort=desc');
+        const d=await r.json();
+        const txs=d.result||[];
+        const volume=txs.reduce((s,t)=>s+parseFloat(ethers.formatUnits(t.value||'0',18)),0);
+        setStats(s=>({...s,txCount:txs.length,volume}));
+      }catch{}
+      try{
+        const r2=await fetch('/api/payout',{method:'GET'});
+        const d2=await r2.json();
+        setStats(s=>({...s,pendingClaims:d2.pending||0}));
+      }catch{}
+      setLoading(false);
+    })();
+  },[isAdmin]);
+
+  if(!address){
+    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'#fff',marginBottom:12}}>Admin Access</div>
+      <div style={{fontSize:14,color:'rgba(255,255,255,0.6)'}}>Please connect your wallet to continue.</div>
+    </div>);
+  }
+
+  if(!isAdmin){
+    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'#fff',marginBottom:12}}>Access Denied</div>
+      <div style={{fontSize:14,color:'rgba(255,255,255,0.6)'}}>This page is restricted to administrators only.</div>
+    </div>);
+  }
+
+  return(<div style={{minHeight:'100vh',background:'var(--bg)',padding:24}}>
+    <div style={{maxWidth:800,margin:'0 auto'}}>
+      <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'var(--tx1)',marginBottom:24}}>Admin Dashboard</div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:24}}>
+        <div className="ap-card">
+          <div style={{fontSize:12,color:'var(--tx3)',marginBottom:6}}>Total Transactions</div>
+          <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{loading?'...':stats.txCount}</div>
+        </div>
+        <div className="ap-card">
+          <div style={{fontSize:12,color:'var(--tx3)',marginBottom:6}}>Total Volume (USDC)</div>
+          <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{loading?'...':stats.volume.toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div className="ap-card" style={{marginBottom:24}}>
+        <div className="ap-card-title">Maintenance Mode</div>
+        <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>When enabled, only the admin wallet can access the app. Toggle requires a code deploy currently (env-based flag).</div>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:700,background:MAINTENANCE_MODE?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:MAINTENANCE_MODE?'#ef4444':'#22c55e'}}>
+            {MAINTENANCE_MODE?'MAINTENANCE ON':'LIVE'}
+          </div>
+          <div style={{fontSize:12,color:'var(--tx3)'}}>To toggle, change MAINTENANCE_MODE in App.js and redeploy</div>
+        </div>
+      </div>
+
+      <div className="ap-card" style={{marginBottom:24}}>
+        <div className="ap-card-title">Cashback Payouts</div>
+        <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>Pending claims: {loading?'...':stats.pendingClaims}</div>
+        <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={async()=>{
+          const key=prompt('Enter admin key:');
+          if(!key)return;
+          try{
+            const r=await fetch('/api/payout',{method:'POST',headers:{'x-admin-key':key,'Content-Type':'application/json'}});
+            const d=await r.json();
+            alert(d.message+' Paid: '+d.paid);
+          }catch(e){alert('Error: '+e.message);}
+        }}>Process Pending Payouts</button>
+      </div>
+
+      <div className="ap-card">
+        <div className="ap-card-title">Quick Links</div>
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:12}}>
+          <a href="https://testnet.arcscan.app/address/{ADMIN_ADDRESS}" target="_blank" rel="noreferrer" style={{fontSize:13,color:'var(--ac)'}}>View Admin Wallet on Explorer</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();window.location.hash='';window.location.reload();}} style={{fontSize:13,color:'var(--ac)'}}>Back to App</a>
+        </div>
+      </div>
+    </div>
+  </div>);
 }
 
 export default function App(){return <AppInner/>;}
