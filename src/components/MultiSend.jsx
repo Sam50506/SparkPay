@@ -118,23 +118,27 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           while ((m = addrRegex.exec(flatText)) !== null) {
             allAddrs.push({ addr: m[0], index: m.index });
           }
-          // Also scan original text for truncated/invalid addresses to report them
-          const anyAddrRegex = /0x[0-9a-zA-Z]{4,}/g;
+          // Scan for short/malformed 0x tokens (not full 40-char) to report as invalid
+          const anyAddrRegex = /0x[0-9a-fA-F]{1,39}(?![0-9a-fA-F])/g;
           let m2;
           while ((m2 = anyAddrRegex.exec(flatText)) !== null) {
-            if (!/^0x[0-9a-fA-F]{40}$/.test(m2[0]) && !allAddrs.some(a => a.index === m2.index)) {
-              skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format' });
-            }
+            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format' });
           }
           for (let i = 0; i < allAddrs.length; i++) {
-            const start = allAddrs[i].index;
+            // Start segment AFTER the address itself to avoid matching hex digits inside it as amount
+            const start = allAddrs[i].index + allAddrs[i].addr.length;
             const end = i + 1 < allAddrs.length ? allAddrs[i+1].index : flatText.length;
             const segment = flatText.slice(start, end);
-            const numMatches = segment.match(/\d+(\.\d+)?/g) || [];
-            const amount = numMatches.find(n => parseFloat(n) > 0 && !allAddrs[i].addr.toLowerCase().includes(n.toLowerCase()));
             const country = MS_COUNTRIES.find(c => segment.includes(c)) || '';
+            // Match signed numbers so we can distinguish negative from missing
+            const numMatches = [...segment.matchAll(/(-?\d+(\.\d+)?)/g)].map(n => n[1]);
+            const amount = numMatches.find(n => parseFloat(n) > 0);
+            const negAmount = numMatches.find(n => parseFloat(n) < 0);
             if (!amount) {
-              skipped.push({ snippet: allAddrs[i].addr, reason: 'Missing amount' });
+              const reason = negAmount
+                ? `Invalid amount (negative: ${negAmount})`
+                : 'Missing amount';
+              skipped.push({ snippet: allAddrs[i].addr, reason });
               continue;
             }
             parsed.push({ addr: allAddrs[i].addr, amount, country });
