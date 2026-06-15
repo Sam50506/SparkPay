@@ -122,6 +122,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           if (addr && amount) parsed.push({ addr, amount, country });
         }
         if (parsed.length > 0) setMulti(parsed);
+        else { setMulti([]); setFileError('No valid rows found in CSV.'); }
       };
       reader.readAsText(file);
     }
