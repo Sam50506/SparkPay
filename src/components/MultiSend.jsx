@@ -154,12 +154,15 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             allAddrs.push({ addr: m[0], index: m.index });
           }
           // Scan for short/malformed 0x tokens (not full 40-char) to report as invalid
+          // Only match short/malformed 0x tokens — must NOT be part of a valid 40-char address
+          const validAddrSet = new Set(allAddrs.map(a => a.addr));
           const anyAddrRegex = /0x[0-9a-fA-F]{1,39}(?![0-9a-fA-F])/g;
           let m2;
           let malformedCount = 0;
           while ((m2 = anyAddrRegex.exec(flatText)) !== null) {
+            if (validAddrSet.has(m2[0])) continue;
             malformedCount++;
-            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format', fileRow: malformedCount });
+            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format' });
           }
           for (let i = 0; i < allAddrs.length; i++) {
             // Start segment AFTER the address itself to avoid matching hex digits inside it as amount
@@ -175,12 +178,12 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
               const reason = negAmount
                 ? `Invalid amount (negative: ${negAmount})`
                 : 'Missing amount';
-              skipped.push({ snippet: allAddrs[i].addr, reason, fileRow: malformedCount + i + 1, raw: allAddrs[i].addr });
+              skipped.push({ snippet: allAddrs[i].addr, reason, raw: allAddrs[i].addr });
               continue;
             }
             parsed.push({ addr: allAddrs[i].addr, amount, country });
           }
-          // total = all valid-length addresses + malformed ones (no double counting)
+          // total = unique addresses found (no double counting)
           const trueTotal = allAddrs.length + malformedCount;
           console.log('Parsed:', parsed.length, 'Skipped:', skipped.length, 'Total:', trueTotal, skipped);
           if (parsed.length > 0) {
@@ -284,7 +287,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
               <div key={i} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 100px 70px', columnGap: 8, padding: '13px 12px', borderBottom: i < fileWarning.items.length - 1 ? '1px solid var(--b0)' : 'none', alignItems: 'center', background: isLinked ? 'rgba(245,158,11,0.04)' : 'transparent' }}>
                 {/* Col 1 — position */}
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx3)' }}>
-                  {item.fileRow != null ? item.fileRow : i + 1}
+                  {item.fileRow ?? i + 1}
                 </span>
                 {/* Col 2 — issue */}
                 <span style={{ fontSize: 12, color: recoverable ? '#f59e0b' : 'var(--re)', fontWeight: 500, paddingRight: 8 }}>
