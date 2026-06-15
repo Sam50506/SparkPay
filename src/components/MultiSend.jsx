@@ -266,7 +266,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             <button onClick={() => setFileWarning(null)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer', fontSize: 18, fontWeight: 700, padding: 0, lineHeight: 1 }}>&times;</button>
           </div>
           {/* Column headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 76px', columnGap: 12, padding: '8px 16px', borderBottom: '1px solid var(--b0)', background: 'var(--elev)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '50px 1fr 100px 70px', columnGap: 8, padding: '8px 12px', borderBottom: '1px solid var(--b0)', background: 'var(--elev)' }}>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Row</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Issue</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Address</span>
@@ -277,7 +277,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             const recoverable = /^0x[0-9a-fA-F]{40}$/.test(item.snippet);
             const isLinked = item.linkedIdx !== undefined;
             return (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 76px', columnGap: 12, padding: '13px 16px', borderBottom: i < fileWarning.items.length - 1 ? '1px solid var(--b0)' : 'none', alignItems: 'center', background: isLinked ? 'rgba(245,158,11,0.04)' : 'transparent' }}>
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 100px 70px', columnGap: 8, padding: '13px 12px', borderBottom: i < fileWarning.items.length - 1 ? '1px solid var(--b0)' : 'none', alignItems: 'center', background: isLinked ? 'rgba(245,158,11,0.04)' : 'transparent' }}>
                 {/* Col 1 — position */}
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx3)' }}>
                   {item.fileRow != null ? item.fileRow : i + 1}
