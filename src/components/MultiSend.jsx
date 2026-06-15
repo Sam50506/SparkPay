@@ -188,7 +188,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           console.log('Parsed:', parsed.length, 'Skipped:', skipped.length, 'Total:', trueTotal, skipped);
           if (parsed.length > 0) {
             setMulti(parsed);
-            setFileWarning(skipped.length > 0 ? { total: trueTotal, valid: parsed.length, items: skipped } : null);
+            setFileWarning(skipped.length > 0 ? { total: null, valid: parsed.length, items: skipped } : null);
           } else {
             setMulti([]);
             setFileWarning(null);
@@ -268,7 +268,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
               <span style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>
                 {fileWarning.items.length} row{fileWarning.items.length !== 1 ? 's' : ''} need attention
               </span>
-              <span style={{ fontSize: 11, color: 'var(--tx3)' }}>({fileWarning.valid} of {fileWarning.total} imported)</span>
+              <span style={{ fontSize: 11, color: 'var(--tx3)' }}>{fileWarning.total != null ? `(${fileWarning.valid} of ${fileWarning.total} imported)` : `(${fileWarning.valid} imported)`}</span>
             </div>
             <button onClick={() => setFileWarning(null)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer', fontSize: 18, fontWeight: 700, padding: 0, lineHeight: 1 }}>&times;</button>
           </div>
