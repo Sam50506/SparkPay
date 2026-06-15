@@ -390,7 +390,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
       </div>
 
       <button className="ap-btn ap-btn-primary" onClick={handleMultiReview} disabled={loading}>
-        {loading ? 'Sending...' : 'Review and Send All'}
+        {loading ? 'Sending...' : fileWarning ? 'Send to Valid Recipients Only' : 'Review and Send All'}
       </button>
     </div>
   );
