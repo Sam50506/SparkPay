@@ -156,8 +156,10 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           // Scan for short/malformed 0x tokens (not full 40-char) to report as invalid
           const anyAddrRegex = /0x[0-9a-fA-F]{1,39}(?![0-9a-fA-F])/g;
           let m2;
+          let malformedCount = 0;
           while ((m2 = anyAddrRegex.exec(flatText)) !== null) {
-            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format', fileRow: skipped.length + 1 });
+            malformedCount++;
+            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format', fileRow: malformedCount });
           }
           for (let i = 0; i < allAddrs.length; i++) {
             // Start segment AFTER the address itself to avoid matching hex digits inside it as amount
@@ -173,15 +175,17 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
               const reason = negAmount
                 ? `Invalid amount (negative: ${negAmount})`
                 : 'Missing amount';
-              skipped.push({ snippet: allAddrs[i].addr, reason, fileRow: i + 1, raw: allAddrs[i].addr });
+              skipped.push({ snippet: allAddrs[i].addr, reason, fileRow: malformedCount + i + 1, raw: allAddrs[i].addr });
               continue;
             }
             parsed.push({ addr: allAddrs[i].addr, amount, country });
           }
-          console.log('Parsed:', parsed.length, 'Skipped:', skipped.length, skipped);
+          // total = all valid-length addresses + malformed ones (no double counting)
+          const trueTotal = allAddrs.length + malformedCount;
+          console.log('Parsed:', parsed.length, 'Skipped:', skipped.length, 'Total:', trueTotal, skipped);
           if (parsed.length > 0) {
             setMulti(parsed);
-            setFileWarning(skipped.length > 0 ? { total: parsed.length + skipped.length, valid: parsed.length, items: skipped } : null);
+            setFileWarning(skipped.length > 0 ? { total: trueTotal, valid: parsed.length, items: skipped } : null);
           } else {
             setMulti([]);
             setFileWarning(null);
