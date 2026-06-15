@@ -99,7 +99,9 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             if (!addr.toLowerCase().startsWith('0x')) continue;
             dataRowNum++;
             if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format', fileRow: rowNum }); continue; }
-            if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount', fileRow: rowNum, raw: addr }); continue; }
+            const parsedAmt = parseFloat(amount);
+            if (!amount || isNaN(parsedAmt) || parsedAmt === 0) { skipped.push({ snippet: addr, reason: 'Missing amount', fileRow: rowNum, raw: addr }); continue; }
+            if (parsedAmt < 0) { skipped.push({ snippet: addr, reason: `Invalid amount (negative: ${amount})`, fileRow: rowNum, raw: addr }); continue; }
             parsed.push({ addr, amount, country });
           }
           if (parsed.length > 0) {
@@ -207,14 +209,18 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
         const lines = ev.target.result.split('\n').filter(l => l.trim());
         const parsed = [];
         const skipped = [];
+        let csvRowNum = 0;
         for (const line of lines) {
+          csvRowNum++;
           const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
           const addr = parts[0] || '';
           const amount = parts[1] || '';
           const country = parts[2] || '';
           if (!addr.toLowerCase().startsWith('0x')) continue;
-          if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format' }); continue; }
-          if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount' }); continue; }
+          if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format', fileRow: csvRowNum }); continue; }
+          const parsedAmt = parseFloat(amount);
+          if (!amount || isNaN(parsedAmt) || parsedAmt === 0) { skipped.push({ snippet: addr, reason: 'Missing amount', fileRow: csvRowNum, raw: addr }); continue; }
+          if (parsedAmt < 0) { skipped.push({ snippet: addr, reason: `Invalid amount (negative: ${amount})`, fileRow: csvRowNum, raw: addr }); continue; }
           parsed.push({ addr, amount, country });
         }
         if (parsed.length > 0) {
