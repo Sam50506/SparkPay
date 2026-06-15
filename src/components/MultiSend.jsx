@@ -37,11 +37,16 @@ function CountrySelect({ value, onChange }) {
 export default function MultiSend({ multi, setMulti, loading, handleMultiReview }) {
   const fileRef = useRef(null);
   const [fileError, setFileError] = React.useState(null);
+  const [fileWarning, setFileWarning] = React.useState(null);
+  const [showSkipped, setShowSkipped] = React.useState(false);
+  const truncateAddr = (a) => (a && a.length > 14) ? `${a.slice(0,6)}...${a.slice(-4)}` : (a || '');
 
   const handleCSV = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setFileError(null);
+    setFileWarning(null);
+    setShowSkipped(false);
     const name = file.name.toLowerCase();
 
     if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
@@ -52,14 +57,24 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const sheet = wb.Sheets[wb.SheetNames[0]];
           const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
           const parsed = [];
+          const skipped = [];
           for (const row of rows) {
             const addr = String(row[0] || '').trim();
             const amount = String(row[1] || '').trim();
             const country = String(row[2] || '').trim();
-            if (addr && amount && addr.match(/^0x[0-9a-fA-F]{40}$/)) parsed.push({ addr, amount, country });
+            if (!addr.toLowerCase().startsWith('0x')) continue;
+            if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format' }); continue; }
+            if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount' }); continue; }
+            parsed.push({ addr, amount, country });
           }
-          if (parsed.length > 0) setMulti(parsed);
-          else { setMulti([]); setFileError('No valid rows found in spreadsheet.'); }
+          if (parsed.length > 0) {
+            setMulti(parsed);
+            setFileWarning(skipped.length > 0 ? { total: parsed.length + skipped.length, valid: parsed.length, items: skipped } : null);
+          } else {
+            setMulti([]);
+            setFileWarning(null);
+            setFileError('No valid rows found in spreadsheet.');
+          }
         } catch (err) {
           setMulti([]);
           setFileError('Could not read spreadsheet file.');
@@ -92,18 +107,29 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             text += lines.join('\n') + '\n';
           }
           const parsed = [];
-          for (const line of text.split('\n')) {
-            const addrMatch = line.match(/0x[0-9a-fA-F]{40}/);
-            if (!addrMatch) continue;
-            const rest = line.slice(addrMatch.index + addrMatch[0].length);
+          const skipped = [];
+          for (const rawLine of text.split('\n')) {
+            const line = rawLine.trim();
+            if (!line) continue;
+            const tokenMatch = line.match(/0x[0-9a-zA-Z]+/);
+            if (!tokenMatch) continue;
+            const token = tokenMatch[0];
+            const rest = line.slice(tokenMatch.index + token.length);
+            if (!/^0x[0-9a-fA-F]{40}$/.test(token)) { skipped.push({ snippet: token, reason: 'Invalid wallet address format' }); continue; }
             const numMatches = rest.match(/\d+(\.\d+)?/g) || [];
             const amount = numMatches.find(n => parseFloat(n) > 0);
-            if (!amount) continue;
+            if (!amount) { skipped.push({ snippet: token, reason: 'Missing amount' }); continue; }
             const country = MS_COUNTRIES.find(c => rest.includes(c)) || '';
-            parsed.push({ addr: addrMatch[0], amount, country });
+            parsed.push({ addr: token, amount, country });
           }
-          if (parsed.length > 0) setMulti(parsed);
-          else { setMulti([]); setFileError('Could not find recipient rows in PDF. Try CSV or XLSX instead.'); }
+          if (parsed.length > 0) {
+            setMulti(parsed);
+            setFileWarning(skipped.length > 0 ? { total: parsed.length + skipped.length, valid: parsed.length, items: skipped } : null);
+          } else {
+            setMulti([]);
+            setFileWarning(null);
+            setFileError('Could not find recipient rows in PDF. Try CSV or XLSX instead.');
+          }
         } catch (err) {
           console.error('PDF parse error:', err);
           setMulti([]);
@@ -116,15 +142,25 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
       reader.onload = (ev) => {
         const lines = ev.target.result.split('\n').filter(l => l.trim());
         const parsed = [];
+        const skipped = [];
         for (const line of lines) {
           const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
-          const addr = parts[0];
-          const amount = parts[1];
+          const addr = parts[0] || '';
+          const amount = parts[1] || '';
           const country = parts[2] || '';
-          if (addr && amount) parsed.push({ addr, amount, country });
+          if (!addr.toLowerCase().startsWith('0x')) continue;
+          if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format' }); continue; }
+          if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount' }); continue; }
+          parsed.push({ addr, amount, country });
         }
-        if (parsed.length > 0) setMulti(parsed);
-        else { setMulti([]); setFileError('No valid rows found in CSV.'); }
+        if (parsed.length > 0) {
+          setMulti(parsed);
+          setFileWarning(skipped.length > 0 ? { total: parsed.length + skipped.length, valid: parsed.length, items: skipped } : null);
+        } else {
+          setMulti([]);
+          setFileWarning(null);
+          setFileError('No valid rows found in CSV.');
+        }
       };
       reader.readAsText(file);
     }
@@ -156,6 +192,28 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
         <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#ef4444', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
           <span>{fileError}</span>
           <button onClick={() => setFileError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 16, fontWeight: 700, padding: 0, lineHeight: 1, flexShrink: 0 }}>&times;</button>
+        </div>
+      )}
+
+      {fileWarning && (
+        <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#f59e0b', marginBottom: 14 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <span>Imported {fileWarning.valid} of {fileWarning.total} recipients - {fileWarning.items.length} skipped.</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button onClick={() => setShowSkipped(s => !s)} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: 12, fontWeight: 600, padding: 0, textDecoration: 'underline' }}>{showSkipped ? 'Hide' : 'Details'}</button>
+              <button onClick={() => setFileWarning(null)} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: 16, fontWeight: 700, padding: 0, lineHeight: 1 }}>&times;</button>
+            </div>
+          </div>
+          {showSkipped && (
+            <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(245,158,11,0.25)' }}>
+              {fileWarning.items.map((item, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', fontSize: 11, color: 'var(--tx2)' }}>
+                  <span style={{ fontFamily: 'monospace' }}>{truncateAddr(item.snippet) || '(empty)'}</span>
+                  <span style={{ color: '#f59e0b', flexShrink: 0 }}>{item.reason}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
