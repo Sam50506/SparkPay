@@ -917,10 +917,10 @@ function AdminPanel({address,maintenanceMode,setMaintenanceMode}){
           <div style={{padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:700,background:maintenanceMode?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:maintenanceMode?'#ef4444':'#22c55e'}}>
             {maintenanceMode?'MAINTENANCE ON':'LIVE'}
           </div>
-          <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 14px'}} onClick={()=>{
-            const newVal=!MAINTENANCE_MODE;
-            localStorage.setItem('arc_maintenance',newVal?'true':'false');
-            window.location.reload();
+          <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 14px'}} onClick={async()=>{
+            const newVal=!maintenanceMode;
+            setMaintenanceMode(newVal);
+            await supabase.from('settings').update({value:String(newVal)}).eq('key','maintenance_mode');
           }}>{maintenanceMode?'Turn Off':'Turn On'}</button>
         </div>
       </div>
