@@ -62,10 +62,11 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
     if (highlightIdx === null) return;
     const r = multi[highlightIdx];
     if (r && /^0x[0-9a-fA-F]{40}$/.test(r.addr) && parseFloat(r.amount) > 0) {
+      const idxToRemove = highlightIdx;
       setHighlightIdx(null);
       setFileWarning(w => {
         if (!w) return w;
-        const next = { ...w, items: w.items.filter(it => it.linkedIdx !== highlightIdx) };
+        const next = { ...w, items: w.items.filter(it => it.linkedIdx !== idxToRemove) };
         return next.items.length === 0 ? null : next;
       });
     }
