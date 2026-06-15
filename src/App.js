@@ -594,7 +594,7 @@ function AppInner() {
   const[maintenanceMode,setMaintenanceMode]=useState(DEFAULT_MAINTENANCE);
   const[maintenanceLoaded,setMaintenanceLoaded]=useState(false);
   useEffect(()=>{
-    fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance&select=value',{
+    fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode&select=value',{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
     }).then(r=>r.json()).then(d=>{
       if(d&&d[0])setMaintenanceMode(d[0].value==='true');
