@@ -325,7 +325,7 @@ function getProvider() {
 }
 
 const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
-const MAINTENANCE_MODE=localStorage.getItem('arc_maintenance')==='true';
+const DEFAULT_MAINTENANCE=true;const MAINTENANCE_MODE=localStorage.getItem('arc_maintenance')!==null?localStorage.getItem('arc_maintenance')==='true':DEFAULT_MAINTENANCE;
 const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
