@@ -90,12 +90,14 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const parsed = [];
           const skipped = [];
           let rowNum = 0;
+          let dataRowNum = 0;
           for (const row of rows) {
             rowNum++;
             const addr = String(row[0] || '').trim();
             const amount = String(row[1] || '').trim();
             const country = String(row[2] || '').trim();
             if (!addr.toLowerCase().startsWith('0x')) continue;
+            dataRowNum++;
             if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format', fileRow: rowNum }); continue; }
             if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount', fileRow: rowNum, raw: addr }); continue; }
             parsed.push({ addr, amount, country });
@@ -155,7 +157,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const anyAddrRegex = /0x[0-9a-fA-F]{1,39}(?![0-9a-fA-F])/g;
           let m2;
           while ((m2 = anyAddrRegex.exec(flatText)) !== null) {
-            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format', fileRow: skipped.length + 1 });
+            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format', fileRow: skipped.length + 1, fileRowLabel: `~pos ${m2.index}` });
           }
           for (let i = 0; i < allAddrs.length; i++) {
             // Start segment AFTER the address itself to avoid matching hex digits inside it as amount
@@ -171,7 +173,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
               const reason = negAmount
                 ? `Invalid amount (negative: ${negAmount})`
                 : 'Missing amount';
-              skipped.push({ snippet: allAddrs[i].addr, reason, fileRow: i + 1, raw: allAddrs[i].addr });
+              skipped.push({ snippet: allAddrs[i].addr, reason, fileRow: i + 1, fileRowLabel: `addr ${i + 1}`, raw: allAddrs[i].addr });
               continue;
             }
             parsed.push({ addr: allAddrs[i].addr, amount, country });
@@ -264,8 +266,8 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             <button onClick={() => setFileWarning(null)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer', fontSize: 18, fontWeight: 700, padding: 0, lineHeight: 1 }}>&times;</button>
           </div>
           {/* Column headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr 110px 80px', gap: 0, padding: '6px 14px', borderBottom: '1px solid var(--b0)', background: 'var(--elev)' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>#</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '72px 1fr 120px 90px', gap: 0, padding: '8px 16px', borderBottom: '1px solid var(--b0)', background: 'var(--elev)' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Row in file</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Issue</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Address</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'right' }}>Action</span>
@@ -275,10 +277,10 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
             const recoverable = /^0x[0-9a-fA-F]{40}$/.test(item.snippet);
             const isLinked = item.linkedIdx !== undefined;
             return (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px 1fr 110px 80px', gap: 0, padding: '9px 14px', borderBottom: i < fileWarning.items.length - 1 ? '1px solid var(--b0)' : 'none', alignItems: 'center', background: isLinked ? 'rgba(245,158,11,0.04)' : 'transparent' }}>
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '72px 1fr 120px 90px', gap: 0, padding: '13px 16px', borderBottom: i < fileWarning.items.length - 1 ? '1px solid var(--b0)' : 'none', alignItems: 'center', background: isLinked ? 'rgba(245,158,11,0.04)' : 'transparent' }}>
                 {/* Col 1 — position */}
                 <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx3)' }}>
-                  {item.fileRow ?? i + 1}
+                  {item.fileRowLabel ?? (item.fileRow != null ? `Row ${item.fileRow}` : `Row ${i + 1}`)}
                 </span>
                 {/* Col 2 — issue */}
                 <span style={{ fontSize: 12, color: recoverable ? '#f59e0b' : 'var(--re)', fontWeight: 500, paddingRight: 8 }}>
