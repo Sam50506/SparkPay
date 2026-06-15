@@ -36,10 +36,29 @@ function CountrySelect({ value, onChange }) {
 
 export default function MultiSend({ multi, setMulti, loading, handleMultiReview }) {
   const fileRef = useRef(null);
+  const rowRefs = useRef({});
   const [fileError, setFileError] = React.useState(null);
   const [fileWarning, setFileWarning] = React.useState(null);
   const [showSkipped, setShowSkipped] = React.useState(false);
+  const [highlightIdx, setHighlightIdx] = React.useState(null);
   const truncateAddr = (a) => (a && a.length > 14) ? `${a.slice(0,6)}...${a.slice(-4)}` : (a || '');
+
+  const addAndFocus = (item, i) => {
+    const newIdx = multi.length;
+    setMulti(p => [...p, { addr: item.raw, amount: item.amount || '', country: item.country || '' }]);
+    setFileWarning(w => {
+      const next = { ...w, items: w.items.filter((_, j) => j !== i) };
+      return next.items.length === 0 ? null : next;
+    });
+    setTimeout(() => {
+      const el = rowRefs.current[newIdx];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setHighlightIdx(newIdx);
+        setTimeout(() => setHighlightIdx(null), 2500);
+      }
+    }, 80);
+  };
 
   const handleCSV = (e) => {
     const file = e.target.files[0];
@@ -229,9 +248,19 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           {showSkipped && (
             <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(245,158,11,0.25)' }}>
               {fileWarning.items.map((item, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', fontSize: 11, color: 'var(--tx2)' }}>
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', fontSize: 11, color: 'var(--tx2)', alignItems: 'center' }}>
                   <span style={{ fontFamily: 'monospace' }}>{truncateAddr(item.snippet) || '(empty)'}</span>
-                  <span style={{ color: '#f59e0b', flexShrink: 0 }}>{item.reason}</span>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#f59e0b' }}>{item.reason}</span>
+                    {/^0x[0-9a-fA-F]{40}$/.test(item.snippet) && (
+                      <button
+                        onClick={() => addAndFocus({ raw: item.snippet, amount: '', country: '' }, i)}
+                        style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 6, color: '#f59e0b', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: '2px 8px', whiteSpace: 'nowrap' }}
+                      >
+                        Add &amp; Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -246,7 +275,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
       </div>
 
       {multi.map((r, i) => (
-        <div key={i} style={{ marginBottom: 10 }}>
+        <div key={i} ref={el => rowRefs.current[i] = el} style={{ marginBottom: 10, borderRadius: 12, transition: 'box-shadow 0.3s, background 0.3s', boxShadow: highlightIdx === i ? '0 0 0 2px #f59e0b' : 'none', background: highlightIdx === i ? 'rgba(245,158,11,0.06)' : 'transparent', padding: highlightIdx === i ? '8px' : '0' }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
             <div style={{ flex: 2 }}>
               {i === 0 && <div className="ap-label">Address</div>}
