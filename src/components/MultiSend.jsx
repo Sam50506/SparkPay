@@ -216,7 +216,10 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const addr = parts[0] || '';
           const amount = parts[1] || '';
           const country = parts[2] || '';
-          if (!addr.toLowerCase().startsWith('0x')) continue;
+          if (!addr.toLowerCase().startsWith('0x')) {
+            if (addr) skipped.push({ snippet: addr.slice(0, 20), reason: 'Invalid wallet address format', fileRow: csvRowNum });
+            continue;
+          }
           if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format', fileRow: csvRowNum }); continue; }
           const parsedAmt = parseFloat(amount);
           if (!amount || isNaN(parsedAmt) || parsedAmt === 0) { skipped.push({ snippet: addr, reason: 'Missing amount', fileRow: csvRowNum, raw: addr }); continue; }
