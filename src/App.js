@@ -325,6 +325,8 @@ function getProvider() {
 }
 
 const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
+const MAINTENANCE_MODE=true;
+const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
 const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xEC605Cea7C1270C01A3e7B869f762CfDAB8c8E41';
@@ -806,7 +808,13 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
         </div>
       )}
 
-      {!splash&&address&&(
+      {!splash&&address&&MAINTENANCE_MODE&&address.toLowerCase()!==ADMIN_ADDRESS&&(
+        <div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+          <div style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,color:'#fff',marginBottom:16}}>Under Maintenance</div>
+          <div style={{fontSize:14,color:'rgba(255,255,255,0.6)',lineHeight:1.6,maxWidth:360}}>ArcPay is currently undergoing scheduled maintenance. Please check back soon.</div>
+        </div>
+      )}
+      {!splash&&address&&(!MAINTENANCE_MODE||address.toLowerCase()===ADMIN_ADDRESS)&&(
         <div className="ap-app">
           {mobOpen&&<div className="ap-mob-overlay on" onClick={()=>setMobOpen(false)}/>}
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
