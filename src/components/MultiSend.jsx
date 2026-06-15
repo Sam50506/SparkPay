@@ -47,18 +47,29 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
     const newIdx = multi.length;
     setMulti(p => [...p, { addr: item.raw, amount: item.amount || '', country: item.country || '' }]);
     setFileWarning(w => {
-      const next = { ...w, items: w.items.filter((_, j) => j !== i) };
-      return next.items.length === 0 ? null : next;
+      const next = { ...w, items: w.items.map((it, j) => j === i ? { ...it, linkedIdx: newIdx } : it) };
+      return next;
     });
+    setHighlightIdx(newIdx);
     setTimeout(() => {
       const el = rowRefs.current[newIdx];
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setHighlightIdx(newIdx);
-        setTimeout(() => setHighlightIdx(null), 2500);
-      }
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 80);
   };
+
+  // Clear highlight + issue entry once the linked row is valid
+  React.useEffect(() => {
+    if (highlightIdx === null) return;
+    const r = multi[highlightIdx];
+    if (r && /^0x[0-9a-fA-F]{40}$/.test(r.addr) && parseFloat(r.amount) > 0) {
+      setHighlightIdx(null);
+      setFileWarning(w => {
+        if (!w) return w;
+        const next = { ...w, items: w.items.filter(it => it.linkedIdx !== highlightIdx) };
+        return next.items.length === 0 ? null : next;
+      });
+    }
+  }, [multi, highlightIdx]);
 
   const handleCSV = (e) => {
     const file = e.target.files[0];
@@ -77,13 +88,15 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
           const parsed = [];
           const skipped = [];
+          let rowNum = 0;
           for (const row of rows) {
+            rowNum++;
             const addr = String(row[0] || '').trim();
             const amount = String(row[1] || '').trim();
             const country = String(row[2] || '').trim();
             if (!addr.toLowerCase().startsWith('0x')) continue;
-            if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format' }); continue; }
-            if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount' }); continue; }
+            if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format', fileRow: rowNum }); continue; }
+            if (!amount || !(parseFloat(amount) > 0)) { skipped.push({ snippet: addr, reason: 'Missing amount', fileRow: rowNum, raw: addr }); continue; }
             parsed.push({ addr, amount, country });
           }
           if (parsed.length > 0) {
@@ -141,7 +154,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const anyAddrRegex = /0x[0-9a-fA-F]{1,39}(?![0-9a-fA-F])/g;
           let m2;
           while ((m2 = anyAddrRegex.exec(flatText)) !== null) {
-            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format' });
+            skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format', fileRow: skipped.length + 1 });
           }
           for (let i = 0; i < allAddrs.length; i++) {
             // Start segment AFTER the address itself to avoid matching hex digits inside it as amount
@@ -157,7 +170,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
               const reason = negAmount
                 ? `Invalid amount (negative: ${negAmount})`
                 : 'Missing amount';
-              skipped.push({ snippet: allAddrs[i].addr, reason });
+              skipped.push({ snippet: allAddrs[i].addr, reason, fileRow: i + 1, raw: allAddrs[i].addr });
               continue;
             }
             parsed.push({ addr: allAddrs[i].addr, amount, country });
@@ -237,34 +250,72 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
       )}
 
       {fileWarning && (
-        <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#f59e0b', marginBottom: 14 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <span>Imported {fileWarning.valid} of {fileWarning.total} recipients - {fileWarning.items.length} skipped.</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-              <button onClick={() => setShowSkipped(s => !s)} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: 12, fontWeight: 600, padding: 0, textDecoration: 'underline' }}>{showSkipped ? 'Hide' : 'Details'}</button>
-              <button onClick={() => setFileWarning(null)} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', fontSize: 16, fontWeight: 700, padding: 0, lineHeight: 1 }}>&times;</button>
+        <div style={{ background: 'var(--card)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 14, marginBottom: 16, overflow: 'hidden' }}>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'rgba(245,158,11,0.10)', borderBottom: '1px solid rgba(245,158,11,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 15 }}>⚠️</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>
+                {fileWarning.items.length} row{fileWarning.items.length !== 1 ? 's' : ''} need attention
+              </span>
+              <span style={{ fontSize: 11, color: 'var(--tx3)' }}>({fileWarning.valid} of {fileWarning.total} imported)</span>
             </div>
+            <button onClick={() => setFileWarning(null)} style={{ background: 'none', border: 'none', color: 'var(--tx3)', cursor: 'pointer', fontSize: 18, fontWeight: 700, padding: 0, lineHeight: 1 }}>&times;</button>
           </div>
-          {showSkipped && (
-            <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(245,158,11,0.25)' }}>
-              {fileWarning.items.map((item, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 0', fontSize: 11, color: 'var(--tx2)', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'monospace' }}>{truncateAddr(item.snippet) || '(empty)'}</span>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                    <span style={{ color: '#f59e0b' }}>{item.reason}</span>
-                    {/^0x[0-9a-fA-F]{40}$/.test(item.snippet) && (
-                      <button
-                        onClick={() => addAndFocus({ raw: item.snippet, amount: '', country: '' }, i)}
-                        style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 6, color: '#f59e0b', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: '2px 8px', whiteSpace: 'nowrap' }}
-                      >
-                        Add &amp; Edit
-                      </button>
-                    )}
-                  </div>
+          {/* Column headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: '44px 1fr 110px 80px', gap: 0, padding: '6px 14px', borderBottom: '1px solid var(--b0)', background: 'var(--elev)' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>#</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Issue</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Address</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--tx3)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'right' }}>Action</span>
+          </div>
+          {/* Rows */}
+          {fileWarning.items.map((item, i) => {
+            const recoverable = /^0x[0-9a-fA-F]{40}$/.test(item.snippet);
+            const isLinked = item.linkedIdx !== undefined;
+            return (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '44px 1fr 110px 80px', gap: 0, padding: '9px 14px', borderBottom: i < fileWarning.items.length - 1 ? '1px solid var(--b0)' : 'none', alignItems: 'center', background: isLinked ? 'rgba(245,158,11,0.04)' : 'transparent' }}>
+                {/* Col 1 — position */}
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--tx3)' }}>
+                  {item.fileRow ?? i + 1}
+                </span>
+                {/* Col 2 — issue */}
+                <span style={{ fontSize: 12, color: recoverable ? '#f59e0b' : 'var(--re)', fontWeight: 500, paddingRight: 8 }}>
+                  {item.reason}
+                </span>
+                {/* Col 3 — address */}
+                <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--tx2)' }}>
+                  {truncateAddr(item.snippet) || '(empty)'}
+                </span>
+                {/* Col 4 — action */}
+                <div style={{ textAlign: 'right' }}>
+                  {recoverable && !isLinked && (
+                    <button
+                      onClick={() => addAndFocus({ raw: item.snippet, amount: '', country: '' }, i)}
+                      style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 7, color: '#f59e0b', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: '4px 10px', whiteSpace: 'nowrap' }}
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {isLinked && (
+                    <button
+                      onClick={() => {
+                        const el = rowRefs.current[item.linkedIdx];
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setHighlightIdx(item.linkedIdx);
+                      }}
+                      style={{ background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 7, color: '#f59e0b', cursor: 'pointer', fontSize: 11, fontWeight: 600, padding: '4px 10px', whiteSpace: 'nowrap' }}
+                    >
+                      Go to row
+                    </button>
+                  )}
+                  {!recoverable && (
+                    <span style={{ fontSize: 11, color: 'var(--tx3)' }}>—</span>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            );
+          })}
         </div>
       )}
 
