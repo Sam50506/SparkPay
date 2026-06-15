@@ -217,7 +217,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           const amount = parts[1] || '';
           const country = parts[2] || '';
           if (!addr.toLowerCase().startsWith('0x')) {
-            if (addr) skipped.push({ snippet: addr.slice(0, 20), reason: 'Invalid wallet address format', fileRow: csvRowNum });
+            if (addr || amount) skipped.push({ snippet: addr ? addr.slice(0, 20) : '(empty)', reason: 'Invalid wallet address format', fileRow: csvRowNum });
             continue;
           }
           if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { skipped.push({ snippet: addr, reason: 'Invalid wallet address format', fileRow: csvRowNum }); continue; }
