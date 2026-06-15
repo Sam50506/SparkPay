@@ -325,7 +325,7 @@ function getProvider() {
 }
 
 const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
-const DEFAULT_MAINTENANCE=true;const MAINTENANCE_MODE=localStorage.getItem('arc_maintenance')!==null?localStorage.getItem('arc_maintenance')==='true':DEFAULT_MAINTENANCE;
+const DEFAULT_MAINTENANCE=true;
 const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
@@ -591,6 +591,16 @@ function WalletPicker({onPick,onClose}){
 }
 function AppInner() {
   const isAdminRoute = window.location.hash === '#admin';
+  const[maintenanceMode,setMaintenanceMode]=useState(DEFAULT_MAINTENANCE);
+  const[maintenanceLoaded,setMaintenanceLoaded]=useState(false);
+  useEffect(()=>{
+    fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance&select=value',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    }).then(r=>r.json()).then(d=>{
+      if(d&&d[0])setMaintenanceMode(d[0].value==='true');
+      setMaintenanceLoaded(true);
+    }).catch(()=>setMaintenanceLoaded(true));
+  },[]);
   const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
   const wcProvRef=useRef(null);const wcInitRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const isPWA=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;const[splash,setSplash]=useState(!isPWA);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[showWalletPrompt,setShowWalletPrompt]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(false);
@@ -761,7 +771,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
   const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return <MultiSend multi={multi} setMulti={setMulti} loading={loading} handleMultiReview={handleMultiReview}/>;case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faucet':return <Faucet address={address} balance={balance} setBalance={setBalance} faucetLoading={faucetLoading} setFaucetLoading={setFaucetLoading} faucetMsg={faucetMsg} setFaucetMsg={setFaucetMsg} lastClaim={lastClaim} setLastClaim={setLastClaim}/>;default:return renderSend();}};
 
   if(isAdminRoute){
-    return(<div className={'ap-root'+(dm?'':' light')}><style>{CSS}</style><AdminPanel address={address}/>{!address&&<div style={{position:'fixed',bottom:24,left:0,right:0,display:'flex',justifyContent:'center'}}><div className="ap-connect-card" style={{maxWidth:360,width:'calc(100% - 48px)'}}><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:16,color:'var(--tx1)',marginBottom:12}}>Connect Wallet</div><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>{showPicker&&<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>}</div></div>}</div>);
+    return(<div className={'ap-root'+(dm?'':' light')}><style>{CSS}</style><AdminPanel address={address} maintenanceMode={maintenanceMode} setMaintenanceMode={setMaintenanceMode}/>{!address&&<div style={{position:'fixed',bottom:24,left:0,right:0,display:'flex',justifyContent:'center'}}><div className="ap-connect-card" style={{maxWidth:360,width:'calc(100% - 48px)'}}><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:16,color:'var(--tx1)',marginBottom:12}}>Connect Wallet</div><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>{showPicker&&<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>}</div></div>}</div>);
   }
   return(
     <div className={'ap-root'+(dm?'':' light')}>
@@ -812,13 +822,13 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
         </div>
       )}
 
-      {!splash&&address&&MAINTENANCE_MODE&&address.toLowerCase()!==ADMIN_ADDRESS&&(
+      {!splash&&address&&maintenanceMode&&address.toLowerCase()!==ADMIN_ADDRESS&&(
         <div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
           <div style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,color:'#fff',marginBottom:16}}>Under Maintenance</div>
           <div style={{fontSize:14,color:'rgba(255,255,255,0.6)',lineHeight:1.6,maxWidth:360}}>ArcPay is currently undergoing scheduled maintenance. Please check back soon.</div>
         </div>
       )}
-      {!splash&&address&&(!MAINTENANCE_MODE||address.toLowerCase()===ADMIN_ADDRESS)&&(
+      {!splash&&address&&(!maintenanceMode||address.toLowerCase()===ADMIN_ADDRESS)&&(
         <div className="ap-app">
           {mobOpen&&<div className="ap-mob-overlay on" onClick={()=>setMobOpen(false)}/>}
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
@@ -848,12 +858,10 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
 }
 
 
-function AdminPanel({address}){
+function AdminPanel({address,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
   const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
   const[loading,setLoading]=useState(true);
-  const[maintenanceOn,setMaintenanceOn]=useState(MAINTENANCE_MODE);
-
   useEffect(()=>{
     if(!isAdmin)return;
     (async()=>{
@@ -906,14 +914,14 @@ function AdminPanel({address}){
         <div className="ap-card-title">Maintenance Mode</div>
         <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>When enabled, only the admin wallet can access the app.</div>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <div style={{padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:700,background:MAINTENANCE_MODE?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:MAINTENANCE_MODE?'#ef4444':'#22c55e'}}>
-            {MAINTENANCE_MODE?'MAINTENANCE ON':'LIVE'}
+          <div style={{padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:700,background:maintenanceMode?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:maintenanceMode?'#ef4444':'#22c55e'}}>
+            {maintenanceMode?'MAINTENANCE ON':'LIVE'}
           </div>
           <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 14px'}} onClick={()=>{
             const newVal=!MAINTENANCE_MODE;
             localStorage.setItem('arc_maintenance',newVal?'true':'false');
             window.location.reload();
-          }}>{MAINTENANCE_MODE?'Turn Off':'Turn On'}</button>
+          }}>{maintenanceMode?'Turn Off':'Turn On'}</button>
         </div>
       </div>
 
