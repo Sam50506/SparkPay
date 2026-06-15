@@ -325,7 +325,7 @@ function getProvider() {
 }
 
 const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
-const MAINTENANCE_MODE=true;
+const MAINTENANCE_MODE=localStorage.getItem('arc_maintenance')==='true';
 const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
@@ -904,12 +904,16 @@ function AdminPanel({address}){
 
       <div className="ap-card" style={{marginBottom:24}}>
         <div className="ap-card-title">Maintenance Mode</div>
-        <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>When enabled, only the admin wallet can access the app. Toggle requires a code deploy currently (env-based flag).</div>
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
+        <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>When enabled, only the admin wallet can access the app.</div>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
           <div style={{padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:700,background:MAINTENANCE_MODE?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:MAINTENANCE_MODE?'#ef4444':'#22c55e'}}>
             {MAINTENANCE_MODE?'MAINTENANCE ON':'LIVE'}
           </div>
-          <div style={{fontSize:12,color:'var(--tx3)'}}>To toggle, change MAINTENANCE_MODE in App.js and redeploy</div>
+          <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 14px'}} onClick={()=>{
+            const newVal=!MAINTENANCE_MODE;
+            localStorage.setItem('arc_maintenance',newVal?'true':'false');
+            window.location.reload();
+          }}>{MAINTENANCE_MODE?'Turn Off':'Turn On'}</button>
         </div>
       </div>
 
