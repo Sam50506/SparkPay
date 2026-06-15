@@ -106,22 +106,40 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
                 .trim());
             text += lines.join('\n') + '\n';
           }
+          console.log('PDF extracted text:', text);
           const parsed = [];
           const skipped = [];
-          for (const rawLine of text.split('\n')) {
-            const line = rawLine.trim();
-            if (!line) continue;
-            const tokenMatch = line.match(/0x[0-9a-zA-Z]+/);
-            if (!tokenMatch) continue;
-            const token = tokenMatch[0];
-            const rest = line.slice(tokenMatch.index + token.length);
-            if (!/^0x[0-9a-fA-F]{40}$/.test(token)) { skipped.push({ snippet: token, reason: 'Invalid wallet address format' }); continue; }
-            const numMatches = rest.match(/\d+(\.\d+)?/g) || [];
-            const amount = numMatches.find(n => parseFloat(n) > 0);
-            if (!amount) { skipped.push({ snippet: token, reason: 'Missing amount' }); continue; }
-            const country = MS_COUNTRIES.find(c => rest.includes(c)) || '';
-            parsed.push({ addr: token, amount, country });
+          // Collapse all whitespace/newlines so wrapped addresses are found
+          const flatText = text.replace(/\s+/g, ' ');
+          // Find all valid 40-char hex addresses globally
+          const addrRegex = /0x[0-9a-fA-F]{40}/g;
+          let m;
+          const allAddrs = [];
+          while ((m = addrRegex.exec(flatText)) !== null) {
+            allAddrs.push({ addr: m[0], index: m.index });
           }
+          // Also scan original text for truncated/invalid addresses to report them
+          const anyAddrRegex = /0x[0-9a-zA-Z]{4,}/g;
+          let m2;
+          while ((m2 = anyAddrRegex.exec(flatText)) !== null) {
+            if (!/^0x[0-9a-fA-F]{40}$/.test(m2[0]) && !allAddrs.some(a => a.index === m2.index)) {
+              skipped.push({ snippet: m2[0].slice(0, 20) + (m2[0].length > 20 ? '...' : ''), reason: 'Invalid wallet address format' });
+            }
+          }
+          for (let i = 0; i < allAddrs.length; i++) {
+            const start = allAddrs[i].index;
+            const end = i + 1 < allAddrs.length ? allAddrs[i+1].index : flatText.length;
+            const segment = flatText.slice(start, end);
+            const numMatches = segment.match(/\d+(\.\d+)?/g) || [];
+            const amount = numMatches.find(n => parseFloat(n) > 0 && !allAddrs[i].addr.toLowerCase().includes(n.toLowerCase()));
+            const country = MS_COUNTRIES.find(c => segment.includes(c)) || '';
+            if (!amount) {
+              skipped.push({ snippet: allAddrs[i].addr, reason: 'Missing amount' });
+              continue;
+            }
+            parsed.push({ addr: allAddrs[i].addr, amount, country });
+          }
+          console.log('Parsed:', parsed.length, 'Skipped:', skipped.length, skipped);
           if (parsed.length > 0) {
             setMulti(parsed);
             setFileWarning(skipped.length > 0 ? { total: parsed.length + skipped.length, valid: parsed.length, items: skipped } : null);
