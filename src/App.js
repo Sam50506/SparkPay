@@ -857,7 +857,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
         <div className="ap-app">
           {mobOpen&&<div className="ap-mob-overlay on" onClick={()=>setMobOpen(false)}/>}
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
-            <div className="ap-logo-area"><svg width="34" height="34" viewBox="0 0 100 100" fill="none"><defs><linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#E8F0FF"/><stop offset="100%" stopColor="#7AA8D8"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="#0F1A2E"/><path d="M50 18 C28 18 18 38 18 52 L18 76 L30 76 L30 52 C30 38 39 30 50 30 C61 30 70 38 70 52 L70 76 L82 76 L82 52 C82 38 72 18 50 18Z" fill="url(#lg1)"/><path d="M38 76 L38 58 C38 53 43 48 50 48 C57 48 62 53 62 58 L62 76 L50 76Z" fill="url(#lg1)" opacity="0.5"/></svg><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
+            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="34" height="34" style={{borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
             <nav className="ap-nav">
               {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title}><div className="ap-nav-sec">{sec.title}</div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
             </nav>
