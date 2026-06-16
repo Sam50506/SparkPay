@@ -303,9 +303,9 @@ const SplashScreen = ({ onDone }) => {
       <div style={{position:'absolute',zIndex:8,display:'flex',alignItems:'center',justifyContent:'center',width:'100%'}}>
         <div style={{position:'relative',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,lineHeight:1,letterSpacing:'-0.03em',userSelect:'none'}}>
           {/* Blue top glitch */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.25s steps(1) 0.12s 6 alternate, sp-gfade 0.5s 2.0s forwards',pointerEvents:'none'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.08s steps(1) 0.04s 4 alternate, sp-gfade 0.2s 0.5s forwards',pointerEvents:'none'}}>SparkPay</div>
           {/* Cyan bottom glitch */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.25s steps(1) 0s 6 alternate, sp-gfade 0.5s 2.0s forwards',pointerEvents:'none'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.08s steps(1) 0s 4 alternate, sp-gfade 0.2s 0.5s forwards',pointerEvents:'none'}}>SparkPay</div>
           {/* Invisible spacer to hold size */}
           <div style={{opacity:0,pointerEvents:'none'}}>SparkPay</div>
         </div>
