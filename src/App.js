@@ -276,30 +276,79 @@ const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
   useEffect(() => {
     const t0=setTimeout(()=>setPhase(1),100);
-    const t1=setTimeout(()=>setPhase(2),600);
-    const t2=setTimeout(()=>setPhase(3),1000);
-    const t3=setTimeout(()=>setExit(true),2100);
-    const t4=setTimeout(()=>onDone(),2500);
-    return()=>{[t0,t1,t2,t3,t4].forEach(clearTimeout);}
+    const t1=setTimeout(()=>setPhase(2),500);
+    const t2=setTimeout(()=>setPhase(3),900);
+    const t3=setTimeout(()=>setPhase(4),1300);
+    const t4=setTimeout(()=>setExit(true),2400);
+    const t5=setTimeout(()=>onDone(),2850);
+    return()=>{[t0,t1,t2,t3,t4,t5].forEach(clearTimeout);}
   }, [onDone]);
   return (
-    <div style={{position:'fixed',inset:0,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:999,opacity:exit?0:1,transform:exit?'scale(1.03)':'scale(1)',transition:'opacity .4s ease, transform .4s ease'}}>
+    <div style={{position:'fixed',inset:0,background:'#06060f',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:9999,opacity:exit?0:1,transform:exit?'scale(1.04)':'scale(1)',transition:'opacity .45s ease, transform .45s ease',overflow:'hidden'}}>
       <style>{`
-        @keyframes lineExpand{from{width:0;opacity:0}to{width:120px;opacity:1}}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes dotPulse{0%,100%{opacity:0.3}50%{opacity:1}}
+        @keyframes sparkFloat{0%{opacity:0;transform:translateY(0) scale(0)}20%{opacity:1}100%{opacity:0;transform:translateY(-120px) scale(1.5)}}
+        @keyframes boltFlash{0%{opacity:0;transform:scaleY(0)}30%{opacity:1;transform:scaleY(1)}70%{opacity:1}100%{opacity:0}}
+        @keyframes ringExpand{from{transform:scale(0.4);opacity:0.8}to{transform:scale(2.2);opacity:0}}
+        @keyframes barFill{from{width:0}to{width:100%}}
+        @keyframes glowPulse{0%,100%{text-shadow:0 0 20px rgba(250,204,21,0.4),0 0 40px rgba(250,204,21,0.2)}50%{text-shadow:0 0 40px rgba(250,204,21,0.8),0 0 80px rgba(250,204,21,0.4)}}
+        @keyframes subFade{from{opacity:0;letter-spacing:0.3em}to{opacity:1;letter-spacing:0.18em}}
       `}</style>
+
+      {/* Background sparks */}
+      {phase>=1&&[...Array(12)].map((_,i)=>(
+        <div key={i} style={{position:'absolute',left:`${15+i*6}%`,top:`${30+((i*37)%40)}%`,width:i%3===0?6:i%3===1?4:3,height:i%3===0?6:i%3===1?4:3,borderRadius:'50%',background:i%2===0?'#facc15':'#a78bfa',animation:`sparkFloat ${0.8+i*0.15}s ${i*0.08}s ease-out forwards`,pointerEvents:'none'}}/>
+      ))}
+
+      {/* Expanding ring */}
+      {phase>=1&&(
+        <div style={{position:'absolute',width:180,height:180,borderRadius:'50%',border:'1.5px solid rgba(250,204,21,0.5)',animation:'ringExpand 1s ease-out forwards',pointerEvents:'none'}}/>
+      )}
+      {phase>=2&&(
+        <div style={{position:'absolute',width:180,height:180,borderRadius:'50%',border:'1px solid rgba(167,139,250,0.4)',animation:'ringExpand 1s 0.15s ease-out forwards',pointerEvents:'none'}}/>
+      )}
+
+      {/* Lightning bolt icon */}
+      <div style={{opacity:phase>=1?1:0,transform:phase>=1?'scale(1)':'scale(0.5)',transition:'opacity .35s ease, transform .4s cubic-bezier(.34,1.56,.64,1)',marginBottom:20}}>
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <defs>
+            <linearGradient id="boltGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#facc15"/>
+              <stop offset="100%" stopColor="#f97316"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <polygon points="32,4 18,30 28,30 24,52 38,26 28,26" fill="url(#boltGrad)" filter="url(#glow)"/>
+        </svg>
+      </div>
+
+      {/* SparkPay wordmark */}
       <div style={{textAlign:'center'}}>
-        <div style={{opacity:phase>=1?1:0,transform:phase>=1?'translateY(0)':'translateY(16px)',transition:'opacity .5s ease, transform .5s ease'}}>
-          <div style={{fontFamily:'var(--fd)',fontSize:52,fontWeight:900,color:'#fff',letterSpacing:'-0.04em',lineHeight:1}}>ArcPay</div>
+        <div style={{opacity:phase>=2?1:0,transform:phase>=2?'translateY(0)':'translateY(14px)',transition:'opacity .45s ease, transform .45s ease'}}>
+          <div style={{fontFamily:'var(--fd)',fontSize:48,fontWeight:900,letterSpacing:'-0.04em',lineHeight:1,animation:phase>=3?'glowPulse 1.8s ease-in-out infinite':'none'}}>
+            <span style={{color:'#facc15'}}>Spark</span><span style={{color:'#fff'}}>Pay</span>
+          </div>
         </div>
-        <div style={{height:2,background:'#2563eb',borderRadius:1,margin:'16px auto 0',animation:phase>=2?'lineExpand .5s cubic-bezier(.4,0,.2,1) forwards':'none',width:phase>=2?120:0}}/>
-        <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',letterSpacing:'0.2em',textTransform:'uppercase',fontWeight:500,marginTop:14,opacity:phase>=3?1:0,transform:phase>=3?'translateY(0)':'translateY(8px)',transition:'opacity .4s ease, transform .4s ease'}}>
-          Global Remittance
+
+        {/* Divider bar */}
+        <div style={{height:'1.5px',background:'linear-gradient(90deg,transparent,#facc15,#a78bfa,transparent)',borderRadius:1,margin:'14px auto 0',width:phase>=3?'140px':'0',transition:'width .5s cubic-bezier(.4,0,.2,1) .1s'}}/>
+
+        {/* Tagline */}
+        <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',letterSpacing:'0.18em',textTransform:'uppercase',fontWeight:600,marginTop:12,opacity:phase>=4?1:0,animation:phase>=4?'subFade .5s ease forwards':'none'}}>
+          Instant Global Payments
         </div>
       </div>
-      <div style={{position:'absolute',bottom:36,display:'flex',gap:6,alignItems:'center'}}>
-        {[0,1,2].map(i=><div key={i} style={{width:4,height:4,borderRadius:'50%',background:'#2563eb',animation:`dotPulse 1.2s ${i*0.2}s ease-in-out infinite`}}/>)}
+
+      {/* Progress bar */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:'2px',background:'rgba(255,255,255,0.06)'}}>
+        <div style={{height:'100%',background:'linear-gradient(90deg,#facc15,#a78bfa)',borderRadius:1,animation:phase>=1?'barFill 2.2s cubic-bezier(.4,0,.15,1) forwards':'none'}}/>
+      </div>
+
+      {/* Version */}
+      <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(255,255,255,0.2)',fontWeight:500,letterSpacing:'0.06em'}}>
+        Testnet · Chain 5042002
       </div>
     </div>
   );
