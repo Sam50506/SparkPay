@@ -14,9 +14,9 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Inter:wght@400;500;600;700;800;900&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0A0E1A;--surf:#111827;--card:#1A2235;--elev:#1F2A3F;--hov:#243048;
-  --b0:#2A3550;--b1:#334060;--b2:#3D4D72;--b3:#4F6090;
-  --tx1:#F0F4FF;--tx2:#A0AECA;--tx3:#5A6A8A;
+  --bg:#000000;--surf:#0A0A0A;--card:#111111;--elev:#1A1A1A;--hov:#222222;
+  --b0:#2A2A2A;--b1:#333333;--b2:#444444;--b3:#555555;
+  --tx1:#FFFFFF;--tx2:#AAAAAA;--tx3:#666666;
   --ac:#4D9FE0;--ac2:#70B8F0;--acd:rgba(77,159,224,.15);--acs:rgba(77,159,224,.3);
   --cy:#17E5B0;--re:#FF4F61;--ye:#F0C43F;
   --fd:'Inter',sans-serif;--fb:'Inter',sans-serif;
