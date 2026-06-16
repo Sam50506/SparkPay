@@ -66,7 +66,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-topbar{height:62px;border-bottom:1px solid var(--b0);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
 .ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px;background:var(--bg);min-height:100%}
 .ap-page-enter{animation:scaleIn .22s ease both;max-width:580px}
-.ap-logo-area{padding:20px 16px 17px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:11px}
+.ap-logo-area{padding:20px 16px 17px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:8px}
 .ap-logo-name{font-family:var(--fd);font-weight:800;font-size:17px;letter-spacing:-.3px;line-height:1;color:var(--tx1)}
 .ap-logo-tag{font-size:10px;color:var(--tx3);font-weight:600;letter-spacing:.07em;margin-top:2px;text-transform:uppercase}
 .ap-nav{flex:1;padding:8px 0;overflow-y:auto}
@@ -857,7 +857,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
         <div className="ap-app">
           {mobOpen&&<div className="ap-mob-overlay on" onClick={()=>setMobOpen(false)}/>}
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
-            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="34" height="34" style={{borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
+            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="44" height="44" style={{borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
             <nav className="ap-nav">
               {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title}><div className="ap-nav-sec">{sec.title}</div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
             </nav>
