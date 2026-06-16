@@ -289,6 +289,7 @@ const SplashScreen = ({ onDone }) => {
         @keyframes sp-bolt{from{transform:scale(0.6);opacity:0;filter:drop-shadow(0 0 30px #fff)}to{transform:scale(1);opacity:1}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
         @keyframes sp-sub{from{opacity:0}to{opacity:1}}
+        @keyframes sp-fade{from{opacity:1}to{opacity:0}}
         .sp-glitch-before{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:inherit;font-weight:900;letter-spacing:-0.03em;color:#4B8CF5;animation:sp-glitch1 0.08s steps(1) 0s 6 alternate,sp-reveal 0.3s 0.5s forwards;clip-path:polygon(0 0,100% 0,100% 40%,0 40%);pointer-events:none}
         .sp-glitch-after{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:inherit;font-weight:900;letter-spacing:-0.03em;color:#17E5B0;animation:sp-glitch2 0.07s steps(1) 0.03s 6 alternate,sp-reveal 0.3s 0.5s forwards;clip-path:polygon(0 60%,100% 60%,100% 100%,0 100%);pointer-events:none}
       `}</style>
@@ -306,8 +307,8 @@ const SplashScreen = ({ onDone }) => {
       <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-reveal .5s cubic-bezier(.22,1,.36,1) .5s forwards'}}>
         <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,letterSpacing:'-0.03em',color:'#fff',lineHeight:1}}>
           {/* Glitch layers */}
-          <div className="sp-glitch-before">SparkPay</div>
-          <div className="sp-glitch-after">SparkPay</div>
+          <div style={{position:'absolute',top:0,left:0,right:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5',animation:'sp-glitch1 0.08s steps(1) 0s 6 alternate, sp-fade 0.2s 0.5s forwards',clipPath:'polygon(0 0,100% 0,100% 40%,0 40%)',pointerEvents:'none'}}>SparkPay</div>
+          <div style={{position:'absolute',top:0,left:0,right:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#17E5B0',animation:'sp-glitch2 0.07s steps(1) 0.03s 6 alternate, sp-fade 0.2s 0.5s forwards',clipPath:'polygon(0 60%,100% 60%,100% 100%,0 100%)',pointerEvents:'none'}}>SparkPay</div>
           {/* Real text */}
           <span style={{position:'relative',zIndex:3,display:'flex',alignItems:'center'}}>
             Sp
