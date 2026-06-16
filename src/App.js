@@ -293,8 +293,7 @@ const SplashScreen = ({ onDone }) => {
       {/* Flash */}
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#4B8CF5,#17E5B0)',animation:'sp-flash .7s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
-      {/* Radial glow */}
-      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 0.8s forwards',pointerEvents:'none'}}/>
+
 
       {/* Logo */}
       <div style={{display:'flex',flexDirection:'column',alignItems:'center',position:'relative',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 0.3s forwards'}}>
