@@ -845,6 +845,17 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
       )}
       {address&&(
         <div className="ap-layout">
+          <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
+            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="50" height="50" style={{borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
+            <nav className="ap-nav">
+              {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title} className="ap-nav-section"><div className="ap-nav-title">{sec.title}</div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
+            </nav>
+            <div className="ap-sidebar-foot">
+              <div className="ap-net-badge"><span className="ap-net-dot"/>Arc Testnet<span style={{color:'var(--tx3)',marginLeft:4,fontWeight:500}}>#5042002</span></div>
+              <div className="ap-wallet-pill"><div className="ap-wallet-icon"><IC.Wallet/></div><div style={{flex:1,minWidth:0}}><div style={{fontSize:10,color:'var(--tx3)',fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase'}}>{walletName||'Wallet'}</div><div style={{fontSize:12,fontWeight:600,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{short(address)}</div></div><div style={{fontSize:13,fontWeight:700,color:'var(--ac2)',fontFamily:'var(--fd)'}}>${balance}</div></div>
+            </div>
+          </aside>
+          {mobOpen&&<div className="ap-overlay" onClick={()=>setMobOpen(false)}/>}
           <div className="ap-topbar">
             <div style={{display:'flex',alignItems:'center',gap:12}}><button className="ap-btn-icon mob-show" onClick={()=>setMobOpen(true)} style={{border:'none',background:'var(--elev)'}}><IC.Menu/></button><span style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:16,letterSpacing:'-.2px',color:'var(--tx1)'}}>{PAGE_TITLES[tab]||'SparkPay'}</span></div>
             <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:13,color:'var(--ac2)',background:'var(--acd)',padding:'6px 12px',borderRadius:8,border:'1px solid var(--acs)'}}>${balance}</div><div className="ap-badge ap-badge-blue mob-hide" style={{padding:'6px 12px',fontSize:12,fontFamily:'monospace'}}>{short(address)}</div><button className="ap-btn ap-btn-icon" onClick={()=>navigator.clipboard?.writeText(address)}><IC.Copy/></button><button className="ap-btn ap-btn-danger" onClick={doDisconnect}>Disconnect</button></div>
