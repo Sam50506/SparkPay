@@ -283,7 +283,7 @@ const SplashScreen = ({ onDone }) => {
     return()=>{[t0,t1,t2,t3,t4].forEach(clearTimeout);}
   }, [onDone]);
   return (
-    <div style={{position:'fixed',inset:0,zIndex:9999,background:'#080d1f',display:'flex',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .6s ease',overflow:'hidden'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .6s ease',overflow:'hidden'}}>
       <style>{`
         @keyframes sp-ray{0%{opacity:0;transform:scaleX(0)}60%{opacity:0.6}100%{opacity:0;transform:scaleX(1)}}
         @keyframes sp-ray2{0%{opacity:0;transform:scaleY(0)}60%{opacity:0.4}100%{opacity:0;transform:scaleY(1)}}
@@ -316,31 +316,32 @@ const SplashScreen = ({ onDone }) => {
       <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:0,position:'relative',opacity:0,animation:phase>=1?'sp-logo .5s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
 
         {/* SparkPay wordmark with bolt */}
-        <div style={{position:'relative',display:'flex',alignItems:'center'}}>
-          {/* Spark text */}
-          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,56px)',fontWeight:900,letterSpacing:'-0.03em',color:'#fff',lineHeight:1}}>Sp</span>
+        <div style={{position:'relative',display:'flex',alignItems:'center',lineHeight:1}}>
+          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,58px)',fontWeight:900,letterSpacing:'-0.02em',color:'#fff'}}>Sp</span>
 
-          {/* Bolt replacing 'a' */}
-          <div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'clamp(22px,5vw,34px)',marginBottom:4,opacity:0,animation:phase>=2?'sp-bolt .4s .1s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
-            <svg viewBox="0 0 24 32" fill="none" style={{width:'clamp(20px,4.5vw,30px)',height:'clamp(26px,6vw,40px)',filter:'drop-shadow(0 0 8px rgba(23,229,176,0.8))'}}>
+          {/* Bold wide bolt replacing 'a' — sized and positioned to sit like the letter */}
+          <div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',opacity:0,animation:phase>=2?'sp-bolt .35s .1s cubic-bezier(.22,1,.36,1) forwards':'none',margin:'0 1px',position:'relative',top:1}}>
+            <svg viewBox="0 0 30 44" fill="none" style={{width:'clamp(24px,5vw,36px)',height:'clamp(36px,7.5vw,54px)',filter:'drop-shadow(0 0 12px rgba(75,140,245,0.9)) drop-shadow(0 0 24px rgba(23,229,176,0.5))'}}>
               <defs>
-                <linearGradient id="boltG" x1="12" y1="0" x2="12" y2="32" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#7AACFF"/>
+                <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#ffffff"/>
+                  <stop offset="45%" stopColor="#7AACFF"/>
                   <stop offset="100%" stopColor="#17E5B0"/>
                 </linearGradient>
               </defs>
-              <path d="M15 1L2 17H11L9 31L22 15H13L15 1Z" fill="url(#boltG)"/>
+              {/* Wide bold bolt — reads clearly as a letter substitute */}
+              <path d="M20 2L3 24H14L10 42L27 20H16L20 2Z" fill="url(#boltG)" strokeWidth="0"/>
             </svg>
           </div>
 
-          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,56px)',fontWeight:900,letterSpacing:'-0.03em',color:'#fff',lineHeight:1}}>rkPay</span>
+          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,58px)',fontWeight:900,letterSpacing:'-0.02em',color:'#fff'}}>rkPay</span>
 
           {/* Shine sweep */}
-          {phase>=2&&<div style={{position:'absolute',top:0,bottom:0,width:'40%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)',animation:'sp-shine .8s .3s ease forwards',pointerEvents:'none'}}/>}
+          {phase>=2&&<div style={{position:'absolute',top:0,bottom:0,width:'35%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)',animation:'sp-shine .9s .4s ease forwards',pointerEvents:'none'}}/>}
         </div>
 
         {/* Tagline */}
-        <div style={{marginTop:16,fontSize:'clamp(9px,2vw,11px)',fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,transition:'opacity .5s ease .2s',display:phase>=3?'block':'none',animation:phase>=3?'sp-logo .4s ease forwards':'none'}}>
+        <div style={{marginTop:18,fontSize:'clamp(9px,2vw,11px)',fontWeight:600,letterSpacing:'0.24em',textTransform:'uppercase',color:'rgba(235,240,255,0.28)',opacity:0,animation:phase>=3?'sp-logo .5s .1s ease forwards':'none'}}>
           Instant Global Payments
         </div>
       </div>
