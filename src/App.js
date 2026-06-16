@@ -282,8 +282,8 @@ const SplashScreen = ({ onDone }) => {
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
         @keyframes sp-flash{0%{opacity:0}10%{opacity:0.25}20%{opacity:0}35%{opacity:0.12}50%{opacity:0}100%{opacity:0}}
-        @keyframes sp-g1{0%{transform:translate(-8px,0);opacity:1}20%{transform:translate(8px,-3px);opacity:1}40%{transform:translate(-10px,2px);opacity:1}60%{transform:translate(6px,0);opacity:1}80%{transform:translate(-4px,1px);opacity:1}100%{transform:translate(0,0);opacity:1}}
-        @keyframes sp-g2{0%{transform:translate(8px,0);opacity:1}20%{transform:translate(-6px,3px);opacity:1}40%{transform:translate(9px,-2px);opacity:1}60%{transform:translate(-5px,0);opacity:1}80%{transform:translate(3px,-1px);opacity:1}100%{transform:translate(0,0);opacity:1}}
+        @keyframes sp-g1{0%{transform:translate(-4px,0)}20%{transform:translate(4px,-1px)}40%{transform:translate(-5px,1px)}60%{transform:translate(3px,0)}80%{transform:translate(-2px,0)}100%{transform:translate(0,0)}}
+        @keyframes sp-g2{0%{transform:translate(4px,0)}20%{transform:translate(-3px,1px)}40%{transform:translate(5px,-1px)}60%{transform:translate(-2px,0)}80%{transform:translate(2px,0)}100%{transform:translate(0,0)}}
         @keyframes sp-gfade{0%{opacity:1}100%{opacity:0}}
         @keyframes sp-wordin{0%{opacity:0;filter:blur(4px)}100%{opacity:1;filter:blur(0)}}
         @keyframes sp-bolt{from{transform:scale(0.5);opacity:0;filter:drop-shadow(0 0 40px #fff) drop-shadow(0 0 20px #4B8CF5)}to{transform:scale(1);opacity:1;filter:drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))}}
