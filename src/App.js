@@ -282,76 +282,40 @@ const SplashScreen = ({ onDone }) => {
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
         @keyframes sp-flash{0%{opacity:0}10%{opacity:0.25}20%{opacity:0}35%{opacity:0.12}50%{opacity:0}100%{opacity:0}}
-        @keyframes sp-gfade{0%{opacity:1}100%{opacity:0}}
         @keyframes sp-logoin{0%{opacity:0;transform:scale(1.08);filter:blur(6px)}60%{filter:blur(0)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
-        @keyframes sp-bolt{from{transform:scale(0.5);opacity:0;filter:drop-shadow(0 0 40px #fff) drop-shadow(0 0 20px #4B8CF5)}to{transform:scale(1);opacity:1;filter:drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))}}
+        @keyframes sp-bolt{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
         @keyframes sp-sub{from{opacity:0}to{opacity:1}}
         @keyframes sp-glow{from{opacity:0}to{opacity:1}}
-        @keyframes sh0{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-38px,-52px) rotate(-18deg) scale(0.7)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh1{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(44px,-38px) rotate(22deg) scale(0.65)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh2{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-52px,14px) rotate(-28deg) scale(0.6)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh3{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(48px,22px) rotate(32deg) scale(0.55)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh4{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-18px,56px) rotate(-14deg) scale(0.6)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh5{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(32px,48px) rotate(25deg) scale(0.5)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh6{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-60px,-18px) rotate(-35deg) scale(0.45)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh7{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(56px,-12px) rotate(18deg) scale(0.5)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh8{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(8px,-62px) rotate(42deg) scale(0.55)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
-        @keyframes sh9{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-24px,64px) rotate(-22deg) scale(0.4)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sp-shine{0%{left:-40%;opacity:0}50%{opacity:1}100%{left:120%;opacity:0}}
       `}</style>
 
       {/* Flash */}
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#4B8CF5,#17E5B0)',animation:'sp-flash .7s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
       {/* Radial glow */}
-      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 1.0s forwards',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 0.8s forwards',pointerEvents:'none'}}/>
 
-      {/* Glass shatter — 10 shards fly out then converge into bolt */}
-      <div style={{position:'absolute',zIndex:8,display:'flex',alignItems:'center',justifyContent:'center',width:'100%',pointerEvents:'none'}}>
-        <div style={{position:'relative',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,lineHeight:1,letterSpacing:'-0.03em',userSelect:'none'}}>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(0 0,35% 0,28% 38%,0 45%)',animation:'sh0 0.55s cubic-bezier(.4,0,.2,1) 0.05s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(35% 0,65% 0,58% 42%,28% 38%)',animation:'sh1 0.55s cubic-bezier(.4,0,.2,1) 0.02s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(65% 0,100% 0,100% 35%,58% 42%)',animation:'sh2 0.55s cubic-bezier(.4,0,.2,1) 0.07s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 45%,28% 38%,32% 62%,0 58%)',animation:'sh3 0.55s cubic-bezier(.4,0,.2,1) 0.04s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#fff',clipPath:'polygon(28% 38%,58% 42%,54% 65%,32% 62%)',animation:'sh4 0.55s cubic-bezier(.4,0,.2,1) 0.0s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(58% 42%,100% 35%,100% 60%,54% 65%)',animation:'sh5 0.55s cubic-bezier(.4,0,.2,1) 0.06s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 58%,32% 62%,26% 85%,0 100%)',animation:'sh6 0.55s cubic-bezier(.4,0,.2,1) 0.03s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#fff',clipPath:'polygon(32% 62%,54% 65%,48% 88%,26% 85%)',animation:'sh7 0.55s cubic-bezier(.4,0,.2,1) 0.08s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(54% 65%,100% 60%,100% 100%,48% 88%)',animation:'sh8 0.55s cubic-bezier(.4,0,.2,1) 0.01s forwards'}}>SparkPay</div>
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(26% 85%,48% 88%,100% 100%,0 100%)',animation:'sh9 0.55s cubic-bezier(.4,0,.2,1) 0.05s forwards'}}>SparkPay</div>
-          {/* Invisible spacer */}
-          <div style={{opacity:0,pointerEvents:'none'}}>SparkPay</div>
-        </div>
-      </div>
-
-      {/* Main logo group */}
-      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:0,position:'relative',opacity:0,animation:'sp-logoin .5s cubic-bezier(.22,1,.36,1) 0.7s forwards'}}>
-
-        {/* SparkPay wordmark with bolt */}
-        <div style={{position:'relative',display:'flex',alignItems:'center',lineHeight:1}}>
+      {/* Logo */}
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',position:'relative',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 0.3s forwards'}}>
+        <div style={{position:'relative',display:'flex',alignItems:'center',lineHeight:1,overflow:'hidden'}}>
           <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,58px)',fontWeight:900,letterSpacing:'-0.02em',color:'#fff'}}>Sp</span>
-
-          <div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',margin:'0 1px',position:'relative',top:1}}>
-            <svg viewBox="0 0 30 44" fill="none" style={{width:'clamp(24px,5vw,36px)',height:'clamp(36px,7.5vw,54px)',filter:'drop-shadow(0 0 12px rgba(75,140,245,0.9)) drop-shadow(0 0 24px rgba(23,229,176,0.5)) drop-shadow(0 0 6px #fff)',animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 0.5s both'}}>
+          <span style={{display:'inline-flex',alignItems:'center',margin:'0 2px',position:'relative',top:1,opacity:0,animation:'sp-bolt .4s cubic-bezier(.34,1.56,.64,1) 0.6s forwards'}}>
+            <svg viewBox="0 0 30 44" fill="none" style={{width:'clamp(22px,4.5vw,34px)',height:'clamp(33px,7vw,51px)',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
               <defs>
                 <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#ffffff"/>
+                  <stop offset="0%" stopColor="#fff"/>
                   <stop offset="45%" stopColor="#7AACFF"/>
                   <stop offset="100%" stopColor="#17E5B0"/>
                 </linearGradient>
               </defs>
               <path d="M20 2L3 24H14L10 42L27 20H16L20 2Z" fill="url(#boltG)"/>
             </svg>
-          </div>
-
+          </span>
           <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,58px)',fontWeight:900,letterSpacing:'-0.02em',color:'#fff'}}>rkPay</span>
-
-          {/* Shine sweep */}
-          <div style={{position:'absolute',top:0,bottom:0,width:'35%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)',animation:'sp-shine .9s .4s ease forwards',pointerEvents:'none'}}/>
+          <div style={{position:'absolute',top:0,bottom:0,width:'40%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)',animation:'sp-shine .8s 0.8s ease forwards',pointerEvents:'none'}}/>
         </div>
-
-        {/* Tagline */}
-        <div style={{marginTop:18,fontSize:'clamp(9px,2vw,11px)',fontWeight:600,letterSpacing:'0.24em',textTransform:'uppercase',color:'rgba(235,240,255,0.28)',opacity:0,animation:'sp-sub .5s .1s ease forwards'}}>
+        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease 0.9s forwards'}}>
           Instant Global Payments
         </div>
       </div>
