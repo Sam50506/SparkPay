@@ -326,10 +326,10 @@ const SplashScreen = ({ onDone }) => {
 
       {/* Real logo — reveals after glitch with scale+blur effect */}
       <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 0.7s forwards'}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.02em'}}>
           Sp
           <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
-            <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 0.5s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
+            <svg width="36" height="54" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 0.5s both',filter:'drop-shadow(0 0 14px rgba(75,140,245,1)) drop-shadow(0 0 28px rgba(23,229,176,0.7)) drop-shadow(0 0 6px #fff)'}}>
               <defs>
                 <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#fff"/>
