@@ -62,7 +62,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-app{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
 .ap-sidebar{width:256px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--b0);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:100;transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .ap-sidebar.mob-open{transform:translateX(0)!important;box-shadow:0 0 60px rgba(0,0,0,.65)}
-.ap-content{flex:1;margin-left:256px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.ap-content{flex:1;margin-left:256px;display:flex;flex-direction:column;height:100vh;overflow:hidden}.ap-layout{flex:1;margin-left:256px;display:flex;flex-direction:column;min-height:100vh;background:var(--bg)}
 .ap-topbar{height:62px;border-bottom:1px solid var(--b0);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
 .ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px;background:var(--bg);min-height:100%}
 .ap-page-enter{animation:scaleIn .22s ease both;max-width:580px}
@@ -194,7 +194,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-resumed-banner{background:rgba(240,196,63,.07);border:1px solid rgba(240,196,63,.18);border-radius:12px;padding:10px 16px;font-size:13px;color:var(--ye);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 @media(max-width:768px){
   .ap-sidebar{transform:translateX(-270px)}
-  .ap-content{margin-left:0}
+  .ap-content{margin-left:0}.ap-layout{margin-left:0}
   .ap-page{padding:18px 16px 96px}
   .ap-botnav{display:flex}
   .mob-hide{display:none!important}
