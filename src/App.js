@@ -284,6 +284,7 @@ const SplashScreen = ({ onDone }) => {
         @keyframes sp-flash{0%{opacity:0}10%{opacity:0.25}20%{opacity:0}35%{opacity:0.12}50%{opacity:0}100%{opacity:0}}
         @keyframes sp-g1{0%{transform:translate(-4px,0)}20%{transform:translate(4px,-1px)}40%{transform:translate(-5px,1px)}60%{transform:translate(3px,0)}80%{transform:translate(-2px,0)}100%{transform:translate(0,0)}}
         @keyframes sp-g2{0%{transform:translate(4px,0)}20%{transform:translate(-3px,1px)}40%{transform:translate(5px,-1px)}60%{transform:translate(-2px,0)}80%{transform:translate(2px,0)}100%{transform:translate(0,0)}}
+        @keyframes sp-logoin{0%{opacity:0;transform:scale(1.08);filter:blur(6px)}60%{filter:blur(0)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
         @keyframes sp-gfade{0%{opacity:1}100%{opacity:0}}
         @keyframes sp-wordin{0%{opacity:0;filter:blur(4px)}100%{opacity:1;filter:blur(0)}}
         @keyframes sp-bolt{from{transform:scale(0.5);opacity:0;filter:drop-shadow(0 0 40px #fff) drop-shadow(0 0 20px #4B8CF5)}to{transform:scale(1);opacity:1;filter:drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))}}
@@ -310,8 +311,8 @@ const SplashScreen = ({ onDone }) => {
         </div>
       </div>
 
-      {/* Real logo — fades in after glitch */}
-      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-wordin .5s ease 1s forwards'}}>
+      {/* Real logo — reveals after glitch with scale+blur effect */}
+      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 1.5s forwards'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
           Sp
           <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
