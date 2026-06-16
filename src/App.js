@@ -293,50 +293,54 @@ const SplashScreen = ({ onDone }) => {
         @keyframes sp-glow{0%,100%{opacity:0.5}50%{opacity:1}}
       `}</style>
 
-      {/* Radial glow behind bolt */}
-      <div style={{position:'absolute',width:320,height:320,borderRadius:'50%',background:'radial-gradient(circle,rgba(234,179,8,0.07) 0%,transparent 70%)',pointerEvents:'none',opacity:phase>=1?1:0,transition:'opacity .6s ease'}}/>
+      {/* Radial glow */}
+      <div style={{position:'absolute',width:360,height:360,borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.1) 0%,rgba(23,229,176,0.04) 50%,transparent 70%)',pointerEvents:'none',opacity:phase>=1?1:0,transition:'opacity .8s ease'}}/>
 
       {/* Icon + wordmark group */}
-      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:28}}>
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:32}}>
 
-        {/* Bolt */}
-        <div style={{opacity:phase>=1?1:0,animation:phase>=1?'sp-bolt .4s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
-          <svg width="42" height="52" viewBox="0 0 42 52" fill="none">
+        {/* Bolt icon with brand gradient */}
+        <div style={{opacity:phase>=1?1:0,animation:phase>=1?'sp-bolt .45s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
+          <svg width="44" height="54" viewBox="0 0 44 54" fill="none">
             <defs>
-              <linearGradient id="spg" x1="21" y1="0" x2="21" y2="52" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#fde047"/>
-                <stop offset="100%" stopColor="#ca8a04"/>
+              <linearGradient id="spg" x1="22" y1="0" x2="22" y2="54" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#7AACFF"/>
+                <stop offset="100%" stopColor="#17E5B0"/>
               </linearGradient>
+              <filter id="spf" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
             </defs>
-            <path d="M26 2L4 28H20L16 50L38 24H22L26 2Z" fill="url(#spg)"/>
+            <path d="M27 2L4 29H20L17 52L40 25H24L27 2Z" fill="url(#spg)" filter="url(#spf)"/>
           </svg>
         </div>
 
         {/* Wordmark */}
         <div style={{textAlign:'center'}}>
           <div style={{opacity:phase>=2?1:0,animation:phase>=2?'sp-word .4s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
-            <span style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,letterSpacing:'-0.03em',color:'#fff'}}>Spark</span><span style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,letterSpacing:'-0.03em',color:'#eab308'}}>Pay</span>
+            <span style={{fontFamily:'var(--fd)',fontSize:42,fontWeight:900,letterSpacing:'-0.03em',color:'#EBF0FF'}}>Spark</span><span style={{fontFamily:'var(--fd)',fontSize:42,fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5'}}>Pay</span>
           </div>
 
-          {/* Thin line */}
+          {/* Thin accent line */}
           <div style={{display:'flex',justifyContent:'center',marginTop:16}}>
-            <div style={{height:'1px',background:'#eab308',borderRadius:1,opacity:0,animation:phase>=3?'sp-line .4s .05s ease forwards':'none'}}/>
+            <div style={{height:'1px',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',borderRadius:1,opacity:0,animation:phase>=3?'sp-line .5s .05s ease forwards':'none'}}/>
           </div>
 
           {/* Tagline */}
-          <div style={{marginTop:12,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(255,255,255,0.28)',opacity:0,animation:phase>=3?'sp-sub .5s .2s ease forwards':'none'}}>
+          <div style={{marginTop:14,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.25)',opacity:0,animation:phase>=3?'sp-sub .5s .25s ease forwards':'none'}}>
             Instant Global Payments
           </div>
         </div>
       </div>
 
       {/* Bottom progress bar */}
-      <div style={{position:'absolute',bottom:0,left:0,right:0,height:'2px',background:'rgba(255,255,255,0.04)',transformOrigin:'left'}}>
-        <div style={{height:'100%',background:'#eab308',transformOrigin:'left',transform:'scaleX(0)',animation:phase>=1?'sp-bar 2.4s cubic-bezier(.4,0,.2,1) forwards':'none'}}/>
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:'2px',background:'rgba(255,255,255,0.04)'}}>
+        <div style={{height:'100%',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',transformOrigin:'left',transform:'scaleX(0)',animation:phase>=1?'sp-bar 2.4s cubic-bezier(.4,0,.2,1) forwards':'none'}}/>
       </div>
 
       {/* Bottom label */}
-      <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(255,255,255,0.15)',letterSpacing:'0.08em',fontWeight:500}}>
+      <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(235,240,255,0.15)',letterSpacing:'0.08em',fontWeight:500}}>
         Testnet · Chain 5042002
       </div>
     </div>
