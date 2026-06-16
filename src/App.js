@@ -41,7 +41,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 @keyframes fillBar{from{width:0}to{width:100%}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes cashPop{0%{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}60%{transform:translateX(-50%) translateY(-3px) scale(1.03)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
-.ap-splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .55s ease,transform .55s ease}
+.ap-splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .35s ease,transform .35s ease}
 .ap-splash.exit{opacity:0;transform:scale(1.04);pointer-events:none}
 .ap-ring-outer{animation:spinCW 5s linear infinite;transform-origin:50% 50%}
 .ap-ring-inner{animation:spinCCW 3.5s linear infinite;transform-origin:50% 50%}
@@ -297,7 +297,7 @@ const SplashScreen = ({ onDone }) => {
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#4B8CF5,#17E5B0)',animation:'sp-flash .7s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
       {/* Radial glow */}
-      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 1.2s forwards',pointerEvents:'none'}}/>
+      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 1.0s forwards',pointerEvents:'none'}}/>
 
       {/* Glitch layers — visible immediately, independent of logo wrapper */}
       <div style={{position:'absolute',zIndex:8,display:'flex',alignItems:'center',justifyContent:'center',width:'100%'}}>
@@ -312,11 +312,11 @@ const SplashScreen = ({ onDone }) => {
       </div>
 
       {/* Real logo — reveals after glitch with scale+blur effect */}
-      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 1.5s forwards'}}>
+      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 0.7s forwards'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
           Sp
           <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
-            <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 1.1s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
+            <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 0.5s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
               <defs>
                 <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#fff"/>
@@ -329,14 +329,14 @@ const SplashScreen = ({ onDone }) => {
           </span>
           rkPay
         </div>
-        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease 1.4s forwards'}}>
+        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease 0.9s forwards'}}>
           Instant Global Payments
         </div>
       </div>
 
       {/* Progress bar */}
       <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:'rgba(255,255,255,0.04)'}}>
-        <div style={{height:'100%',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',animation:'sp-bar 2.6s cubic-bezier(.4,0,.2,1) .2s both'}}/>
+        <div style={{height:'100%',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',animation:'sp-bar 1.6s cubic-bezier(.4,0,.2,1) .2s both'}}/>
       </div>
       <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(235,240,255,0.15)',letterSpacing:'0.06em',fontWeight:500}}>
         Testnet · Chain 5042002
