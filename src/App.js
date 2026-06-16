@@ -275,68 +275,82 @@ const SplashScreen = ({ onDone }) => {
   const [phase, setPhase] = useState(0);
   const [exit, setExit] = useState(false);
   useEffect(() => {
-    const t0=setTimeout(()=>setPhase(1),80);
-    const t1=setTimeout(()=>setPhase(2),420);
-    const t2=setTimeout(()=>setPhase(3),820);
-    const t3=setTimeout(()=>setExit(true),2600);
-    const t4=setTimeout(()=>onDone(),3000);
+    const t0=setTimeout(()=>setPhase(1),100);
+    const t1=setTimeout(()=>setPhase(2),700);
+    const t2=setTimeout(()=>setPhase(3),1200);
+    const t3=setTimeout(()=>setExit(true),2800);
+    const t4=setTimeout(()=>onDone(),3200);
     return()=>{[t0,t1,t2,t3,t4].forEach(clearTimeout);}
   }, [onDone]);
   return (
-    <div style={{position:'fixed',inset:0,zIndex:9999,background:'#080810',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9999,background:'#080d1f',display:'flex',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .6s ease',overflow:'hidden'}}>
       <style>{`
-        @keyframes sp-bolt{0%{opacity:0;transform:translateY(-8px) scale(0.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
-        @keyframes sp-word{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-        @keyframes sp-line{0%{width:0;opacity:0}100%{width:48px;opacity:1}}
-        @keyframes sp-sub{0%{opacity:0}100%{opacity:1}}
-        @keyframes sp-bar{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
-        @keyframes sp-glow{0%,100%{opacity:0.5}50%{opacity:1}}
+        @keyframes sp-ray{0%{opacity:0;transform:scaleX(0)}60%{opacity:0.6}100%{opacity:0;transform:scaleX(1)}}
+        @keyframes sp-ray2{0%{opacity:0;transform:scaleY(0)}60%{opacity:0.4}100%{opacity:0;transform:scaleY(1)}}
+        @keyframes sp-logo{0%{opacity:0;transform:scale(0.92)}100%{opacity:1;transform:scale(1)}}
+        @keyframes sp-bolt{0%{opacity:0;transform:translateY(-6px) scale(0.8)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        @keyframes sp-shine{0%{left:-100%}100%{left:200%}}
+        @keyframes sp-particle{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+        @keyframes sp-glow{0%,100%{opacity:0.6}50%{opacity:1}}
       `}</style>
 
-      {/* Radial glow behind bolt */}
-      <div style={{position:'absolute',width:320,height:320,borderRadius:'50%',background:'radial-gradient(circle,rgba(234,179,8,0.07) 0%,transparent 70%)',pointerEvents:'none',opacity:phase>=1?1:0,transition:'opacity .6s ease'}}/>
+      {/* Deep background glow */}
+      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.04) 40%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',pointerEvents:'none'}}/>
 
-      {/* Icon + wordmark group */}
-      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:28}}>
+      {/* Horizontal light ray */}
+      {phase>=2&&<div style={{position:'absolute',top:'50%',left:0,right:0,height:1,background:'linear-gradient(90deg,transparent 0%,rgba(75,140,245,0.6) 30%,rgba(23,229,176,0.8) 50%,rgba(75,140,245,0.6) 70%,transparent 100%)',transform:'translateY(-50%)',animation:'sp-ray 1.2s ease-out forwards',transformOrigin:'center'}}/>}
 
-        {/* Bolt */}
-        <div style={{opacity:phase>=1?1:0,animation:phase>=1?'sp-bolt .4s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
-          <svg width="42" height="52" viewBox="0 0 42 52" fill="none">
-            <defs>
-              <linearGradient id="spg" x1="21" y1="0" x2="21" y2="52" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#fde047"/>
-                <stop offset="100%" stopColor="#ca8a04"/>
-              </linearGradient>
-            </defs>
-            <path d="M26 2L4 28H20L16 50L38 24H22L26 2Z" fill="url(#spg)"/>
-          </svg>
+      {/* Vertical light ray */}
+      {phase>=2&&<div style={{position:'absolute',left:'50%',top:0,bottom:0,width:1,background:'linear-gradient(180deg,transparent 0%,rgba(75,140,245,0.3) 30%,rgba(23,229,176,0.5) 50%,rgba(75,140,245,0.3) 70%,transparent 100%)',transform:'translateX(-50%)',animation:'sp-ray2 1.2s ease-out forwards',transformOrigin:'center'}}/>}
+
+      {/* Particles */}
+      {phase>=2&&[...Array(12)].map((_,i)=>{
+        const angle=(i/12)*Math.PI*2;
+        const dist=60+Math.random()*40;
+        const tx=Math.cos(angle)*dist+'px';
+        const ty=Math.sin(angle)*dist+'px';
+        return <div key={i} style={{position:'absolute',width:i%3===0?3:2,height:i%3===0?3:2,borderRadius:'50%',background:i%2===0?'#7AACFF':'#17E5B0',top:'50%',left:'50%','--tx':tx,'--ty':ty,animation:`sp-particle 1s ${i*0.05}s ease-out forwards`}}/>;
+      })}
+
+      {/* Main logo group */}
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:0,position:'relative',opacity:0,animation:phase>=1?'sp-logo .5s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
+
+        {/* SparkPay wordmark with bolt */}
+        <div style={{position:'relative',display:'flex',alignItems:'center'}}>
+          {/* Spark text */}
+          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,56px)',fontWeight:900,letterSpacing:'-0.03em',color:'#fff',lineHeight:1}}>Sp</span>
+
+          {/* Bolt replacing 'a' */}
+          <div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'clamp(22px,5vw,34px)',marginBottom:4,opacity:0,animation:phase>=2?'sp-bolt .4s .1s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
+            <svg viewBox="0 0 24 32" fill="none" style={{width:'clamp(20px,4.5vw,30px)',height:'clamp(26px,6vw,40px)',filter:'drop-shadow(0 0 8px rgba(23,229,176,0.8))'}}>
+              <defs>
+                <linearGradient id="boltG" x1="12" y1="0" x2="12" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#7AACFF"/>
+                  <stop offset="100%" stopColor="#17E5B0"/>
+                </linearGradient>
+              </defs>
+              <path d="M15 1L2 17H11L9 31L22 15H13L15 1Z" fill="url(#boltG)"/>
+            </svg>
+          </div>
+
+          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,56px)',fontWeight:900,letterSpacing:'-0.03em',color:'#fff',lineHeight:1}}>rkPay</span>
+
+          {/* Shine sweep */}
+          {phase>=2&&<div style={{position:'absolute',top:0,bottom:0,width:'40%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent)',animation:'sp-shine .8s .3s ease forwards',pointerEvents:'none'}}/>}
         </div>
 
-        {/* Wordmark */}
-        <div style={{textAlign:'center'}}>
-          <div style={{opacity:phase>=2?1:0,animation:phase>=2?'sp-word .4s cubic-bezier(.22,1,.36,1) forwards':'none'}}>
-            <span style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,letterSpacing:'-0.03em',color:'#fff'}}>Spark</span><span style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,letterSpacing:'-0.03em',color:'#eab308'}}>Pay</span>
-          </div>
-
-          {/* Thin line */}
-          <div style={{display:'flex',justifyContent:'center',marginTop:16}}>
-            <div style={{height:'1px',background:'#eab308',borderRadius:1,opacity:0,animation:phase>=3?'sp-line .4s .05s ease forwards':'none'}}/>
-          </div>
-
-          {/* Tagline */}
-          <div style={{marginTop:12,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(255,255,255,0.28)',opacity:0,animation:phase>=3?'sp-sub .5s .2s ease forwards':'none'}}>
-            Instant Global Payments
-          </div>
+        {/* Tagline */}
+        <div style={{marginTop:16,fontSize:'clamp(9px,2vw,11px)',fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,transition:'opacity .5s ease .2s',display:phase>=3?'block':'none',animation:phase>=3?'sp-logo .4s ease forwards':'none'}}>
+          Instant Global Payments
         </div>
       </div>
 
-      {/* Bottom progress bar */}
-      <div style={{position:'absolute',bottom:0,left:0,right:0,height:'2px',background:'rgba(255,255,255,0.04)',transformOrigin:'left'}}>
-        <div style={{height:'100%',background:'#eab308',transformOrigin:'left',transform:'scaleX(0)',animation:phase>=1?'sp-bar 2.4s cubic-bezier(.4,0,.2,1) forwards':'none'}}/>
+      {/* Bottom progress */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,height:'2px',background:'rgba(255,255,255,0.04)'}}>
+        <div style={{height:'100%',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',transformOrigin:'left',transform:'scaleX(0)',transition:'transform 2.6s cubic-bezier(.4,0,.2,1)',transitionDelay:phase>=1?'0s':'999s',...(phase>=1?{transform:'scaleX(1)'}:{})}}/>
       </div>
 
-      {/* Bottom label */}
-      <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(255,255,255,0.15)',letterSpacing:'0.08em',fontWeight:500}}>
+      <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(235,240,255,0.15)',letterSpacing:'0.06em',fontWeight:500}}>
         Testnet · Chain 5042002
       </div>
     </div>
