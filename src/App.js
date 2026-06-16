@@ -274,46 +274,45 @@ const OnboardingModal=({onDone})=>{
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
   useEffect(() => {
-    const t1=setTimeout(()=>setExit(true), 2800);
-    const t2=setTimeout(()=>onDone(), 3200);
+    const t1=setTimeout(()=>setExit(true),2800);
+    const t2=setTimeout(()=>onDone(),3200);
     return()=>{clearTimeout(t1);clearTimeout(t2);}
   }, [onDone]);
   return (
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
         @keyframes sp-flash{0%{opacity:0}15%{opacity:0.18}30%{opacity:0}45%{opacity:0.08}100%{opacity:0}}
-        @keyframes sp-scan{0%{top:0;opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
-        @keyframes sp-glitch1{0%{transform:translate(-4px,0);opacity:1}25%{transform:translate(4px,-2px);opacity:0.8}50%{transform:translate(-6px,1px);opacity:1}75%{transform:translate(3px,0);opacity:0.9}100%{transform:translate(0,0);opacity:0}}
-        @keyframes sp-glitch2{0%{transform:translate(4px,0);opacity:1}25%{transform:translate(-3px,2px);opacity:0.8}50%{transform:translate(5px,-1px);opacity:1}75%{transform:translate(-2px,0);opacity:0.9}100%{transform:translate(0,0);opacity:0}}
+        @keyframes sp-g1{0%{transform:translate(-4px,0)}25%{transform:translate(4px,-2px)}50%{transform:translate(-6px,1px)}75%{transform:translate(3px,0)}100%{transform:translate(0,0)}}
+        @keyframes sp-g2{0%{transform:translate(4px,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(5px,-1px)}75%{transform:translate(-2px,0)}100%{transform:translate(0,0)}}
         @keyframes sp-reveal{0%{opacity:0;letter-spacing:0.15em}100%{opacity:1;letter-spacing:-0.03em}}
         @keyframes sp-bolt{from{transform:scale(0.6);opacity:0;filter:drop-shadow(0 0 30px #fff)}to{transform:scale(1);opacity:1}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
         @keyframes sp-sub{from{opacity:0}to{opacity:1}}
-        @keyframes sp-fade{from{opacity:1}to{opacity:0}}
-        .sp-glitch-before{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:inherit;font-weight:900;letter-spacing:-0.03em;color:#4B8CF5;animation:sp-glitch1 0.08s steps(1) 0s 6 alternate,sp-reveal 0.3s 0.5s forwards;clip-path:polygon(0 0,100% 0,100% 40%,0 40%);pointer-events:none}
-        .sp-glitch-after{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:inherit;font-weight:900;letter-spacing:-0.03em;color:#17E5B0;animation:sp-glitch2 0.07s steps(1) 0.03s 6 alternate,sp-reveal 0.3s 0.5s forwards;clip-path:polygon(0 60%,100% 60%,100% 100%,0 100%);pointer-events:none}
+        @keyframes sp-gfade{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
       `}</style>
 
-      {/* Blue flash */}
+      {/* Blue flash overlay */}
       <div style={{position:'absolute',inset:0,background:'#4B8CF5',animation:'sp-flash .6s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
-      {/* Scan line */}
-      <div style={{position:'absolute',left:0,right:0,height:3,top:0,zIndex:20,pointerEvents:'none',background:'linear-gradient(90deg,transparent,#4B8CF5,#17E5B0,#4B8CF5,transparent)',boxShadow:'0 0 12px 4px rgba(75,140,245,0.5),0 0 30px 8px rgba(23,229,176,0.2)',animation:'sp-scan 1.1s cubic-bezier(.4,0,.6,1) .1s forwards'}}/>
-
-      {/* Radial glow */}
+      {/* Subtle radial glow */}
       <div style={{position:'absolute',width:'60vw',height:'60vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.1) 0%,rgba(23,229,176,0.04) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-sub .8s ease 1s forwards',pointerEvents:'none'}}/>
 
       {/* Logo */}
       <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-reveal .5s cubic-bezier(.22,1,.36,1) .5s forwards'}}>
-        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,letterSpacing:'-0.03em',color:'#fff',lineHeight:1}}>
-          {/* Glitch layers */}
-          <div style={{position:'absolute',top:0,left:0,right:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5',animation:'sp-glitch1 0.08s steps(1) 0s 6 alternate, sp-fade 0.2s 0.5s forwards',clipPath:'polygon(0 0,100% 0,100% 40%,0 40%)',pointerEvents:'none'}}>SparkPay</div>
-          <div style={{position:'absolute',top:0,left:0,right:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#17E5B0',animation:'sp-glitch2 0.07s steps(1) 0.03s 6 alternate, sp-fade 0.2s 0.5s forwards',clipPath:'polygon(0 60%,100% 60%,100% 100%,0 100%)',pointerEvents:'none'}}>SparkPay</div>
-          {/* Real text */}
+
+        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
+
+          {/* Glitch layer 1 — blue, top half */}
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.06s steps(1) 0s 5 alternate, sp-gfade 0.5s 0.45s forwards',pointerEvents:'none'}}>SparkPay</div>
+
+          {/* Glitch layer 2 — cyan, bottom half */}
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.06s steps(1) 0.02s 5 alternate, sp-gfade 0.5s 0.45s forwards',pointerEvents:'none'}}>SparkPay</div>
+
+          {/* Real wordmark */}
           <span style={{position:'relative',zIndex:3,display:'flex',alignItems:'center'}}>
             Sp
             <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
-              <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .4s cubic-bezier(.34,1.56,.64,1) .6s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
+              <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .4s cubic-bezier(.34,1.56,.64,1) .65s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
                 <defs>
                   <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#fff"/>
@@ -327,7 +326,8 @@ const SplashScreen = ({ onDone }) => {
             rkPay
           </span>
         </div>
-        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease .9s forwards'}}>
+
+        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease .95s forwards'}}>
           Instant Global Payments
         </div>
       </div>
