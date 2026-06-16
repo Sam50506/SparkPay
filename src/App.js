@@ -324,25 +324,34 @@ const SplashScreen = ({ onDone }) => {
         </div>
       </div>
 
-      {/* Real logo — reveals after glitch with scale+blur effect */}
-      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 0.7s forwards'}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.02em'}}>
-          Sp
-          <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
-            <svg width="36" height="54" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 0.5s both',filter:'drop-shadow(0 0 14px rgba(75,140,245,1)) drop-shadow(0 0 28px rgba(23,229,176,0.7)) drop-shadow(0 0 6px #fff)'}}>
+      {/* Main logo group */}
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:0,position:'relative',opacity:0,animation:'sp-logoin .5s cubic-bezier(.22,1,.36,1) 0.7s forwards'}}>
+
+        {/* SparkPay wordmark with bolt */}
+        <div style={{position:'relative',display:'flex',alignItems:'center',lineHeight:1}}>
+          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,58px)',fontWeight:900,letterSpacing:'-0.02em',color:'#fff'}}>Sp</span>
+
+          <div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',margin:'0 1px',position:'relative',top:1}}>
+            <svg viewBox="0 0 30 44" fill="none" style={{width:'clamp(24px,5vw,36px)',height:'clamp(36px,7.5vw,54px)',filter:'drop-shadow(0 0 12px rgba(75,140,245,0.9)) drop-shadow(0 0 24px rgba(23,229,176,0.5)) drop-shadow(0 0 6px #fff)',animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 0.5s both'}}>
               <defs>
                 <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#fff"/>
+                  <stop offset="0%" stopColor="#ffffff"/>
                   <stop offset="45%" stopColor="#7AACFF"/>
                   <stop offset="100%" stopColor="#17E5B0"/>
                 </linearGradient>
               </defs>
               <path d="M20 2L3 24H14L10 42L27 20H16L20 2Z" fill="url(#boltG)"/>
             </svg>
-          </span>
-          rkPay
+          </div>
+
+          <span style={{fontFamily:'var(--fd)',fontSize:'clamp(36px,8vw,58px)',fontWeight:900,letterSpacing:'-0.02em',color:'#fff'}}>rkPay</span>
+
+          {/* Shine sweep */}
+          <div style={{position:'absolute',top:0,bottom:0,width:'35%',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)',animation:'sp-shine .9s .4s ease forwards',pointerEvents:'none'}}/>
         </div>
-        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease 0.9s forwards'}}>
+
+        {/* Tagline */}
+        <div style={{marginTop:18,fontSize:'clamp(9px,2vw,11px)',fontWeight:600,letterSpacing:'0.24em',textTransform:'uppercase',color:'rgba(235,240,255,0.28)',opacity:0,animation:'sp-sub .5s .1s ease forwards'}}>
           Instant Global Payments
         </div>
       </div>
