@@ -70,7 +70,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-logo-name{font-family:var(--fd);font-weight:800;font-size:17px;letter-spacing:-.3px;line-height:1;color:var(--tx1)}
 .ap-logo-tag{font-size:10px;color:var(--tx3);font-weight:600;letter-spacing:.07em;margin-top:2px;text-transform:uppercase}
 .ap-nav{flex:1;padding:8px 0;overflow-y:auto}
-.ap-nav-sec{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.1em;padding:10px 20px 4px;text-transform:uppercase}
+.ap-nav-sec{font-size:10px;font-weight:700;color:var(--tx1);letter-spacing:.1em;padding:10px 20px 4px;text-transform:uppercase}
 .ap-nav-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13.5px;font-weight:500;color:var(--tx2);margin:1px 8px;border:1px solid transparent;transition:all .14s;user-select:none;position:relative}
 .ap-nav-item:hover{background:var(--elev);color:var(--tx1)}
 .ap-nav-item.active{background:var(--acd);color:var(--ac2);border-color:var(--acs)}
@@ -848,7 +848,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
             <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="50" height="50" style={{borderRadius:0,objectFit:"contain",background:"none"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
             <nav className="ap-nav">
-              {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title} className="ap-nav-section">{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
+              {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title} className="ap-nav-sec">{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
             </nav>
             <div className="ap-sidebar-foot">
               <div className="ap-net-badge"><span className="ap-net-dot"/>Arc Testnet<span style={{color:'var(--tx3)',marginLeft:4,fontWeight:500}}>#5042002</span></div>
