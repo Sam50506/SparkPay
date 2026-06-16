@@ -359,7 +359,7 @@ const USDC_ADDR  = process.env.REACT_APP_USDC_ADDR||'0x3600000000000000000000000
 const WC_ID      = process.env.REACT_APP_WC_ID||'';
 const SB_URL     = process.env.REACT_APP_SUPABASE_URL||'';
 const SB_KEY     = process.env.REACT_APP_SUPABASE_ANON_KEY||'';
-const APP_URL    = 'https://arc-remittance.vercel.app';
+const APP_URL    = 'https://sparkpay-app.vercel.app';
 
 const sbFetch=(path,opts={})=>fetch(SB_URL+path,{...opts,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}}).then(async r=>{if(!r.ok)throw new Error(await r.text());return r.json();});
 const sbInsert=(table,data)=>sbFetch('/rest/v1/'+table,{method:'POST',body:JSON.stringify(data)});
