@@ -282,8 +282,8 @@ const SplashScreen = ({ onDone }) => {
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
         @keyframes sp-flash{0%{opacity:0}15%{opacity:0.18}30%{opacity:0}45%{opacity:0.08}100%{opacity:0}}
-        @keyframes sp-g1{0%{transform:translate(-4px,0)}25%{transform:translate(4px,-2px)}50%{transform:translate(-6px,1px)}75%{transform:translate(3px,0)}100%{transform:translate(0,0)}}
-        @keyframes sp-g2{0%{transform:translate(4px,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(5px,-1px)}75%{transform:translate(-2px,0)}100%{transform:translate(0,0)}}
+        @keyframes sp-g1{0%{transform:translate(-6px,0)}25%{transform:translate(6px,-3px)}50%{transform:translate(-8px,2px)}75%{transform:translate(4px,0)}100%{transform:translate(0,0)}}
+        @keyframes sp-g2{0%{transform:translate(6px,0)}25%{transform:translate(-5px,3px)}50%{transform:translate(7px,-2px)}75%{transform:translate(-3px,0)}100%{transform:translate(0,0)}}
         @keyframes sp-reveal{0%{opacity:0;letter-spacing:0.15em}100%{opacity:1;letter-spacing:-0.03em}}
         @keyframes sp-bolt{from{transform:scale(0.6);opacity:0;filter:drop-shadow(0 0 30px #fff)}to{transform:scale(1);opacity:1}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
@@ -303,10 +303,10 @@ const SplashScreen = ({ onDone }) => {
         <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
 
           {/* Glitch layer 1 — blue, top half */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.06s steps(1) 0s 5 alternate, sp-gfade 0.5s 0.45s forwards',pointerEvents:'none'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.12s steps(1) 0s 8 alternate, sp-gfade 0.6s 1s forwards',pointerEvents:'none'}}>SparkPay</div>
 
           {/* Glitch layer 2 — cyan, bottom half */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.06s steps(1) 0.02s 5 alternate, sp-gfade 0.5s 0.45s forwards',pointerEvents:'none'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.12s steps(1) 0.04s 8 alternate, sp-gfade 0.6s 1s forwards',pointerEvents:'none'}}>SparkPay</div>
 
           {/* Real wordmark */}
           <span style={{position:'relative',zIndex:3,display:'flex',alignItems:'center'}}>
