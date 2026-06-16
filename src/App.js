@@ -814,7 +814,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
           {/* Hero Section */}
           <div style={{maxWidth:480,margin:'0 auto',padding:'16px 24px 0'}}>
             <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:40}}>
-              <SparkPayLogo size={32}/>
+              <SparkPayLogo size={48}/>
               <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
             </div>
             <div style={{textAlign:'center',marginBottom:40}}>
