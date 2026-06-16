@@ -61,7 +61,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-connect-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--tx3)}
 .ap-app{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
 .ap-sidebar{width:256px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--b0);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:100;transition:transform .28s cubic-bezier(.4,0,.2,1)}
-.ap-sidebar.mob-open{transform:translateX(0)!important;box-shadow:0 0 60px rgba(0,0,0,.65)}
+.ap-sidebar.mob-open{transform:translateX(0)!important;box-shadow:0 0 60px rgba(0,0,0,.65)}.ap-overlay{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,0.4)}
 .ap-content{flex:1;margin-left:256px;display:flex;flex-direction:column;height:100vh;overflow:hidden}.ap-layout{flex:1;margin-left:256px;display:flex;flex-direction:column;min-height:100vh;background:var(--bg)}
 .ap-topbar{height:62px;border-bottom:1px solid var(--b0);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
 .ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px;background:var(--bg);min-height:100%}
@@ -846,9 +846,9 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
       {address&&(
         <div className="ap-layout">
           <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
-            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="50" height="50" style={{borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
+            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="50" height="50" style={{borderRadius:0,objectFit:"contain",background:"none"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
             <nav className="ap-nav">
-              {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title} className="ap-nav-section"><div className="ap-nav-title">{sec.title}</div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
+              {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title} className="ap-nav-section">{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
             </nav>
             <div className="ap-sidebar-foot">
               <div className="ap-net-badge"><span className="ap-net-dot"/>Arc Testnet<span style={{color:'var(--tx3)',marginLeft:4,fontWeight:500}}>#5042002</span></div>
