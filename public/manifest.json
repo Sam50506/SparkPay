@@ -1,6 +1,6 @@
 {
-  "short_name": "ArcPay",
-  "name": "ArcPay",
+  "short_name": "SparkPay",
+  "name": "SparkPay",
   "description": "Cross border USDC remittance on Arc Testnet",
   "icons": [
     {

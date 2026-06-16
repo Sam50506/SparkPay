@@ -19,7 +19,7 @@ self.addEventListener('fetch', event => {
 self.addEventListener('push', event => {
   const data = event.data?.json() || {};
   event.waitUntil(
-    self.registration.showNotification(data.title || 'ArcPay', {
+    self.registration.showNotification(data.title || 'SparkPay', {
       body: data.body || '',
       icon: '/logo192.png'
     })
