@@ -274,67 +274,68 @@ const OnboardingModal=({onDone})=>{
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
   useEffect(() => {
-    const t1=setTimeout(()=>setExit(true),2800);
-    const t2=setTimeout(()=>onDone(),3200);
+    const t1=setTimeout(()=>setExit(true),3000);
+    const t2=setTimeout(()=>onDone(),3400);
     return()=>{clearTimeout(t1);clearTimeout(t2);}
   }, [onDone]);
   return (
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
-        @keyframes sp-flash{0%{opacity:0}15%{opacity:0.18}30%{opacity:0}45%{opacity:0.08}100%{opacity:0}}
-        @keyframes sp-g1{0%{transform:translate(-6px,0)}25%{transform:translate(6px,-3px)}50%{transform:translate(-8px,2px)}75%{transform:translate(4px,0)}100%{transform:translate(0,0)}}
-        @keyframes sp-g2{0%{transform:translate(6px,0)}25%{transform:translate(-5px,3px)}50%{transform:translate(7px,-2px)}75%{transform:translate(-3px,0)}100%{transform:translate(0,0)}}
-        @keyframes sp-reveal{0%{opacity:0;letter-spacing:0.15em}100%{opacity:1;letter-spacing:-0.03em}}
-        @keyframes sp-bolt{from{transform:scale(0.6);opacity:0;filter:drop-shadow(0 0 30px #fff)}to{transform:scale(1);opacity:1}}
+        @keyframes sp-flash{0%{opacity:0}10%{opacity:0.25}20%{opacity:0}35%{opacity:0.12}50%{opacity:0}100%{opacity:0}}
+        @keyframes sp-g1{0%{transform:translate(-8px,0);opacity:1}20%{transform:translate(8px,-3px);opacity:1}40%{transform:translate(-10px,2px);opacity:1}60%{transform:translate(6px,0);opacity:1}80%{transform:translate(-4px,1px);opacity:1}100%{transform:translate(0,0);opacity:1}}
+        @keyframes sp-g2{0%{transform:translate(8px,0);opacity:1}20%{transform:translate(-6px,3px);opacity:1}40%{transform:translate(9px,-2px);opacity:1}60%{transform:translate(-5px,0);opacity:1}80%{transform:translate(3px,-1px);opacity:1}100%{transform:translate(0,0);opacity:1}}
+        @keyframes sp-gfade{0%{opacity:1}100%{opacity:0}}
+        @keyframes sp-wordin{0%{opacity:0;filter:blur(4px)}100%{opacity:1;filter:blur(0)}}
+        @keyframes sp-bolt{from{transform:scale(0.5);opacity:0;filter:drop-shadow(0 0 40px #fff) drop-shadow(0 0 20px #4B8CF5)}to{transform:scale(1);opacity:1;filter:drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
         @keyframes sp-sub{from{opacity:0}to{opacity:1}}
-        @keyframes sp-gfade{0%{opacity:1}80%{opacity:1}100%{opacity:0}}
+        @keyframes sp-glow{from{opacity:0}to{opacity:1}}
       `}</style>
 
-      {/* Blue flash overlay */}
-      <div style={{position:'absolute',inset:0,background:'#4B8CF5',animation:'sp-flash .6s ease forwards',pointerEvents:'none',zIndex:2}}/>
+      {/* Flash */}
+      <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#4B8CF5,#17E5B0)',animation:'sp-flash .7s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
-      {/* Subtle radial glow */}
-      <div style={{position:'absolute',width:'60vw',height:'60vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.1) 0%,rgba(23,229,176,0.04) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-sub .8s ease 1s forwards',pointerEvents:'none'}}/>
+      {/* Radial glow */}
+      <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 1.2s forwards',pointerEvents:'none'}}/>
 
-      {/* Logo */}
-      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-reveal .5s cubic-bezier(.22,1,.36,1) .5s forwards'}}>
-
-        <div style={{position:'relative',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
-
-          {/* Glitch layer 1 — blue, top half */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.12s steps(1) 0s 8 alternate, sp-gfade 0.6s 1s forwards',pointerEvents:'none'}}>SparkPay</div>
-
-          {/* Glitch layer 2 — cyan, bottom half */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontWeight:900,letterSpacing:'-0.03em',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.12s steps(1) 0.04s 8 alternate, sp-gfade 0.6s 1s forwards',pointerEvents:'none'}}>SparkPay</div>
-
-          {/* Real wordmark */}
-          <span style={{position:'relative',zIndex:3,display:'flex',alignItems:'center'}}>
-            Sp
-            <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
-              <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .4s cubic-bezier(.34,1.56,.64,1) .65s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
-                <defs>
-                  <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#fff"/>
-                    <stop offset="45%" stopColor="#7AACFF"/>
-                    <stop offset="100%" stopColor="#17E5B0"/>
-                  </linearGradient>
-                </defs>
-                <path d="M20 2L3 24H14L10 42L27 20H16L20 2Z" fill="url(#boltG)"/>
-              </svg>
-            </span>
-            rkPay
-          </span>
+      {/* Glitch layers — visible immediately, independent of logo wrapper */}
+      <div style={{position:'absolute',zIndex:8,display:'flex',alignItems:'center',justifyContent:'center',width:'100%'}}>
+        <div style={{position:'relative',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,lineHeight:1,letterSpacing:'-0.03em',userSelect:'none'}}>
+          {/* Blue top glitch */}
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.1s steps(1) 0.05s 9 alternate, sp-gfade 0.3s 1.0s forwards',pointerEvents:'none'}}>SparkPay</div>
+          {/* Cyan bottom glitch */}
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.1s steps(1) 0s 9 alternate, sp-gfade 0.3s 1.0s forwards',pointerEvents:'none'}}>SparkPay</div>
+          {/* Invisible spacer to hold size */}
+          <div style={{opacity:0,pointerEvents:'none'}}>SparkPay</div>
         </div>
+      </div>
 
-        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease .95s forwards'}}>
+      {/* Real logo — fades in after glitch */}
+      <div style={{position:'relative',zIndex:10,textAlign:'center',opacity:0,animation:'sp-wordin .5s ease 1s forwards'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,color:'#fff',lineHeight:1,letterSpacing:'-0.03em'}}>
+          Sp
+          <span style={{display:'inline-flex',alignItems:'center',margin:'0 1px',position:'relative',top:1}}>
+            <svg width="32" height="48" viewBox="0 0 30 44" fill="none" style={{animation:'sp-bolt .5s cubic-bezier(.34,1.56,.64,1) 1.1s both',filter:'drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))'}}>
+              <defs>
+                <linearGradient id="boltG" x1="15" y1="0" x2="15" y2="44" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#fff"/>
+                  <stop offset="45%" stopColor="#7AACFF"/>
+                  <stop offset="100%" stopColor="#17E5B0"/>
+                </linearGradient>
+              </defs>
+              <path d="M20 2L3 24H14L10 42L27 20H16L20 2Z" fill="url(#boltG)"/>
+            </svg>
+          </span>
+          rkPay
+        </div>
+        <div style={{marginTop:16,fontSize:10,fontWeight:600,letterSpacing:'0.22em',textTransform:'uppercase',color:'rgba(235,240,255,0.3)',opacity:0,animation:'sp-sub .4s ease 1.4s forwards'}}>
           Instant Global Payments
         </div>
       </div>
 
       {/* Progress bar */}
       <div style={{position:'absolute',bottom:0,left:0,right:0,height:2,background:'rgba(255,255,255,0.04)'}}>
-        <div style={{height:'100%',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',animation:'sp-bar 2.4s cubic-bezier(.4,0,.2,1) .3s both'}}/>
+        <div style={{height:'100%',background:'linear-gradient(90deg,#4B8CF5,#17E5B0)',animation:'sp-bar 2.6s cubic-bezier(.4,0,.2,1) .2s both'}}/>
       </div>
       <div style={{position:'absolute',bottom:14,fontSize:10,color:'rgba(235,240,255,0.15)',letterSpacing:'0.06em',fontWeight:500}}>
         Testnet · Chain 5042002
