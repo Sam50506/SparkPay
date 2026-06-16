@@ -66,7 +66,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-topbar{height:62px;border-bottom:1px solid var(--b0);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
 .ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px;background:var(--bg);min-height:100%}
 .ap-page-enter{animation:scaleIn .22s ease both;max-width:580px}
-.ap-logo-area{padding:12px 12px 12px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:8px}
+.ap-logo-area{padding:10px 14px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:8px}
 .ap-logo-name{font-family:var(--fd);font-weight:800;font-size:17px;letter-spacing:-.3px;line-height:1;color:var(--tx1)}
 .ap-logo-tag{font-size:10px;color:var(--tx3);font-weight:600;letter-spacing:.07em;margin-top:2px;text-transform:uppercase}
 .ap-nav{flex:1;padding:8px 0;overflow-y:auto}
@@ -819,7 +819,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
             </div>
             <div style={{textAlign:'center',marginBottom:40}}>
               <div style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-0.5px',marginBottom:12}}>Send USDC<br/><span style={{color:'var(--ac)'}}>Globally.</span></div>
-              <div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6}}>Cross-border remittance on Arc Testnet.<br/>Zero fees. Instant settlement.</div>
+              <div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6}}>Send money across borders instantly.<br/>Zero fees. Instant settlement. Powered by Arc.</div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:32}}>
               {[['20+','Countries'],['~0','Fees'],['Instant','Settlement']].map(([v,l])=>(
