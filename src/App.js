@@ -282,15 +282,22 @@ const SplashScreen = ({ onDone }) => {
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
         @keyframes sp-flash{0%{opacity:0}10%{opacity:0.25}20%{opacity:0}35%{opacity:0.12}50%{opacity:0}100%{opacity:0}}
-        @keyframes sp-g1{0%{transform:translate(-4px,0)}20%{transform:translate(4px,-1px)}40%{transform:translate(-5px,1px)}60%{transform:translate(3px,0)}80%{transform:translate(-2px,0)}100%{transform:translate(0,0)}}
-        @keyframes sp-g2{0%{transform:translate(4px,0)}20%{transform:translate(-3px,1px)}40%{transform:translate(5px,-1px)}60%{transform:translate(-2px,0)}80%{transform:translate(2px,0)}100%{transform:translate(0,0)}}
-        @keyframes sp-logoin{0%{opacity:0;transform:scale(1.08);filter:blur(6px)}60%{filter:blur(0)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
         @keyframes sp-gfade{0%{opacity:1}100%{opacity:0}}
-        @keyframes sp-wordin{0%{opacity:0;filter:blur(4px)}100%{opacity:1;filter:blur(0)}}
+        @keyframes sp-logoin{0%{opacity:0;transform:scale(1.08);filter:blur(6px)}60%{filter:blur(0)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
         @keyframes sp-bolt{from{transform:scale(0.5);opacity:0;filter:drop-shadow(0 0 40px #fff) drop-shadow(0 0 20px #4B8CF5)}to{transform:scale(1);opacity:1;filter:drop-shadow(0 0 10px rgba(75,140,245,1)) drop-shadow(0 0 20px rgba(23,229,176,0.6))}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
         @keyframes sp-sub{from{opacity:0}to{opacity:1}}
         @keyframes sp-glow{from{opacity:0}to{opacity:1}}
+        @keyframes sh0{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-38px,-52px) rotate(-18deg) scale(0.7)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh1{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(44px,-38px) rotate(22deg) scale(0.65)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh2{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-52px,14px) rotate(-28deg) scale(0.6)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh3{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(48px,22px) rotate(32deg) scale(0.55)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh4{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-18px,56px) rotate(-14deg) scale(0.6)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh5{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(32px,48px) rotate(25deg) scale(0.5)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh6{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-60px,-18px) rotate(-35deg) scale(0.45)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh7{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(56px,-12px) rotate(18deg) scale(0.5)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh8{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(8px,-62px) rotate(42deg) scale(0.55)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
+        @keyframes sh9{0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}60%{opacity:1;transform:translate(-24px,64px) rotate(-22deg) scale(0.4)}100%{opacity:0;transform:translate(0,0) rotate(0deg) scale(0)}}
       `}</style>
 
       {/* Flash */}
@@ -299,14 +306,20 @@ const SplashScreen = ({ onDone }) => {
       {/* Radial glow */}
       <div style={{position:'absolute',width:'70vw',height:'70vw',borderRadius:'50%',background:'radial-gradient(circle,rgba(75,140,245,0.12) 0%,rgba(23,229,176,0.05) 50%,transparent 70%)',top:'50%',left:'50%',transform:'translate(-50%,-50%)',opacity:0,animation:'sp-glow .8s ease 1.0s forwards',pointerEvents:'none'}}/>
 
-      {/* Glitch layers — visible immediately, independent of logo wrapper */}
-      <div style={{position:'absolute',zIndex:8,display:'flex',alignItems:'center',justifyContent:'center',width:'100%'}}>
+      {/* Glass shatter — 10 shards fly out then converge into bolt */}
+      <div style={{position:'absolute',zIndex:8,display:'flex',alignItems:'center',justifyContent:'center',width:'100%',pointerEvents:'none'}}>
         <div style={{position:'relative',fontFamily:'var(--fd)',fontSize:'clamp(38px,9vw,64px)',fontWeight:900,lineHeight:1,letterSpacing:'-0.03em',userSelect:'none'}}>
-          {/* Blue top glitch */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(0 0,100% 0,100% 45%,0 45%)',animation:'sp-g1 0.08s steps(1) 0.04s 4 alternate, sp-gfade 0.2s 0.5s forwards',pointerEvents:'none'}}>SparkPay</div>
-          {/* Cyan bottom glitch */}
-          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 55%,100% 55%,100% 100%,0 100%)',animation:'sp-g2 0.08s steps(1) 0s 4 alternate, sp-gfade 0.2s 0.5s forwards',pointerEvents:'none'}}>SparkPay</div>
-          {/* Invisible spacer to hold size */}
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(0 0,35% 0,28% 38%,0 45%)',animation:'sh0 0.55s cubic-bezier(.4,0,.2,1) 0.05s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(35% 0,65% 0,58% 42%,28% 38%)',animation:'sh1 0.55s cubic-bezier(.4,0,.2,1) 0.02s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(65% 0,100% 0,100% 35%,58% 42%)',animation:'sh2 0.55s cubic-bezier(.4,0,.2,1) 0.07s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 45%,28% 38%,32% 62%,0 58%)',animation:'sh3 0.55s cubic-bezier(.4,0,.2,1) 0.04s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#fff',clipPath:'polygon(28% 38%,58% 42%,54% 65%,32% 62%)',animation:'sh4 0.55s cubic-bezier(.4,0,.2,1) 0.0s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(58% 42%,100% 35%,100% 60%,54% 65%)',animation:'sh5 0.55s cubic-bezier(.4,0,.2,1) 0.06s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(0 58%,32% 62%,26% 85%,0 100%)',animation:'sh6 0.55s cubic-bezier(.4,0,.2,1) 0.03s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#fff',clipPath:'polygon(32% 62%,54% 65%,48% 88%,26% 85%)',animation:'sh7 0.55s cubic-bezier(.4,0,.2,1) 0.08s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#4B8CF5',clipPath:'polygon(54% 65%,100% 60%,100% 100%,48% 88%)',animation:'sh8 0.55s cubic-bezier(.4,0,.2,1) 0.01s forwards'}}>SparkPay</div>
+          <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',color:'#17E5B0',clipPath:'polygon(26% 85%,48% 88%,100% 100%,0 100%)',animation:'sh9 0.55s cubic-bezier(.4,0,.2,1) 0.05s forwards'}}>SparkPay</div>
+          {/* Invisible spacer */}
           <div style={{opacity:0,pointerEvents:'none'}}>SparkPay</div>
         </div>
       </div>
