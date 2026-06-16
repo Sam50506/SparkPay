@@ -837,32 +837,7 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
               <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
               <div style={{fontSize:13,color:'var(--tx2)',marginBottom:20}}>Connect your wallet to start sending USDC</div>
               <div className="ap-connect-btns">
-                {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button><ConnectTroubleshoot/></>}
-              </div>
-              {status&&<div style={{marginTop:16,padding:'10px 14px',borderRadius:10,background:'var(--acd)',border:'1px solid var(--acs)',fontSize:13,color:'var(--ac2)'}}>{status.msg}</div>}
-              <div style={{marginTop:20,display:'flex',justifyContent:'center',gap:20,flexWrap:'wrap'}}>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--tx3)'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Non-custodial</div>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--tx3)'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>No KYC</div>
-                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--tx3)'}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cy)" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>Open Source</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!splash&&address&&maintenanceMode&&address.toLowerCase()!==ADMIN_ADDRESS&&(
-        <div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
-          <div style={{fontFamily:'var(--fd)',fontSize:36,fontWeight:900,color:'#fff',marginBottom:16}}>Under Maintenance</div>
-          <div style={{fontSize:14,color:'rgba(255,255,255,0.6)',lineHeight:1.6,maxWidth:360}}>SparkPay is currently undergoing scheduled maintenance. Please check back soon.</div>
-        </div>
-      )}
-      {!splash&&address&&(!maintenanceMode||address.toLowerCase()===ADMIN_ADDRESS)&&(
-        <div className="ap-app">
-          {mobOpen&&<div className="ap-mob-overlay on" onClick={()=>setMobOpen(false)}/>}
-          <aside className={'ap-sidebar'+(mobOpen?' mob-open':'')}>
-            <div className="ap-logo-area"><img src="/sparkpay-logo.jpg" width="50" height="50" style={{borderRadius:10,objectFit:"cover"}}/><div><div className="ap-logo-name">SparkPay</div><div className="ap-logo-tag">Remittance</div></div></div>
-            <nav className="ap-nav">
-              {SIDEBAR_SECTIONS.map(sec=>(<div key={sec.title}><div className="ap-nav-sec">{sec.title}</div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
+                </div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
             </nav>
             <div className="ap-sidebar-foot">
               <div className="ap-net-badge"><span className="ap-net-dot"/>Arc Testnet<span style={{color:'var(--tx3)',marginLeft:4,fontWeight:500}}>#5042002</span></div>
