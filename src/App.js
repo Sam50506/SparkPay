@@ -837,20 +837,19 @@ const renderSchedule=()=>(<div><div className="ap-card"><div className="ap-card-
               <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
               <div style={{fontSize:13,color:'var(--tx2)',marginBottom:20}}>Connect your wallet to start sending USDC</div>
               <div className="ap-connect-btns">
-                </div>{sec.items.map(({id,label,ICN,info,dot})=>(<div key={id} className={'ap-nav-item'+(tab===id?' active':'')} onClick={()=>{setTab(id);setMobOpen(false);setStatus(null);}}><ICN/>{label}{dot&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--re)',display:'inline-block',marginLeft:2,flexShrink:0}}/>}<NavTooltip text={info}/></div>))}</div>))}
-            </nav>
-            <div className="ap-sidebar-foot">
-              <div className="ap-net-badge"><span className="ap-net-dot"/>Arc Testnet<span style={{color:'var(--tx3)',marginLeft:4,fontWeight:500}}>#5042002</span></div>
-              <div className="ap-wallet-pill"><div className="ap-wallet-icon"><IC.Wallet/></div><div style={{flex:1,minWidth:0}}><div style={{fontSize:10,color:'var(--tx3)',fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase'}}>{walletName||'Wallet'}</div><div style={{fontSize:12,fontWeight:600,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{short(address)}</div></div><div style={{fontSize:13,fontWeight:700,color:'var(--ac2)',fontFamily:'var(--fd)'}}>${balance}</div></div>
+                {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button><ConnectTroubleshoot/></>}
+              </div>
             </div>
-          </aside>
-          <main className="ap-content">
-            <header className="ap-topbar">
-              <div style={{display:'flex',alignItems:'center',gap:12}}><button className="ap-btn-icon mob-show" onClick={()=>setMobOpen(true)} style={{border:'none',background:'var(--elev)'}}><IC.Menu/></button><span style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:16,letterSpacing:'-.2px',color:'var(--tx1)'}}>{PAGE_TITLES[tab]||'SparkPay'}</span></div>
-              <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:13,color:'var(--ac2)',background:'var(--acd)',padding:'6px 12px',borderRadius:8,border:'1px solid var(--acs)'}}>${balance}</div><div className="ap-badge ap-badge-blue mob-hide" style={{padding:'6px 12px',fontSize:12,fontFamily:'monospace'}}>{short(address)}</div><button className="ap-btn ap-btn-icon" onClick={()=>navigator.clipboard?.writeText(address)}><IC.Copy/></button><button className="ap-btn ap-btn-danger" onClick={doDisconnect}>Disconnect</button></div>
-            </header>
-            <div className="ap-page"><div className="ap-page-enter">{status&&<div className={statusCls(status)} style={{marginBottom:20}}>{status.msg}</div>}{renderPage()}<div style={{textAlign:'center',marginTop:28,fontSize:11,color:'var(--tx3)'}}>SparkPay on Arc Testnet, Chain {ARC_CHAIN_ID} &nbsp;<a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={{color:'var(--ac)',textDecoration:'none'}}>Block Explorer</a></div></div></div>
-          </main>
+          </div>
+        </div>
+      )}
+      {address&&(
+        <div className="ap-layout">
+          <div className="ap-topbar">
+            <div style={{display:'flex',alignItems:'center',gap:12}}><button className="ap-btn-icon mob-show" onClick={()=>setMobOpen(true)} style={{border:'none',background:'var(--elev)'}}><IC.Menu/></button><span style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:16,letterSpacing:'-.2px',color:'var(--tx1)'}}>{PAGE_TITLES[tab]||'SparkPay'}</span></div>
+            <div style={{display:'flex',alignItems:'center',gap:8}}><div style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:13,color:'var(--ac2)',background:'var(--acd)',padding:'6px 12px',borderRadius:8,border:'1px solid var(--acs)'}}>${balance}</div><div className="ap-badge ap-badge-blue mob-hide" style={{padding:'6px 12px',fontSize:12,fontFamily:'monospace'}}>{short(address)}</div><button className="ap-btn ap-btn-icon" onClick={()=>navigator.clipboard?.writeText(address)}><IC.Copy/></button><button className="ap-btn ap-btn-danger" onClick={doDisconnect}>Disconnect</button></div>
+          </div>
+          <div className="ap-page"><div className="ap-page-enter">{status&&<div className={statusCls(status)} style={{marginBottom:20}}>{status.msg}</div>}{renderPage()}<div style={{textAlign:'center',marginTop:28,fontSize:11,color:'var(--tx3)'}}>SparkPay on Arc Testnet, Chain {ARC_CHAIN_ID} &nbsp;<a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={{color:'var(--ac)',textDecoration:'none'}}>Block Explorer</a></div></div></div>
           <nav className="ap-botnav">
             {BOTTOM_TABS.map(({id,label,ICN,fab})=>fab?(<div key={id} className={'ap-bot-fab-wrap'+(tab===id?' active':'')} onClick={()=>setTab(id)}><div className="ap-fab"><ICN/></div><span>{label}</span></div>):(<div key={id} className={'ap-bot-item'+(tab===id?' active':'')} onClick={()=>setTab(id)}><div style={{position:'relative',display:'inline-flex'}}><ICN/>{id==='rewards'&&cashbackPending>0&&<span className="ap-ndot"/>}</div>{label}</div>))}
           </nav>
