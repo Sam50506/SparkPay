@@ -871,6 +871,49 @@ const renderSettings=()=>(<div className="ap-card"><div className="ap-card-title
 
   const FaqPage=()=>{const[open,setOpen]=React.useState(null);const faqs=[['General',[['What is SparkPay?','SparkPay is a free app that lets you send USDC to anyone in the world. You connect your crypto wallet, enter the recipient address and amount, and the money reaches the recipient in seconds.'],['Do I need to create an account?','No. You just connect your existing crypto wallet like MetaMask or any WalletConnect compatible wallet. There is no sign up, no email, and no password required.'],['Is it really free to send?','Yes. SparkPay charges zero fees. The only cost would be network gas fees, but on Arc Testnet those are also effectively zero.'],['How long does a transfer take?','Usually a few seconds. Once your transaction is submitted to the blockchain, it confirms almost instantly on Arc Testnet.'],['Is my money safe?','SparkPay never touches your funds. You send directly from your own wallet. Nobody at SparkPay can access, hold, or move your money.']]],['Features',[['What is USDC Cashback?','Every time you send 5 USDC or more and the transaction confirms on chain, you earn 1% of the amount back as a reward. When your rewards reach 1 USDC, you can claim it directly to your wallet.'],['What is the Faucet?','The Faucet lets you claim free testnet USDC every 2 hours so you can try SparkPay without using real money. This is available because SparkPay runs on Arc Testnet.'],['Can I schedule payments?','Yes. The Scheduled tab lets you set up a reminder for a future payment. On the scheduled date, SparkPay will pre-fill the Send form so you can confirm with one tap.'],['What is Multi Send?','Multi Send lets you send USDC to multiple wallet addresses in one go. This is useful for paying several people at once, like a team or group.'],['What is an Invoice?','You can create a payment request with a specific amount and share it as a link or ID. The recipient can open it in SparkPay and pay it directly without needing to copy your address manually.']]],['Troubleshooting',[['I sent to the wrong address. What do I do?','Blockchain transactions cannot be reversed once confirmed. Always double check the recipient address before confirming. Save trusted addresses in your Contacts to avoid this in the future.'],['My transaction is stuck as pending.','Wait a few minutes and refresh the History tab. If it stays pending, check the transaction hash on testnet.arcscan.app. If it still does not resolve, contact support on Telegram.'],['My cashback is not showing up.','Cashback only applies to transactions of 5 USDC or more that are fully confirmed on chain. Check the Rewards tab after your transaction shows as confirmed in History.'],['I need more help.','If you cannot find an answer here, reach out directly on Telegram. Tap the button below and send a message describing your issue.']]]];return(<div><div className="ap-card"><div className="ap-card-title">Frequently Asked Questions</div><div className="ap-card-sub">Tap a question to see the answer.</div>{faqs.map(([section,items])=>(<div key={section} style={{marginTop:16}}><div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:8}}>{section}</div><div className="ap-div"/>{items.map(([q,a],i)=>{const key=section+i;return(<div key={key} style={{borderBottom:'1px solid var(--b0)'}}><div onClick={()=>setOpen(open===key?null:key)} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 0',cursor:'pointer'}}><div style={{fontSize:13,fontWeight:700,color:'var(--tx1)',paddingRight:12}}>{q}</div><div style={{fontSize:18,color:'var(--tx3)',flexShrink:0}}>{open===key?'−':'+'}</div></div>{open===key&&<div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.8,paddingBottom:14}}>{a}</div>}</div>);})})</div>))}</div><div className="ap-card" style={{textAlign:'center'}}><div style={{fontSize:13,fontWeight:700,color:'var(--tx1)',marginBottom:6}}>Still need help?</div><div style={{fontSize:12,color:'var(--tx2)',marginBottom:16}}>Contact us on Telegram and we will get back to you as soon as possible.</div><a href="https://t.me/Sam50506" target="_blank" rel="noreferrer" className="ap-btn ap-btn-primary" style={{textDecoration:'none',display:'block',textAlign:'center'}}>Chat on Telegram</a></div></div>);};
   const renderFaq=()=><FaqPage/>;
+  const renderRewards=()=>(<div>
+    <div className="ap-card">
+      <div className="ap-card-title">Cashback Rewards</div>
+      <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:20}}>Earn cashback on every confirmed transaction. Minimum 1 USDC to claim.</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}}>
+        <div style={{background:'var(--elev)',borderRadius:14,padding:'16px 12px',textAlign:'center'}}>
+          <div style={{fontSize:11,color:'var(--tx3)',marginBottom:6,fontWeight:600,textTransform:'uppercase',letterSpacing:'.06em'}}>Pending</div>
+          <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--ac)'}}>{cashbackPending.toFixed(3)}</div>
+          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>USDC</div>
+        </div>
+        <div style={{background:'var(--elev)',borderRadius:14,padding:'16px 12px',textAlign:'center'}}>
+          <div style={{fontSize:11,color:'var(--tx3)',marginBottom:6,fontWeight:600,textTransform:'uppercase',letterSpacing:'.06em'}}>Claimed</div>
+          <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--cy)'}}>{cashbackHistory.reduce((s,h)=>s+(parseFloat(h)||0),0).toFixed(3)}</div>
+          <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>USDC</div>
+        </div>
+      </div>
+      {cashbackPending>=1&&<div style={{marginBottom:16}}>
+        <div className="ap-label">Claim Amount (USDC)</div>
+        <input className="ap-input" type="number" placeholder={'Max: '+cashbackPending.toFixed(3)} value={claimAmt} onChange={e=>setClaimAmt(e.target.value)} style={{marginBottom:10}}/>
+        <button className="ap-btn ap-btn-primary" onClick={claimCashback} disabled={claimLoading||!claimAmt||parseFloat(claimAmt)<1||parseFloat(claimAmt)>cashbackPending}>
+          {claimLoading?'Submitting...':claimSubmitted==='paid'?'Reward received!':'Claim Cashback'}
+        </button>
+      </div>}
+      {cashbackPending<1&&<div style={{padding:'12px 14px',background:'var(--elev)',borderRadius:10,fontSize:13,color:'var(--tx3)',textAlign:'center'}}>
+        Need {(1-cashbackPending).toFixed(3)} more USDC to unlock claiming
+      </div>}
+    </div>
+    {myClaimsHistory.length>0&&<div className="ap-card">
+      <div className="ap-card-title">Claim History</div>
+      <div className="ap-div"/>
+      {claimsLoading?<div style={{textAlign:'center',padding:20,color:'var(--tx3)'}}>Loading...</div>:myClaimsHistory.map((cl,i)=>(
+        <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--b0)'}}>
+          <div>
+            <div style={{fontWeight:700,color:'var(--tx1)',fontSize:14}}>{cl.amount} USDC</div>
+            <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{new Date(cl.timestamp).toLocaleDateString()}</div>
+          </div>
+          <div style={{padding:'4px 12px',borderRadius:999,fontSize:12,fontWeight:600,background:cl.status==='paid'?'rgba(34,197,94,0.15)':'rgba(251,191,36,0.15)',color:cl.status==='paid'?'#22c55e':'#f59e0b'}}>
+            {cl.status}
+          </div>
+        </div>
+      ))}
+    </div>}
+  </div>);
   const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return <MultiSend multi={multi} setMulti={setMulti} loading={loading} handleMultiReview={handleMultiReview}/>;case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faq':return renderFaq();case 'faucet':return <Faucet address={address} balance={balance} setBalance={setBalance} faucetLoading={faucetLoading} setFaucetLoading={setFaucetLoading} faucetMsg={faucetMsg} setFaucetMsg={setFaucetMsg} lastClaim={lastClaim} setLastClaim={setLastClaim}/>;default:return renderSend();}};
 
   if(isAdminRoute){
