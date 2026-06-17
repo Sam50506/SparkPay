@@ -809,7 +809,7 @@ const renderSchedule=()=>{
     if(!newSched.addr||!newSched.amount||!newSched.next){setStatus({type:'error',msg:'Fill all required fields'});return;}
     if(!signer){setStatus({type:'error',msg:'Connect your wallet first'});return;}
     const releaseTime=Math.floor(new Date(newSched.next+'T'+(newSched.time||'12:00')).getTime()/1000);
-    if(releaseTime<=Math.floor(Date.now()/1000)){setStatus({type:'error',msg:'Scheduled time must be in the future'});return;}
+    if(releaseTime<=Math.floor(Date.now()/1000)){setStatus({type:'error',msg:'Release time must be in the future. Please select a later date or time.'});return;}
     setLoading(true);
     try{
       const amt=ethers.parseUnits(newSched.amount,18);
