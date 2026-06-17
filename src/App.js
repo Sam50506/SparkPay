@@ -128,7 +128,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-country-pill:hover{border-color:var(--ac)}
 .ap-country-pill.empty{color:var(--tx3)}
 .ap-cc{font-size:10px;font-weight:800;background:var(--acd);color:var(--ac2);border-radius:4px;padding:2px 5px;letter-spacing:.04em}
-.ap-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);animation:fadeIn .2s ease}
+.ap-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);animation:fadeIn .2s ease}@media(min-width:900px){.ap-modal-bg{left:256px}}
 .ap-modal{background:var(--card);border:1px solid var(--b1);border-radius:24px;padding:28px;width:100%;max-width:400px;box-shadow:var(--shl);animation:scaleIn .2s ease}
 .ap-modal-title{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--tx1);margin-bottom:6px}
 .ap-modal-sub{font-size:13px;color:var(--tx2);margin-bottom:22px}
