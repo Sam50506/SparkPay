@@ -823,6 +823,16 @@ const renderSchedule=()=>{
       setStatus({type:'info',msg:'Locking USDC in escrow...'});
       const tx=await sched.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('21','gwei')});
       const receipt=await tx.wait();
+      // Get payment ID from event
+      const iface=new ethers.Interface(['event PaymentScheduled(uint256 indexed id,address indexed sender,address indexed recipient,uint256 amount,uint256 releaseTime)']);
+      const log=receipt.logs.find(l=>{try{iface.parseLog(l);return true;}catch{return false;}});
+      const paymentId=log?Number(iface.parseLog(log).args[0]):0;
+      // Save to Supabase for cron
+      await fetch(SB_URL+'/rest/v1/scheduled_payments',{
+        method:'POST',
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({payment_id:paymentId,sender:address,recipient:newSched.addr.trim(),amount:newSched.amount,release_time:releaseTime,country:newSched.country||''})
+      });
       setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()});
       setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
       setTimeout(refreshBal,4000);
