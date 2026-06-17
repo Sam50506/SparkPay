@@ -11,8 +11,15 @@ const SCHED_ABI = [
 ];
 
 async function main() {
+  if (!PRIVATE_KEY || PRIVATE_KEY.trim() === '') {
+    console.error("KEEPER_PRIVATE_KEY not set");
+    process.exit(1);
+  }
+
+  const key = PRIVATE_KEY.trim().startsWith('0x') ? PRIVATE_KEY.trim() : '0x' + PRIVATE_KEY.trim();
+
   const provider = new ethers.JsonRpcProvider(RPC, 5042002);
-  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  const wallet = new ethers.Wallet(key, provider);
   const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
 
   const count = Number(await contract.paymentCount());
