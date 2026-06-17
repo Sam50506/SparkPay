@@ -622,6 +622,7 @@ function NeedHelpMenu({paymentId,address}){
   const[newRecipient,setNewRecipient]=React.useState('');
   const[newAmount,setNewAmount]=React.useState('');
   const[newDate,setNewDate]=React.useState('');
+  const[newTime,setNewTime]=React.useState('');
   const[loading,setLoading]=React.useState(false);
   const[done,setDone]=React.useState(false);
 
@@ -638,7 +639,8 @@ function NeedHelpMenu({paymentId,address}){
           reason:reason||null,
           new_recipient:newRecipient||null,
           new_amount:newAmount||null,
-          new_date:newDate||null
+          new_date:newDate||null,
+          new_time:newTime||null
         })
       });
       if(!r.ok)throw new Error('Failed');
@@ -680,7 +682,9 @@ function NeedHelpMenu({paymentId,address}){
       <input className="ap-input" type="number" style={{marginBottom:10}} placeholder="0.00" value={newAmount} onChange={e=>setNewAmount(e.target.value)}/>
       <div className="ap-label">New Release Date</div>
       <input className="ap-input" type="date" style={{marginBottom:10}} value={newDate} onChange={e=>setNewDate(e.target.value)}/>
-      <button className="ap-btn ap-btn-primary" style={{width:'100%',marginTop:4}} onClick={()=>submit('edit')} disabled={loading||(!newRecipient&&!newAmount&&!newDate)}>{loading?'Submitting...':'Submit Request'}</button>
+      <div className="ap-label">New Release Time</div>
+      <input className="ap-input" type="time" style={{marginBottom:10}} value={newTime} onChange={e=>setNewTime(e.target.value)}/>
+      <button className="ap-btn ap-btn-primary" style={{width:'100%',marginTop:4}} onClick={()=>submit('edit')} disabled={loading||(!newRecipient&&!newAmount&&!newDate&&!newTime)}>{loading?'Submitting...':'Submit Request'}</button>
       <button onClick={()=>setStep(null)} style={{marginTop:8,width:'100%',background:'none',border:'none',fontSize:12,color:'var(--tx3)',cursor:'pointer'}}>Back</button>
     </div>}
   </div>);
