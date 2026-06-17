@@ -503,7 +503,7 @@ function OKXSelect({value, onChange, options, style}){
 function NavTooltip({text}){
   const[open,setOpen]=useState(false);const ref=useRef(null);
   useEffect(()=>{if(!open)return;const close=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};document.addEventListener('mousedown',close);document.addEventListener('touchstart',close);return()=>{document.removeEventListener('mousedown',close);document.removeEventListener('touchstart',close);};},[open]);
-  return(<span ref={ref} style={{position:'relative',display:'inline-flex',flexShrink:0}}><i className="ni mob-hide" onClick={e=>{e.stopPropagation();setOpen(o=>!o);}}>i</i>{open&&<div className="ap-tip-pop">{text}</div>}</span>);
+  return(<span ref={ref} style={{position:'relative',display:'inline-flex',flexShrink:0}}>{open&&<div className="ap-tip-pop">{text}</div>}</span>);
 }
 
 function ConfirmModal({data,onConfirm,onCancel,walletName}){
