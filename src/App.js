@@ -960,7 +960,7 @@ const batchGroups={};allTxns.forEach(t=>{if(!t.hash)return;if(!batchGroups[t.has
   const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return <MultiSend multi={multi} setMulti={setMulti} loading={loading} handleMultiReview={handleMultiReview}/>;case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faq':return renderFaq();case 'faucet':return <Faucet address={address} balance={balance} setBalance={setBalance} faucetLoading={faucetLoading} setFaucetLoading={setFaucetLoading} faucetMsg={faucetMsg} setFaucetMsg={setFaucetMsg} lastClaim={lastClaim} setLastClaim={setLastClaim}/>;default:return renderSend();}};
 
   if(isAdminRoute){
-    return(<div className={'ap-root'+(dm?'':' light')}><style>{CSS}</style><AdminPanel address={address} maintenanceMode={maintenanceMode} setMaintenanceMode={setMaintenanceMode}/>{!address&&<div style={{position:'fixed',bottom:24,left:0,right:0,display:'flex',justifyContent:'center'}}><div className="ap-connect-card" style={{maxWidth:360,width:'calc(100% - 48px)'}}><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:16,color:'var(--tx1)',marginBottom:12}}>Connect Wallet</div><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>{showPicker&&<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>}</div></div>}</div>);
+    return(<div className={'ap-root'+(dm?'':' light')}><style>{CSS}</style><AdminPanel address={address} signer={signer} maintenanceMode={maintenanceMode} setMaintenanceMode={setMaintenanceMode}/>{!address&&<div style={{position:'fixed',bottom:24,left:0,right:0,display:'flex',justifyContent:'center'}}><div className="ap-connect-card" style={{maxWidth:360,width:'calc(100% - 48px)'}}><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:16,color:'var(--tx1)',marginBottom:12}}>Connect Wallet</div><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>{showPicker&&<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>}</div></div>}</div>);
   }
   return(
     <div className={'ap-root'+(dm?'':' light')}>
@@ -1038,7 +1038,7 @@ function ScheduledRequests(){
   const[requests,setRequests]=React.useState([]);
   const[loading,setLoading]=React.useState(true);
   const fetchRequests=async()=>{setLoading(true);try{const r=await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();setRequests(d||[]);}catch(e){console.error(e);}setLoading(false);};
-  const updateStatus=async(id,status,request_type,payment_id)=>{try{let adminKey=localStorage.getItem('arc_admin_key');if(!adminKey){adminKey=prompt('Enter admin key:');if(!adminKey)return;localStorage.setItem('arc_admin_key',adminKey);}const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':adminKey},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type})});const d=await r.json();if(d.error){localStorage.removeItem('arc_admin_key');alert('Failed: '+d.error);return;}fetchRequests();alert(status==='approved'?'Approved and executed on-chain!':'Rejected successfully.');}catch(e){alert('Failed: '+e.message);}};
+  const updateStatus=async(id,status,request_type,payment_id)=>{try{if(!signer){alert('Connect your wallet first');return;}const msg='SparkPay Admin Action: '+status+' request '+id+' for payment '+payment_id;const signature=await signer.signMessage(msg);const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type,signature,message:msg})});const d=await r.json();if(d.error){alert('Failed: '+d.error);return;}fetchRequests();alert(status==='approved'?'Approved and executed on-chain!':'Rejected successfully.');}catch(e){alert('Failed: '+e.message);}};
   React.useEffect(()=>{fetchRequests();},[]);
   if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
   if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
@@ -1068,7 +1068,7 @@ function ScheduledRequests(){
   </div>);
 }
 
-function AdminPanel({address,maintenanceMode,setMaintenanceMode}){
+function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
   const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
   const[loading,setLoading]=useState(true);
