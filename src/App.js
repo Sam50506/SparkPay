@@ -820,7 +820,14 @@ const renderSchedule=()=>{
       setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()});
       setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
       setTimeout(refreshBal,4000);
-    }catch(e){setStatus({type:'error',msg:e.reason||e.message||'Failed to schedule'});}
+    }catch(e){
+      let msg='Scheduling failed. Please try again.';
+      if(e?.code===4001||e?.code==='ACTION_REJECTED')msg='Transaction cancelled.';
+      else if(e?.message?.includes('Too early'))msg='Release time must be in the future.';
+      else if(e?.message?.includes('insufficient'))msg='Insufficient balance to lock this amount.';
+      else if(e?.message?.includes('reverted'))msg='Transaction reverted. Check your balance and try again.';
+      setStatus({type:'error',msg});
+    }
     setLoading(false);
   };
   const handleExecute=async(id)=>{
