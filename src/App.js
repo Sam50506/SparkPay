@@ -1038,7 +1038,7 @@ function ScheduledRequests(){
   const[requests,setRequests]=React.useState([]);
   const[loading,setLoading]=React.useState(true);
   const fetchRequests=async()=>{setLoading(true);try{const r=await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();setRequests(d||[]);}catch(e){console.error(e);}setLoading(false);};
-  const updateStatus=async(id,status)=>{try{await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?id=eq.'+id,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({status})});fetchRequests();}catch(e){alert('Failed: '+e.message);}};
+  const updateStatus=async(id,status,request_type,payment_id)=>{try{const adminKey=prompt('Enter admin key:');if(!adminKey)return;await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':adminKey},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type})});fetchRequests();}catch(e){alert('Failed: '+e.message);}};
   React.useEffect(()=>{fetchRequests();},[]);
   if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
   if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
@@ -1061,8 +1061,8 @@ function ScheduledRequests(){
         </div>
       </div>
       {r.status==='pending'&&<div style={{display:'flex',gap:8}}>
-        <button className="ap-btn ap-btn-primary" style={{fontSize:11,padding:'6px 12px',marginTop:0}} onClick={()=>updateStatus(r.id,'approved')}>Approve</button>
-        <button className="ap-btn ap-btn-danger" style={{fontSize:11,padding:'6px 12px'}} onClick={()=>updateStatus(r.id,'rejected')}>Reject</button>
+        <button className="ap-btn ap-btn-primary" style={{fontSize:11,padding:'6px 12px',marginTop:0}} onClick={()=>updateStatus(r.id,'approved',r.request_type,r.payment_id)}>Approve</button>
+        <button className="ap-btn ap-btn-danger" style={{fontSize:11,padding:'6px 12px'}} onClick={()=>updateStatus(r.id,'rejected',r.request_type,r.payment_id)}>Reject</button>
       </div>}
     </div>))}
   </div>);
