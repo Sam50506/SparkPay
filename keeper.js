@@ -1,7 +1,7 @@
 const { ethers } = require("ethers");
 
 const RPC = "https://rpc.testnet.arc.network";
-const SCHED_ADDR = "0x3334a3064dBa5F19C5191F6E109AFf70dFeE3118";
+const SCHED_ADDR = "0x4dd5BD2e2FB59E1591ED769783fC277C8F7B2990";
 const PRIVATE_KEY = process.env.KEEPER_PRIVATE_KEY;
 
 const SCHED_ABI = [
