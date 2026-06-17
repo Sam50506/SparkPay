@@ -11,36 +11,24 @@ const SCHED_ABI = [
 ];
 
 async function main() {
-  if (!PRIVATE_KEY || PRIVATE_KEY.trim() === '') {
-    console.error("KEEPER_PRIVATE_KEY not set");
-    process.exit(1);
-  }
-
-  const key = PRIVATE_KEY.trim().startsWith('0x') ? PRIVATE_KEY.trim() : '0x' + PRIVATE_KEY.trim();
-
+  if (!PRIVATE_KEY) { console.error("No private key"); process.exit(1); }
+  const key = PRIVATE_KEY.startsWith('0x') ? PRIVATE_KEY : '0x' + PRIVATE_KEY;
   const provider = new ethers.JsonRpcProvider(RPC, 5042002);
   const wallet = new ethers.Wallet(key, provider);
   const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
-
   const count = Number(await contract.paymentCount());
   const now = Math.floor(Date.now() / 1000);
-  
-  console.log(`Checking ${count} payments at ${new Date().toISOString()}`);
-
+  console.log("Checking " + count + " payments");
   for (let i = 0; i < count; i++) {
     const p = await contract.getPayment(i);
     if (!p.executed && !p.cancelled && Number(p.releaseTime) <= now) {
-      console.log(`Executing payment ${i} - ${ethers.formatUnits(p.amount, 18)} USDC to ${p.recipient}`);
-      try {
-        const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
-        await tx.wait();
-        console.log(`Payment ${i} executed! Tx: ${tx.hash}`);
-      } catch(e) {
-        console.error(`Payment ${i} failed:`, e.message);
-      }
+      console.log("Executing payment " + i);
+      const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
+      await tx.wait();
+      console.log("Done: " + tx.hash);
     }
   }
-  console.log("Done");
+  console.log("Keeper finished");
 }
 
-main().catch(console.error);
+main().catch(e => { console.error(e.message); process.exit(1); });
