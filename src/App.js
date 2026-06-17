@@ -65,7 +65,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-content{flex:1;margin-left:256px;display:flex;flex-direction:column;height:100vh;overflow:hidden}.ap-layout{flex:1;margin-left:256px;display:flex;flex-direction:column;min-height:100vh;background:var(--bg)}
 .ap-topbar{height:62px;border-bottom:1px solid var(--b0);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
 .ap-page{flex:1;overflow-y:auto;padding:28px 28px 40px;background:var(--bg);min-height:100%}
-.ap-page-enter{animation:scaleIn .22s ease both;max-width:580px}
+.ap-page-enter{animation:scaleIn .22s ease both;max-width:580px}@media(min-width:900px){.ap-page-enter{max-width:800px}.ap-main{margin-left:256px;padding:32px 48px}.ap-connect-card{max-width:480px}}
 .ap-logo-area{padding:10px 14px;border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:8px}
 .ap-logo-name{font-family:var(--fd);font-weight:800;font-size:17px;letter-spacing:-.3px;line-height:1;color:var(--tx1)}
 .ap-logo-tag{font-size:10px;color:var(--tx3);font-weight:600;letter-spacing:.07em;margin-top:2px;text-transform:uppercase}
