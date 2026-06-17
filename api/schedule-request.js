@@ -23,19 +23,19 @@ async function sendTelegram(msg) {
   } catch(e) {}
 }
 
+const ADMIN_KEY = process.env.PAYOUT_ADMIN_KEY;
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { action, request_id, payment_id, request_type, signature, message } = req.body;
+  const { action, request_id, payment_id, request_type } = req.body;
 
   // Handle approve/reject actions
   if (action === 'approve' || action === 'reject') {
+    if (req.headers['x-admin-key'] !== ADMIN_KEY) {
+      return res.status(401).json({error: 'Unauthorized'});
+    }
     try {
-      // Verify signature is from admin wallet
-      const recovered = ethers.verifyMessage(message, signature);
-      if (recovered.toLowerCase() !== ADMIN_ADDRESS) {
-        return res.status(401).json({error: 'Unauthorized - invalid signature'});
-      }
 
       if (action === 'approve' && request_type === 'cancel') {
         const provider = new ethers.JsonRpcProvider(RPC, {name: 'Arc Testnet', chainId: 5042002});
