@@ -428,7 +428,7 @@ function CountrySelect({value,onChange}){
         {value?<span style={{maxWidth:90,overflow:'hidden',textOverflow:'ellipsis'}}>{value}</span>:<span>Country</span>}
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start'}} onClick={()=>setOpen(false)}>
+      {open&&<div style={{position:'fixed',top:0,bottom:0,right:0,left:window.innerWidth>=900?256:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start'}} onClick={()=>setOpen(false)}>
         <div style={{background:'var(--card)',width:'100%',maxHeight:'40vh',display:'flex',flexDirection:'column',borderRadius:'0 0 20px 20px'}} onClick={e=>e.stopPropagation()}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
             <button onClick={()=>setOpen(false)} style={{background:'none',border:'none',fontSize:14,color:'var(--ac)',cursor:'pointer',fontWeight:600}}>Cancel</button>
@@ -451,7 +451,7 @@ function CountrySelect({value,onChange}){
       {value?<span style={{maxWidth:90,overflow:'hidden',textOverflow:'ellipsis'}}>{value}</span>:<span>Country</span>}
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{marginLeft:'auto',flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-    {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start'}} onClick={()=>{setOpen(false);setCtrySearch('');}}>
+    {open&&<div style={{position:'fixed',top:0,bottom:0,right:0,left:window.innerWidth>=900?256:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start'}} onClick={()=>{setOpen(false);setCtrySearch('');}}>
       <div style={{background:'var(--card)',width:'100%',maxHeight:'40vh',display:'flex',flexDirection:'column',borderRadius:'0 0 20px 20px'}} onClick={e=>e.stopPropagation()}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
           <button onClick={()=>{setOpen(false);setCtrySearch('');}} style={{background:'none',border:'none',fontSize:14,color:'var(--ac)',cursor:'pointer',fontWeight:600}}>Cancel</button>
@@ -479,7 +479,7 @@ function OKXSelect({value, onChange, options, style}){
         <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{options.find(o=>o.value===value)?.label||'Select...'}</span>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      {open&&<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start'}} onClick={()=>setOpen(false)}>
+      {open&&<div style={{position:'fixed',top:0,bottom:0,right:0,left:window.innerWidth>=900?256:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'flex-start'}} onClick={()=>setOpen(false)}>
         <div style={{background:'var(--card)',width:'100%',height:'55vh',overflowY:'auto',borderRadius:'0 0 20px 20px',paddingBottom:16}} onClick={e=>e.stopPropagation()}>
           <div style={{textAlign:'center',fontWeight:700,fontSize:15,padding:'12px 16px',borderBottom:'1px solid var(--b0)',color:'var(--tx1)'}}>Select Country</div>
           {options.map(o=><div key={o.value} onClick={()=>{onChange(o.value);setOpen(false);}} style={{padding:'12px 20px',fontSize:14,color:'var(--tx1)',borderBottom:'1px solid var(--b0)',background:value===o.value?'var(--acd)':'transparent'}}>{o.label}</div>)}
