@@ -1,4 +1,4 @@
-const { ethers } = require('ethers');
+import { ethers } from 'ethers';
 
 const RPC = 'https://rpc.testnet.arc.network';
 const SCHED_ADDR = '0x13474Fe73628949236DA25D38b7207ecEC0E6058';
@@ -9,7 +9,7 @@ const SCHED_ABI = [
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Verify cron secret to prevent unauthorized calls
   if(req.headers['authorization'] !== 'Bearer '+process.env.CRON_SECRET){
     return res.status(401).json({error:'Unauthorized'});
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
     const pending = await r.json();
 
     const now = Math.floor(Date.now() / 1000);
-    const results = { executed: [], skipped: [], failed: [] };
+    const results = { executed: [], skipped: [], failed: [] }
 
     for (const p of pending) {
       if (p.release_time > now) {
