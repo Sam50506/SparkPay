@@ -30,3 +30,5 @@ deploy.mjs
 deployed_address.txt
 artifacts/
 src/App.js.backup
+node_modules/
+contracts-hardhat/node_modules/
