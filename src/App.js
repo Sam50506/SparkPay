@@ -615,6 +615,77 @@ function WalletPicker({onPick,onClose}){
     </div>
   );
 }
+function NeedHelpMenu({paymentId,address}){
+  const[open,setOpen]=React.useState(false);
+  const[step,setStep]=React.useState(null);
+  const[reason,setReason]=React.useState('');
+  const[newRecipient,setNewRecipient]=React.useState('');
+  const[newAmount,setNewAmount]=React.useState('');
+  const[newDate,setNewDate]=React.useState('');
+  const[loading,setLoading]=React.useState(false);
+  const[done,setDone]=React.useState(false);
+
+  const submit=async(type)=>{
+    setLoading(true);
+    try{
+      const r=await fetch('/api/schedule-request',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          payment_id:paymentId,
+          wallet_address:address,
+          request_type:type,
+          reason:reason||null,
+          new_recipient:newRecipient||null,
+          new_amount:newAmount||null,
+          new_date:newDate||null
+        })
+      });
+      if(!r.ok)throw new Error('Failed');
+      setDone(true);
+      setOpen(false);
+      setStep(null);
+    }catch(e){alert('Failed to submit request. Please try again.');}
+    setLoading(false);
+  };
+
+  if(done)return(<div style={{marginTop:8,fontSize:12,color:'var(--cy)',fontWeight:600,padding:'8px 12px',background:'rgba(23,229,176,.08)',borderRadius:10,textAlign:'center'}}>Request submitted. We will review and get back to you shortly.</div>);
+
+  return(<div style={{marginTop:8}}>
+    {!open&&<button onClick={()=>setOpen(true)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer'}}>Need Help?</button>}
+    {open&&!step&&<div style={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'14px',marginTop:4}}>
+      <div style={{fontSize:13,fontWeight:700,color:'var(--tx1)',marginBottom:12}}>How can we help?</div>
+      <div onClick={()=>setStep('cancel')} style={{padding:'12px 14px',borderRadius:10,border:'1px solid var(--b0)',marginBottom:8,cursor:'pointer',background:'var(--elev)'}}>
+        <div style={{fontSize:13,fontWeight:700,color:'var(--tx1)'}}>Request Cancellation</div>
+        <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>Ask admin to cancel and refund this payment</div>
+      </div>
+      <div onClick={()=>setStep('edit')} style={{padding:'12px 14px',borderRadius:10,border:'1px solid var(--b0)',cursor:'pointer',background:'var(--elev)'}}>
+        <div style={{fontSize:13,fontWeight:700,color:'var(--tx1)'}}>Edit Payment Details</div>
+        <div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>Request to update recipient, amount or date</div>
+      </div>
+      <button onClick={()=>setOpen(false)} style={{marginTop:10,width:'100%',background:'none',border:'none',fontSize:12,color:'var(--tx3)',cursor:'pointer'}}>Cancel</button>
+    </div>}
+    {open&&step==='cancel'&&<div style={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'14px',marginTop:4}}>
+      <div style={{fontSize:13,fontWeight:700,color:'var(--tx1)',marginBottom:10}}>Reason for cancellation</div>
+      <textarea value={reason} onChange={e=>setReason(e.target.value)} placeholder="Please explain why you want to cancel..." style={{width:'100%',padding:'10px 12px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:13,outline:'none',minHeight:80,resize:'vertical',boxSizing:'border-box',fontFamily:'inherit'}}/>
+      <button className="ap-btn ap-btn-primary" style={{width:'100%',marginTop:10}} onClick={()=>submit('cancel')} disabled={loading||!reason.trim()}>{loading?'Submitting...':'Submit Request'}</button>
+      <button onClick={()=>setStep(null)} style={{marginTop:8,width:'100%',background:'none',border:'none',fontSize:12,color:'var(--tx3)',cursor:'pointer'}}>Back</button>
+    </div>}
+    {open&&step==='edit'&&<div style={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,padding:'14px',marginTop:4}}>
+      <div style={{fontSize:13,fontWeight:700,color:'var(--tx1)',marginBottom:10}}>Edit Payment Details</div>
+      <div style={{fontSize:11,color:'var(--tx3)',marginBottom:10}}>Fill in only the fields you want to change.</div>
+      <div className="ap-label">New Recipient Address</div>
+      <input className="ap-input" style={{marginBottom:10}} placeholder="0x..." value={newRecipient} onChange={e=>setNewRecipient(e.target.value)}/>
+      <div className="ap-label">New Amount (USDC)</div>
+      <input className="ap-input" type="number" style={{marginBottom:10}} placeholder="0.00" value={newAmount} onChange={e=>setNewAmount(e.target.value)}/>
+      <div className="ap-label">New Release Date</div>
+      <input className="ap-input" type="date" style={{marginBottom:10}} value={newDate} onChange={e=>setNewDate(e.target.value)}/>
+      <button className="ap-btn ap-btn-primary" style={{width:'100%',marginTop:4}} onClick={()=>submit('edit')} disabled={loading||(!newRecipient&&!newAmount&&!newDate)}>{loading?'Submitting...':'Submit Request'}</button>
+      <button onClick={()=>setStep(null)} style={{marginTop:8,width:'100%',background:'none',border:'none',fontSize:12,color:'var(--tx3)',cursor:'pointer'}}>Back</button>
+    </div>}
+  </div>);
+}
+
 function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,onCancel,loading}){
   const[payments,setPayments]=React.useState([]);
   const[fetching,setFetching]=React.useState(false);
@@ -644,7 +715,7 @@ function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,
   const now=blockTime;
   const sc=p=>p.executed?{bg:'rgba(23,229,176,.1)',cl:'var(--cy)'}:p.cancelled?{bg:'rgba(255,79,97,.1)',cl:'var(--re)'}:now>=p.releaseTime?{bg:'rgba(59,130,196,.15)',cl:'var(--ac)'}:{bg:'rgba(100,100,100,.08)',cl:'var(--tx3)'};
   const sl=p=>p.executed?'Released':p.cancelled?'Cancelled':now>=p.releaseTime?'Processing Payment':'Scheduled';
-  return(<div className="ap-card"><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}><div><div className="ap-card-title" style={{marginBottom:2}}>Scheduled Payments</div><div style={{fontSize:12,color:'var(--tx3)'}}>{payments.filter(p=>!p.executed&&!p.cancelled).length} active</div></div><button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'5px 10px',marginTop:0}} onClick={fetchPayments}>{fetching?'Loading...':'Refresh'}</button></div>{fetching&&payments.length===0&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'20px 0',fontSize:13}}>Loading...</div>}{payments.map(p=>{const s=sc(p);return(<div key={p.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}><div style={{flex:1}}><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}><span style={{fontSize:16,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{parseFloat(p.amount).toFixed(2)}</span><span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>{p.country&&<span className="ap-cc">{p.country}</span>}</div><div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:6}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div><div style={{marginTop:6}}><span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:s.bg,color:s.cl}}>{sl(p)}</span>{!p.executed&&!p.cancelled&&now>=p.releaseTime&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:8,lineHeight:1.6}}>Your payment is being processed and will be delivered to the recipient within 30 minutes.</div>}</div></div></div><div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 10px',background:'var(--card)',borderRadius:10,marginBottom:10}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style={{fontSize:11,color:'var(--tx2)',fontWeight:500}}>{new Date(p.releaseTime*1000).toLocaleString('en',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span></div>{!p.executed&&!p.cancelled&&now<p.releaseTime&&<div style={{display:'flex',gap:8}}><button className="ap-btn ap-btn-danger" style={{flex:1,fontSize:12,padding:'10px 16px'}} onClick={()=>onCancel(p.id)} disabled={loading}>Cancel Payment</button></div>}</div>);})}
+  return(<div className="ap-card"><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}><div><div className="ap-card-title" style={{marginBottom:2}}>Scheduled Payments</div><div style={{fontSize:12,color:'var(--tx3)'}}>{payments.filter(p=>!p.executed&&!p.cancelled).length} active</div></div><button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'5px 10px',marginTop:0}} onClick={fetchPayments}>{fetching?'Loading...':'Refresh'}</button></div>{fetching&&payments.length===0&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'20px 0',fontSize:13}}>Loading...</div>}{payments.map(p=>{const s=sc(p);return(<div key={p.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}><div style={{flex:1}}><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}><span style={{fontSize:16,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{parseFloat(p.amount).toFixed(2)}</span><span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>{p.country&&<span className="ap-cc">{p.country}</span>}</div><div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:6}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div><div style={{marginTop:6}}><span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:s.bg,color:s.cl}}>{sl(p)}</span>{!p.executed&&!p.cancelled&&now>=p.releaseTime&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:8,lineHeight:1.6}}>Your payment is being processed and will be delivered to the recipient within 30 minutes.</div>}</div></div></div><div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 10px',background:'var(--card)',borderRadius:10,marginBottom:10}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style={{fontSize:11,color:'var(--tx2)',fontWeight:500}}>{new Date(p.releaseTime*1000).toLocaleString('en',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span></div>{!p.executed&&!p.cancelled&&now<p.releaseTime&&<div style={{display:'flex',gap:8}}><button className="ap-btn ap-btn-danger" style={{flex:1,fontSize:12,padding:'10px 16px'}} onClick={()=>onCancel(p.id)} disabled={loading}>Cancel Payment</button></div>}{!p.executed&&!p.cancelled&&now>=p.releaseTime&&<NeedHelpMenu paymentId={p.id} address={address}/>}</div>);})}
   </div>);
 }
 
