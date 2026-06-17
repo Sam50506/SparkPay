@@ -1043,7 +1043,18 @@ function ScheduledRequests(){
   const[requests,setRequests]=React.useState([]);
   const[loading,setLoading]=React.useState(true);
   const fetchRequests=async()=>{setLoading(true);try{const r=await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();setRequests(d||[]);}catch(e){console.error(e);}setLoading(false);};
-  const updateStatus=async(id,status,request_type,payment_id)=>{try{const key=prompt('Enter admin key:');if(!key)return;const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type})});const d=await r.json();if(d.error){alert('Failed: '+d.error);return;}fetchRequests();alert(status==='approved'?'Approved and executed on-chain!':'Rejected successfully.');}catch(e){alert('Failed: '+e.message);}};
+  const updateStatus=async(id,status,request_type,payment_id)=>{try{const key=prompt('Enter admin key:');if(!key)return;const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type})});const d=await r.json();if(d.error){alert('Failed: '+d.error);return;}fetchRequests();
+      if(status==='approved'&&request_type==='edit'){
+        const req=requests.find(r=>r.id===id);
+        const changes=[];
+        if(req?.new_recipient)changes.push('Recipient: '+req.new_recipient.slice(0,10)+'...'+req.new_recipient.slice(-6));
+        if(req?.new_amount)changes.push('Amount: '+req.new_amount+' USDC');
+        if(req?.new_date)changes.push('Date: '+req.new_date);
+        if(req?.new_time)changes.push('Time: '+req.new_time);
+        alert('Edit approved!\n\nChanges recorded:\n'+changes.join('\n'));
+      } else {
+        alert(status==='approved'?'Approved successfully!':'Rejected successfully.');
+      }}catch(e){alert('Failed: '+e.message);}};
   React.useEffect(()=>{fetchRequests();},[]);
   if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
   if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
@@ -1062,7 +1073,7 @@ function ScheduledRequests(){
           <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:4}}>Payment #{r.payment_id} • {r.wallet_address.slice(0,10)}...{r.wallet_address.slice(-6)}</div>
           <div style={{fontSize:11,color:'var(--tx3)',marginBottom:4}}>{new Date(r.created_at).toLocaleString()}</div>
           {r.reason&&<div style={{fontSize:12,color:'var(--tx2)',background:'var(--elev)',borderRadius:8,padding:'8px 10px',marginTop:4}}>{r.reason}</div>}
-          {r.request_type==='edit'&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:4}}>{r.new_recipient&&<div>New recipient: <span style={{fontFamily:'monospace'}}>{r.new_recipient}</span></div>}{r.new_amount&&<div>New amount: {r.new_amount} USDC</div>}{r.new_date&&<div>New date: {r.new_date}</div>}</div>}
+          {r.request_type==='edit'&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:4,background:'var(--elev)',borderRadius:8,padding:'8px 10px'}}>{r.new_recipient&&<div>📍 New recipient: <span style={{fontFamily:'monospace'}}>{r.new_recipient.slice(0,10)}...{r.new_recipient.slice(-6)}</span></div>}{r.new_amount&&<div>💰 New amount: {r.new_amount} USDC</div>}{r.new_date&&<div>📅 New date: {r.new_date}</div>}{r.new_time&&<div>🕐 New time: {r.new_time}</div>}</div>}
         </div>
       </div>
       {r.status==='pending'&&<div style={{display:'flex',gap:8}}>
