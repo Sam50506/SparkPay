@@ -711,7 +711,7 @@ function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,
     setFetching(false);
   },[address,provider,schedAddr,schedAbi]);
   React.useEffect(()=>{fetchPayments();},[fetchPayments]);
-  React.useEffect(()=>{const t=setInterval(()=>fetchPayments(),30000);return()=>clearInterval(t);},[fetchPayments]);
+  React.useEffect(()=>{const t=setInterval(()=>fetchPayments(),10000);return()=>clearInterval(t);},[fetchPayments]);
   if(payments.length===0&&!fetching)return null;
   const now=blockTime;
   const sc=p=>p.executed?{bg:'rgba(23,229,176,.1)',cl:'var(--cy)'}:p.cancelled?{bg:'rgba(255,79,97,.1)',cl:'var(--re)'}:now>=p.releaseTime?{bg:'rgba(59,130,196,.15)',cl:'var(--ac)'}:{bg:'rgba(100,100,100,.08)',cl:'var(--tx3)'};
