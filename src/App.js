@@ -1031,6 +1031,42 @@ const batchGroups={};allTxns.forEach(t=>{if(!t.hash)return;if(!batchGroups[t.has
 }
 
 
+function ScheduledRequests(){
+  const SB_URL=process.env.REACT_APP_SUPABASE_URL;
+  const SB_KEY=process.env.REACT_APP_SUPABASE_ANON_KEY;
+  const[requests,setRequests]=React.useState([]);
+  const[loading,setLoading]=React.useState(true);
+  const fetchRequests=async()=>{setLoading(true);try{const r=await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();setRequests(d||[]);}catch(e){console.error(e);}setLoading(false);};
+  const updateStatus=async(id,status)=>{try{await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?id=eq.'+id,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({status})});fetchRequests();}catch(e){alert('Failed: '+e.message);}};
+  React.useEffect(()=>{fetchRequests();},[]);
+  if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
+  if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
+  return(<div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+      <div style={{fontSize:12,color:'var(--tx3)'}}>{requests.filter(r=>r.status==='pending').length} pending</div>
+      <button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'4px 10px',marginTop:0}} onClick={fetchRequests}>Refresh</button>
+    </div>
+    {requests.map(r=>(<div key={r.id} style={{padding:'14px 0',borderBottom:'1px solid var(--b0)'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+            <span style={{fontSize:12,fontWeight:700,padding:'2px 10px',borderRadius:999,background:r.request_type==='cancel'?'rgba(255,79,97,.1)':'rgba(59,130,196,.1)',color:r.request_type==='cancel'?'var(--re)':'var(--ac)'}}>{r.request_type==='cancel'?'Cancel Request':'Edit Request'}</span>
+            <span style={{fontSize:11,fontWeight:700,padding:'2px 10px',borderRadius:999,background:r.status==='pending'?'rgba(240,196,63,.1)':r.status==='approved'?'rgba(23,229,176,.1)':'rgba(255,79,97,.1)',color:r.status==='pending'?'#f59e0b':r.status==='approved'?'var(--cy)':'var(--re)'}}>{r.status}</span>
+          </div>
+          <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:4}}>Payment #{r.payment_id} • {r.wallet_address.slice(0,10)}...{r.wallet_address.slice(-6)}</div>
+          <div style={{fontSize:11,color:'var(--tx3)',marginBottom:4}}>{new Date(r.created_at).toLocaleString()}</div>
+          {r.reason&&<div style={{fontSize:12,color:'var(--tx2)',background:'var(--elev)',borderRadius:8,padding:'8px 10px',marginTop:4}}>{r.reason}</div>}
+          {r.request_type==='edit'&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:4}}>{r.new_recipient&&<div>New recipient: <span style={{fontFamily:'monospace'}}>{r.new_recipient}</span></div>}{r.new_amount&&<div>New amount: {r.new_amount} USDC</div>}{r.new_date&&<div>New date: {r.new_date}</div>}</div>}
+        </div>
+      </div>
+      {r.status==='pending'&&<div style={{display:'flex',gap:8}}>
+        <button className="ap-btn ap-btn-primary" style={{fontSize:11,padding:'6px 12px',marginTop:0}} onClick={()=>updateStatus(r.id,'approved')}>Approve</button>
+        <button className="ap-btn ap-btn-danger" style={{fontSize:11,padding:'6px 12px'}} onClick={()=>updateStatus(r.id,'rejected')}>Reject</button>
+      </div>}
+    </div>))}
+  </div>);
+}
+
 function AdminPanel({address,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
   const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
@@ -1112,8 +1148,12 @@ function AdminPanel({address,maintenanceMode,setMaintenanceMode}){
         }}>Process Pending Payouts</button>
       </div>
 
-      <div className="ap-card">
-        <div className="ap-card-title">Quick Links</div>
+      <div className="ap-card" style={{marginBottom:24}}>
+                    <div className="ap-card-title">Scheduled Payment Requests</div>
+                    <ScheduledRequests/>
+                  </div>
+                  <div className="ap-card">
+                    <div className="ap-card-title">Quick Links</div>
         <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:12}}>
           <a href="https://testnet.arcscan.app/address/{ADMIN_ADDRESS}" target="_blank" rel="noreferrer" style={{fontSize:13,color:'var(--ac)'}}>View Admin Wallet on Explorer</a>
           <a href="#" onClick={(e)=>{e.preventDefault();window.location.hash='';window.location.reload();}} style={{fontSize:13,color:'var(--ac)'}}>Back to App</a>
