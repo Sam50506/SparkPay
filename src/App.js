@@ -341,14 +341,14 @@ function TimePicker({value, onChange}){
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:12}}>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>Hour</div>
-            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2}}>
-              {hours.map(h=><div key={h} onClick={()=>setTime(h,m,isPM)} style={{padding:'6px 10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:h===h12?700:400,background:h===h12?'var(--acd)':'transparent',color:h===h12?'var(--ac)':'var(--tx1)',textAlign:'center'}}>{h}</div>)}
+            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2,scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch'}}>
+              {hours.map(h=><div key={h} onClick={()=>setTime(h,m,isPM)} style={{padding:'10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:h===h12?700:400,background:h===h12?'var(--acd)':'transparent',color:h===h12?'var(--ac)':'var(--tx1)',textAlign:'center',scrollSnapAlign:'start',flexShrink:0}}>{h}</div>)}
             </div>
           </div>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>Min</div>
-            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2}}>
-              {mins.map(mn=><div key={mn} onClick={()=>setTime(h12,mn,isPM)} style={{padding:'6px 10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:mn===m?700:400,background:mn===m?'var(--acd)':'transparent',color:mn===m?'var(--ac)':'var(--tx1)',textAlign:'center'}}>{mn}</div>)}
+            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2,scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch'}}>
+              {mins.map(mn=><div key={mn} onClick={()=>setTime(h12,mn,isPM)} style={{padding:'10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:mn===m?700:400,background:mn===m?'var(--acd)':'transparent',color:mn===m?'var(--ac)':'var(--tx1)',textAlign:'center',scrollSnapAlign:'start',flexShrink:0}}>{mn}</div>)}
             </div>
           </div>
           <div>
