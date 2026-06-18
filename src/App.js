@@ -9,6 +9,27 @@ import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { QRCodeSVG } from 'qrcode.react';
+import { Html5Qrcode } from 'html5-qrcode';
+
+function QRScanner({onScan,onClose}){
+  React.useEffect(()=>{
+    const scanner = new Html5Qrcode('qr-reader');
+    scanner.start(
+      {facingMode:'environment'},
+      {fps:10,qrbox:250},
+      (text)=>{scanner.stop().then(()=>onScan(text)).catch(()=>{});},
+      ()=>{}
+    ).catch(()=>{});
+    return ()=>{scanner.stop().catch(()=>{});};
+  },[]);
+  return (<div style={{position:'fixed',inset:0,zIndex:999,background:'#000',display:'flex',flexDirection:'column'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 16px',background:'#111'}}>
+      <span style={{color:'#fff',fontWeight:700,fontSize:15}}>Scan QR Code</span>
+      <button onClick={onClose} style={{background:'none',border:'none',color:'#fff',fontSize:22,cursor:'pointer'}}>×</button>
+    </div>
+    <div id="qr-reader" style={{flex:1}}/>
+  </div>);
+}
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -748,7 +769,7 @@ function AppInner() {
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
   const[showQR,setShowQR]=useState(false);const[rates,setRates]=useState({});
-  const[sendTo,setSendTo]=useState('');const[sendAmt,setSendAmt]=useState('');const[sendCtry,setSendCtry]=useState(()=>ls('arc_ctry',''));
+  const[sendTo,setSendTo]=useState('');const[sendAmt,setSendAmt]=useState('');const[showScanner,setShowScanner]=useState(false);const[sendCtry,setSendCtry]=useState(()=>ls('arc_ctry',''));
   const[multi,setMulti]=useState([{addr:'',amount:'',country:''}]);
   const[invPayer,setInvPayer]=useState('');const[invAmt,setInvAmt]=useState('');const[invDesc,setInvDesc]=useState('');const[invCtry,setInvCtry]=useState('');const[invId,setInvId]=useState('');
   const[payId,setPayId]=useState('');const[payDet,setPayDet]=useState(null);
@@ -877,7 +898,7 @@ function AppInner() {
     </div>
     <div className="ap-card" style={{marginBottom:0}}>
       <div className="ap-label">Recipient Address</div>
-      <input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:14}}/>
+      <div style={{display:'flex',gap:8,marginBottom:14}}><input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:0,flex:1}}/><button type="button" onClick={()=>setShowScanner(true)} className="ap-btn-icon" style={{flexShrink:0}} title="Scan QR Code"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14.01"/><line x1="18" y1="14" x2="18" y2="14.01"/><line x1="14" y1="18" x2="14" y2="18.01"/><line x1="18" y1="18" x2="18" y2="18.01"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg></button></div>{showScanner&&<QRScanner onScan={(text)=>{setSendTo(text);setShowScanner(false);}} onClose={()=>setShowScanner(false)}/>}
       
       <button className="ap-btn ap-btn-primary" onClick={handleSendReview} disabled={loading||!sendTo||!sendAmt}>{loading?'Processing...':'Review Transfer'}</button>
       <div className="ap-fee-note" style={{marginTop:8}}><IC.Check/> Estimated fee: ~0.0005 USDC on Arc Testnet</div>
