@@ -89,6 +89,29 @@ export default async function handler(req, res) {
         await updateSupabase(SB_URL, SB_SERVICE_KEY, p.id, { executed: true });
         results.executed.push(p.payment_id);
 
+        try {
+          const sendAmount = parseFloat(ethers.formatUnits(amount, 18));
+          if (sendAmount >= 5 && p.wallet_address) {
+            const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
+            const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${p.wallet_address}&select=*`, {
+              headers: { 'apikey': SB_SERVICE_KEY, 'Authorization': `Bearer ${SB_SERVICE_KEY}` }
+            });
+            const rows = await getRes.json();
+            const current = rows[0]?.pending_amount || 0;
+            const newBalance = parseFloat((parseFloat(current) + cashbackAmt).toFixed(3));
+            await fetch(`${SB_URL}/rest/v1/cashback_balances`, {
+              method: 'POST',
+              headers: {
+                'apikey': SB_SERVICE_KEY,
+                'Authorization': `Bearer ${SB_SERVICE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+              },
+              body: JSON.stringify({ wallet_address: p.wallet_address, pending_amount: newBalance, updated_at: new Date().toISOString() })
+            });
+          }
+        } catch(ce) { console.error('Cashback award failed:', ce.message); }
+
       } catch (e) {
         results.failed.push({ id: p.payment_id, error: e.message });
       }

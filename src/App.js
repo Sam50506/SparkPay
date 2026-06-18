@@ -799,7 +799,13 @@ function AppInner() {
   const[contacts,setContacts]=useState([]);const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('');const[editId,setEditId]=useState(null);
   const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'',freq:'weekly',next:'',time:'09:00'});const[editSchedId,setEditSchedId]=useState(null);const[editSchedData,setEditSchedData]=useState(null);
   const[defCtry,setDefCtry]=useState(()=>ls('arc_ctry',''));
-  const[cashbackPending,setCashbackPending]=useState(()=>ls('arc_cashback_pending',0));const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
+  const[cashbackPending,setCashbackPending]=useState(0);const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
+  useEffect(()=>{
+    if(!address)return;
+    sbSelect('cashback_balances','wallet_address=eq.'+address+'&select=pending_amount').then(rows=>{
+      setCashbackPending(rows?.[0]?.pending_amount?parseFloat(rows[0].pending_amount):0);
+    }).catch(()=>{});
+  },[address]);
   const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[claimAmt,setClaimAmt]=useState('');const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);const[manageTxns,setManageTxns]=useState(false);const[rateSearch,setRateSearch]=useState('');const[manageContacts,setManageContacts]=useState(false);const[selectedContacts,setSelectedContacts]=useState([]);const[cSearch,setCSearch]=useState('');const[showAdd,setShowAdd]=useState(false);const[selectedTxns,setSelectedTxns]=useState([]);const[txSearch,setTxSearch]=useState('');const[txFilter,setTxFilter]=useState('all');const[txPage,setTxPage]=useState(1);const[expandedTx,setExpandedTx]=useState(null);const[pendingClaimsCount,setPendingClaimsCount]=useState(0);
 
   useEffect(()=>{if(address)lsSave('arc_contacts_'+address,contacts);},[contacts,address]);
@@ -808,7 +814,7 @@ function AppInner() {
   useEffect(()=>{if(address)lsSave('arc_txhistory_'+address,txns);},[txns,address]);
   useEffect(()=>lsSave('arc_dm',dm),[dm]);
   useEffect(()=>lsSave('arc_ctry',defCtry),[defCtry]);
-  useEffect(()=>lsSave('arc_cashback_pending',cashbackPending),[cashbackPending]);
+  
   useEffect(()=>lsSave('arc_cashback_history',cashbackHistory),[cashbackHistory]);
   useEffect(()=>{if(address)lsSave('arc_session',{address,walletType:walletName,ts:Date.now()});},[address,walletName]);
   useEffect(()=>{if(!splash){const s=ls('arc_session',null);if(s&&s.address&&!address&&Date.now()-s.ts<86400000){setSavedSession(s);setShowResumeModal(true);}}},[splash]);// eslint-disable-line
@@ -857,7 +863,12 @@ function AppInner() {
   },[address]);
 
   const fetchMyClaims=async()=>{if(!address)return;setClaimsLoading(true);try{const rows=await sbSelect('cashback_claims','wallet_address=eq.'+address+'&order=timestamp.desc&limit=10');setMyClaimsHistory(rows||[]);if(rows&&rows.length>0&&rows[0].status==='paid'&&claimSubmitted===true){setClaimSubmitted('paid');setTimeout(()=>setClaimSubmitted(false),5000);}}catch(e){console.error(e);}setClaimsLoading(false);};
-  const claimCashback=async()=>{const amt=parseFloat(claimAmt)||cashbackPending;if(cashbackPending<1||claimLoading||amt<1||amt>cashbackPending)return;setClaimLoading(true);try{await sbInsert('cashback_claims',{wallet_address:address,amount:amt,timestamp:new Date().toISOString(),status:'pending'});setClaimSubmitted(true);setCashbackPending(prev=>parseFloat((prev-amt).toFixed(3)));setStatus({type:'success',msg:'Cashback claim submitted. Your USDC will be sent to your wallet shortly.'});}catch(e){setStatus({type:'error',msg:'Claim failed: '+e.message});}setClaimLoading(false);};
+  const claimCashback=async()=>{const amt=parseFloat(claimAmt)||cashbackPending;if(cashbackPending<5||claimLoading||amt<5||amt>cashbackPending)return;setClaimLoading(true);try{
+    await sbInsert('cashback_claims',{wallet_address:address,amount:amt,timestamp:new Date().toISOString(),status:'pending'});
+    const newBalance=parseFloat((cashbackPending-amt).toFixed(3));
+    await sbUpdate('cashback_balances','wallet_address=eq.'+address,{pending_amount:newBalance,updated_at:new Date().toISOString()});
+    setClaimSubmitted(true);setCashbackPending(newBalance);setStatus({type:'success',msg:'Cashback claim submitted. Your USDC will be sent to your wallet shortly.'});
+  }catch(e){setStatus({type:'error',msg:'Claim failed: '+e.message});}setClaimLoading(false);};
 
   const addArc=p=>({chainId:ARC_CHAIN_HEX,chainName:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:[ARC_RPC||ARC_RPC_FALLBACK],blockExplorerUrls:['https://testnet.arcscan.app'],...p});
   const ensureArc=async eth=>{try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902||e.code===-32603){setStatus({type:'info',msg:'Adding Arc Testnet to your wallet...'});try{await eth.request({method:'wallet_addEthereumChain',params:[addArc({})]});}catch(ae){setStatus({type:'error',msg:'Please add Arc Testnet manually in your wallet settings. Chain ID: 5042002, RPC: https://rpc.testnet.arc.network'});throw ae;}}else throw e;}};
