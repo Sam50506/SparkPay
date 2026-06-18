@@ -316,6 +316,54 @@ const OnboardingModal=({onDone})=>{
   );
 };
 
+function TimePicker({value, onChange}){
+  const [open, setOpen] = React.useState(false);
+  const hours = Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
+  const mins = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+  const parsed = value ? value.split(':') : ['12','00'];
+  const h24 = parseInt(parsed[0]);
+  const m = parsed[1]||'00';
+  const isPM = h24 >= 12;
+  const h12 = String(h24===0?12:h24>12?h24-12:h24).padStart(2,'0');
+  const setTime = (newH12, newM, newPM) => {
+    let h = parseInt(newH12);
+    if(newPM && h!==12) h+=12;
+    if(!newPM && h===12) h=0;
+    onChange(String(h).padStart(2,'0')+':'+newM);
+  };
+  return(
+    <div style={{position:'relative'}}>
+      <div className="ap-input" style={{marginBottom:0,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'space-between',userSelect:'none'}} onClick={()=>setOpen(o=>!o)}>
+        <span style={{fontWeight:600,fontSize:15}}>{h12}:{m} {isPM?'PM':'AM'}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      {open&&<div style={{position:'absolute',top:'calc(100% + 6px)',left:0,right:0,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:14,zIndex:300,padding:16,boxShadow:'0 8px 32px rgba(0,0,0,0.18)'}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:12}}>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>Hour</div>
+            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2}}>
+              {hours.map(h=><div key={h} onClick={()=>setTime(h,m,isPM)} style={{padding:'6px 10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:h===h12?700:400,background:h===h12?'var(--acd)':'transparent',color:h===h12?'var(--ac)':'var(--tx1)',textAlign:'center'}}>{h}</div>)}
+            </div>
+          </div>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>Min</div>
+            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2}}>
+              {mins.map(mn=><div key={mn} onClick={()=>setTime(h12,mn,isPM)} style={{padding:'6px 10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:mn===m?700:400,background:mn===m?'var(--acd)':'transparent',color:mn===m?'var(--ac)':'var(--tx1)',textAlign:'center'}}>{mn}</div>)}
+            </div>
+          </div>
+          <div>
+            <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>AM/PM</div>
+            <div style={{display:'flex',flexDirection:'column',gap:2}}>
+              {['AM','PM'].map(p=><div key={p} onClick={()=>setTime(h12,m,p==='PM')} style={{padding:'6px 10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:(p==='PM')===isPM?700:400,background:(p==='PM')===isPM?'var(--acd)':'transparent',color:(p==='PM')===isPM?'var(--ac)':'var(--tx1)',textAlign:'center'}}>{p}</div>)}
+            </div>
+          </div>
+        </div>
+        <button className="ap-btn ap-btn-primary" style={{width:'100%',fontSize:13,padding:'9px 0'}} onClick={()=>setOpen(false)}>Confirm</button>
+      </div>}
+    </div>
+  );
+}
+
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
   useEffect(() => {
@@ -1034,7 +1082,7 @@ const renderSchedule=()=>{
     }catch(e){setStatus({type:'error',msg:cleanErr(e)});}
     setLoading(false);
   };
-  return(<div><div className="ap-card"><div className="ap-card-title">Schedule Payment</div><div className="ap-card-sub">Lock USDC now. It releases to the recipient automatically at your chosen time.</div><div style={{fontSize:12,color:'var(--tx3)',marginBottom:16,lineHeight:1.7,paddingLeft:12,borderLeft:'2px solid var(--b2)'}}>USDC is locked in a smart contract escrow and released automatically when the time arrives. You can cancel anytime before release to get your USDC back.</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}><div><div className="ap-label">Recipient Address</div><input className="ap-input" style={{marginBottom:0}} placeholder="0x..." value={newSched.addr} onChange={e=>setNewSched(s=>({...s,addr:e.target.value}))}/></div><div><div className="ap-label">Amount (USDC)</div><input className="ap-input" style={{marginBottom:0}} type="number" placeholder="0.00" value={newSched.amount} onChange={e=>setNewSched(s=>({...s,amount:e.target.value}))}/></div><div><div className="ap-label">Country</div><CountrySelect value={newSched.country} onChange={v=>setNewSched(s=>({...s,country:v}))}/></div><div><div className="ap-label">Release Date</div><input className="ap-input" style={{marginBottom:0}} type="date" value={newSched.next||''} onChange={e=>setNewSched(s=>({...s,next:e.target.value}))} min={new Date(Date.now()+5*60000).toISOString().slice(0,10)}/></div><div><div className="ap-label">Release Time</div><input className="ap-input" style={{marginBottom:0}} type="time" value={newSched.time||'12:00'} onChange={e=>setNewSched(s=>({...s,time:e.target.value}))}/></div></div><button className="ap-btn ap-btn-primary" onClick={handleSchedule} disabled={loading}>{loading?'Processing...':'Lock and Schedule Payment'}</button></div><OnChainSchedules address={address} provider={provider} signer={signer} schedAddr={SCHED_ADDR} schedAbi={SCHED_ABI} onExecute={handleExecute} onCancel={handleCancelSched} loading={loading}/></div>);};
+  return(<div><div className="ap-card"><div className="ap-card-title">Schedule Payment</div><div className="ap-card-sub">Lock USDC now. It releases to the recipient automatically at your chosen time.</div><div style={{fontSize:12,color:'var(--tx3)',marginBottom:16,lineHeight:1.7,paddingLeft:12,borderLeft:'2px solid var(--b2)'}}>USDC is locked in a smart contract escrow and released automatically when the time arrives. You can cancel anytime before release to get your USDC back.</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}><div><div className="ap-label">Recipient Address</div><input className="ap-input" style={{marginBottom:0}} placeholder="0x..." value={newSched.addr} onChange={e=>setNewSched(s=>({...s,addr:e.target.value}))}/></div><div><div className="ap-label">Amount (USDC)</div><input className="ap-input" style={{marginBottom:0}} type="number" placeholder="0.00" value={newSched.amount} onChange={e=>setNewSched(s=>({...s,amount:e.target.value}))}/></div><div><div className="ap-label">Country</div><CountrySelect value={newSched.country} onChange={v=>setNewSched(s=>({...s,country:v}))}/></div><div><div className="ap-label">Release Date</div><input className="ap-input" style={{marginBottom:0}} type="date" value={newSched.next||''} onChange={e=>setNewSched(s=>({...s,next:e.target.value}))} min={new Date(Date.now()+5*60000).toISOString().slice(0,10)}/></div><div><div className="ap-label">Release Time</div><TimePicker value={newSched.time||'12:00'} onChange={v=>setNewSched(s=>({...s,time:v}))}/></div></div><button className="ap-btn ap-btn-primary" onClick={handleSchedule} disabled={loading}>{loading?'Processing...':'Lock and Schedule Payment'}</button></div><OnChainSchedules address={address} provider={provider} signer={signer} schedAddr={SCHED_ADDR} schedAbi={SCHED_ABI} onExecute={handleExecute} onCancel={handleCancelSched} loading={loading}/></div>);};
 
 const batchGroups={};allTxns.forEach(t=>{if(!t.hash)return;if(!batchGroups[t.hash])batchGroups[t.hash]=[];batchGroups[t.hash].push(t);});
   const dedupedTxns=Object.entries(batchGroups).map(([hash,txs])=>txs.length>1?{...txs[0],isBatch:true,batchTxns:txs,amount:txs.reduce((s,t)=>s+parseFloat(t.amount||0),0)}:txs[0]);
