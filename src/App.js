@@ -919,7 +919,19 @@ function AppInner() {
     </div>
     <div className="ap-card" style={{marginBottom:0}}>
       <div className="ap-label">Recipient Address</div>
-      <div style={{display:'flex',gap:8,marginBottom:14}}><input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:0,flex:1}}/><button type="button" onClick={()=>setShowScanner(true)} className="ap-btn-icon" style={{flexShrink:0}} title="Scan QR Code"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14.01"/><line x1="18" y1="14" x2="18" y2="14.01"/><line x1="14" y1="18" x2="14" y2="18.01"/><line x1="18" y1="18" x2="18" y2="18.01"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg></button></div>{showScanner&&<QRScanner onScan={(text)=>{setSendTo(text);setShowScanner(false);}} onClose={()=>setShowScanner(false)}/>}
+      <div style={{display:'flex',gap:8,marginBottom:14}}><input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:0,flex:1}}/><button type="button" onClick={()=>setShowScanner(true)} className="ap-btn-icon" style={{flexShrink:0}} title="Scan QR Code"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14.01"/><line x1="18" y1="14" x2="18" y2="14.01"/><line x1="14" y1="18" x2="14" y2="18.01"/><line x1="18" y1="18" x2="18" y2="18.01"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg></button></div>{showScanner&&<QRScanner onScan={(text)=>{
+  let addr=text;
+  try{
+    const url=new URL(text);
+    const payParam=url.searchParams.get('pay');
+    if(payParam)addr=payParam;
+  }catch(e){
+    const match=text.match(/0x[a-fA-F0-9]{40}/);
+    if(match)addr=match[0];
+  }
+  setSendTo(addr);
+  setShowScanner(false);
+}} onClose={()=>setShowScanner(false)}/>}
       
       <button className="ap-btn ap-btn-primary" onClick={handleSendReview} disabled={loading||!sendTo||!sendAmt}>{loading?'Processing...':'Review Transfer'}</button>
       <div className="ap-fee-note" style={{marginTop:8}}><IC.Check/> Estimated fee: ~0.0005 USDC on Arc Testnet</div>
