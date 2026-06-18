@@ -318,8 +318,15 @@ const OnboardingModal=({onDone})=>{
 
 function TimePicker({value, onChange}){
   const [open, setOpen] = React.useState(false);
+  const wrapRef = React.useRef(null);
   const hours = Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
   const mins = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+  React.useEffect(()=>{
+    if(!open) return;
+    const handler=(e)=>{if(wrapRef.current&&!wrapRef.current.contains(e.target))setOpen(false);};
+    document.addEventListener('mousedown',handler);
+    return()=>document.removeEventListener('mousedown',handler);
+  },[open]);
   const parsed = value ? value.split(':') : ['12','00'];
   const h24 = parseInt(parsed[0]);
   const m = parsed[1]||'00';
@@ -332,7 +339,7 @@ function TimePicker({value, onChange}){
     onChange(String(h).padStart(2,'0')+':'+newM);
   };
   return(
-    <div style={{position:'relative'}}>
+    <div ref={wrapRef} style={{position:'relative'}}>
       <div className="ap-input" style={{marginBottom:0,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'space-between',userSelect:'none'}} onClick={()=>setOpen(o=>!o)}>
         <span style={{fontWeight:600,fontSize:15}}>{h12}:{m} {isPM?'PM':'AM'}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
