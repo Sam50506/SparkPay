@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 const RPC = 'https://rpc.testnet.arc.network';
-const SCHED_ADDR = '0xEbc3BaFcb6B942c01c592DbA40De295604118a70';
+const SCHED_ADDR = '0x1Eb2088f3FE2bD64Dde3c770f87a5047f99b8946';
 const SCHED_ABI = [
   'function execute(uint256 id) external',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'
