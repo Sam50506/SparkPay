@@ -354,6 +354,8 @@ const DEFAULT_MAINTENANCE=true;
 const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
+const ARC_RPC_FALLBACK2='https://arc-testnet.drpc.org';
+const ARC_RPC_FALLBACK3='https://5042002.rpc.thirdweb.com';
 const SCHED_ADDR = '0x4dd5BD2e2FB59E1591ED769783fC277C8F7B2990';
 const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xEC605Cea7C1270C01A3e7B869f762CfDAB8c8E41';
 const USDC_ADDR  = process.env.REACT_APP_USDC_ADDR||'0x3600000000000000000000000000000000000000';
@@ -901,7 +903,7 @@ const renderSchedule=()=>{
       const amt=ethers.parseUnits(newSched.amount,18);
       const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
       setStatus({type:'info',msg:'Locking USDC in escrow...'});
-      const tx=await sched.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
+      const rpcs=[ARC_RPC,ARC_RPC_FALLBACK,ARC_RPC_FALLBACK2,ARC_RPC_FALLBACK3].filter(Boolean);let tx;for(const rpc of rpcs){try{const rp=new ethers.JsonRpcProvider(rpc,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const sc=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer.connect(rp));tx=await sc.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});break;}catch(er){if(rpcs.indexOf(rpc)===rpcs.length-1)throw er;}}
       await tx.wait();
       setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()});
       setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
