@@ -43,12 +43,15 @@ function QRScanner({onScan,onClose}){
       onClose();
     }
   };
-  return (<div style={{position:'fixed',inset:0,zIndex:999,background:'#000',display:'flex',flexDirection:'column'}}>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 16px',background:'#111'}}>
-      <span style={{color:'#fff',fontWeight:700,fontSize:15}}>Scan QR Code</span>
-      <button onClick={handleClose} style={{background:'none',border:'none',color:'#fff',fontSize:22,cursor:'pointer'}}>×</button>
+  const isPC=window.innerWidth>=900;
+  return (<div style={{position:'fixed',inset:0,zIndex:999,background:isPC?'rgba(0,0,0,0.75)':'#000',display:'flex',alignItems:isPC?'center':'stretch',justifyContent:isPC?'center':'stretch'}}>
+    <div style={{background:'#000',display:'flex',flexDirection:'column',width:isPC?'420px':'100%',height:isPC?'480px':'100%',borderRadius:isPC?16:0,overflow:'hidden',boxShadow:isPC?'0 24px 80px rgba(0,0,0,0.6)':'none'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 16px',background:'#111'}}>
+        <span style={{color:'#fff',fontWeight:700,fontSize:15}}>Scan QR Code</span>
+        <button onClick={handleClose} style={{background:'none',border:'none',color:'#fff',fontSize:22,cursor:'pointer'}}>×</button>
+      </div>
+      <div id="qr-reader" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}/>
     </div>
-    <div id="qr-reader" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}/>
   </div>);
 }
 
