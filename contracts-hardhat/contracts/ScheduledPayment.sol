@@ -52,7 +52,6 @@ contract ScheduledPayment {
 
     function execute(uint256 id) external {
         require(msg.sender == executor, "Not authorized");
-
         Payment storage p = payments[id];
         require(!p.executed, "Already executed");
         require(!p.cancelled, "Payment cancelled");
@@ -66,7 +65,7 @@ contract ScheduledPayment {
 
     function cancel(uint256 id) external {
         Payment storage p = payments[id];
-        require(msg.sender == p.sender, "Not sender");
+        require(msg.sender == p.sender || msg.sender == executor, "Not authorized");
         require(!p.executed, "Already executed");
         require(!p.cancelled, "Already cancelled");
 

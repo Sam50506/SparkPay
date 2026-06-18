@@ -906,7 +906,19 @@ const renderSchedule=()=>{
       setStatus({type:'info',msg:'Locking USDC in escrow...'});
       const sched2=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
       let tx=await sched2.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
-      await tx.wait();
+      setStatus({type:'info',msg:'Transaction submitted! Waiting for confirmation...'});
+      try{
+        await Promise.race([tx.wait(),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),30000))]);
+      }catch(waitErr){
+        if(waitErr.message==='timeout'){
+          setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()+' (Confirmation pending)'});
+          setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
+          setTimeout(refreshBal,4000);
+          setLoading(false);
+          return;
+        }
+        throw waitErr;
+      }
       setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()});
       setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
       setTimeout(refreshBal,4000);
