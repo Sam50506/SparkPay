@@ -319,7 +319,7 @@ const OnboardingModal=({onDone})=>{
 function TimePicker({value, onChange}){
   const [open, setOpen] = React.useState(false);
   const hours = Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
-  const mins = Array.from({length:60},(_,i)=>String(i).padStart(2,'0'));
+  const mins = ['00','05','10','15','20','25','30','35','40','45','50','55'];
   const parsed = value ? value.split(':') : ['12','00'];
   const h24 = parseInt(parsed[0]);
   const m = parsed[1]||'00';
@@ -347,8 +347,7 @@ function TimePicker({value, onChange}){
           </div>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>Min</div>
-            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2,scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch'}}>
-              {mins.map(mn=><div key={mn} onClick={()=>setTime(h12,mn,isPM)} style={{padding:'10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:mn===m?700:400,background:mn===m?'var(--acd)':'transparent',color:mn===m?'var(--ac)':'var(--tx1)',textAlign:'center',scrollSnapAlign:'start',flexShrink:0}}>{mn}</div>)}
+            <input type='number' min='0' max='59' value={parseInt(m)} onChange={e=>{const v=Math.max(0,Math.min(59,parseInt(e.target.value)||0));setTime(h12,String(v).padStart(2,'0'),isPM);}} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
             </div>
           </div>
           <div>
