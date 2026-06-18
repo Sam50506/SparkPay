@@ -63,12 +63,28 @@ export default async function handler(req, res) {
           continue;
         }
 
-        // FIX 3: Added gasLimit to prevent silent tx failures
-        const tx = await contract.execute(p.payment_id, {
-          gasPrice: ethers.parseUnits('21', 'gwei'),
-          gasLimit: 100000
-        });
-        await tx.wait();
+        // Use Supabase recipient/amount if an approved edit exists, else use on-chain
+        const recipient = p.recipient || onChain.recipient;
+        const amount    = p.amount    || onChain.amount;
+
+        if (p.recipient || p.amount) {
+          // Approved edit — send USDC directly to updated recipient
+          const USDC_ABI = ['function transfer(address to, uint256 amount) returns (bool)'];
+          const USDC_ADDR = process.env.REACT_APP_USDC_ADDR || '0x3600000000000000000000000000000000000000';
+          const usdc = new ethers.Contract(USDC_ADDR, USDC_ABI, wallet);
+          const tx = await usdc.transfer(recipient, amount, {
+            gasPrice: ethers.parseUnits('21', 'gwei'),
+            gasLimit: 100000
+          });
+          await tx.wait();
+        } else {
+          // No edits — normal on-chain execution
+          const tx = await contract.execute(p.payment_id, {
+            gasPrice: ethers.parseUnits('21', 'gwei'),
+            gasLimit: 100000
+          });
+          await tx.wait();
+        }
 
         await updateSupabase(SB_URL, SB_SERVICE_KEY, p.id, { executed: true });
         results.executed.push(p.payment_id);

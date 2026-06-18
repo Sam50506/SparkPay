@@ -45,6 +45,24 @@ export default async function handler(req, res) {
         await tx.wait();
       }
 
+      if (action === 'approve' && request_type === 'edit') {
+        const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=eq.${request_id}&select=*`, {
+          headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`}
+        });
+        const [editReq] = await reqRes.json();
+        const updates = {};
+        if (editReq.new_recipient) updates.recipient = editReq.new_recipient;
+        if (editReq.new_amount)    updates.amount = editReq.new_amount;
+        if (editReq.new_date)      updates.release_time = Math.floor(new Date(editReq.new_date).getTime() / 1000);
+        if (Object.keys(updates).length > 0) {
+          await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
+            method: 'PATCH',
+            headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json'},
+            body: JSON.stringify(updates)
+          });
+        }
+      }
+
       await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=eq.${request_id}`, {
         method: 'PATCH',
         headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json'},
