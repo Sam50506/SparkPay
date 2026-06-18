@@ -847,7 +847,14 @@ function AppInner() {
   },[address]);
   useEffect(()=>{if(tab==='history'&&signer){loadContractHistory();setTxPage(1);setTxSearch('');setTxFilter('all');setExpandedTx(null);}},[tab,signer,loadContractHistory]);useEffect(()=>{if(tab==='rewards'&&address){fetchMyClaims();}},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
 
-  const awardCashback=useCallback((txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;setCashbackPending(p=>parseFloat((p+amt).toFixed(3)));setCashbackHistory(prev=>[{amount:amt,txHash,ts:Date.now()},...prev.slice(0,49)]);setCashbackToastData({amount:amt.toFixed(3)});setShowCashbackToast(true);},[]);
+  const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;
+    try{
+      const r=await fetch('/api/cashback-award',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet_address:address,amount:amt,tx_hash:txHash})});
+      const d=await r.json();
+      if(d.success){setCashbackPending(d.newBalance);}
+    }catch(e){console.error('Cashback award failed:',e);}
+    setCashbackHistory(prev=>[{amount:amt,txHash,ts:Date.now()},...prev.slice(0,49)]);setCashbackToastData({amount:amt.toFixed(3)});setShowCashbackToast(true);
+  },[address]);
 
   const fetchMyClaims=async()=>{if(!address)return;setClaimsLoading(true);try{const rows=await sbSelect('cashback_claims','wallet_address=eq.'+address+'&order=timestamp.desc&limit=10');setMyClaimsHistory(rows||[]);if(rows&&rows.length>0&&rows[0].status==='paid'&&claimSubmitted===true){setClaimSubmitted('paid');setTimeout(()=>setClaimSubmitted(false),5000);}}catch(e){console.error(e);}setClaimsLoading(false);};
   const claimCashback=async()=>{const amt=parseFloat(claimAmt)||cashbackPending;if(cashbackPending<1||claimLoading||amt<1||amt>cashbackPending)return;setClaimLoading(true);try{await sbInsert('cashback_claims',{wallet_address:address,amount:amt,timestamp:new Date().toISOString(),status:'pending'});setClaimSubmitted(true);setCashbackPending(prev=>parseFloat((prev-amt).toFixed(3)));setStatus({type:'success',msg:'Cashback claim submitted. Your USDC will be sent to your wallet shortly.'});}catch(e){setStatus({type:'error',msg:'Claim failed: '+e.message});}setClaimLoading(false);};
