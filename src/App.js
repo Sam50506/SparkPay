@@ -909,7 +909,8 @@ const renderSchedule=()=>{
       setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
       setTimeout(refreshBal,4000);
     }catch(e){
-      let msg='Scheduling failed. Please try again.';
+      console.error('Schedule error full:', e);
+      let msg='Scheduling failed: '+(e?.reason||e?.shortMessage||e?.message||'Unknown error');
       if(e?.code===4001||e?.code==='ACTION_REJECTED')msg='Transaction cancelled.';
       else if(e?.message?.includes('Too early'))msg='Release time must be in the future.';
       else if(e?.message?.includes('insufficient'))msg='Insufficient balance to lock this amount.';
