@@ -341,8 +341,8 @@ function TimePicker({value, onChange}){
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:12}}>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>Hour</div>
-            <div style={{maxHeight:140,overflowY:'auto',display:'flex',flexDirection:'column',gap:2,scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch'}}>
-              {hours.map(h=><div key={h} onClick={()=>setTime(h,m,isPM)} style={{padding:'10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:h===h12?700:400,background:h===h12?'var(--acd)':'transparent',color:h===h12?'var(--ac)':'var(--tx1)',textAlign:'center',scrollSnapAlign:'start',flexShrink:0}}>{h}</div>)}
+            <div style={{height:156,overflowY:'scroll',display:'flex',flexDirection:'column',scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch',scrollBehavior:'smooth'}}>
+              {hours.map(h=><div key={h} onClick={()=>setTime(h,m,isPM)} style={{minHeight:52,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:8,cursor:'pointer',fontSize:16,fontWeight:h===h12?700:400,background:h===h12?'var(--acd)':'transparent',color:h===h12?'var(--ac)':'var(--tx1)',scrollSnapAlign:'start',flexShrink:0}}>{h}</div>)}
             </div>
           </div>
           <div>
