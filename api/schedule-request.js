@@ -72,8 +72,8 @@ export default async function handler(req, res) {
       await sendTelegram(`${action === 'approve' ? '✅ Approved' : '❌ Rejected'} request #${request_id} for payment #${payment_id}`);
       return res.json({success: true});
     } catch(e) {
-      console.error(e);
-      return res.status(500).json({error: e.message});
+      console.error('CANCEL ERROR:', e.message, e?.reason, e?.code);
+      return res.status(500).json({error: e.message, reason: e?.reason, code: e?.code});
     }
   }
 
