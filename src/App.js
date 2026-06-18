@@ -319,7 +319,7 @@ const OnboardingModal=({onDone})=>{
 function TimePicker({value, onChange}){
   const [open, setOpen] = React.useState(false);
   const hours = Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
-  const mins = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+  const mins = Array.from({length:60},(_,i)=>String(i).padStart(2,'0'));
   const parsed = value ? value.split(':') : ['12','00'];
   const h24 = parseInt(parsed[0]);
   const m = parsed[1]||'00';
