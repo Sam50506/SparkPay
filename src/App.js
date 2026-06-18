@@ -903,7 +903,8 @@ const renderSchedule=()=>{
       const amt=ethers.parseUnits(newSched.amount,18);
       const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
       setStatus({type:'info',msg:'Locking USDC in escrow...'});
-      const rpcs=[ARC_RPC,ARC_RPC_FALLBACK,ARC_RPC_FALLBACK2,ARC_RPC_FALLBACK3].filter(Boolean);let tx;for(const rpc of rpcs){try{const rp=new ethers.JsonRpcProvider(rpc,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const sc=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer.connect(rp));tx=await sc.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});break;}catch(er){if(rpcs.indexOf(rpc)===rpcs.length-1)throw er;}}
+      const sched2=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
+      let tx=await sched2.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
       await tx.wait();
       setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()});
       setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
