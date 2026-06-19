@@ -852,7 +852,7 @@ function AppInner() {
   const[payId,setPayId]=useState('');const[payDet,setPayDet]=useState(null);
   const[txns,setTxns]=useState([]);
   const[contractTxns,setContractTxns]=useState([]);
-  const[contacts,setContacts]=useState([]);const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('');const[editId,setEditId]=useState(null);
+  const[contacts,setContacts]=useState([]);const[contactsLoaded,setContactsLoaded]=useState(false);const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('');const[editId,setEditId]=useState(null);
   const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'',freq:'weekly',next:'',time:'09:00'});const[editSchedId,setEditSchedId]=useState(null);const[editSchedData,setEditSchedData]=useState(null);
   const[defCtry,setDefCtry]=useState(()=>ls('arc_ctry',''));
   const[cashbackPending,setCashbackPending]=useState(0);const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
@@ -864,7 +864,7 @@ function AppInner() {
   },[address]);
   const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[claimAmt,setClaimAmt]=useState('');const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);const[manageTxns,setManageTxns]=useState(false);const[rateSearch,setRateSearch]=useState('');const[manageContacts,setManageContacts]=useState(false);const[selectedContacts,setSelectedContacts]=useState([]);const[cSearch,setCSearch]=useState('');const[showAdd,setShowAdd]=useState(false);const[selectedTxns,setSelectedTxns]=useState([]);const[txSearch,setTxSearch]=useState('');const[txFilter,setTxFilter]=useState('all');const[txPage,setTxPage]=useState(1);const[expandedTx,setExpandedTx]=useState(null);const[pendingClaimsCount,setPendingClaimsCount]=useState(0);
 
-  useEffect(()=>{if(address)lsSave('arc_contacts_'+address,contacts);},[contacts,address]);
+  useEffect(()=>{if(address&&contactsLoaded)lsSave('arc_contacts_'+address,contacts);},[contacts,address,contactsLoaded]);
   useEffect(()=>lsSave('arc_scheds',scheds),[scheds]);
   useEffect(()=>{if(address){const cutoff=Math.floor(Date.now()/1000)-(30*24*60*60);const all=ls('arc_txhistory_'+address,[]);const recent=all.filter(t=>!t.timestamp||t.timestamp>cutoff);if(recent.length<all.length){lsSave('arc_txhistory_'+address,recent);setStatus({type:'info',msg:'Transactions older than 30 days have been removed to keep your app running smoothly.'});}setTxns(recent);}},[address]);
   useEffect(()=>{if(address)lsSave('arc_txhistory_'+address,txns);},[txns,address]);
@@ -882,7 +882,7 @@ function AppInner() {
   useEffect(()=>{if(!window.ethereum)return;const onAcc=a=>{if(!a.length){setTimeout(()=>{if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(accounts=>{if(!accounts.length)doDisconnect();})},1000);}else setAddress(a[0]);};const onChain=(chainId)=>{};window.ethereum.on('accountsChanged',onAcc);window.ethereum.on('chainChanged',onChain);return()=>{window.ethereum.removeListener('accountsChanged',onAcc);window.ethereum.removeListener('chainChanged',onChain);};},[doDisconnect]);
 
   const refreshBal=useCallback(async()=>{if(!address)return;try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const b=await rp.getBalance(address);setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));}catch{}},[address]);
-  useEffect(()=>{if(signer&&address){refreshBal();setContacts(ls('arc_contacts_'+address,[]));}},[signer,address,refreshBal]);
+  useEffect(()=>{if(signer&&address){refreshBal();setContacts(ls('arc_contacts_'+address,[]));setContactsLoaded(true);}},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
   const loadContractHistory=useCallback(async()=>{if(!address)return;try{const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+address+'&sort=desc');const d=await r.json();if(d.message!=='OK'||!d.result)return;const allExplorer=d.result.filter(t=>t.isError==='0'&&parseInt(t.value)>0).map(t=>{const isReceived=t.to.toLowerCase()===address.toLowerCase()&&t.from.toLowerCase()!==address.toLowerCase();return{hash:t.hash,recipient:isReceived?t.from:t.to,sender:t.from,amount:parseFloat(ethers.formatUnits(t.value,18)).toFixed(2),country:'',timestamp:parseInt(t.timeStamp),status:'confirmed',received:isReceived,type:isReceived?'received':'send'};});setContractTxns(allExplorer);}catch(e){console.log('explorer fetch failed:',e);}},[address]);// eslint-disable-line
