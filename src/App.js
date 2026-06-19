@@ -751,7 +751,6 @@ function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,payment
     }catch(e){alert(e.message||'Failed to submit request. Please try again.');}
     setLoading(false);
   };
-  };
 
   if(done)return(<div style={{marginTop:8,fontSize:12,color:'var(--cy)',fontWeight:600,padding:'8px 12px',background:'rgba(23,229,176,.08)',borderRadius:10,textAlign:'center'}}>Request submitted. We will review and get back to you shortly.</div>);
 
