@@ -38,6 +38,12 @@ export default async function handler(req, res) {
     try {
 
       if (action === 'approve' && request_type === 'cancel') {
+        const provider = new ethers.JsonRpcProvider(RPC, {name: 'Arc Testnet', chainId: 5042002});
+        const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+        const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
+        const tx = await contract.cancel(payment_id, {gasPrice: ethers.parseUnits('100', 'gwei'), gasLimit: 100000});
+        await tx.wait();
+
         await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
           method: 'PATCH',
           headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json'},
