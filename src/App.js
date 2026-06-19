@@ -1297,8 +1297,14 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
           </div>
           <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 14px'}} onClick={async()=>{
             const newVal=!maintenanceMode;
-            setMaintenanceMode(newVal);
-            await supabase.from('settings').update({value:String(newVal)}).eq('key','maintenance_mode');
+            try{
+              await fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode',{
+                method:'PATCH',
+                headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+                body:JSON.stringify({value:String(newVal)})
+              });
+              setMaintenanceMode(newVal);
+            }catch(e){alert('Failed to update maintenance mode: '+e.message);}
           }}>{maintenanceMode?'Turn Off':'Turn On'}</button>
         </div>
       </div>
