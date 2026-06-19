@@ -715,7 +715,7 @@ function WalletPicker({onPick,onClose}){
     </div>
   );
 }
-function NeedHelpMenu({paymentId,address,contractAddress}){
+function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,payment,onRefresh}){
   const[open,setOpen]=React.useState(false);
   const[step,setStep]=React.useState(null);
   const[reason,setReason]=React.useState('');
@@ -729,29 +729,28 @@ function NeedHelpMenu({paymentId,address,contractAddress}){
   const submit=async(type)=>{
     setLoading(true);
     try{
-      const r=await fetch('/api/schedule-request',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          payment_id:paymentId,
-          wallet_address:address,
-          request_type:type,
-          reason:reason||null,
-          new_recipient:newRecipient||null,
-          new_amount:newAmount||null,
-          new_date:newDate||null,
-          new_time:newTime||null,
-          contract_address:contractAddress,
-                                                     original_recipient:null,
-                                                     original_amount:null
-        })
-      });
-      if(!r.ok)throw new Error('Failed');
-      setDone(true);
-      setOpen(false);
-      setStep(null);
-    }catch(e){alert('Failed to submit request. Please try again.');}
+      if(type==='edit'){
+        const contract=new ethers.Contract(contractAddress,schedAbi,signer);
+        const cancelTx=await contract.cancel(paymentId,{gasPrice:ethers.parseUnits('100','gwei'),gasLimit:100000});
+        await cancelTx.wait();
+        const recipient=newRecipient||payment.recipient;
+        const amount=newAmount?ethers.parseUnits(newAmount,18):ethers.parseUnits(payment.amount.toString(),18);
+        const dateStr=newDate?(newTime?`${newDate}T${newTime}:00`:`${newDate}T00:00:00`):null;
+        const releaseTime=dateStr?Math.floor(new Date(dateStr).getTime()/1000):payment.releaseTime;
+        if(releaseTime<=Math.floor(Date.now()/1000))throw new Error('Release time must be in the future');
+        const scheduleTx=await contract.schedule(recipient,releaseTime,payment.country||'',{value:amount,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
+        await scheduleTx.wait();
+        await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:'edit',reason:'On-chain edit completed',new_recipient:recipient,new_amount:newAmount||null,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
+        setDone(true);setOpen(false);setStep(null);
+        if(onRefresh)onRefresh();
+      } else {
+        const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:newAmount||null,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
+        if(!r.ok)throw new Error('Failed');
+        setDone(true);setOpen(false);setStep(null);
+      }
+    }catch(e){alert(e.message||'Failed to submit request. Please try again.');}
     setLoading(false);
+  };
   };
 
   if(done)return(<div style={{marginTop:8,fontSize:12,color:'var(--cy)',fontWeight:600,padding:'8px 12px',background:'rgba(23,229,176,.08)',borderRadius:10,textAlign:'center'}}>Request submitted. We will review and get back to you shortly.</div>);
@@ -826,7 +825,7 @@ function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,
   const hasCancelApproved=p=>!!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'&&r.status==='approved'));
   const sc=p=>p.executed?{bg:'rgba(23,229,176,.1)',cl:'var(--cy)'}:(p.cancelled||hasCancelApproved(p))?{bg:'rgba(255,79,97,.1)',cl:'var(--re)'}:now>=p.releaseTime?{bg:'rgba(59,130,196,.15)',cl:'var(--ac)'}:{bg:'rgba(100,100,100,.08)',cl:'var(--tx3)'};
   const sl=p=>p.executed?'Released':p.cancelled?'Cancelled':hasCancelApproved(p)?'Cancellation Approved — Refund Pending':now>=p.releaseTime?'Processing Payment':'Scheduled';
-  return(<div className="ap-card"><ChangesModal/><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}><div><div className="ap-card-title" style={{marginBottom:2}}>Scheduled Payments</div><div style={{fontSize:12,color:'var(--tx3)'}}>{payments.filter(p=>!p.executed&&!p.cancelled&&!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'&&r.status==='approved'))).length} active</div></div><button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'5px 10px',marginTop:0}} onClick={fetchPayments}>{fetching?'Loading...':'Refresh'}</button></div>{fetching&&payments.length===0&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'20px 0',fontSize:13}}>Loading...</div>}{payments.map(p=>{const s=sc(p);return(<div key={p.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}><div style={{flex:1}}><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}><span style={{fontSize:16,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{parseFloat(p.amount).toFixed(2)}</span><span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>{p.country&&<span className="ap-cc">{p.country}</span>}</div><div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:6}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div><div style={{marginTop:6}}><span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:s.bg,color:s.cl}}>{sl(p)}</span>{!p.executed&&!p.cancelled&&!hasCancelApproved(p)&&now>=p.releaseTime&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:8,lineHeight:1.6}}>Your payment is being processed and will be delivered to the recipient within 60 minutes.</div>}{requests[p.id]&&requests[p.id].length>0&&<div style={{marginTop:8}}>{requests[p.id].slice(0,1).map((r,i)=>r.status==='approved'&&r.request_type==='cancel'?(<div key={i} style={{padding:'8px 12px',borderRadius:8,background:'rgba(23,229,176,.1)',marginBottom:4}}><span style={{fontSize:11,fontWeight:700,color:'var(--cy)'}}>✅ Admin approved your cancellation — USDC refunded to your wallet.</span></div>):(<div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 10px',borderRadius:8,background:r.status==='approved'?'rgba(23,229,176,.1)':r.status==='rejected'?'rgba(255,79,97,.1)':'rgba(240,196,63,.1)'}}><span style={{fontSize:11,fontWeight:700,color:r.status==='approved'?'var(--cy)':r.status==='rejected'?'var(--re)':'#f59e0b'}}>{r.request_type==='cancel'?'Cancel':'Edit'} Request: {r.status==='pending'?'Waiting for admin':r.status==='approved'?'Approved by admin':'Rejected by admin'}</span>{r.request_type==='edit'&&(r.new_recipient||r.new_amount||r.new_date||r.new_time)&&<button onClick={()=>setChangesModal(r)} style={{background:'none',border:'1px solid currentColor',borderRadius:6,padding:'2px 8px',fontSize:10,fontWeight:700,cursor:'pointer',color:r.status==='approved'?'var(--cy)':r.status==='rejected'?'var(--re)':'#f59e0b',whiteSpace:'nowrap',flexShrink:0}}>Check here</button>}</div>))}</div>}</div></div></div><div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 10px',background:'var(--card)',borderRadius:10,marginBottom:10}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style={{fontSize:11,color:'var(--tx2)',fontWeight:500}}>{new Date(p.releaseTime*1000).toLocaleString('en',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})}</span></div>{!p.executed&&!p.cancelled&&now<p.releaseTime&&<div style={{display:'flex',gap:8}}><button className="ap-btn ap-btn-danger" style={{flex:1,fontSize:12,padding:'10px 16px'}} onClick={()=>onCancel(p.id)} disabled={loading}>Cancel Payment</button></div>}{!p.executed&&!p.cancelled&&hasCancelApproved(p)&&<div style={{marginTop:8,fontSize:12,color:'var(--cy)',fontWeight:600,padding:'8px 12px',background:'rgba(23,229,176,.08)',borderRadius:10}}>✅ Cancellation approved! Your USDC has been refunded to your wallet. Please refresh your balance.</div>}{!p.executed&&!p.cancelled&&!hasCancelApproved(p)&&now>=p.releaseTime&&<NeedHelpMenu paymentId={p.id} address={address} contractAddress={schedAddr}/>}</div>);})}
+  return(<div className="ap-card"><ChangesModal/><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}><div><div className="ap-card-title" style={{marginBottom:2}}>Scheduled Payments</div><div style={{fontSize:12,color:'var(--tx3)'}}>{payments.filter(p=>!p.executed&&!p.cancelled&&!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'&&r.status==='approved'))).length} active</div></div><button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'5px 10px',marginTop:0}} onClick={fetchPayments}>{fetching?'Loading...':'Refresh'}</button></div>{fetching&&payments.length===0&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'20px 0',fontSize:13}}>Loading...</div>}{payments.map(p=>{const s=sc(p);return(<div key={p.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}><div style={{flex:1}}><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}><span style={{fontSize:16,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{parseFloat(p.amount).toFixed(2)}</span><span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>{p.country&&<span className="ap-cc">{p.country}</span>}</div><div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:6}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div><div style={{marginTop:6}}><span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:s.bg,color:s.cl}}>{sl(p)}</span>{!p.executed&&!p.cancelled&&!hasCancelApproved(p)&&now>=p.releaseTime&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:8,lineHeight:1.6}}>Your payment is being processed and will be delivered to the recipient within 60 minutes.</div>}{requests[p.id]&&requests[p.id].length>0&&<div style={{marginTop:8}}>{requests[p.id].slice(0,1).map((r,i)=>r.status==='approved'&&r.request_type==='cancel'?(<div key={i} style={{padding:'8px 12px',borderRadius:8,background:'rgba(23,229,176,.1)',marginBottom:4}}><span style={{fontSize:11,fontWeight:700,color:'var(--cy)'}}>✅ Admin approved your cancellation — USDC refunded to your wallet.</span></div>):(<div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 10px',borderRadius:8,background:r.status==='approved'?'rgba(23,229,176,.1)':r.status==='rejected'?'rgba(255,79,97,.1)':'rgba(240,196,63,.1)'}}><span style={{fontSize:11,fontWeight:700,color:r.status==='approved'?'var(--cy)':r.status==='rejected'?'var(--re)':'#f59e0b'}}>{r.request_type==='cancel'?'Cancel':'Edit'} Request: {r.status==='pending'?'Waiting for admin':r.status==='approved'?'Approved by admin':'Rejected by admin'}</span>{r.request_type==='edit'&&(r.new_recipient||r.new_amount||r.new_date||r.new_time)&&<button onClick={()=>setChangesModal(r)} style={{background:'none',border:'1px solid currentColor',borderRadius:6,padding:'2px 8px',fontSize:10,fontWeight:700,cursor:'pointer',color:r.status==='approved'?'var(--cy)':r.status==='rejected'?'var(--re)':'#f59e0b',whiteSpace:'nowrap',flexShrink:0}}>Check here</button>}</div>))}</div>}</div></div></div><div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 10px',background:'var(--card)',borderRadius:10,marginBottom:10}}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span style={{fontSize:11,color:'var(--tx2)',fontWeight:500}}>{new Date(p.releaseTime*1000).toLocaleString('en',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true})}</span></div>{!p.executed&&!p.cancelled&&now<p.releaseTime&&<div style={{display:'flex',gap:8}}><button className="ap-btn ap-btn-danger" style={{flex:1,fontSize:12,padding:'10px 16px'}} onClick={()=>onCancel(p.id)} disabled={loading}>Cancel Payment</button></div>}{!p.executed&&!p.cancelled&&hasCancelApproved(p)&&<div style={{marginTop:8,fontSize:12,color:'var(--cy)',fontWeight:600,padding:'8px 12px',background:'rgba(23,229,176,.08)',borderRadius:10}}>✅ Cancellation approved! Your USDC has been refunded to your wallet. Please refresh your balance.</div>}{!p.executed&&!p.cancelled&&!hasCancelApproved(p)&&now>=p.releaseTime&&<NeedHelpMenu paymentId={p.id} address={address} contractAddress={schedAddr} signer={signer} schedAbi={schedAbi} payment={p} onRefresh={fetchPayments}/>}</div>);})}
   </div>);
 }
 
