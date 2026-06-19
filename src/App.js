@@ -363,7 +363,6 @@ function TimePicker({value, onChange}){
               {['AM','PM'].map(p=><div key={p} onClick={()=>setTime(h12,m,p==='PM')} style={{padding:'6px 10px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:(p==='PM')===isPM?700:400,background:(p==='PM')===isPM?'var(--acd)':'transparent',color:(p==='PM')===isPM?'var(--ac)':'var(--tx1)',textAlign:'center'}}>{p}</div>)}
             </div>
           </div>
-        </div>
         <button className="ap-btn ap-btn-primary" style={{width:'100%',fontSize:13,padding:'9px 0'}} onClick={()=>setOpen(false)}>Confirm</button>
       </div>}
     </div>
