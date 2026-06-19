@@ -895,25 +895,40 @@ function AppInner() {
         allExplorer.push({hash:t.hash,recipient:isReceived?t.from:t.to,sender:t.from,amount:parseFloat(ethers.formatUnits(t.value,18)).toFixed(2),country:'',timestamp:parseInt(t.timeStamp),status:'confirmed',received:isReceived,type:isReceived?'received':'send'});
       });
     }
-    // Fetch scheduled payment events
+    // Fetch scheduled payment events using block explorer for real timestamps
     try{
+      const schedTxsResp=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+SCHED_ADDR+'&sort=desc');
+      const schedTxsData=await schedTxsResp.json();
+      const schedTxs=schedTxsData.message==='OK'?schedTxsData.result||[]:[];
       const schedContract=new ethers.Contract(SCHED_ADDR,['function paymentCount() view returns (uint256)','function getPayment(uint256) view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'],provider);
       const count=Number(await schedContract.paymentCount());
+      const seenHashes=new Set(allExplorer.map(t=>t.hash));
       for(let i=count-1;i>=0;i--){
         const p=await schedContract.getPayment(i);
+        const amt=parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2);
         if(p.sender.toLowerCase()===address.toLowerCase()){
-          const amt=parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2);
           if(p.executed){
-            allExplorer.push({hash:'sched_exec_'+i,recipient:p.recipient,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',type:'scheduled',label:'Scheduled Payment',sortTime:Number(p.releaseTime)});
+            const execTx=schedTxs.find(t=>t.from.toLowerCase()!==address.toLowerCase()&&t.isError==='0');
+            const execTs=execTx?parseInt(execTx.timeStamp):Number(p.releaseTime);
+            if(!seenHashes.has('sched_exec_'+i)){
+              allExplorer.push({hash:'sched_exec_'+i,recipient:p.recipient,sender:address,amount:amt,country:p.country,timestamp:execTs,status:'confirmed',type:'scheduled',label:'Scheduled Payment'});
+              seenHashes.add('sched_exec_'+i);
+            }
           }
           if(p.cancelled){
-            if(!txns.find(t=>t.hash==='sched_refund_'+i)){
-              allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',received:true,type:'refund',label:'Refund',sortTime:Number(p.releaseTime)});
+            if(!seenHashes.has('sched_refund_'+i)){
+              const cancelTx=schedTxs.find(t=>t.from.toLowerCase()===address.toLowerCase()&&t.isError==='0'&&parseInt(t.value)===0);
+              const cancelTs=cancelTx?parseInt(cancelTx.timeStamp):Math.floor(Date.now()/1000);
+              allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:cancelTs,status:'confirmed',received:true,type:'refund',label:'Refund'});
+              seenHashes.add('sched_refund_'+i);
             }
           }
         }
         if(p.recipient.toLowerCase()===address.toLowerCase()&&p.executed){
-          allExplorer.push({hash:'sched_recv_'+i,recipient:address,sender:p.sender,amount:parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2),country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',received:true,type:'scheduled_received',label:'Scheduled Payment Received'});
+          if(!seenHashes.has('sched_recv_'+i)){
+            allExplorer.push({hash:'sched_recv_'+i,recipient:address,sender:p.sender,amount:parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2),country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',received:true,type:'scheduled_received',label:'Scheduled Payment Received'});
+            seenHashes.add('sched_recv_'+i);
+          }
         }
       }
     }catch(e){console.log('sched events error:',e);}
