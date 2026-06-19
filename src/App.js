@@ -741,7 +741,7 @@ function NeedHelpMenu({paymentId,address,contractAddress}){
           new_amount:newAmount||null,
           new_date:newDate||null,
           new_time:newTime||null,
-          contract_address:contractAddress
+          contract_address:contractAddress,
                                                      original_recipient:originalRecipient||null,
                                                      original_amount:originalAmount||null
         })
