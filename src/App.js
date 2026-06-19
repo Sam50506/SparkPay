@@ -885,7 +885,38 @@ function AppInner() {
   useEffect(()=>{if(signer&&address){refreshBal();setContacts(ls('arc_contacts_'+address,[]));setContactsLoaded(true);}},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
-  const loadContractHistory=useCallback(async()=>{if(!address)return;try{const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+address+'&sort=desc');const d=await r.json();if(d.message!=='OK'||!d.result)return;const allExplorer=d.result.filter(t=>t.isError==='0'&&parseInt(t.value)>0).map(t=>{const isReceived=t.to.toLowerCase()===address.toLowerCase()&&t.from.toLowerCase()!==address.toLowerCase();return{hash:t.hash,recipient:isReceived?t.from:t.to,sender:t.from,amount:parseFloat(ethers.formatUnits(t.value,18)).toFixed(2),country:'',timestamp:parseInt(t.timeStamp),status:'confirmed',received:isReceived,type:isReceived?'received':'send'};});setContractTxns(allExplorer);}catch(e){console.log('explorer fetch failed:',e);}},[address]);// eslint-disable-line
+  const loadContractHistory=useCallback(async()=>{if(!address)return;try{
+    const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+address+'&sort=desc');
+    const d=await r.json();
+    const allExplorer=[];
+    if(d.message==='OK'&&d.result){
+      d.result.filter(t=>t.isError==='0'&&parseInt(t.value)>0).forEach(t=>{
+        const isReceived=t.to.toLowerCase()===address.toLowerCase()&&t.from.toLowerCase()!==address.toLowerCase();
+        allExplorer.push({hash:t.hash,recipient:isReceived?t.from:t.to,sender:t.from,amount:parseFloat(ethers.formatUnits(t.value,18)).toFixed(2),country:'',timestamp:parseInt(t.timeStamp),status:'confirmed',received:isReceived,type:isReceived?'received':'send'});
+      });
+    }
+    // Fetch scheduled payment events
+    try{
+      const schedContract=new ethers.Contract(SCHED_ADDR,['function paymentCount() view returns (uint256)','function getPayment(uint256) view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'],provider);
+      const count=Number(await schedContract.paymentCount());
+      for(let i=count-1;i>=0;i--){
+        const p=await schedContract.getPayment(i);
+        if(p.sender.toLowerCase()===address.toLowerCase()){
+          const amt=parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2);
+          if(p.executed){
+            allExplorer.push({hash:'sched_exec_'+i,recipient:p.recipient,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',type:'scheduled',label:'Scheduled Payment'});
+          }
+          if(p.cancelled){
+            allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',received:true,type:'refund',label:'Refund (Cancelled Schedule)'});
+          }
+        }
+        if(p.recipient.toLowerCase()===address.toLowerCase()&&p.executed){
+          allExplorer.push({hash:'sched_recv_'+i,recipient:address,sender:p.sender,amount:parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2),country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',received:true,type:'scheduled_received',label:'Scheduled Payment Received'});
+        }
+      }
+    }catch(e){console.log('sched events error:',e);}
+    setContractTxns(allExplorer);
+  }catch(e){console.log('explorer fetch failed:',e);}},[address]);// eslint-disable-line
   const refreshPendingTxns=useCallback(async()=>{
     try{
       const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
@@ -907,7 +938,7 @@ function AppInner() {
       setTxns(updated);
     }catch(_){}
   },[address]);
-  useEffect(()=>{if(tab==='history'&&signer){loadContractHistory();setTxPage(1);setTxSearch('');setTxFilter('all');setExpandedTx(null);}if(signer&&address){(async()=>{try{const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer.provider||provider);const scheduledTxns=txns.filter(t=>t.type==='scheduled'&&t.status==='scheduled');for(const st of scheduledTxns){const idMatch=st.id&&st.id.includes('_sched')?null:null;}const count=Number(await sched.paymentCount());const onChainMap={};for(let i=0;i<count;i++){const p=await sched.getPayment(i);if(p.sender.toLowerCase()===address.toLowerCase()){onChainMap[i]=p;}}setTxns(prev=>{let changed=false;const updated=prev.map(t=>{if(t.type==='scheduled'&&t.status==='scheduled'){const match=Object.entries(onChainMap).find(([id,p])=>p.recipient.toLowerCase()===t.recipient.toLowerCase()&&Math.abs(parseFloat(ethers.formatUnits(p.amount,18))-parseFloat(t.amount))<0.001&&Number(p.releaseTime)===Number(t.releaseTime||t.timestamp));if(match){const[,p]=match;if(p.executed){changed=true;return{...t,status:'confirmed'};}if(p.cancelled){changed=true;return{...t,status:'cancelled'};}}}return t;});if(changed)lsSave('arc_txhistory_'+address,updated);return changed?updated:prev;});}catch(e){console.log('sync error',e);}})();}},[signer,address]);useEffect(()=>{if(tab==='rewards'&&address){fetchMyClaims();}},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
+  useEffect(()=>{if(tab==='history'&&signer){loadContractHistory();setTxPage(1);setTxSearch('');setTxFilter('all');setExpandedTx(null);}if(signer&&address){(async()=>{try{const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer.provider||provider);const scheduledTxns=txns.filter(t=>t.type==='scheduled'&&t.status==='scheduled');for(const st of scheduledTxns){const idMatch=st.id&&st.id.includes('_sched')?null:null;}const count=Number(await sched.paymentCount());const onChainMap={};for(let i=0;i<count;i++){const p=await sched.getPayment(i);if(p.sender.toLowerCase()===address.toLowerCase()){onChainMap[i]=p;}}setTxns(prev=>{let changed=false;const updated=prev.map(t=>{if(t.type==='scheduled'&&t.status==='scheduled'){const match=Object.entries(onChainMap).find(([id,p])=>p.recipient.toLowerCase()===t.recipient.toLowerCase()&&Math.abs(parseFloat(ethers.formatUnits(p.amount,18))-parseFloat(t.amount))<0.001&&Number(p.releaseTime)===Number(t.releaseTime||t.timestamp));if(match){const[,p]=match;if(p.executed){changed=true;return{...t,status:'confirmed'};}if(p.cancelled){changed=true;return{...t,status:'cancelled'};}}}return t;});if(changed)lsSave('arc_txhistory_'+address,updated);return changed?updated:prev;});}catch(e){console.log('sync error',e);}})();}},[tab,signer,address]);useEffect(()=>{if(tab==='rewards'&&address){fetchMyClaims();}},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
 
   const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;
     try{
