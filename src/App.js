@@ -1082,8 +1082,11 @@ const renderSchedule=()=>{
     setLoading(true);
     try{
       const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
+      const payment=await sched.getPayment(id);
       const tx=await sched.cancel(id);
       await tx.wait();
+      const refundRec={id:tx.hash+'_refund',hash:tx.hash,recipient:address,amount:parseFloat(ethers.formatUnits(payment.amount,18)),country:payment.country||'',timestamp:Math.floor(Date.now()/1000),status:'confirmed',type:'refund',received:true};
+      setTxns(prev=>{const updatedOld=prev.map(t=>t.type==='scheduled'&&t.recipient===payment.recipient&&Math.abs(parseFloat(t.amount)-parseFloat(ethers.formatUnits(payment.amount,18)))<0.001&&t.status==='scheduled'?{...t,status:'cancelled'}:t);const u=[refundRec,...updatedOld.slice(0,499)];lsSave('arc_txhistory_'+address,u);return u;});
       setStatus({type:'success',msg:'Cancelled. USDC refunded to your wallet.'});
       setTimeout(refreshBal,4000);
     }catch(e){setStatus({type:'error',msg:cleanErr(e)});}
