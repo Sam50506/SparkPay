@@ -743,6 +743,8 @@ function NeedHelpMenu({paymentId,address,contractAddress}){
           new_date:newDate||null,
           new_time:newTime||null,
           contract_address:contractAddress
+                                                     original_recipient:originalRecipient||null,
+                                                     original_amount:originalAmount||null
         })
       });
       if(!r.ok)throw new Error('Failed');
@@ -797,7 +799,7 @@ function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,
   const[fetching,setFetching]=React.useState(false);
   const[blockTime,setBlockTime]=React.useState(Math.floor(Date.now()/1000));
   const[requests,setRequests]=React.useState({});
-  const[changesModal,setChangesModal]=React.useState(null);React.useEffect(()=>{if(!address)return;fetch(SB_URL+'/rest/v1/scheduled_payment_requests?wallet_address=eq.'+address+'&contract_address=eq.'+SCHED_ADDR+'&order=created_at.desc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(r=>r.json()).then(d=>{const map={};(d||[]).forEach(r=>{if(!map[r.payment_id])map[r.payment_id]=[];map[r.payment_id].push(r);});setRequests(map);}).catch(()=>{});},[address]);
+  const[changesModal,setChangesModal]=React.useState(null);const fetchRequests=React.useCallback(()=>{if(!address)return;fetch(SB_URL+'/rest/v1/scheduled_payment_requests?wallet_address=eq.'+address+'&contract_address=eq.'+SCHED_ADDR+'&order=created_at.desc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(r=>r.json()).then(d=>{const map={};(d||[]).forEach(r=>{if(!map[r.payment_id])map[r.payment_id]=[];map[r.payment_id].push(r);});setRequests(map);}).catch(()=>{});},[address]);React.useEffect(()=>{fetchRequests();const t=setInterval(fetchRequests,15000);return()=>clearInterval(t);},[fetchRequests]);
   const fetchPayments=React.useCallback(async()=>{
     if(!address||!provider)return;
     setFetching(true);
