@@ -917,7 +917,7 @@ function AppInner() {
           }
           if(p.cancelled){
             if(!seenHashes.has('sched_refund_'+i)){
-              const cancelTx=schedTxs.find(t=>t.from.toLowerCase()===address.toLowerCase()&&t.isError==='0'&&parseInt(t.value)===0);
+              const cancelTx=schedTxs.filter(t=>t.from.toLowerCase()===address.toLowerCase()&&t.isError==='0'&&parseInt(t.value)===0).sort((a,b)=>parseInt(b.timeStamp)-parseInt(a.timeStamp))[0];
               const cancelTs=cancelTx?parseInt(cancelTx.timeStamp):Math.floor(Date.now()/1000);
               allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:cancelTs,status:'confirmed',received:true,type:'refund',label:'Refund'});
               seenHashes.add('sched_refund_'+i);
@@ -1133,8 +1133,7 @@ const renderSchedule=()=>{
       const payment=await sched.getPayment(id);
       const tx=await sched.cancel(id);
       await tx.wait();
-      const refundRec={id:tx.hash+'_refund',hash:tx.hash,recipient:address,amount:parseFloat(ethers.formatUnits(payment.amount,18)),country:payment.country||'',timestamp:Math.floor(Date.now()/1000),status:'confirmed',type:'refund',received:true};
-      setTxns(prev=>{const updatedOld=prev.map(t=>t.type==='scheduled'&&t.recipient===payment.recipient&&Math.abs(parseFloat(t.amount)-parseFloat(ethers.formatUnits(payment.amount,18)))<0.001&&t.status==='scheduled'?{...t,status:'cancelled'}:t);const u=[refundRec,...updatedOld.slice(0,499)];lsSave('arc_txhistory_'+address,u);return u;});
+      setTxns(prev=>{const updatedOld=prev.map(t=>t.type==='scheduled'&&t.recipient===payment.recipient&&Math.abs(parseFloat(t.amount)-parseFloat(ethers.formatUnits(payment.amount,18)))<0.001&&t.status==='scheduled'?{...t,status:'cancelled'}:t);lsSave('arc_txhistory_'+address,updatedOld);return updatedOld;});
       setStatus({type:'success',msg:'Cancelled. USDC refunded to your wallet.'});
       setTimeout(refreshBal,4000);
     }catch(e){setStatus({type:'error',msg:cleanErr(e)});}
