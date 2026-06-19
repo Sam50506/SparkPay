@@ -44,7 +44,6 @@ export default async function handler(req, res) {
           body: JSON.stringify({cancelled: true})
         });
       }
-      }
 
       if (action === 'approve' && request_type === 'edit') {
         const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=eq.${request_id}&select=*`, {
