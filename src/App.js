@@ -917,7 +917,7 @@ function AppInner() {
           }
           if(p.cancelled){
             if(!seenHashes.has('sched_refund_'+i)){
-              const cancelTx=schedTxs.filter(t=>t.from.toLowerCase()===address.toLowerCase()&&t.isError==='0'&&parseInt(t.value)===0).sort((a,b)=>parseInt(b.timeStamp)-parseInt(a.timeStamp))[0];
+              const cancelTx=schedTxs.filter(t=>t.from.toLowerCase()===address.toLowerCase()&&t.isError==='0'&&parseInt(t.value)===0&&parseInt(t.timeStamp)>Number(p.releaseTime)-86400).sort((a,b)=>parseInt(b.timeStamp)-parseInt(a.timeStamp))[0];
               const cancelTs=cancelTx?parseInt(cancelTx.timeStamp):Math.floor(Date.now()/1000);
               allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:cancelTs,status:'confirmed',received:true,type:'refund',label:'Refund'});
               seenHashes.add('sched_refund_'+i);
@@ -932,7 +932,7 @@ function AppInner() {
         }
       }
     }catch(e){console.log('sched events error:',e);}
-    setContractTxns(allExplorer);
+    const deletedHashes=new Set(ls('arc_deleted_hashes_'+address,[]));setContractTxns(allExplorer.filter(t=>!deletedHashes.has(t.hash)));
   }catch(e){console.log('explorer fetch failed:',e);}},[address]);// eslint-disable-line
   const refreshPendingTxns=useCallback(async()=>{
     try{
