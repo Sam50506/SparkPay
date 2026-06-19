@@ -1,7 +1,7 @@
 const { ethers } = require("ethers");
 
 const RPC = "https://rpc.testnet.arc.network";
-const SCHED_ADDR = "0x13474Fe73628949236DA25D38b7207ecEC0E6058";
+const SCHED_ADDR = "0x1Eb2088f3FE2bD64Dde3c770f87a5047f99b8946";
 const PRIVATE_KEY = process.env.KEEPER_PRIVATE_KEY;
 
 const SCHED_ABI = [
@@ -26,6 +26,32 @@ async function main() {
       const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
       await tx.wait();
       console.log("Done: " + tx.hash);
+
+        try {
+          const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
+          if (sendAmount >= 5) {
+            const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
+            const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+            const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+            const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${p.sender}&select=*`, {
+              headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+            });
+            const rows = await getRes.json();
+            const current = rows[0]?.pending_amount || 0;
+            const newBalance = parseFloat((parseFloat(current) + cashbackAmt).toFixed(3));
+            await fetch(`${SB_URL}/rest/v1/cashback_balances`, {
+              method: 'POST',
+              headers: {
+                'apikey': SB_KEY,
+                'Authorization': `Bearer ${SB_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+              },
+              body: JSON.stringify({ wallet_address: p.sender, pending_amount: newBalance, updated_at: new Date().toISOString() })
+            });
+            console.log("Cashback awarded: " + cashbackAmt + " to " + p.sender);
+          }
+        } catch (ce) { console.error("Cashback failed:", ce.message); }
     }
   }
   console.log("Keeper finished");
