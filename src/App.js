@@ -904,10 +904,12 @@ function AppInner() {
         if(p.sender.toLowerCase()===address.toLowerCase()){
           const amt=parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2);
           if(p.executed){
-            allExplorer.push({hash:'sched_exec_'+i,recipient:p.recipient,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',type:'scheduled',label:'Scheduled Payment'});
+            allExplorer.push({hash:'sched_exec_'+i,recipient:p.recipient,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',type:'scheduled',label:'Scheduled Payment',sortTime:Number(p.releaseTime)});
           }
           if(p.cancelled){
-            allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:Math.floor(Date.now()/1000),status:'confirmed',received:true,type:'refund',label:'Refund'});
+            if(!txns.find(t=>t.hash==='sched_refund_'+i)){
+              allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:Number(p.releaseTime),status:'confirmed',received:true,type:'refund',label:'Refund',sortTime:Number(p.releaseTime)});
+            }
           }
         }
         if(p.recipient.toLowerCase()===address.toLowerCase()&&p.executed){
@@ -981,7 +983,7 @@ function AppInner() {
 
   const exportCSV=()=>{const rows=[['Type','Hash','Recipient','Amount (USDC)','Country','Date','Status'],...txns.map(t=>['Send',t.hash||'',t.recipient||'',t.amount||'',t.country||'',fmtDate(t.timestamp),t.status||'']),...ls('arc_invoices',[]).map(i=>['Invoice',i.id||'',i.payer||'',i.amount||'',i.country||'',fmtDate(i.ts),i.paid?'Paid':'Unpaid']),...scheds.map(s=>['Scheduled','',s.addr||'',s.amount||'',s.country||'',s.next||'',s.freq||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sparkpay-history.csv';a.click();URL.revokeObjectURL(url);};
 
-  const schedHashes=new Set(contractTxns.filter(r=>r.type==='scheduled'||r.type==='refund'||r.type==='scheduled_received').map(r=>r.hash));const allTxns=[...txns.filter(t=>!(t.type==='scheduled'&&contractTxns.some(c=>c.type==='scheduled'&&c.recipient.toLowerCase()===(t.recipient||'').toLowerCase()&&Math.abs(parseFloat(c.amount)-parseFloat(t.amount))<0.01))),...contractTxns.filter(r=>!txns.find(l=>l.hash===r.hash))].sort((a,b)=>Number(b.timestamp||0)-Number(a.timestamp||0));
+  const schedHashes=new Set(contractTxns.filter(r=>r.type==='scheduled'||r.type==='refund'||r.type==='scheduled_received').map(r=>r.hash));const allTxns=[...txns.filter(t=>!(t.type==='scheduled'&&contractTxns.some(c=>c.type==='scheduled'&&c.recipient.toLowerCase()===(t.recipient||'').toLowerCase()&&Math.abs(parseFloat(c.amount)-parseFloat(t.amount))<0.01))),...contractTxns.filter(r=>!txns.find(l=>l.hash===r.hash))].sort((a,b)=>Number(b.sortTime||b.timestamp||0)-Number(a.sortTime||a.timestamp||0));
   const chartData=buildChart(allTxns);const totalSent=allTxns.filter(t=>!t.received&&t.type!=='refund'&&t.status!=='scheduled').reduce((s,t)=>{const n=typeof t.amount==='bigint'||typeof t.amount==='object'?parseFloat(ethers.formatUnits(BigInt(t.amount.toString()),18)):parseFloat(t.amount);const v=isNaN(n)?0:n;return s+(v<0?0:v);},0);
   const hasPendingTx=txns.some(t=>t.status==='pending'||t.status==='submitted');
   const recentRecipients=[...new Set(txns.filter(t=>t.recipient&&!t.hash?.startsWith('0xdemo')).map(t=>t.recipient))].slice(0,5);
