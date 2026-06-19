@@ -38,11 +38,12 @@ export default async function handler(req, res) {
     try {
 
       if (action === 'approve' && request_type === 'cancel') {
-        const provider = new ethers.JsonRpcProvider(RPC, {name: 'Arc Testnet', chainId: 5042002});
-        const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-        const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
-        const tx = await contract.cancel(payment_id, {gasPrice: ethers.parseUnits('21', 'gwei')});
-        await tx.wait();
+        await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
+          method: 'PATCH',
+          headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json'},
+          body: JSON.stringify({cancelled: true})
+        });
+      }
       }
 
       if (action === 'approve' && request_type === 'edit') {
@@ -53,7 +54,10 @@ export default async function handler(req, res) {
         const updates = {};
         if (editReq.new_recipient) updates.recipient = editReq.new_recipient;
         if (editReq.new_amount)    updates.amount = editReq.new_amount;
-        if (editReq.new_date)      updates.release_time = Math.floor(new Date(editReq.new_date).getTime() / 1000);
+        if (editReq.new_date) {
+  const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T00:00:00`;
+  updates.release_time = Math.floor(new Date(dateStr).getTime() / 1000);
+}
         if (Object.keys(updates).length > 0) {
           await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
             method: 'PATCH',
