@@ -742,8 +742,8 @@ function NeedHelpMenu({paymentId,address,contractAddress}){
           new_date:newDate||null,
           new_time:newTime||null,
           contract_address:contractAddress,
-                                                     original_recipient:originalRecipient||null,
-                                                     original_amount:originalAmount||null
+                                                     original_recipient:null,
+                                                     original_amount:null
         })
       });
       if(!r.ok)throw new Error('Failed');
