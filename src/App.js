@@ -1575,9 +1575,14 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         </div>
       </div>
 
-      <div className="ap-card" style={{marginBottom:24}}>
-        <div className="ap-card-title">Cashback Payouts</div>
-        <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>Pending claims: {loading?'...':stats.pendingClaims}</div>
+      <div className="ap-card" style={{marginBottom:16}}>
+        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:14}}>
+          <div>
+            <div className="ap-card-title">Cashback Payouts</div>
+            <div style={{fontSize:12,color:'var(--tx3)',marginTop:4}}>{loading?'Loading...':stats.pendingClaims+' pending claim'+(stats.pendingClaims===1?'':'s')}</div>
+          </div>
+          {stats.pendingClaims>0&&<div style={{width:8,height:8,borderRadius:999,background:'#f59e0b',marginTop:6}}/>}
+        </div>
         <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={async()=>{
           const token=sessionStorage.getItem('sp_admin_jwt');
           if(!token){alert('Session expired. Please re-verify with passkey.');window.location.reload();return;}
@@ -1589,16 +1594,25 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         }}>Process Pending Payouts</button>
       </div>
 
-      <div className="ap-card" style={{marginBottom:24}}>
-        <div className="ap-card-title">Scheduled Payment Requests</div>
+      <div className="ap-card" style={{marginBottom:32}}>
+        <div className="ap-card-title" style={{marginBottom:14}}>Scheduled Payment Requests</div>
         <ScheduledRequests/>
       </div>
 
-      <div className="ap-card" style={{marginBottom:24}}>
-        <div className="ap-card-title">Quick Links</div>
-        <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:12}}>
-          <a href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{fontSize:13,color:'var(--ac)'}}>View Admin Wallet on Explorer</a>
-          <a href="#" onClick={(e)=>{e.preventDefault();sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();}} style={{fontSize:13,color:'var(--ac)'}}>Sign Out & Back to App</a>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Resources</div>
+      <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,overflow:'hidden'}}>
+        <a href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:'1px solid var(--b0)'}}>
+          <div style={{width:30,height:30,borderRadius:8,background:'var(--elev)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx2)" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </div>
+          <div style={{flex:1,fontSize:13,fontWeight:600,color:'var(--tx1)'}}>View Admin Wallet on Explorer</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <div onClick={()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();}} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',cursor:'pointer'}}>
+          <div style={{width:30,height:30,borderRadius:8,background:'rgba(239,68,68,0.1)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </div>
+          <div style={{flex:1,fontSize:13,fontWeight:600,color:'#ef4444'}}>Sign Out</div>
         </div>
       </div>
     </div>
