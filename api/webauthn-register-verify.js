@@ -32,14 +32,15 @@ export default async function handler(req, res) {
 
     if (!verification.verified) return res.status(400).json({ error: 'Verification failed' });
 
-    const { credentialID, credentialPublicKey, counter } = verification.registrationInfo;
+    const { credential } = verification.registrationInfo;
+    const { id: credentialID, publicKey: credentialPublicKey, counter } = credential;
 
     await fetch(`${SB_URL}/rest/v1/webauthn_credentials`, {
       method: 'POST',
       headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
       body: JSON.stringify({
         admin_address: ADMIN_ADDRESS,
-        credential_id: Buffer.from(credentialID).toString('base64url'),
+        credential_id: credentialID,
         public_key: Buffer.from(credentialPublicKey).toString('base64url'),
         counter
       })

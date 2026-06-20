@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     rpID,
     userVerification: 'required',
     allowCredentials: creds.map(c => ({
-      id: Buffer.from(c.credential_id, 'base64url'),
+      id: c.credential_id,
       type: 'public-key'
     }))
   });

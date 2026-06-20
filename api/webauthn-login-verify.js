@@ -36,9 +36,9 @@ export default async function handler(req, res) {
       expectedChallenge,
       expectedOrigin: origin,
       expectedRPID: rpID,
-      authenticator: {
-        credentialID: Buffer.from(cred.credential_id, 'base64url'),
-        credentialPublicKey: Buffer.from(cred.public_key, 'base64url'),
+      credential: {
+        id: cred.credential_id,
+        publicKey: Buffer.from(cred.public_key, 'base64url'),
         counter: cred.counter
       }
     });
