@@ -1280,15 +1280,17 @@ function ScheduledRequests(){
       } else {
         alert(status==='approved'?'Approved successfully!':'Rejected successfully.');
       }}catch(e){alert('Failed: '+e.message);}};
+  const[showAll,setShowAll]=React.useState(false);
   React.useEffect(()=>{fetchRequests();},[]);
   if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
   if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
+  const visible=showAll?requests:requests.slice(0,5);
   return(<div>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
       <div style={{fontSize:12,color:'var(--tx3)'}}>{requests.filter(r=>r.status==='pending').length} pending</div>
       <button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'4px 10px',marginTop:0}} onClick={fetchRequests}>Refresh</button>
     </div>
-    {requests.map(r=>(<div key={r.id} style={{padding:'14px 0',borderBottom:'1px solid var(--b0)'}}>
+    {visible.map(r=>(<div key={r.id} style={{padding:'14px 0',borderBottom:'1px solid var(--b0)'}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
         <div>
           <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
@@ -1306,6 +1308,7 @@ function ScheduledRequests(){
         <button className="ap-btn ap-btn-danger" style={{fontSize:11,padding:'6px 12px'}} onClick={()=>updateStatus(r.id,'rejected',r.request_type,r.payment_id)}>Reject</button>
       </div>}
     </div>))}
+    {requests.length>5&&<button onClick={()=>setShowAll(s=>!s)} style={{width:'100%',marginTop:8,padding:'10px',background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:10,color:'var(--ac)',fontSize:13,fontWeight:600,cursor:'pointer'}}>{showAll?'Show less':'Show all ('+requests.length+')'}</button>}
   </div>);
 }
 
