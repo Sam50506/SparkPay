@@ -1325,8 +1325,9 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode&select=value',{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
     }).then(r=>r.json()).then(d=>{
+      alert('DEBUG: '+JSON.stringify(d));
       if(d&&d[0])setMaintenanceMode(d[0].value==='true');
-    }).catch(()=>{});
+    }).catch((e)=>{alert('DEBUG ERROR: '+e.message);});
   },[]);
   const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
   const[loading,setLoading]=useState(true);
