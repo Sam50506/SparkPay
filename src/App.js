@@ -1646,8 +1646,8 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         </div>
       </div>
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Operations</div>
-      <div className="ap-card" style={{marginBottom:16}}>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Site Control</div>
+      <div className="ap-card" style={{marginBottom:32}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div>
             <div className="ap-card-title">Maintenance Mode</div>
@@ -1673,6 +1673,7 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         </div>
       </div>
 
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Payment Operations</div>
       <div className="ap-card" style={{marginBottom:16}}>
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:14}}>
           <div>
@@ -1692,17 +1693,19 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         }}>Process Pending Payouts</button>
       </div>
 
-      <div className="ap-card" style={{marginBottom:16}}>
+      <div className="ap-card" style={{marginBottom:32}}>
         <div className="ap-card-title" style={{marginBottom:4}}>Manual Execute</div>
         <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Force-execute a scheduled payment if the cron/keeper bot fails.</div>
         <ManualExecute/>
       </div>
 
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Requests</div>
       <div className="ap-card" style={{marginBottom:32}}>
         <div className="ap-card-title" style={{marginBottom:14}}>Scheduled Payment Requests</div>
         <ScheduledRequests/>
       </div>
 
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Monitoring</div>
       <div className="ap-card" style={{marginBottom:32}}>
         <div className="ap-card-title" style={{marginBottom:14}}>Failed Transactions</div>
         <FailedTxns/>
