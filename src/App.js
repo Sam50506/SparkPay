@@ -1484,8 +1484,20 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
       <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>Admin Verification</div>
       <div style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:24,maxWidth:300,lineHeight:1.6}}>{pinMode==='setup'?'Set a secure PIN to access the admin dashboard.':'Enter your PIN to access the admin dashboard.'}</div>
       {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:16,maxWidth:300}}>{pkError}</div>}
-      <input type="password" inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} placeholder="Enter PIN" style={{width:220,padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none',marginBottom:pinMode==='setup'?12:20}}/>
-      {pinMode==='setup'&&<input type="password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} placeholder="Confirm PIN" style={{width:220,padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none',marginBottom:20}}/>}
+      <div style={{position:'relative',width:220,marginBottom:pinMode==='setup'?12:20}}>
+        <input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'transparent',caretColor:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none',WebkitTextSecurity:'disc'}}/>
+        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:8,pointerEvents:'none'}}>
+          {pinValue.length===0&&<span style={{color:'rgba(255,255,255,0.3)',fontSize:14}}>Enter PIN</span>}
+          {Array.from({length:pinValue.length}).map((_,i)=><div key={i} style={{width:9,height:9,borderRadius:999,background:'#fff'}}/>)}
+        </div>
+      </div>
+      {pinMode==='setup'&&<div style={{position:'relative',width:220,marginBottom:20}}>
+        <input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'transparent',caretColor:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none'}}/>
+        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:8,pointerEvents:'none'}}>
+          {pinConfirm.length===0&&<span style={{color:'rgba(255,255,255,0.3)',fontSize:14}}>Confirm PIN</span>}
+          {Array.from({length:pinConfirm.length}).map((_,i)=><div key={i} style={{width:9,height:9,borderRadius:999,background:'#fff'}}/>)}
+        </div>
+      </div>}
       <button onClick={pinMode==='setup'?setupPin:verifyPin} disabled={pkLoading||pinValue.length<6} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',opacity:pkLoading||pinValue.length<6?0.5:1}}>
         {pkLoading?'Verifying...':pinMode==='setup'?'Set PIN':'Unlock'}
       </button>
@@ -1518,9 +1530,7 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',position:'sticky',top:0,zIndex:10}}>
       <div style={{maxWidth:820,margin:'0 auto',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <div style={{width:32,height:32,borderRadius:9,background:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
-          </div>
+          <SparkPayLogo size={32}/>
           <div>
             <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:800,color:'var(--tx1)',lineHeight:1.2}}>SparkPay</div>
             <div style={{fontSize:10,color:'var(--tx3)',fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase'}}>Admin Console</div>
@@ -1557,19 +1567,18 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
             </div>
           </div>
-          <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)',letterSpacing:'-0.5px'}}>{loading?<span style={{opacity:0.3}}>—</span>:stats.volume.toFixed(2)+' USDC'}</div>
+          <div style={{display:'flex',alignItems:'baseline',gap:4,whiteSpace:'nowrap',overflow:'hidden'}}><span style={{fontSize:loading?26:(stats.volume>=10000?20:26),fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)',letterSpacing:'-0.5px'}}>{loading?'—':stats.volume.toFixed(2)}</span><span style={{fontSize:13,fontWeight:600,color:'var(--tx3)'}}>USDC</span></div>
         </div>
       </div>
 
       <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Operations</div>
       <div className="ap-card" style={{marginBottom:16}}>
-        <div className="ap-card-title">Maintenance Mode</div>
-        <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>When enabled, only the admin wallet can access the app.</div>
-        <div style={{display:'flex',alignItems:'center',gap:12}}>
-          <div style={{padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:700,background:maintenanceMode?'rgba(239,68,68,0.15)':'rgba(34,197,94,0.15)',color:maintenanceMode?'#ef4444':'#22c55e'}}>
-            {maintenanceMode?'MAINTENANCE ON':'LIVE'}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div className="ap-card-title">Maintenance Mode</div>
+            <div style={{fontSize:13,color:'var(--tx2)',marginTop:4}}>{maintenanceMode?'Site is locked — only admin wallet can access SparkPay.':'Site is live and accessible to all users.'}</div>
           </div>
-          <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 14px'}} onClick={async()=>{
+          <button onClick={async()=>{
             const newVal=!maintenanceMode;
             try{
               await fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode',{
@@ -1579,7 +1588,13 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
               });
               setMaintenanceMode(newVal);
             }catch(e){alert('Failed to update maintenance mode: '+e.message);}
-          }}>{maintenanceMode?'Turn Off':'Turn On'}</button>
+          }} style={{width:48,height:28,borderRadius:999,border:'none',background:maintenanceMode?'#ef4444':'var(--b1)',position:'relative',cursor:'pointer',flexShrink:0,transition:'background .2s'}}>
+            <div style={{position:'absolute',top:3,left:maintenanceMode?23:3,width:22,height:22,borderRadius:999,background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,0.3)'}}/>
+          </button>
+        </div>
+        <div style={{marginTop:14,display:'inline-flex',alignItems:'center',gap:6,padding:'5px 12px',borderRadius:999,background:maintenanceMode?'rgba(239,68,68,0.1)':'rgba(34,197,94,0.1)'}}>
+          <div style={{width:6,height:6,borderRadius:999,background:maintenanceMode?'#ef4444':'#22c55e'}}/>
+          <span style={{fontSize:11,fontWeight:700,color:maintenanceMode?'#ef4444':'#22c55e'}}>{maintenanceMode?'MAINTENANCE ACTIVE':'LIVE'}</span>
         </div>
       </div>
 
