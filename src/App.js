@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 import Faucet from './components/Faucet';
 import MultiSend from './components/MultiSend';
 
@@ -1301,6 +1302,56 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
   const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
   const[loading,setLoading]=useState(true);
+  const[pkLoading,setPkLoading]=useState(false);
+  const[pkRegistered,setPkRegistered]=useState(null);
+  const[pkAuthed,setPkAuthed]=useState(()=>{
+    const t=sessionStorage.getItem('sp_admin_jwt');
+    return !!t;
+  });
+  const[pkError,setPkError]=useState('');
+
+  useEffect(()=>{
+    if(!isAdmin)return;
+    fetch(SB_URL+'/rest/v1/webauthn_credentials?admin_address=eq.'+ADMIN_ADDRESS+'&select=id',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    }).then(r=>r.json()).then(d=>setPkRegistered(d&&d.length>0)).catch(()=>setPkRegistered(false));
+  },[isAdmin]);
+
+  const registerPasskey=async()=>{
+    setPkLoading(true);setPkError('');
+    try{
+      const optRes=await fetch('/api/webauthn-register-options',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
+      const options=await optRes.json();
+      if(options.error)throw new Error(options.error);
+      const attResp=await startRegistration(options);
+      const verRes=await fetch('/api/webauthn-register-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,response:attResp})});
+      const verData=await verRes.json();
+      if(!verData.verified)throw new Error(verData.error||'Registration failed');
+      setPkRegistered(true);
+      alert('Passkey registered successfully!');
+    }catch(e){
+      setPkError(e.message||'Registration failed');
+    }
+    setPkLoading(false);
+  };
+
+  const loginWithPasskey=async()=>{
+    setPkLoading(true);setPkError('');
+    try{
+      const optRes=await fetch('/api/webauthn-login-options',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
+      const options=await optRes.json();
+      if(options.error)throw new Error(options.error);
+      const authResp=await startAuthentication(options);
+      const verRes=await fetch('/api/webauthn-login-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,response:authResp})});
+      const verData=await verRes.json();
+      if(!verData.verified)throw new Error(verData.error||'Authentication failed');
+      sessionStorage.setItem('sp_admin_jwt',verData.token);
+      setPkAuthed(true);
+    }catch(e){
+      setPkError(e.message||'Authentication failed');
+    }
+    setPkLoading(false);
+  };
   useEffect(()=>{
     if(!isAdmin)return;
     (async()=>{
