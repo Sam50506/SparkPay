@@ -1189,6 +1189,13 @@ const batchGroups={};allTxns.forEach(t=>{if(!t.hash)return;if(!batchGroups[t.has
   const renderFaq=()=><FaqPage/>;
   const renderPage=()=>{switch(tab){case 'send':return renderSend();case 'multi':return <MultiSend multi={multi} setMulti={setMulti} loading={loading} handleMultiReview={handleMultiReview}/>;case 'invoice':return renderInvoice();case 'pay':return renderPay();case 'contacts':return renderContacts();case 'schedule':return renderSchedule();case 'history':return renderHistory();case 'rates':return renderRates();case 'fees':return renderFees();case 'rewards':return renderRewards();case 'receive':return renderReceive();case 'settings':return renderSettings();case 'about':return renderAbout();case 'faq':return renderFaq();case 'faucet':return <Faucet address={address} balance={balance} setBalance={setBalance} faucetLoading={faucetLoading} setFaucetLoading={setFaucetLoading} faucetMsg={faucetMsg} setFaucetMsg={setFaucetMsg} lastClaim={lastClaim} setLastClaim={setLastClaim}/>;default:return renderSend();}};
 
+  if(!isAdminRoute&&maintenanceLoaded&&maintenanceMode&&address&&address.toLowerCase()!==ADMIN_ADDRESS){
+    return(<div style={{position:'fixed',inset:0,background:'#0a0a0a',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      <div style={{fontSize:48,marginBottom:16}}>🛠️</div>
+      <div style={{fontSize:20,fontWeight:800,color:'#fff',marginBottom:8}}>Under Maintenance</div>
+      <div style={{fontSize:14,color:'#999',maxWidth:320,lineHeight:1.6}}>SparkPay is currently undergoing maintenance. Please check back shortly.</div>
+    </div>);
+  }
   if(isAdminRoute){
     return(<div className={'ap-root'+(dm?'':' light')}><style>{CSS}</style><AdminPanel address={address} signer={signer} maintenanceMode={maintenanceMode} setMaintenanceMode={setMaintenanceMode}/>{!address&&<div style={{position:'fixed',bottom:24,left:0,right:0,display:'flex',justifyContent:'center'}}><div className="ap-connect-card" style={{maxWidth:360,width:'calc(100% - 48px)'}}><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:16,color:'var(--tx1)',marginBottom:12}}>Connect Wallet</div><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button>{showPicker&&<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>}</div></div>}</div>);
   }
