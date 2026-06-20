@@ -20,9 +20,10 @@ export default async function handler(req, res) {
     userID: new TextEncoder().encode(ADMIN_ADDRESS),
     userName: 'SparkPay Admin',
     attestationType: 'none',
+    timeout: 60000,
     authenticatorSelection: {
       residentKey: 'preferred',
-      userVerification: 'required',
+      userVerification: 'preferred',
       authenticatorAttachment: 'platform'
     }
   });
