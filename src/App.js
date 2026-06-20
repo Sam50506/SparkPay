@@ -1293,21 +1293,29 @@ function ScheduledRequests(){
   if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
   const visible=showAll?requests:requests.slice(0,5);
   return(<div>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-      <div style={{fontSize:12,color:'var(--tx3)'}}>{requests.filter(r=>r.status==='pending').length} pending</div>
-      <button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'4px 10px',marginTop:0}} onClick={fetchRequests}>Refresh</button>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{requests.filter(r=>r.status==='pending').length} pending of {requests.length}</div>
+      <button onClick={fetchRequests} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx2)'}}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
     </div>
-    {visible.map(r=>(<div key={r.id} style={{padding:'14px 0',borderBottom:'1px solid var(--b0)'}}>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
-        <div>
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
-            <span style={{fontSize:12,fontWeight:700,padding:'2px 10px',borderRadius:999,background:r.request_type==='cancel'?'rgba(255,79,97,.1)':'rgba(59,130,196,.1)',color:r.request_type==='cancel'?'var(--re)':'var(--ac)'}}>{r.request_type==='cancel'?'Cancel Request':'Edit Request'}</span>
-            <span style={{fontSize:11,fontWeight:700,padding:'2px 10px',borderRadius:999,background:r.status==='pending'?'rgba(240,196,63,.1)':r.status==='approved'?'rgba(23,229,176,.1)':'rgba(255,79,97,.1)',color:r.status==='pending'?'#f59e0b':r.status==='approved'?'var(--cy)':'var(--re)'}}>{r.status}</span>
+    {visible.map(r=>(<div key={r.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+        <div style={{flex:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,flexWrap:'wrap'}}>
+            <span style={{fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:7,background:r.request_type==='cancel'?'rgba(255,79,97,.1)':'rgba(59,130,196,.1)',color:r.request_type==='cancel'?'var(--re)':'var(--ac)'}}>{r.request_type==='cancel'?'Cancel':'Edit'}</span>
+            <span style={{fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:7,background:r.status==='pending'?'rgba(240,196,63,.1)':r.status==='approved'?'rgba(23,229,176,.1)':'rgba(255,79,97,.1)',color:r.status==='pending'?'#f59e0b':r.status==='approved'?'var(--cy)':'var(--re)'}}>{r.status}</span>
           </div>
-          <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:4}}>Payment #{r.payment_id} • {r.wallet_address.slice(0,10)}...{r.wallet_address.slice(-6)}</div>
-          <div style={{fontSize:11,color:'var(--tx3)',marginBottom:4}}>{new Date(r.created_at).toLocaleString()}</div>
-          {r.reason&&<div style={{fontSize:12,color:'var(--tx2)',background:'var(--elev)',borderRadius:8,padding:'8px 10px',marginTop:4}}>{r.reason}</div>}
-          {r.request_type==='edit'&&<div style={{fontSize:12,color:'var(--tx2)',marginTop:4,background:'var(--elev)',borderRadius:8,padding:'8px 10px'}}>{r.new_recipient&&<div>📍 New recipient: <span style={{fontFamily:'monospace'}}>{r.new_recipient.slice(0,10)}...{r.new_recipient.slice(-6)}</span></div>}{r.new_amount&&<div>💰 New amount: {r.new_amount} USDC</div>}{r.new_date&&<div>📅 New date: {r.new_date}</div>}{r.new_time&&<div>🕐 New time: {r.new_time}</div>}</div>}
+          <div style={{fontSize:12,color:'var(--tx1)',fontFamily:'monospace',fontWeight:600,marginBottom:3}}>Payment #{r.payment_id}</div>
+          <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:3}}>{r.wallet_address.slice(0,10)}...{r.wallet_address.slice(-6)}</div>
+          <div style={{fontSize:11,color:'var(--tx3)'}}>{new Date(r.created_at).toLocaleString()}</div>
+          {r.reason&&<div style={{fontSize:12,color:'var(--tx2)',background:'var(--card)',borderRadius:8,padding:'8px 10px',marginTop:8}}>{r.reason}</div>}
+          {r.request_type==='edit'&&(r.new_recipient||r.new_amount||r.new_date||r.new_time)&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px'}}>
+            {r.new_recipient&&<div style={{display:'flex',alignItems:'center',gap:7,fontSize:11,color:'var(--tx2)',marginBottom:5}}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>New recipient: <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{r.new_recipient.slice(0,8)}...{r.new_recipient.slice(-6)}</span></div>}
+            {r.new_amount&&<div style={{display:'flex',alignItems:'center',gap:7,fontSize:11,color:'var(--tx2)',marginBottom:5}}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/></svg>New amount: <span style={{color:'var(--tx1)',fontWeight:600}}>{r.new_amount} USDC</span></div>}
+            {r.new_date&&<div style={{display:'flex',alignItems:'center',gap:7,fontSize:11,color:'var(--tx2)',marginBottom:5}}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>New date: <span style={{color:'var(--tx1)'}}>{r.new_date}</span></div>}
+            {r.new_time&&<div style={{display:'flex',alignItems:'center',gap:7,fontSize:11,color:'var(--tx2)'}}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>New time: <span style={{color:'var(--tx1)'}}>{r.new_time}</span></div>}
+          </div>}
         </div>
       </div>
       {r.status==='pending'&&<div style={{display:'flex',gap:8}}>
