@@ -1506,36 +1506,55 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     </div>);
   }
 
-  return(<div style={{minHeight:'100vh',background:'var(--bg)',padding:24}}>
-    <div style={{maxWidth:800,margin:'0 auto'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
-        <div>
-          <div style={{fontFamily:'var(--fd)',fontSize:26,fontWeight:900,color:'var(--tx1)'}}>Admin Dashboard</div>
-          <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>{ADMIN_ADDRESS.slice(0,8)}...{ADMIN_ADDRESS.slice(-6)}</div>
+  return(<div style={{minHeight:'100vh',background:'var(--bg)'}}>
+    <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',position:'sticky',top:0,zIndex:10}}>
+      <div style={{maxWidth:820,margin:'0 auto',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:32,height:32,borderRadius:9,background:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
+          </div>
+          <div>
+            <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:800,color:'var(--tx1)',lineHeight:1.2}}>SparkPay</div>
+            <div style={{fontSize:10,color:'var(--tx3)',fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase'}}>Admin Console</div>
+          </div>
         </div>
-        <div style={{width:38,height:38,borderRadius:12,background:'rgba(34,197,94,0.1)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/></svg>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 10px',borderRadius:999,background:'rgba(34,197,94,0.1)'}}>
+            <div style={{width:6,height:6,borderRadius:999,background:'#22c55e'}}/>
+            <span style={{fontSize:11,fontWeight:700,color:'#22c55e'}}>Verified</span>
+          </div>
+          <button onClick={()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();}} style={{background:'none',border:'1px solid var(--b1)',borderRadius:9,width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx2)'}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style={{maxWidth:820,margin:'0 auto',padding:'28px 24px 60px'}}>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Overview</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:32}}>
+        <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+            <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>Total Transactions</div>
+            <div style={{width:28,height:28,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+          </div>
+          <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)',letterSpacing:'-0.5px'}}>{loading?<span style={{opacity:0.3}}>—</span>:stats.txCount}</div>
+        </div>
+        <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+            <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>Total Volume</div>
+            <div style={{width:28,height:28,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+            </div>
+          </div>
+          <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)',letterSpacing:'-0.5px'}}>{loading?<span style={{opacity:0.3}}>—</span>:stats.volume.toFixed(2)+' USDC'}</div>
         </div>
       </div>
 
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:24}}>
-        <div className="ap-card">
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            <div style={{fontSize:12,color:'var(--tx3)'}}>Total Transactions</div>
-          </div>
-          <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{loading?'...':stats.txCount}</div>
-        </div>
-        <div className="ap-card">
-          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
-            <div style={{fontSize:12,color:'var(--tx3)'}}>Total Volume (USDC)</div>
-          </div>
-          <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{loading?'...':stats.volume.toFixed(2)}</div>
-        </div>
-      </div>
-
-      <div className="ap-card" style={{marginBottom:24}}>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Operations</div>
+      <div className="ap-card" style={{marginBottom:16}}>
         <div className="ap-card-title">Maintenance Mode</div>
         <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>When enabled, only the admin wallet can access the app.</div>
         <div style={{display:'flex',alignItems:'center',gap:12}}>
