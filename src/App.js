@@ -1385,6 +1385,32 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     </div>);
   }
 
+  if(pkRegistered===null){
+    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{color:'rgba(255,255,255,0.5)',fontSize:14}}>Loading...</div></div>);
+  }
+
+  if(!pkAuthed){
+    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      <div style={{width:64,height:64,borderRadius:20,background:'rgba(59,130,196,.12)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:24}}>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="1.8"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/><path d="M12 17v4"/><path d="M9 9.5v2"/><path d="M15 9.5v2"/></svg>
+      </div>
+      <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>Admin Verification</div>
+      <div style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:28,maxWidth:300,lineHeight:1.6}}>{pkRegistered?'Use your device biometrics or passkey to access the admin dashboard.':'Set up a passkey to secure this admin dashboard with device biometrics.'}</div>
+      {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:16,maxWidth:300}}>{pkError}</div>}
+      {pkRegistered?(
+        <button onClick={loginWithPasskey} disabled={pkLoading} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:10}}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/></svg>
+          {pkLoading?'Verifying...':'Verify with Passkey'}
+        </button>
+      ):(
+        <button onClick={registerPasskey} disabled={pkLoading} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:10}}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/></svg>
+          {pkLoading?'Setting up...':'Set Up Passkey'}
+        </button>
+      )}
+    </div>);
+  }
+
   return(<div style={{minHeight:'100vh',background:'var(--bg)',padding:24}}>
     <div style={{maxWidth:800,margin:'0 auto'}}>
       <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'var(--tx1)',marginBottom:24}}>Admin Dashboard</div>
