@@ -1292,12 +1292,13 @@ function ScheduledRequests(){
         alert(status==='approved'?'Approved successfully!':'Rejected successfully.');
       }}catch(e){alert('Failed: '+e.message);}};
   const[showAll,setShowAll]=React.useState(false);
+  const[reqFilter,setReqFilter]=React.useState('all');
   const[manageReq,setManageReq]=React.useState(false);
   const[selectedReq,setSelectedReq]=React.useState([]);
   const[hiddenReq,setHiddenReq]=React.useState(()=>new Set(JSON.parse(localStorage.getItem('sp_hidden_admin_requests')||'[]')));
   React.useEffect(()=>{fetchRequests();},[]);
   if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
-  const visibleAll=requests.filter(r=>!hiddenReq.has(r.id));
+  const visibleAll=requests.filter(r=>!hiddenReq.has(r.id)).filter(r=>reqFilter==='all'||r.status===reqFilter);
   if(visibleAll.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
   const visible=showAll?visibleAll:visibleAll.slice(0,5);
   return(<div>
@@ -1305,6 +1306,12 @@ function ScheduledRequests(){
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
       <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{visibleAll.filter(r=>r.status==='pending').length} pending of {visibleAll.length}</div>
       <div style={{display:'flex',gap:6}}>
+        <select value={reqFilter} onChange={e=>setReqFilter(e.target.value)} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,padding:'0 8px',height:28,fontSize:11,fontWeight:600,color:'var(--tx2)',outline:'none'}}>
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
         <button onClick={()=>{setManageReq(m=>!m);setSelectedReq([]);}} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,padding:'0 10px',height:28,fontSize:11,fontWeight:600,cursor:'pointer',color:manageReq?'var(--re)':'var(--tx2)'}}>{manageReq?'Done':'Manage'}</button>
         <button onClick={fetchRequests} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx2)'}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -1337,6 +1344,61 @@ function ScheduledRequests(){
       </div>}
     </div>))}
     {requests.length>5&&<button onClick={()=>setShowAll(s=>!s)} style={{width:'100%',marginTop:8,padding:'10px',background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:10,color:'var(--ac)',fontSize:13,fontWeight:600,cursor:'pointer'}}>{showAll?'Show less':'Show all ('+requests.length+')'}</button>}
+  </div>);
+}
+
+function ManualExecute(){
+  const[paymentId,setPaymentId]=React.useState('');
+  const[loading,setLoading]=React.useState(false);
+  const[result,setResult]=React.useState(null);
+  const execute=async()=>{
+    if(!paymentId)return;
+    setLoading(true);setResult(null);
+    try{
+      const token=sessionStorage.getItem('sp_admin_jwt');
+      if(!token){alert('Session expired. Please re-verify with passkey.');window.location.reload();return;}
+      const r=await fetch('/api/manual-execute',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({payment_id:paymentId})});
+      const d=await r.json();
+      if(d.error){setResult({type:'error',msg:d.error});}
+      else{setResult({type:'success',msg:'Executed! Hash: '+d.hash});setPaymentId('');}
+    }catch(e){setResult({type:'error',msg:e.message});}
+    setLoading(false);
+  };
+  return(<div>
+    <div style={{display:'flex',gap:8}}>
+      <input className="ap-input" style={{marginBottom:0,flex:1}} type="number" placeholder="Payment ID (e.g. 5)" value={paymentId} onChange={e=>setPaymentId(e.target.value)}/>
+      <button className="ap-btn ap-btn-primary" style={{marginTop:0,width:'auto',padding:'0 20px'}} onClick={execute} disabled={loading||!paymentId}>{loading?'Executing...':'Execute'}</button>
+    </div>
+    {result&&<div style={{marginTop:10,fontSize:12,padding:'8px 12px',borderRadius:8,background:result.type==='success'?'rgba(23,229,176,.1)':'rgba(255,79,97,.1)',color:result.type==='success'?'var(--cy)':'var(--re)',wordBreak:'break-all'}}>{result.msg}</div>}
+  </div>);
+}
+
+function FailedTxns(){
+  const[txns,setTxns]=React.useState([]);
+  const[loading,setLoading]=React.useState(true);
+  const fetchFailed=async()=>{
+    setLoading(true);
+    try{
+      const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+ADMIN_ADDRESS+'&sort=desc');
+      const d=await r.json();
+      const failed=(d.result||[]).filter(t=>t.isError==='1').slice(0,15);
+      setTxns(failed);
+    }catch(e){console.error(e);}
+    setLoading(false);
+  };
+  React.useEffect(()=>{fetchFailed();},[]);
+  if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
+  if(txns.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No failed transactions found. ✅</div>;
+  return(<div>
+    <button onClick={fetchFailed} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,padding:'5px 12px',fontSize:11,fontWeight:600,color:'var(--tx2)',cursor:'pointer',marginBottom:12}}>Refresh</button>
+    {txns.map((t,i)=>(<div key={i} style={{background:'var(--elev)',borderRadius:10,padding:'10px 12px',marginBottom:8}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+        <span style={{fontSize:11,fontWeight:700,color:'var(--re)'}}>Failed</span>
+        <span style={{fontSize:11,color:'var(--tx3)'}}>{new Date(Number(t.timeStamp)*1000).toLocaleString()}</span>
+      </div>
+      <div style={{fontSize:11,fontFamily:'monospace',color:'var(--tx2)',wordBreak:'break-all'}}>{t.hash}</div>
+      <a href={'https://testnet.arcscan.app/tx/'+t.hash} target="_blank" rel="noreferrer" style={{fontSize:11,color:'var(--ac)',marginTop:4,display:'inline-block'}}>View on Explorer</a>
+    </div>))}
   </div>);
 }
 
@@ -1630,9 +1692,20 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         }}>Process Pending Payouts</button>
       </div>
 
+      <div className="ap-card" style={{marginBottom:16}}>
+        <div className="ap-card-title" style={{marginBottom:4}}>Manual Execute</div>
+        <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Force-execute a scheduled payment if the cron/keeper bot fails.</div>
+        <ManualExecute/>
+      </div>
+
       <div className="ap-card" style={{marginBottom:32}}>
         <div className="ap-card-title" style={{marginBottom:14}}>Scheduled Payment Requests</div>
         <ScheduledRequests/>
+      </div>
+
+      <div className="ap-card" style={{marginBottom:32}}>
+        <div className="ap-card-title" style={{marginBottom:14}}>Failed Transactions</div>
+        <FailedTxns/>
       </div>
 
       <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Resources</div>
