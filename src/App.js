@@ -1447,11 +1447,30 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     </div>);
   }
 
-  if(pkRegistered===null){
+  if(pkRegistered===null&&webauthnSupported){
     return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{color:'rgba(255,255,255,0.5)',fontSize:14}}>Loading...</div></div>);
   }
 
-  if(!pkAuthed){
+  if(!pkAuthed&&!webauthnSupported){
+    if(pinSetup===null){
+      return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{color:'rgba(255,255,255,0.5)',fontSize:14}}>Loading...</div></div>);
+    }
+    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      <div style={{width:64,height:64,borderRadius:20,background:'rgba(59,130,196,.12)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:24}}>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>Admin Verification</div>
+      <div style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:24,maxWidth:300,lineHeight:1.6}}>{pinMode==='setup'?'Set a secure PIN to access the admin dashboard.':'Enter your PIN to access the admin dashboard.'}</div>
+      {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:16,maxWidth:300}}>{pkError}</div>}
+      <input type="password" inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} placeholder="Enter PIN" style={{width:220,padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none',marginBottom:pinMode==='setup'?12:20}}/>
+      {pinMode==='setup'&&<input type="password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} placeholder="Confirm PIN" style={{width:220,padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none',marginBottom:20}}/>}
+      <button onClick={pinMode==='setup'?setupPin:verifyPin} disabled={pkLoading||pinValue.length<6} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',opacity:pkLoading||pinValue.length<6?0.5:1}}>
+        {pkLoading?'Verifying...':pinMode==='setup'?'Set PIN':'Unlock'}
+      </button>
+    </div>);
+  }
+
+  if(!pkAuthed&&webauthnSupported){
     return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
       <div style={{width:64,height:64,borderRadius:20,background:'rgba(59,130,196,.12)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:24}}>
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="1.8"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/><path d="M12 17v4"/><path d="M9 9.5v2"/><path d="M15 9.5v2"/></svg>
