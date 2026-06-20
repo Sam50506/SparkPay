@@ -1427,15 +1427,29 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
 
   return(<div style={{minHeight:'100vh',background:'var(--bg)',padding:24}}>
     <div style={{maxWidth:800,margin:'0 auto'}}>
-      <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'var(--tx1)',marginBottom:24}}>Admin Dashboard</div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
+        <div>
+          <div style={{fontFamily:'var(--fd)',fontSize:26,fontWeight:900,color:'var(--tx1)'}}>Admin Dashboard</div>
+          <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>{ADMIN_ADDRESS.slice(0,8)}...{ADMIN_ADDRESS.slice(-6)}</div>
+        </div>
+        <div style={{width:38,height:38,borderRadius:12,background:'rgba(34,197,94,0.1)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/></svg>
+        </div>
+      </div>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:24}}>
         <div className="ap-card">
-          <div style={{fontSize:12,color:'var(--tx3)',marginBottom:6}}>Total Transactions</div>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <div style={{fontSize:12,color:'var(--tx3)'}}>Total Transactions</div>
+          </div>
           <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{loading?'...':stats.txCount}</div>
         </div>
         <div className="ap-card">
-          <div style={{fontSize:12,color:'var(--tx3)',marginBottom:6}}>Total Volume (USDC)</div>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+            <div style={{fontSize:12,color:'var(--tx3)'}}>Total Volume (USDC)</div>
+          </div>
           <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{loading?'...':stats.volume.toFixed(2)}</div>
         </div>
       </div>
