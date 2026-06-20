@@ -1322,6 +1322,54 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     const t=sessionStorage.getItem('sp_admin_jwt');
     return !!t;
   });
+  const[webauthnSupported,setWebauthnSupported]=useState(true);
+  const[pinSetup,setPinSetup]=useState(null);
+  const[pinValue,setPinValue]=useState('');
+  const[pinConfirm,setPinConfirm]=useState('');
+  const[pinMode,setPinMode]=useState('check');
+
+  useEffect(()=>{
+    (async()=>{
+      const supported=typeof window!=='undefined'&&!!window.PublicKeyCredential;
+      let platformAvailable=false;
+      if(supported){
+        try{platformAvailable=await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();}catch{}
+      }
+      setWebauthnSupported(supported&&platformAvailable);
+    })();
+  },[]);
+
+  useEffect(()=>{
+    if(!isAdmin||webauthnSupported)return;
+    fetch(SB_URL+'/rest/v1/admin_pin?admin_address=eq.'+ADMIN_ADDRESS+'&select=id',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    }).then(r=>r.json()).then(d=>{setPinSetup(d&&d.length>0);setPinMode(d&&d.length>0?'verify':'setup');}).catch(()=>{});
+  },[isAdmin,webauthnSupported]);
+
+  const setupPin=async()=>{
+    if(pinValue.length<6){setPkError('PIN must be at least 6 digits');return;}
+    if(pinValue!==pinConfirm){setPkError('PINs do not match');return;}
+    setPkLoading(true);setPkError('');
+    try{
+      const r=await fetch('/api/pin-setup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,pin:pinValue})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error);
+      setPinSetup(true);setPinMode('verify');setPinValue('');setPinConfirm('');
+    }catch(e){setPkError(e.message);}
+    setPkLoading(false);
+  };
+
+  const verifyPin=async()=>{
+    setPkLoading(true);setPkError('');
+    try{
+      const r=await fetch('/api/pin-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,pin:pinValue})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error);
+      sessionStorage.setItem('sp_admin_jwt',d.token);
+      setPkAuthed(true);
+    }catch(e){setPkError(e.message);setPinValue('');}
+    setPkLoading(false);
+  };
   const[pkError,setPkError]=useState('');
 
   useEffect(()=>{
