@@ -1465,10 +1465,10 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         <div className="ap-card-title">Cashback Payouts</div>
         <div style={{fontSize:13,color:'var(--tx2)',marginTop:4,marginBottom:14}}>Pending claims: {loading?'...':stats.pendingClaims}</div>
         <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={async()=>{
-          const key=prompt('Enter admin key:');
-          if(!key)return;
+          const token=sessionStorage.getItem('sp_admin_jwt');
+          if(!token){alert('Session expired. Please re-verify with passkey.');window.location.reload();return;}
           try{
-            const r=await fetch('/api/payout',{method:'POST',headers:{'x-admin-key':key,'Content-Type':'application/json'}});
+            const r=await fetch('/api/payout',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}});
             const d=await r.json();
             alert(d.message+' Paid: '+d.paid);
           }catch(e){alert('Error: '+e.message);}
@@ -1476,14 +1476,15 @@ function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
       </div>
 
       <div className="ap-card" style={{marginBottom:24}}>
-                    <div className="ap-card-title">Scheduled Payment Requests</div>
-                    <ScheduledRequests/>
-                  </div>
-                  <div className="ap-card">
-                    <div className="ap-card-title">Quick Links</div>
+        <div className="ap-card-title">Scheduled Payment Requests</div>
+        <ScheduledRequests/>
+      </div>
+
+      <div className="ap-card" style={{marginBottom:24}}>
+        <div className="ap-card-title">Quick Links</div>
         <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:12}}>
-          <a href="https://testnet.arcscan.app/address/{ADMIN_ADDRESS}" target="_blank" rel="noreferrer" style={{fontSize:13,color:'var(--ac)'}}>View Admin Wallet on Explorer</a>
-          <a href="#" onClick={(e)=>{e.preventDefault();window.location.hash='';window.location.reload();}} style={{fontSize:13,color:'var(--ac)'}}>Back to App</a>
+          <a href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{fontSize:13,color:'var(--ac)'}}>View Admin Wallet on Explorer</a>
+          <a href="#" onClick={(e)=>{e.preventDefault();sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();}} style={{fontSize:13,color:'var(--ac)'}}>Sign Out & Back to App</a>
         </div>
       </div>
     </div>

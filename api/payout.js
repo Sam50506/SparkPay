@@ -1,15 +1,28 @@
 import { ethers } from 'ethers';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 
 const RPC = 'https://rpc.testnet.arc.network';
 const CHAIN_ID = 5042002;
 const ADMIN_KEY = process.env.PAYOUT_ADMIN_KEY;
+const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
+const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   
-  if (req.headers['x-admin-key'] !== ADMIN_KEY) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  let authorized = false;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.address === ADMIN_ADDRESS) authorized = true;
+    } catch (e) {}
+  }
+  if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized - please re-verify with passkey' });
   }
 
   const supabase = createClient(
