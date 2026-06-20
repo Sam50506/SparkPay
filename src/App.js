@@ -1292,19 +1292,28 @@ function ScheduledRequests(){
         alert(status==='approved'?'Approved successfully!':'Rejected successfully.');
       }}catch(e){alert('Failed: '+e.message);}};
   const[showAll,setShowAll]=React.useState(false);
+  const[manageReq,setManageReq]=React.useState(false);
+  const[selectedReq,setSelectedReq]=React.useState([]);
+  const[hiddenReq,setHiddenReq]=React.useState(()=>new Set(JSON.parse(localStorage.getItem('sp_hidden_admin_requests')||'[]')));
   React.useEffect(()=>{fetchRequests();},[]);
   if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
-  if(requests.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
-  const visible=showAll?requests:requests.slice(0,5);
+  const visibleAll=requests.filter(r=>!hiddenReq.has(r.id));
+  if(visibleAll.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No requests yet.</div>;
+  const visible=showAll?visibleAll:visibleAll.slice(0,5);
   return(<div>
+    {manageReq&&<div style={{marginBottom:12}}><div style={{fontSize:12,color:'var(--tx2)',background:'var(--elev)',borderRadius:10,padding:'8px 12px',marginBottom:8}}>Select resolved requests to hide from this view. This only removes them from this device.</div><div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button onClick={()=>setSelectedReq(visibleAll.filter(r=>r.status!=='pending').map(r=>r.id))} className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'5px 10px'}}>Select All Resolved</button><button onClick={()=>setSelectedReq([])} className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'5px 10px'}}>Deselect All</button>{selectedReq.length>0&&<button onClick={()=>{const next=new Set([...hiddenReq,...selectedReq]);setHiddenReq(next);localStorage.setItem('sp_hidden_admin_requests',JSON.stringify([...next]));setSelectedReq([]);setManageReq(false);}} style={{background:'var(--re)',border:'none',color:'#fff',cursor:'pointer',padding:'5px 12px',fontSize:12,borderRadius:8,fontWeight:600}}>Hide {selectedReq.length} Selected</button>}</div></div>}
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
-      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{requests.filter(r=>r.status==='pending').length} pending of {requests.length}</div>
-      <button onClick={fetchRequests} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx2)'}}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </button>
+      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{visibleAll.filter(r=>r.status==='pending').length} pending of {visibleAll.length}</div>
+      <div style={{display:'flex',gap:6}}>
+        <button onClick={()=>{setManageReq(m=>!m);setSelectedReq([]);}} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,padding:'0 10px',height:28,fontSize:11,fontWeight:600,cursor:'pointer',color:manageReq?'var(--re)':'var(--tx2)'}}>{manageReq?'Done':'Manage'}</button>
+        <button onClick={fetchRequests} style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:8,width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx2)'}}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
+      </div>
     </div>
     {visible.map(r=>(<div key={r.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10}}>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+        {manageReq&&r.status!=='pending'&&<input type="checkbox" checked={selectedReq.includes(r.id)} onChange={e=>setSelectedReq(prev=>e.target.checked?[...prev,r.id]:prev.filter(x=>x!==r.id))} style={{width:18,height:18,marginRight:10,marginTop:2,flexShrink:0,cursor:'pointer'}}/>}
         <div style={{flex:1}}>
           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,flexWrap:'wrap'}}>
             <span style={{fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:7,background:r.request_type==='cancel'?'rgba(255,79,97,.1)':'rgba(59,130,196,.1)',color:r.request_type==='cancel'?'var(--re)':'var(--ac)'}}>{r.request_type==='cancel'?'Cancel':'Edit'}</span>
