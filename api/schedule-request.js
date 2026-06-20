@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import jwt from 'jsonwebtoken';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -24,6 +25,7 @@ async function sendTelegram(msg) {
 }
 
 const ADMIN_KEY = process.env.PAYOUT_ADMIN_KEY;
+const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -32,8 +34,18 @@ export default async function handler(req, res) {
 
   // Handle approve/reject actions
   if (action === 'approve' || action === 'reject') {
-    if (req.headers['x-admin-key'] !== ADMIN_KEY) {
-      return res.status(401).json({error: 'Unauthorized'});
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    let authorized = false;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.address === ADMIN_ADDRESS) authorized = true;
+      } catch (e) {}
+    }
+    if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
+    if (!authorized) {
+      return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
     }
     try {
 

@@ -1268,7 +1268,7 @@ function ScheduledRequests(){
   const[requests,setRequests]=React.useState([]);
   const[loading,setLoading]=React.useState(true);
   const fetchRequests=async()=>{setLoading(true);try{const r=await fetch(SB_URL+'/rest/v1/scheduled_payment_requests?order=created_at.desc&limit=20',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});const d=await r.json();setRequests(d||[]);}catch(e){console.error(e);}setLoading(false);};
-  const updateStatus=async(id,status,request_type,payment_id)=>{try{const key=prompt('Enter admin key:');if(!key)return;const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type})});const d=await r.json();if(d.error){alert('Failed: '+d.error);return;}fetchRequests();
+  const updateStatus=async(id,status,request_type,payment_id)=>{try{const token=sessionStorage.getItem('sp_admin_jwt');if(!token){alert('Session expired. Please re-verify with passkey.');window.location.reload();return;}const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:status==='approved'?'approve':'reject',request_id:id,payment_id,request_type})});const d=await r.json();if(d.error){alert('Failed: '+d.error);return;}fetchRequests();
       if(status==='approved'&&request_type==='edit'){
         const req=requests.find(r=>r.id===id);
         const changes=[];
