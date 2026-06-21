@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+import { ethers } from 'ethers';
+
 export const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
 export const DEFAULT_MAINTENANCE=true;
 export const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
@@ -32,3 +35,26 @@ export const REMIT_ABI=[
   {inputs:[{name:'',type:'address'}],name:'nonces',outputs:[{name:'',type:'uint256'}],stateMutability:'view',type:'function'}
 ];
 export const ERC20_ABI=['function balanceOf(address) view returns (uint256)','function allowance(address,address) view returns (uint256)','function approve(address,uint256) returns (bool)','function transfer(address,uint256) returns (bool)','function decimals() view returns (uint8)'];
+
+export const short  =a=>a?a.slice(0,6)+'...'+a.slice(-4):'';
+export const sendNotif=(title,body)=>{if('Notification' in window&&Notification.permission==='granted'){if(navigator.serviceWorker?.controller){navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,icon:'/sparkpay-logo.jpg'}));}else{try{new Notification(title,{body,icon:'/sparkpay-logo.jpg'});}catch(_){}}}};
+export const requestNotifPermission=async()=>{if('Notification' in window&&Notification.permission==='default'){await Notification.requestPermission();}};
+export const fmtUsdc=v=>v!=null?parseFloat(ethers.formatUnits(BigInt(v.toString()),18)).toFixed(2):'0.00';
+export const fmtDate=ts=>{if(!ts)return'';const d=new Date(Number(ts)*1000);return d.toLocaleDateString('en',{month:'short',day:'numeric',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});};
+export const fmtTime=ts=>{if(!ts)return'';const d=new Date(Number(ts)*1000);return d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});};
+export const ls     =(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
+export const lsSave =(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+export async function awaitReceipt(provider,hash,ms=120000){
+  const end=Date.now()+ms;
+  let rpcProvider=null;
+  try{rpcProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});}catch(_){}
+  while(Date.now()<end){
+    try{
+      if(rpcProvider){const r=await rpcProvider.getTransactionReceipt(hash);if(r&&r.blockNumber)return r;}
+      const r2=await provider.getTransactionReceipt(hash);if(r2&&r2.blockNumber)return r2;
+    }catch(_){}
+    await new Promise(res=>setTimeout(res,3000));
+  }
+  return null;
+}

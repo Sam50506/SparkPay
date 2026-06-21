@@ -14,6 +14,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { ARC_CHAIN_ID, ARC_CHAIN_HEX, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RPC, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, SCHED_ADDR, REMIT_ADDR, USDC_ADDR, WC_ID, SB_URL, SB_KEY, APP_URL } from './config';
 import { COUNTRIES, ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, CC, flagEmoji, CURRENCY } from './config';
 import { REMIT_ABI, ERC20_ABI } from './config';
+import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
 
 function QRScanner({onScan,onClose}){
   const scannerRef = React.useRef(null);
@@ -470,28 +471,6 @@ const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'
 
 
 
-const short  =a=>a?a.slice(0,6)+'...'+a.slice(-4):'';
-const sendNotif=(title,body)=>{if('Notification' in window&&Notification.permission==='granted'){if(navigator.serviceWorker?.controller){navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,icon:'/sparkpay-logo.jpg'}));}else{try{new Notification(title,{body,icon:'/sparkpay-logo.jpg'});}catch(_){}}}};
-const requestNotifPermission=async()=>{if('Notification' in window&&Notification.permission==='default'){await Notification.requestPermission();}};
-const fmtUsdc=v=>v!=null?parseFloat(ethers.formatUnits(BigInt(v.toString()),18)).toFixed(2):'0.00';
-const fmtDate=ts=>{if(!ts)return'';const d=new Date(Number(ts)*1000);return d.toLocaleDateString('en',{month:'short',day:'numeric',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});};
-const fmtTime=ts=>{if(!ts)return'';const d=new Date(Number(ts)*1000);return d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});};
-const ls     =(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
-const lsSave =(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
-
-async function awaitReceipt(provider,hash,ms=120000){
-  const end=Date.now()+ms;
-  let rpcProvider=null;
-  try{rpcProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});}catch(_){}
-  while(Date.now()<end){
-    try{
-      if(rpcProvider){const r=await rpcProvider.getTransactionReceipt(hash);if(r&&r.blockNumber)return r;}
-      const r2=await provider.getTransactionReceipt(hash);if(r2&&r2.blockNumber)return r2;
-    }catch(_){}
-    await new Promise(res=>setTimeout(res,3000));
-  }
-  return null;
-}
 
 function buildChart(txns){
   const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return{label:d.toLocaleDateString('en',{weekday:'short'}),date:d,sent:0};});
