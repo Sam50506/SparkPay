@@ -15,6 +15,7 @@ import { ARC_CHAIN_ID, ARC_CHAIN_HEX, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RP
 import { COUNTRIES, ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, CC, flagEmoji, CURRENCY } from './config';
 import { REMIT_ABI, ERC20_ABI } from './config';
 import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
+import { buildChart } from './config';
 
 function QRScanner({onScan,onClose}){
   const scannerRef = React.useRef(null);
@@ -472,11 +473,6 @@ const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'
 
 
 
-function buildChart(txns){
-  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return{label:d.toLocaleDateString('en',{weekday:'short'}),date:d,sent:0};});
-  txns.filter(tx=>!tx.received&&tx.type!=='refund'&&tx.status!=='cancelled'&&tx.status!=='scheduled').forEach(tx=>{const txDate=new Date(Number(tx.timestamp)*1000);const label=txDate.toLocaleDateString('en',{weekday:'short'});const slot=days.find(d=>d.label===label&&d.date.toDateString()===txDate.toDateString());if(slot){let n;if(typeof tx.amount==='bigint'||typeof tx.amount==='object'){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
-  return days;
-}
 
 function addrColor(addr){const colors=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#EF4444','#06B6D4','#F97316'];return colors[parseInt(addr.slice(2,4),16)%colors.length];}
 function isValidAddr(a){return a.trim().length===42&&a.trim().slice(0,2).toLowerCase()==='0x';}
