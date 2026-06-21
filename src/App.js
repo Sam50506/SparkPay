@@ -13,6 +13,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { ARC_CHAIN_ID, ARC_CHAIN_HEX, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RPC, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, SCHED_ADDR, REMIT_ADDR, USDC_ADDR, WC_ID, SB_URL, SB_KEY, APP_URL } from './config';
 import { COUNTRIES, ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, CC, flagEmoji, CURRENCY } from './config';
+import { REMIT_ABI, ERC20_ABI } from './config';
 
 function QRScanner({onScan,onClose}){
   const scannerRef = React.useRef(null);
@@ -468,17 +469,6 @@ const sbSelect=(table,query)=>sbFetch('/rest/v1/'+table+'?'+query);
 const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'PATCH',body:JSON.stringify(data)});
 
 
-const REMIT_ABI=[
-  {inputs:[{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'}],name:'createInvoice',outputs:[{name:'',type:'bytes32'}],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:'token',type:'address'},{name:'invoiceId',type:'bytes32'}],name:'payInvoice',outputs:[],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:'token',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'}],name:'sendMoney',outputs:[],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:"recipients",type:"address[]"},{name:"amounts",type:"uint256[]"},{name:"countries",type:"string[]"}],name:"batchSend",outputs:[],stateMutability:"payable",type:"function"},
-  {inputs:[{name:'user',type:'address'}],name:'getPayments',outputs:[{components:[{name:'sender',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'},{name:'timestamp',type:'uint256'},{name:'invoiceId',type:'bytes32'}],name:'',type:'tuple[]'}],stateMutability:'view',type:'function'},
-  {inputs:[{name:'user',type:'address'}],name:'getUserInvoices',outputs:[{name:'',type:'bytes32[]'}],stateMutability:'view',type:'function'},
-  {inputs:[{name:'',type:'bytes32'}],name:'invoices',outputs:[{name:'creator',type:'address'},{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'},{name:'paid',type:'bool'},{name:'createdAt',type:'uint256'},{name:'nonce',type:'uint256'}],stateMutability:'view',type:'function'},
-  {inputs:[{name:'',type:'address'}],name:'nonces',outputs:[{name:'',type:'uint256'}],stateMutability:'view',type:'function'}
-];
-const ERC20_ABI=['function balanceOf(address) view returns (uint256)','function allowance(address,address) view returns (uint256)','function approve(address,uint256) returns (bool)','function transfer(address,uint256) returns (bool)','function decimals() view returns (uint8)'];
 
 const short  =a=>a?a.slice(0,6)+'...'+a.slice(-4):'';
 const sendNotif=(title,body)=>{if('Notification' in window&&Notification.permission==='granted'){if(navigator.serviceWorker?.controller){navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,icon:'/sparkpay-logo.jpg'}));}else{try{new Notification(title,{body,icon:'/sparkpay-logo.jpg'});}catch(_){}}}};
