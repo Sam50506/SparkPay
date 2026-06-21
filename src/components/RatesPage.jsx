@@ -1,0 +1,6 @@
+import React from 'react';
+import { ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, flagEmoji } from '../config';
+
+export default function RatesPage({ rates, rateSearch, setRateSearch }) {
+  return (<div className="ap-card"><div className="ap-card-title">Live Exchange Rates</div><div className="ap-card-sub">1 USDC = 1 USD, updated live</div><input value={rateSearch} onChange={e=>setRateSearch(e.target.value)} placeholder="Search country..." style={{width:'100%',padding:'10px 14px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:14,outline:'none',marginTop:14,marginBottom:8,boxSizing:'border-box'}}/><div>{ALL_COUNTRIES.filter(c=>!rateSearch||c.toLowerCase().includes(rateSearch.toLowerCase())).map(c=>{const cur=ALL_CURRENCY[c],rate=rates[cur];return(<div key={c} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 0',borderBottom:'1px solid var(--b0)'}}><div style={{display:'flex',alignItems:'center',gap:10}}><span style={{fontSize:20}}>{flagEmoji(ALL_CC[c])}</span><div><div style={{fontWeight:700,color:'var(--tx1)',fontSize:14}}>{c}</div><div style={{fontSize:11,color:'var(--tx3)'}}>{cur}</div></div></div><div style={{fontSize:15,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{rate?rate.toLocaleString('en',{maximumFractionDigits:2}):'...'}</div></div>);})}</div></div>);
+}
