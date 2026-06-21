@@ -30,7 +30,37 @@ const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { action, request_id, payment_id, request_type } = req.body;
+  const { action, request_id, payment_id, request_type, request_ids } = req.body;
+
+  // Handle delete action
+  if (action === 'delete') {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    let authorized = false;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded.address === ADMIN_ADDRESS) authorized = true;
+      } catch (e) {}
+    }
+    if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
+    if (!authorized) {
+      return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
+    }
+    if (!Array.isArray(request_ids) || request_ids.length === 0) {
+      return res.status(400).json({error: 'request_ids required'});
+    }
+    try {
+      const idsFilter = request_ids.join(',');
+      await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=in.(${idsFilter})`, {
+        method: 'DELETE',
+        headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`}
+      });
+      return res.json({success: true});
+    } catch(e) {
+      return res.status(500).json({error: e.message});
+    }
+  }
 
   // Handle approve/reject actions
   if (action === 'approve' || action === 'reject') {
