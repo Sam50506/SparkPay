@@ -16,6 +16,7 @@ import { COUNTRIES, ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, CC, flagEmoji, CURRENCY
 import { REMIT_ABI, ERC20_ABI } from './config';
 import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
 import { buildChart } from './config';
+import { addrColor, isValidAddr } from './config';
 
 function QRScanner({onScan,onClose}){
   const scannerRef = React.useRef(null);
@@ -474,8 +475,6 @@ const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'
 
 
 
-function addrColor(addr){const colors=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#EF4444','#06B6D4','#F97316'];return colors[parseInt(addr.slice(2,4),16)%colors.length];}
-function isValidAddr(a){return a.trim().length===42&&a.trim().slice(0,2).toLowerCase()==='0x';}
 function CountrySelect({value,onChange}){
   const[open,setOpen]=React.useState(false);
   const[ctrySearch,setCtrySearch]=React.useState('');

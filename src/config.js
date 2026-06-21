@@ -64,3 +64,6 @@ export function buildChart(txns){
   txns.filter(tx=>!tx.received&&tx.type!=='refund'&&tx.status!=='cancelled'&&tx.status!=='scheduled').forEach(tx=>{const txDate=new Date(Number(tx.timestamp)*1000);const label=txDate.toLocaleDateString('en',{weekday:'short'});const slot=days.find(d=>d.label===label&&d.date.toDateString()===txDate.toDateString());if(slot){let n;if(typeof tx.amount==='bigint'||typeof tx.amount==='object'){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
   return days;
 }
+
+export function addrColor(addr){const colors=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#EF4444','#06B6D4','#F97316'];return colors[parseInt(addr.slice(2,4),16)%colors.length];}
+export function isValidAddr(a){return a.trim().length===42&&a.trim().slice(0,2).toLowerCase()==='0x';}
