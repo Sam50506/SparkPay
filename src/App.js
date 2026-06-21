@@ -11,6 +11,7 @@ import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { QRCodeSVG } from 'qrcode.react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { ARC_CHAIN_ID, ARC_CHAIN_HEX, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RPC, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, SCHED_ADDR, REMIT_ADDR, USDC_ADDR, WC_ID, SB_URL, SB_KEY, APP_URL } from './config';
 
 function QRScanner({onScan,onClose}){
   const scannerRef = React.useRef(null);
@@ -459,20 +460,6 @@ function getProvider() {
   });
 }
 
-const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
-const DEFAULT_MAINTENANCE=true;
-const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
-const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
-const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
-const ARC_RPC_FALLBACK2='https://arc-testnet.drpc.org';
-const ARC_RPC_FALLBACK3='https://5042002.rpc.thirdweb.com';
-const SCHED_ADDR = '0x1Eb2088f3FE2bD64Dde3c770f87a5047f99b8946';
-const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xEC605Cea7C1270C01A3e7B869f762CfDAB8c8E41';
-const USDC_ADDR  = process.env.REACT_APP_USDC_ADDR||'0x3600000000000000000000000000000000000000';
-const WC_ID      = process.env.REACT_APP_WC_ID||'';
-const SB_URL     = process.env.REACT_APP_SUPABASE_URL||'';
-const SB_KEY     = process.env.REACT_APP_SUPABASE_ANON_KEY||'';
-const APP_URL    = 'https://sparkpay-app.vercel.app';
 
 const sbFetch=(path,opts={})=>fetch(SB_URL+path,{...opts,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}}).then(async r=>{if(!r.ok)throw new Error(await r.text());return r.json();});
 const sbInsert=(table,data)=>sbFetch('/rest/v1/'+table,{method:'POST',body:JSON.stringify(data)});

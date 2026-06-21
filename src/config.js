@@ -1,0 +1,14 @@
+export const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
+export const DEFAULT_MAINTENANCE=true;
+export const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
+export const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
+export const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
+export const ARC_RPC_FALLBACK2='https://arc-testnet.drpc.org';
+export const ARC_RPC_FALLBACK3='https://5042002.rpc.thirdweb.com';
+export const SCHED_ADDR = '0x1Eb2088f3FE2bD64Dde3c770f87a5047f99b8946';
+export const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xEC605Cea7C1270C01A3e7B869f762CfDAB8c8E41';
+export const USDC_ADDR  = process.env.REACT_APP_USDC_ADDR||'0x3600000000000000000000000000000000000000';
+export const WC_ID      = process.env.REACT_APP_WC_ID||'';
+export const SB_URL     = process.env.REACT_APP_SUPABASE_URL||'';
+export const SB_KEY     = process.env.REACT_APP_SUPABASE_ANON_KEY||'';
+export const APP_URL    = 'https://sparkpay-app.vercel.app';
