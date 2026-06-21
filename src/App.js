@@ -298,9 +298,14 @@ function AppInner() {
   const[cashbackPending,setCashbackPending]=useState(0);const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
   useEffect(()=>{
     if(!address)return;
-    sbSelect('cashback_balances','wallet_address=eq.'+address+'&select=pending_amount').then(rows=>{
-      setCashbackPending(rows?.[0]?.pending_amount?parseFloat(rows[0].pending_amount):0);
-    }).catch(()=>{});
+    const fetchCashback=()=>{
+      sbSelect('cashback_balances','wallet_address=eq.'+address+'&select=pending_amount').then(rows=>{
+        setCashbackPending(rows?.[0]?.pending_amount?parseFloat(rows[0].pending_amount):0);
+      }).catch(()=>{});
+    };
+    fetchCashback();
+    const t=setInterval(fetchCashback,15000);
+    return()=>clearInterval(t);
   },[address]);
   const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[claimAmt,setClaimAmt]=useState('');const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);const[manageTxns,setManageTxns]=useState(false);const[rateSearch,setRateSearch]=useState('');const[manageContacts,setManageContacts]=useState(false);const[selectedContacts,setSelectedContacts]=useState([]);const[cSearch,setCSearch]=useState('');const[showAdd,setShowAdd]=useState(false);const[selectedTxns,setSelectedTxns]=useState([]);const[deletedHashes,setDeletedHashes]=useState(()=>new Set(ls('arc_deleted_hashes_'+address||'',[])));const[txSearch,setTxSearch]=useState('');const[txFilter,setTxFilter]=useState('all');const[txPage,setTxPage]=useState(1);const[expandedTx,setExpandedTx]=useState(null);const[showTxns,setShowTxns]=useState(true);const[pendingClaimsCount,setPendingClaimsCount]=useState(0);
 
@@ -323,6 +328,7 @@ function AppInner() {
 
   const refreshBal=useCallback(async()=>{if(!address)return;try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const b=await rp.getBalance(address);setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));}catch{}},[address]);
   useEffect(()=>{if(signer&&address){refreshBal();setContacts(ls('arc_contacts_'+address,[]));setContactsLoaded(true);}},[signer,address,refreshBal]);
+  useEffect(()=>{if(!signer||!address)return;const t=setInterval(refreshBal,15000);return()=>clearInterval(t);},[signer,address,refreshBal]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
   const loadDeletedHashes=useCallback(async()=>{
