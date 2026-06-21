@@ -7,6 +7,7 @@ import TimePicker from './components/TimePicker';
 import SplashScreen from './components/SplashScreen';
 import CountrySelect from './components/CountrySelect';
 import ConfirmModal from './components/ConfirmModal';
+import QRModal from './components/QRModal';
 
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
@@ -353,32 +354,6 @@ function NavTooltip({text}){
   return(<span ref={ref} style={{position:'relative',display:'inline-flex',flexShrink:0}}>{open&&<div className="ap-tip-pop">{text}</div>}</span>);
 }
 
-function QRModal({address,onClose}){
-  const[amt,setAmt]=useState('');
-  const link=APP_URL+'/?pay='+address+(amt?'&amount='+amt:'');
-  return(
-    <div className="ap-modal-bg" onClick={onClose}>
-      <div className="ap-modal" onClick={e=>e.stopPropagation()}>
-        <div className="ap-modal-title">Receive USDC</div>
-        <div className="ap-modal-sub">Share your payment link or QR code</div>
-        <div className="ap-qr-wrap">
-          <div className="ap-qr-box"><QRCodeSVG value={link} size={180} level="M"/></div>
-          <div style={{width:'100%'}}>
-            <div className="ap-label" style={{marginBottom:7}}>Optional Amount</div>
-            <input className="ap-input" type="number" placeholder="0.00 USDC" value={amt} onChange={e=>setAmt(e.target.value)} style={{marginBottom:14}}/>
-            <div className="ap-label" style={{marginBottom:7}}>Payment Link</div>
-            <div className="ap-qr-link">{link}</div>
-            <div style={{display:'flex',gap:8,marginTop:10}}>
-              <button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>navigator.clipboard?.writeText(link)}>Copy Link</button>
-              <button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>navigator.clipboard?.writeText(address)}>Copy Address</button>
-            </div>
-          </div>
-        </div>
-        <button className="ap-btn ap-btn-ghost" style={{width:'100%',marginTop:16}} onClick={onClose}>Close</button>
-      </div>
-    </div>
-  );
-}
 
 function CashbackToast({amount,rarity,onClose}){
   useEffect(()=>{const t=setTimeout(onClose,4000);return()=>clearTimeout(t);},[onClose]);
