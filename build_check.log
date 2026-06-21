@@ -2,7 +2,7 @@
 > arc-remittance@1.0.0 build
 > craco build
 
-(node:27681) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(node:27254) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
 (Use `node --trace-deprecation ...` to show where the warning was created)
 Creating an optimized production build...
 Compiled with warnings.
@@ -119,38 +119,39 @@ Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_
 
 [eslint] 
 src/App.js
-  Line 15:8:      'Lottie' is defined but never used                                                                                                                                                                                                                   no-unused-vars
-  Line 16:8:      'arcpayAnimation' is defined but never used                                                                                                                                                                                                          no-unused-vars
-  Line 20:10:     'QRCodeSVG' is defined but never used                                                                                                                                                                                                                no-unused-vars
-  Line 22:102:    'ARC_RPC_FALLBACK2' is defined but never used                                                                                                                                                                                                        no-unused-vars
-  Line 22:121:    'ARC_RPC_FALLBACK3' is defined but never used                                                                                                                                                                                                        no-unused-vars
-  Line 22:198:    'APP_URL' is defined but never used                                                                                                                                                                                                                  no-unused-vars
-  Line 23:10:     'COUNTRIES' is defined but never used                                                                                                                                                                                                                no-unused-vars
-  Line 23:58:     'CC' is defined but never used                                                                                                                                                                                                                       no-unused-vars
-  Line 27:21:     'isValidAddr' is defined but never used                                                                                                                                                                                                              no-unused-vars
-  Line 28:23:     'sbFetch' is defined but never used                                                                                                                                                                                                                  no-unused-vars
-  Line 53:5:      React Hook React.useEffect has a missing dependency: 'onScan'. Either include it or remove the dependency array. If 'onScan' changes too often, find the parent component that defines it and wrap that definition in useCallback                    react-hooks/exhaustive-deps
-  Line 399:38:    'wcInitRef' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
-  Line 399:260:   'isResumed' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
-  Line 411:171:   'editSchedId' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
-  Line 411:183:   'setEditSchedId' is assigned a value but never used                                                                                                                                                                                                  no-unused-vars
-  Line 411:220:   'editSchedData' is assigned a value but never used                                                                                                                                                                                                   no-unused-vars
-  Line 411:234:   'setEditSchedData' is assigned a value but never used                                                                                                                                                                                                no-unused-vars
-  Line 420:996:   'showTxns' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
-  Line 420:1005:  'setShowTxns' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
-  Line 524:5:     React Hook useCallback has a missing dependency: 'awardCashback'. Either include it or remove the dependency array                                                                                                                                   react-hooks/exhaustive-deps
-  Line 525:400:   'idMatch' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
-  Line 525:1299:  React Hook useEffect has missing dependencies: 'loadContractHistory', 'loadDeletedHashes', 'provider', and 'txns'. Either include them or remove the dependency array                                                                                react-hooks/exhaustive-deps
-  Line 525:1384:  React Hook useEffect has a missing dependency: 'fetchMyClaims'. Either include it or remove the dependency array                                                                                                                                     react-hooks/exhaustive-deps
-  Line 568:9:     'schedHashes' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
-  Line 571:9:     'recentRecipients' is assigned a value but never used                                                                                                                                                                                                no-unused-vars
-  Line 630:9:     'renderMulti' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
-  Line 639:9:     'ERC20_APPROVE_ABI' is assigned a value but never used                                                                                                                                                                                               no-unused-vars
-  Line 648:13:    'sched' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
-  Line 713:665:   'grouped' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
-  Line 789:43:    img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                            jsx-a11y/alt-text
-  Line 837:42:    React Hook React.useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array                                                                                                                               react-hooks/exhaustive-deps
-  Line 951:5:     React Hook useEffect has a missing dependency: 'setMaintenanceMode'. Either include it or remove the dependency array. If 'setMaintenanceMode' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  Line 14:10:     'NeedHelpMenu' is defined but never used                                                                                                                                                                                                             no-unused-vars
+  Line 16:8:      'Lottie' is defined but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 17:8:      'arcpayAnimation' is defined but never used                                                                                                                                                                                                          no-unused-vars
+  Line 21:10:     'QRCodeSVG' is defined but never used                                                                                                                                                                                                                no-unused-vars
+  Line 23:102:    'ARC_RPC_FALLBACK2' is defined but never used                                                                                                                                                                                                        no-unused-vars
+  Line 23:121:    'ARC_RPC_FALLBACK3' is defined but never used                                                                                                                                                                                                        no-unused-vars
+  Line 23:198:    'APP_URL' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 24:10:     'COUNTRIES' is defined but never used                                                                                                                                                                                                                no-unused-vars
+  Line 24:58:     'CC' is defined but never used                                                                                                                                                                                                                       no-unused-vars
+  Line 28:21:     'isValidAddr' is defined but never used                                                                                                                                                                                                              no-unused-vars
+  Line 29:23:     'sbFetch' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 54:5:      React Hook React.useEffect has a missing dependency: 'onScan'. Either include it or remove the dependency array. If 'onScan' changes too often, find the parent component that defines it and wrap that definition in useCallback                    react-hooks/exhaustive-deps
+  Line 284:38:    'wcInitRef' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 284:260:   'isResumed' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 296:171:   'editSchedId' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 296:183:   'setEditSchedId' is assigned a value but never used                                                                                                                                                                                                  no-unused-vars
+  Line 296:220:   'editSchedData' is assigned a value but never used                                                                                                                                                                                                   no-unused-vars
+  Line 296:234:   'setEditSchedData' is assigned a value but never used                                                                                                                                                                                                no-unused-vars
+  Line 305:996:   'showTxns' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 305:1005:  'setShowTxns' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 409:5:     React Hook useCallback has a missing dependency: 'awardCashback'. Either include it or remove the dependency array                                                                                                                                   react-hooks/exhaustive-deps
+  Line 410:400:   'idMatch' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 410:1299:  React Hook useEffect has missing dependencies: 'loadContractHistory', 'loadDeletedHashes', 'provider', and 'txns'. Either include them or remove the dependency array                                                                                react-hooks/exhaustive-deps
+  Line 410:1384:  React Hook useEffect has a missing dependency: 'fetchMyClaims'. Either include it or remove the dependency array                                                                                                                                     react-hooks/exhaustive-deps
+  Line 453:9:     'schedHashes' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 456:9:     'recentRecipients' is assigned a value but never used                                                                                                                                                                                                no-unused-vars
+  Line 515:9:     'renderMulti' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 524:9:     'ERC20_APPROVE_ABI' is assigned a value but never used                                                                                                                                                                                               no-unused-vars
+  Line 533:13:    'sched' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 598:665:   'grouped' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 674:43:    img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                            jsx-a11y/alt-text
+  Line 722:42:    React Hook React.useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array                                                                                                                               react-hooks/exhaustive-deps
+  Line 836:5:     React Hook useEffect has a missing dependency: 'setMaintenanceMode'. Either include it or remove the dependency array. If 'setMaintenanceMode' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
 
 src/components/CountrySelect.jsx
   Line 7:9:     'sheetRef' is assigned a value but never used  no-unused-vars
@@ -168,6 +169,12 @@ src/components/MultiSend.jsx
 src/components/OnboardingModal.jsx
   Line 4:3:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
 
+src/components/ScheduledPaymentsPanel.jsx
+  Line 1:17:  'useState' is defined but never used     no-unused-vars
+  Line 1:27:  'useEffect' is defined but never used    no-unused-vars
+  Line 1:38:  'useCallback' is defined but never used  no-unused-vars
+  Line 4:10:  'IC' is defined but never used           no-unused-vars
+
 src/components/TimePicker.jsx
   Line 7:9:  'mins' is assigned a value but never used  no-unused-vars
 
@@ -176,9 +183,9 @@ To ignore, add // eslint-disable-next-line to the line before.
 
 File sizes after gzip:
 
-  989.11 kB (+2 B)  build/static/js/main.c8e66100.js
-  44.49 kB          build/static/js/769.0a8b12e8.chunk.js
-  4.98 kB           build/static/js/171.ae320931.chunk.js
+  989.9 kB (+794 B)  build/static/js/main.97b1cc8f.js
+  44.49 kB           build/static/js/769.0a8b12e8.chunk.js
+  4.98 kB            build/static/js/171.ae320931.chunk.js
 
 The bundle size is significantly larger than recommended.
 Consider reducing it with code splitting: https://goo.gl/9VhYWB
