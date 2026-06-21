@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IC } from '../icons';
 import { SparkPayLogo } from './OnboardingModal';
 import { short } from '../config';

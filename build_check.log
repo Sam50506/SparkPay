@@ -1,0 +1,199 @@
+
+> arc-remittance@1.0.0 build
+> craco build
+
+(node:27681) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Compiled with warnings.
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/environment/src/crypto.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/environment/src/crypto.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/environment/src/env.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/environment/src/env.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/environment/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/environment/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/events/src/events.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/events/src/events.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/events/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/events/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/constants.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/constants.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/env.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/env.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/error.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/error.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/format.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/format.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/routing.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/routing.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/types.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/types.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/url.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/url.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/validators.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/jsonrpc-utils/src/validators.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/api.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/api.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/constants.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/constants.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/types.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/types.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/utils.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/relay-auth/src/utils.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/safe-json/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/safe-json/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/constants/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/constants/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/constants/misc.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/constants/misc.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/constants/time.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/constants/time.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/types/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/types/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/types/watch.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/types/watch.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/utils/convert.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/utils/convert.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/utils/delay.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/utils/delay.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/utils/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/utils/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/watch.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/time/src/watch.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/window-getters/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/window-getters/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/window-metadata/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/@walletconnect/window-metadata/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/core-impl.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/core-impl.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/factories.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/factories.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/permissions.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/permissions.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/retriever.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/camera/retriever.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/code-decoder.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/code-decoder.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/core.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/core.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/html5-qrcode-scanner.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/html5-qrcode-scanner.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/html5-qrcode.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/html5-qrcode.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/image-assets.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/image-assets.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/index.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/index.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/native-bar-code-detector.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/native-bar-code-detector.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/state-manager.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/state-manager.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/storage.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/storage.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/strings.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/strings.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/base.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/base.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/camera-selection-ui.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/camera-selection-ui.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/camera-zoom-ui.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/camera-zoom-ui.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/file-selection-ui.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/file-selection-ui.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/scan-type-selector.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/scan-type-selector.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/torch-button.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/ui/scanner/torch-button.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/utils.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/utils.ts'
+
+Failed to parse source map from '/data/data/com.termux/files/home/sparkpay/node_modules/src/zxing-html5-qrcode-decoder.ts' file: Error: ENOENT: no such file or directory, open '/data/data/com.termux/files/home/sparkpay/node_modules/src/zxing-html5-qrcode-decoder.ts'
+
+[eslint] 
+src/App.js
+  Line 15:8:      'Lottie' is defined but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 16:8:      'arcpayAnimation' is defined but never used                                                                                                                                                                                                          no-unused-vars
+  Line 20:10:     'QRCodeSVG' is defined but never used                                                                                                                                                                                                                no-unused-vars
+  Line 22:102:    'ARC_RPC_FALLBACK2' is defined but never used                                                                                                                                                                                                        no-unused-vars
+  Line 22:121:    'ARC_RPC_FALLBACK3' is defined but never used                                                                                                                                                                                                        no-unused-vars
+  Line 22:198:    'APP_URL' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 23:10:     'COUNTRIES' is defined but never used                                                                                                                                                                                                                no-unused-vars
+  Line 23:58:     'CC' is defined but never used                                                                                                                                                                                                                       no-unused-vars
+  Line 27:21:     'isValidAddr' is defined but never used                                                                                                                                                                                                              no-unused-vars
+  Line 28:23:     'sbFetch' is defined but never used                                                                                                                                                                                                                  no-unused-vars
+  Line 53:5:      React Hook React.useEffect has a missing dependency: 'onScan'. Either include it or remove the dependency array. If 'onScan' changes too often, find the parent component that defines it and wrap that definition in useCallback                    react-hooks/exhaustive-deps
+  Line 399:38:    'wcInitRef' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 399:260:   'isResumed' is assigned a value but never used                                                                                                                                                                                                       no-unused-vars
+  Line 411:171:   'editSchedId' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 411:183:   'setEditSchedId' is assigned a value but never used                                                                                                                                                                                                  no-unused-vars
+  Line 411:220:   'editSchedData' is assigned a value but never used                                                                                                                                                                                                   no-unused-vars
+  Line 411:234:   'setEditSchedData' is assigned a value but never used                                                                                                                                                                                                no-unused-vars
+  Line 420:996:   'showTxns' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
+  Line 420:1005:  'setShowTxns' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 524:5:     React Hook useCallback has a missing dependency: 'awardCashback'. Either include it or remove the dependency array                                                                                                                                   react-hooks/exhaustive-deps
+  Line 525:400:   'idMatch' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 525:1299:  React Hook useEffect has missing dependencies: 'loadContractHistory', 'loadDeletedHashes', 'provider', and 'txns'. Either include them or remove the dependency array                                                                                react-hooks/exhaustive-deps
+  Line 525:1384:  React Hook useEffect has a missing dependency: 'fetchMyClaims'. Either include it or remove the dependency array                                                                                                                                     react-hooks/exhaustive-deps
+  Line 568:9:     'schedHashes' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 571:9:     'recentRecipients' is assigned a value but never used                                                                                                                                                                                                no-unused-vars
+  Line 630:9:     'renderMulti' is assigned a value but never used                                                                                                                                                                                                     no-unused-vars
+  Line 639:9:     'ERC20_APPROVE_ABI' is assigned a value but never used                                                                                                                                                                                               no-unused-vars
+  Line 648:13:    'sched' is assigned a value but never used                                                                                                                                                                                                           no-unused-vars
+  Line 713:665:   'grouped' is assigned a value but never used                                                                                                                                                                                                         no-unused-vars
+  Line 789:43:    img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                            jsx-a11y/alt-text
+  Line 837:42:    React Hook React.useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array                                                                                                                               react-hooks/exhaustive-deps
+  Line 951:5:     React Hook useEffect has a missing dependency: 'setMaintenanceMode'. Either include it or remove the dependency array. If 'setMaintenanceMode' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src/components/CountrySelect.jsx
+  Line 7:9:     'sheetRef' is assigned a value but never used  no-unused-vars
+  Line 11:280:  Duplicate key 'display'                        no-dupe-keys
+  Line 34:278:  Duplicate key 'display'                        no-dupe-keys
+  Line 57:10:   'OKXSelect' is defined but never used          no-unused-vars
+
+src/components/Faucet.jsx
+  Line 8:7:  'ls' is assigned a value but never used  no-unused-vars
+
+src/components/MultiSend.jsx
+  Line 42:10:   'showSkipped' is assigned a value but never used  no-unused-vars
+  Line 100:13:  'dataRowNum' is assigned a value but never used   no-unused-vars
+
+src/components/OnboardingModal.jsx
+  Line 4:3:  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+src/components/TimePicker.jsx
+  Line 7:9:  'mins' is assigned a value but never used  no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  989.11 kB (+2 B)  build/static/js/main.c8e66100.js
+  44.49 kB          build/static/js/769.0a8b12e8.chunk.js
+  4.98 kB           build/static/js/171.ae320931.chunk.js
+
+The bundle size is significantly larger than recommended.
+Consider reducing it with code splitting: https://goo.gl/9VhYWB
+You can also analyze the project dependencies: https://goo.gl/LeUzfb
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
