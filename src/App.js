@@ -19,6 +19,7 @@ import { REMIT_ABI, ERC20_ABI } from './config';
 import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
 import { buildChart } from './config';
 import { addrColor, isValidAddr } from './config';
+import { getProvider, sbFetch, sbInsert, sbSelect, sbUpdate } from './config';
 
 function QRScanner({onScan,onClose}){
   const scannerRef = React.useRef(null);
@@ -338,30 +339,6 @@ const OnboardingModal=({onDone})=>{
 
 
 
-function getProvider() {
-  return new Promise((resolve) => {
-    const tryResolve = () => {
-      if(window.mises?.ethereum) return window.mises.ethereum;
-      const {ethereum}=window; if(!ethereum) return null;
-      if(ethereum.providers?.length>0){
-        const mises=ethereum.providers.find(p=>p.isMises);if(mises)return mises;
-        const mm=ethereum.providers.find(p=>p.isMetaMask&&!p.isBraveWallet);if(mm)return mm;
-        return ethereum.providers[0];
-      }
-      if(ethereum.isMises) return ethereum;
-      if(ethereum.isMetaMask||ethereum._metamask) return ethereum;
-      return ethereum;
-    };
-    const result=tryResolve(); if(result) return resolve(result);
-    let attempts=0; const timer=setInterval(()=>{attempts++;const r=tryResolve();if(r){clearInterval(timer);return resolve(r);}if(attempts>30){clearInterval(timer);resolve(null);}},100);
-  });
-}
-
-
-const sbFetch=(path,opts={})=>fetch(SB_URL+path,{...opts,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}}).then(async r=>{if(!r.ok)throw new Error(await r.text());return r.json();});
-const sbInsert=(table,data)=>sbFetch('/rest/v1/'+table,{method:'POST',body:JSON.stringify(data)});
-const sbSelect=(table,query)=>sbFetch('/rest/v1/'+table+'?'+query);
-const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'PATCH',body:JSON.stringify(data)});
 
 
 

@@ -67,3 +67,28 @@ export function buildChart(txns){
 
 export function addrColor(addr){const colors=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#EF4444','#06B6D4','#F97316'];return colors[parseInt(addr.slice(2,4),16)%colors.length];}
 export function isValidAddr(a){return a.trim().length===42&&a.trim().slice(0,2).toLowerCase()==='0x';}
+
+export function getProvider() {
+  return new Promise((resolve) => {
+    const tryResolve = () => {
+      if(window.mises?.ethereum) return window.mises.ethereum;
+      const {ethereum}=window; if(!ethereum) return null;
+      if(ethereum.providers?.length>0){
+        const mises=ethereum.providers.find(p=>p.isMises);if(mises)return mises;
+        const mm=ethereum.providers.find(p=>p.isMetaMask&&!p.isBraveWallet);if(mm)return mm;
+        return ethereum.providers[0];
+      }
+      if(ethereum.isMises) return ethereum;
+      if(ethereum.isMetaMask||ethereum._metamask) return ethereum;
+      return ethereum;
+    };
+    const result=tryResolve(); if(result) return resolve(result);
+    let attempts=0; const timer=setInterval(()=>{attempts++;const r=tryResolve();if(r){clearInterval(timer);return resolve(r);}if(attempts>30){clearInterval(timer);resolve(null);}},100);
+  });
+}
+
+
+export const sbFetch=(path,opts={})=>fetch(SB_URL+path,{...opts,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})}}).then(async r=>{if(!r.ok)throw new Error(await r.text());return r.json();});
+export const sbInsert=(table,data)=>sbFetch('/rest/v1/'+table,{method:'POST',body:JSON.stringify(data)});
+export const sbSelect=(table,query)=>sbFetch('/rest/v1/'+table+'?'+query);
+export const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'PATCH',body:JSON.stringify(data)});
