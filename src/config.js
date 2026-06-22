@@ -92,3 +92,5 @@ export const sbFetch=(path,opts={})=>fetch(SB_URL+path,{...opts,headers:{'apikey
 export const sbInsert=(table,data)=>sbFetch('/rest/v1/'+table,{method:'POST',body:JSON.stringify(data)});
 export const sbSelect=(table,query)=>sbFetch('/rest/v1/'+table+'?'+query);
 export const sbUpdate=(table,query,data)=>sbFetch('/rest/v1/'+table+'?'+query,{method:'PATCH',body:JSON.stringify(data)});
+
+export const cleanErr=e=>{if(!e)return'Something went wrong. Please try again.';if(e?.code===4001||e?.code==='ACTION_REJECTED')return'Transaction cancelled.';if(e?.reason)return e.reason;if(e?.message){const m=e.message;if(m.includes('insufficient'))return'Insufficient balance.';if(m.includes('reverted'))return'Transaction reverted: '+(e?.data?.message||e?.error?.message||'Check balance and release time must be at least 10 mins in future.');if(m.includes('Too early'))return'Release time must be in the future.';if(m.includes('user rejected'))return'Transaction cancelled.';if(m.includes('network'))return'Network error. Please check your connection.';if(m.length<100)return m;}return'Transaction failed. Please try again.';};

@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 import { useInvoices } from './hooks/useInvoices';
+import { useBalance } from './hooks/useBalance';
+import { useCashback } from './hooks/useCashback';
 import Faucet from './components/Faucet';
 import MultiSend from './components/MultiSend';
 import TimePicker from './components/TimePicker';
@@ -31,7 +33,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { ARC_CHAIN_ID, ARC_CHAIN_HEX, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RPC, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, SCHED_ADDR, REMIT_ADDR, USDC_ADDR, WC_ID, SB_URL, SB_KEY, APP_URL } from './config';
 import { COUNTRIES, ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, CC, flagEmoji, CURRENCY } from './config';
 import { REMIT_ABI, ERC20_ABI } from './config';
-import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
+import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt, cleanErr } from './config';
 import { buildChart } from './config';
 import { addrColor, isValidAddr } from './config';
 import { getProvider, sbFetch, sbInsert, sbSelect, sbUpdate } from './config';
@@ -245,7 +247,7 @@ function AppInner() {
       setMaintenanceLoaded(true);
     }).catch(()=>setMaintenanceLoaded(true));
   },[]);
-  const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
+  const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[walletName,setWalletName]=useState('');
   const wcProvRef=useRef(null);const wcInitRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const isPWA=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;const[splash,setSplash]=useState(!isPWA);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[showWalletPrompt,setShowWalletPrompt]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(false);
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
@@ -259,7 +261,7 @@ function AppInner() {
   const[contacts,setContacts]=useState([]);const[contactsLoaded,setContactsLoaded]=useState(false);const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('');const[editId,setEditId]=useState(null);
   const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'',freq:'weekly',next:'',time:'09:00'});const[editSchedId,setEditSchedId]=useState(null);const[editSchedData,setEditSchedData]=useState(null);
   const[defCtry,setDefCtry]=useState(()=>ls('arc_ctry',''));
-  const[cashbackPending,setCashbackPending]=useState(0);const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
+  
   useEffect(()=>{
     if(!address)return;
     const fetchCashback=()=>{
@@ -271,7 +273,7 @@ function AppInner() {
     const t=setInterval(fetchCashback,15000);
     return()=>clearInterval(t);
   },[address]);
-  const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[claimAmt,setClaimAmt]=useState('');const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);const[manageTxns,setManageTxns]=useState(false);const[rateSearch,setRateSearch]=useState('');const[manageContacts,setManageContacts]=useState(false);const[selectedContacts,setSelectedContacts]=useState([]);const[cSearch,setCSearch]=useState('');const[showAdd,setShowAdd]=useState(false);const[selectedTxns,setSelectedTxns]=useState([]);const[deletedHashes,setDeletedHashes]=useState(()=>new Set(ls('arc_deleted_hashes_'+address||'',[])));const[txSearch,setTxSearch]=useState('');const[txFilter,setTxFilter]=useState('all');const[txPage,setTxPage]=useState(1);const[expandedTx,setExpandedTx]=useState(null);const[showTxns,setShowTxns]=useState(true);const[pendingClaimsCount,setPendingClaimsCount]=useState(0);
+  const[manageTxns,setManageTxns]=useState(false);const[rateSearch,setRateSearch]=useState('');const[manageContacts,setManageContacts]=useState(false);const[selectedContacts,setSelectedContacts]=useState([]);const[cSearch,setCSearch]=useState('');const[showAdd,setShowAdd]=useState(false);const[selectedTxns,setSelectedTxns]=useState([]);const[deletedHashes,setDeletedHashes]=useState(()=>new Set(ls('arc_deleted_hashes_'+address||'',[])));const[txSearch,setTxSearch]=useState('');const[txFilter,setTxFilter]=useState('all');const[txPage,setTxPage]=useState(1);const[expandedTx,setExpandedTx]=useState(null);const[showTxns,setShowTxns]=useState(true);const[pendingClaimsCount,setPendingClaimsCount]=useState(0);
 
   useEffect(()=>{if(address&&contactsLoaded)lsSave('arc_contacts_'+address,contacts);},[contacts,address,contactsLoaded]);
   useEffect(()=>lsSave('arc_scheds',scheds),[scheds]);
@@ -290,9 +292,9 @@ function AppInner() {
 
   useEffect(()=>{if(!window.ethereum)return;const onAcc=a=>{if(!a.length){setTimeout(()=>{if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(accounts=>{if(!accounts.length)doDisconnect();})},1000);}else setAddress(a[0]);};const onChain=(chainId)=>{};window.ethereum.on('accountsChanged',onAcc);window.ethereum.on('chainChanged',onChain);return()=>{window.ethereum.removeListener('accountsChanged',onAcc);window.ethereum.removeListener('chainChanged',onChain);};},[doDisconnect]);
 
-  const refreshBal=useCallback(async()=>{if(!address)return;try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const b=await rp.getBalance(address);setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));}catch{}},[address]);
-  useEffect(()=>{if(signer&&address){refreshBal();setContacts(ls('arc_contacts_'+address,[]));setContactsLoaded(true);}},[signer,address,refreshBal]);
-  useEffect(()=>{if(!signer||!address)return;const t=setInterval(refreshBal,15000);return()=>clearInterval(t);},[signer,address,refreshBal]);
+  const { balance, setBalance, refreshBal } = useBalance(address, signer);
+  const { cashbackPending, setCashbackPending, cashbackHistory, setCashbackHistory, showCashbackToast, setShowCashbackToast, cashbackToastData, setCashbackToastData, claimLoading, claimSubmitted, setClaimSubmitted, claimAmt, setClaimAmt, myClaimsHistory, claimsLoading, awardCashback, fetchMyClaims, claimCashback } = useCashback({ address, setStatus });
+  useEffect(()=>{if(signer&&address){setContacts(ls('arc_contacts_'+address,[]));setContactsLoaded(true);}},[signer,address]);
 
   const getC=()=>({remit:new ethers.Contract(REMIT_ADDR,REMIT_ABI,signer),usdc:new ethers.Contract(USDC_ADDR,ERC20_ABI,signer)});
   const loadDeletedHashes=useCallback(async()=>{
@@ -379,22 +381,10 @@ const loadContractHistory=useCallback(async()=>{if(!address)return;try{
   },[address]);
   useEffect(()=>{if(tab==='history'&&signer){loadDeletedHashes().then(()=>loadContractHistory());setTxPage(1);setTxSearch('');setTxFilter('all');setExpandedTx(null);}if(signer&&address){(async()=>{try{const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer.provider||provider);const scheduledTxns=txns.filter(t=>t.type==='scheduled'&&t.status==='scheduled');for(const st of scheduledTxns){const idMatch=st.id&&st.id.includes('_sched')?null:null;}const count=Number(await sched.paymentCount());const onChainMap={};for(let i=0;i<count;i++){const p=await sched.getPayment(i);if(p.sender.toLowerCase()===address.toLowerCase()){onChainMap[i]=p;}}setTxns(prev=>{let changed=false;const updated=prev.map(t=>{if(t.type==='scheduled'&&t.status==='scheduled'){const match=Object.entries(onChainMap).find(([id,p])=>p.recipient.toLowerCase()===t.recipient.toLowerCase()&&Math.abs(parseFloat(ethers.formatUnits(p.amount,18))-parseFloat(t.amount))<0.001&&Number(p.releaseTime)===Number(t.releaseTime||t.timestamp));if(match){const[,p]=match;if(p.executed){changed=true;return{...t,status:'confirmed'};}if(p.cancelled){changed=true;return{...t,status:'cancelled'};}}}return t;});if(changed)lsSave('arc_txhistory_'+address,updated);return changed?updated:prev;});}catch(e){console.log('sync error',e);}})();}},[tab,signer,address]);useEffect(()=>{if(tab==='rewards'&&address){fetchMyClaims();}},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
 
-  const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;
-    try{
-      const r=await fetch('/api/cashback-award',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet_address:address,amount:amt,tx_hash:txHash})});
-      const d=await r.json();
-      if(d.success){setCashbackPending(d.newBalance);}
-    }catch(e){console.error('Cashback award failed:',e);}
-    setCashbackHistory(prev=>[{amount:amt,txHash,ts:Date.now()},...prev.slice(0,49)]);setCashbackToastData({amount:amt.toFixed(3)});setShowCashbackToast(true);
-  },[address]);
+  
 
-  const fetchMyClaims=async()=>{if(!address)return;setClaimsLoading(true);try{const rows=await sbSelect('cashback_claims','wallet_address=eq.'+address+'&order=timestamp.desc&limit=10');setMyClaimsHistory(rows||[]);if(rows&&rows.length>0&&rows[0].status==='paid'&&claimSubmitted===true){setClaimSubmitted('paid');setTimeout(()=>setClaimSubmitted(false),5000);}}catch(e){console.error(e);}setClaimsLoading(false);};
-  const claimCashback=async()=>{const amt=parseFloat(claimAmt)||cashbackPending;if(cashbackPending<5||claimLoading||amt<5||amt>cashbackPending)return;setClaimLoading(true);try{
-    await sbInsert('cashback_claims',{wallet_address:address,amount:amt,timestamp:new Date().toISOString(),status:'pending'});
-    const newBalance=parseFloat((cashbackPending-amt).toFixed(3));
-    await sbUpdate('cashback_balances','wallet_address=eq.'+address,{pending_amount:newBalance,updated_at:new Date().toISOString()});
-    setClaimSubmitted(true);setCashbackPending(newBalance);setStatus({type:'success',msg:'Cashback claim submitted. Your USDC will be sent to your wallet shortly.'});
-  }catch(e){setStatus({type:'error',msg:'Claim failed: '+e.message});}setClaimLoading(false);};
+  
+  
 
   const addArc=p=>({chainId:ARC_CHAIN_HEX,chainName:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:[ARC_RPC||ARC_RPC_FALLBACK],blockExplorerUrls:['https://testnet.arcscan.app'],...p});
   const ensureArc=async eth=>{try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902||e.code===-32603){setStatus({type:'info',msg:'Adding Arc Testnet to your wallet...'});try{await eth.request({method:'wallet_addEthereumChain',params:[addArc({})]});}catch(ae){setStatus({type:'error',msg:'Please add Arc Testnet manually in your wallet settings. Chain ID: 5042002, RPC: https://rpc.testnet.arc.network'});throw ae;}}else throw e;}};
@@ -423,7 +413,7 @@ const loadContractHistory=useCallback(async()=>{if(!address)return;try{
   const recentRecipients=[...new Set(txns.filter(t=>t.recipient&&!t.hash?.startsWith('0xdemo')).map(t=>t.recipient))].slice(0,5);
   const convertedVal=(()=>{if(!sendAmt||!sendCtry)return null;const r=rates[CURRENCY[sendCtry]];if(!r)return null;return(parseFloat(sendAmt)*r).toLocaleString('en',{maximumFractionDigits:0});})();
   const statusCls=s=>!s?null:({success:'ap-status ap-status-success',error:'ap-status ap-status-error',warning:'ap-status ap-status-warning',info:'ap-status ap-status-info'}[s.type]||'ap-status ap-status-info');
-  const cleanErr=e=>{if(!e)return'Something went wrong. Please try again.';if(e?.code===4001||e?.code==='ACTION_REJECTED')return'Transaction cancelled.';if(e?.reason)return e.reason;if(e?.message){const m=e.message;if(m.includes('insufficient'))return'Insufficient balance.';if(m.includes('reverted'))return'Transaction reverted: '+(e?.data?.message||e?.error?.message||'Check balance and release time must be at least 10 mins in future.');if(m.includes('Too early'))return'Release time must be in the future.';if(m.includes('user rejected'))return'Transaction cancelled.';if(m.includes('network'))return'Network error. Please check your connection.';if(m.length<100)return m;}return'Transaction failed. Please try again.';};
+
   const { invPayer, setInvPayer, invAmt, setInvAmt, invDesc, setInvDesc, invCtry, setInvCtry, invId, setInvId, payDet, setPayDet, handleCreateInv, handlePayInv, handlePayInvReview } = useInvoices({ address, signer, provider, setStatus, setLoading, setTxns, awardCashback, refreshBal, payId, setPayId, cleanErr, setShowConfirm });
   const txBadge=st=>({confirmed:'ap-tx-badge ap-tx-confirmed',pending:'ap-tx-badge ap-tx-pending',failed:'ap-tx-badge ap-tx-failed',submitted:'ap-tx-badge ap-tx-submitted'}[st]||'ap-tx-badge ap-tx-pending');
 
