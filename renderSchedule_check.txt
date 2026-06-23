@@ -1,0 +1,73 @@
+const renderSchedule=()=>{
+  const SCHED_ABI=['function schedule(address payable recipient,uint256 releaseTime,string calldata country) external payable returns (uint256)','function execute(uint256 id) external','function cancel(uint256 id) external','function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))','function paymentCount() external view returns (uint256)'];
+  const ERC20_APPROVE_ABI=['function approve(address spender,uint256 amount) external returns (bool)'];
+  const handleSchedule=async()=>{
+    if(!newSched.addr||!newSched.amount||!newSched.next){setStatus({type:'error',msg:'Fill all required fields'});return;}
+    if(!signer){setStatus({type:'error',msg:'Connect your wallet first'});return;}
+    const releaseTime=Math.floor(new Date(newSched.next+'T'+(newSched.time||'12:00')).getTime()/1000);
+    if(releaseTime<=Math.floor(Date.now()/1000)){setStatus({type:'error',msg:'Release time must be in the future. Please select a later date or time.'});return;}
+    setLoading(true);
+    try{
+      const amt=ethers.parseUnits(newSched.amount,18);
+      const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
+      setStatus({type:'info',msg:'Locking USDC in escrow...'});
+      const sched2=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
+      let tx=await sched2.schedule(ethers.getAddress(newSched.addr.trim()),releaseTime,newSched.country||'',{value:amt,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
+      setStatus({type:'info',msg:'Transaction submitted! Waiting for confirmation...'});
+      try{
+        await Promise.race([tx.wait(),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),30000))]);
+      }catch(waitErr){
+        if(waitErr.message==='timeout'){
+          setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()+' (Confirmation pending)'});
+          setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
+          setTimeout(refreshBal,4000);
+          setLoading(false);
+          return;
+        }
+        throw waitErr;
+      }
+      setStatus({type:'success',msg:'Payment scheduled! USDC locked in escrow until '+new Date(releaseTime*1000).toLocaleString()});
+      const schedRec={id:tx.hash+'_sched',hash:tx.hash,recipient:newSched.addr,amount:parseFloat(newSched.amount),country:newSched.country,timestamp:releaseTime,status:'scheduled',type:'scheduled',releaseTime:releaseTime};
+      setTxns(prev=>{const u=[schedRec,...prev.slice(0,499)];lsSave('arc_txhistory_'+address,u);return u;});
+      setNewSched({addr:'',amount:'',country:'',freq:'once',next:'',time:''});
+      setTimeout(refreshBal,4000);
+    }catch(e){
+      console.error('Schedule error full:', e);
+      let msg='Scheduling failed: '+(e?.reason||e?.shortMessage||e?.message||'Unknown error');
+      if(e?.code===4001||e?.code==='ACTION_REJECTED')msg='Transaction cancelled.';
+      else if(e?.message?.includes('Too early'))msg='Release time must be in the future.';
+      else if(e?.message?.includes('insufficient'))msg='Insufficient balance to lock this amount.';
+      else if(e?.message?.includes('reverted'))msg='Transaction reverted. Check your balance and try again.';
+      setStatus({type:'error',msg});
+    }
+    setLoading(false);
+  };
+  const handleExecute=async(id)=>{
+    if(!signer)return;
+    setLoading(true);
+    try{
+      const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
+      const tx=await sched.execute(id);
+      await tx.wait();
+      const execData=ls('arc_sched_exec_'+address,{});
+      execData[id]={hash:tx.hash,ts:Math.floor(Date.now()/1000)};
+      lsSave('arc_sched_exec_'+address,execData);
+      setStatus({type:'success',msg:'Payment released successfully!'});
+    }catch(e){setStatus({type:'error',msg:cleanErr(e)});}
+    setLoading(false);
+  };
+  const handleCancelSched=async(id)=>{
+    if(!signer)return;
+    setLoading(true);
+    try{
+      const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer);
+      const payment=await sched.getPayment(id);
+      const tx=await sched.cancel(id);
+      await tx.wait();
+      setTxns(prev=>{const updatedOld=prev.map(t=>t.type==='scheduled'&&t.recipient===payment.recipient&&Math.abs(parseFloat(t.amount)-parseFloat(ethers.formatUnits(payment.amount,18)))<0.001&&t.status==='scheduled'?{...t,status:'cancelled'}:t);lsSave('arc_txhistory_'+address,updatedOld);return updatedOld;});
+      setStatus({type:'success',msg:'Cancelled. USDC refunded to your wallet.'});
+      setTimeout(refreshBal,4000);
+    }catch(e){setStatus({type:'error',msg:cleanErr(e)});}
+    setLoading(false);
+  };
+  return(<div><div className="ap-card"><div className="ap-card-title">Schedule Payment</div><div className="ap-card-sub">Lock USDC now. It releases to the recipient automatically at your chosen time.</div><div style={{fontSize:12,color:'var(--tx3)',marginBottom:16,lineHeight:1.7,paddingLeft:12,borderLeft:'2px solid var(--b2)'}}>USDC is locked in a smart contract escrow and released automatically when the time arrives. You can cancel anytime before release to get your USDC back.</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}><div><div className="ap-label">Recipient Address</div><input className="ap-input" style={{marginBottom:0}} placeholder="0x..." value={newSched.addr} onChange={e=>setNewSched(s=>({...s,addr:e.target.value}))}/></div><div><div className="ap-label">Amount (USDC)</div><input className="ap-input" style={{marginBottom:0}} type="number" placeholder="0.00" value={newSched.amount} onChange={e=>setNewSched(s=>({...s,amount:e.target.value}))}/></div><div><div className="ap-label">Country</div><CountrySelect value={newSched.country} onChange={v=>setNewSched(s=>({...s,country:v}))}/></div><div><div className="ap-label">Release Date</div><input className="ap-input" style={{marginBottom:0}} type="date" value={newSched.next||''} onChange={e=>setNewSched(s=>({...s,next:e.target.value}))} min={new Date(Date.now()+5*60000).toISOString().slice(0,10)}/></div><div><div className="ap-label">Release Time</div><TimePicker value={newSched.time||'12:00'} onChange={v=>setNewSched(s=>({...s,time:v}))}/></div></div><button className="ap-btn ap-btn-primary" onClick={handleSchedule} disabled={loading}>{loading?'Processing...':'Lock and Schedule Payment'}</button></div><OnChainSchedules address={address} provider={provider} signer={signer} schedAddr={SCHED_ADDR} schedAbi={SCHED_ABI} onExecute={handleExecute} onCancel={handleCancelSched} loading={loading}/></div>);};
