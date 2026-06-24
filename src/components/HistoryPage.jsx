@@ -35,9 +35,7 @@ export default function HistoryPage({
       : t.amount
   ).toFixed(2);
 
-  const refunds = filtered.filter(t => t.type === 'refund');
-  const nonRefunds = filtered.filter(t => t.type !== 'refund');
-  const groupedNR = nonRefunds.reduce((acc, t, i) => {
+  const groupedNR = filtered.reduce((acc, t, i) => {
     const d = t.timestamp ? new Date(Number(t.timestamp) * 1000) : new Date();
     let label;
     if (d.toDateString() === today.toDateString()) label = 'Today';
@@ -123,22 +121,7 @@ export default function HistoryPage({
             </div>
           </div>
         )}
-        {refunds.length>0&&(
-          <div style={{marginBottom:16}}>
-            <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:1,padding:'8px 0 4px'}}>Refunds</div>
-            {refunds.map((t,i)=>{
-              const amt=Math.abs(parseFloat(typeof t.amount==='bigint'||(typeof t.amount==='object'&&t.amount!==null)?ethers.formatUnits(BigInt(t.amount.toString()),18):t.amount)).toFixed(2);
-              return(
-                <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderBottom:'1px solid var(--b0)'}}>
-                  <div style={{width:32,height:32,borderRadius:10,background:'rgba(23,229,176,0.1)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'var(--cy)'}}><IC.Check/></div>
-                  <div style={{flex:1}}><div style={{fontWeight:700,color:'var(--tx1)',fontSize:14}}>Refund</div><div style={{fontSize:11,color:'var(--tx3)',marginTop:2}}>{fmtDate(t.timestamp)}</div></div>
-                  <div style={{textAlign:'right'}}><div style={{fontWeight:700,color:'var(--cy)',fontSize:14}}>+{amt} USDC</div></div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {nonRefunds.length===0&&refunds.length===0
+        {filtered.length===0
           ? <div style={{textAlign:'center',color:'var(--tx3)',padding:'32px 0',fontSize:14}}>No transactions found</div>
           : Object.entries(groupedNR).map(([date,txs])=>(
               <div key={date}>
