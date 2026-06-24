@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     // --- Validate payment_id is within range ---
     const count = Number(await contract.paymentCount());
     if (id >= count)
-      return res.status(400).json({ error: `Payment #${id} does not exist. Total payments: ${count}` });
+      return res.status(400).json({ error: `Payment #${id} does not exist. Valid IDs are 0 to ${count - 1} (${count} total payments).` });
 
     // --- Fetch and validate payment state ---
     const payment = await contract.getPayment(id);

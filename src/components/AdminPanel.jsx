@@ -97,7 +97,7 @@ export function ManualExecute(){
   };
   return(<div>
     <div style={{display:'flex',gap:8}}>
-      <input className="ap-input" style={{marginBottom:0,flex:1}} type="number" placeholder="Payment ID (e.g. 5)" value={paymentId} onChange={e=>setPaymentId(e.target.value)}/>
+      <input className="ap-input" style={{marginBottom:0,flex:1}} type="number" placeholder="Payment ID (0-based, e.g. 34)" value={paymentId} onChange={e=>setPaymentId(e.target.value)}/>
       <button className="ap-btn ap-btn-primary" style={{marginTop:0,width:'auto',padding:'0 20px'}} onClick={execute} disabled={loading||!paymentId}>{loading?'Executing...':'Execute'}</button>
     </div>
     {result&&<div style={{marginTop:10,fontSize:12,padding:'8px 12px',borderRadius:8,background:result.type==='success'?'rgba(23,229,176,.1)':'rgba(255,79,97,.1)',color:result.type==='success'?'var(--cy)':'var(--re)',wordBreak:'break-all'}}>{result.msg}</div>}
