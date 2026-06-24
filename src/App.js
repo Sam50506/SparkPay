@@ -146,7 +146,7 @@ const loadContractHistory=useCallback(async()=>{if(!address)return;try{
         const amt=parseFloat(ethers.formatUnits(p.amount,18)).toFixed(2);
         if(p.sender.toLowerCase()===address.toLowerCase()){
           if(p.executed){
-            const execTx=schedTxs.find(t=>t.from.toLowerCase()!==address.toLowerCase()&&t.isError==='0');
+            const execTx=schedTxs.find(t=>t.input&&t.input.startsWith('0xfe0d94c1')&&parseInt('0x'+t.input.slice(10),16)===i&&t.isError==='0');
             const execTs=execTx?parseInt(execTx.timeStamp):Number(p.releaseTime);
             if(!seenHashes.has('sched_exec_'+i)){
               allExplorer.push({hash:'sched_exec_'+i,recipient:p.recipient,sender:address,amount:amt,country:p.country,timestamp:execTs,status:'confirmed',type:'scheduled',label:'Scheduled Payment'});
