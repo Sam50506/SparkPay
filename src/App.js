@@ -155,7 +155,7 @@ const loadContractHistory=useCallback(async()=>{if(!address)return;try{
           }
           if(p.cancelled){
             if(!seenHashes.has('sched_refund_'+i)){
-              const cancelTx=schedTxs.filter(t=>t.isError==='0'&&parseInt(t.value)===0&&parseInt(t.timeStamp)>Number(p.releaseTime)-86400).sort((a,b)=>parseInt(b.timeStamp)-parseInt(a.timeStamp))[0];
+              const cancelSig='0x40e58ee5';const cancelTx=schedTxs.filter(t=>t.isError==='0'&&t.input&&t.input.startsWith(cancelSig)&&parseInt('0x'+t.input.slice(10),16)===i).sort((a,b)=>parseInt(a.timeStamp)-parseInt(b.timeStamp))[0];
               const cancelTs=cancelTx?parseInt(cancelTx.timeStamp):Math.floor(Date.now()/1000);
               allExplorer.push({hash:'sched_refund_'+i,recipient:address,sender:address,amount:amt,country:p.country,timestamp:cancelTs,status:'confirmed',received:true,type:'refund',label:'Refund'});
               seenHashes.add('sched_refund_'+i);
