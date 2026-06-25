@@ -125,7 +125,7 @@ function AppInner() {
 
   const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;
     try{
-      const r=await fetch('/api/cashback-award',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet_address:address,amount:amt,tx_hash:txHash})});
+      const r=await fetch('/api/cashback-award',{method:'POST',headers:{'Content-Type':'application/json','x-internal-secret':process.env.REACT_APP_INTERNAL_SECRET||''},body:JSON.stringify({wallet_address:address,amount:amt,tx_hash:txHash})});
       const d=await r.json();
       if(d.success){setCashbackPending(d.newBalance);}
     }catch(e){console.error('Cashback award failed:',e);}

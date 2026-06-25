@@ -1,10 +1,23 @@
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  // Internal auth check
+  const secret = req.headers['x-internal-secret'];
+  if (!secret || secret !== INTERNAL_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { wallet_address, amount, tx_hash } = req.body;
   if (!wallet_address || !amount) return res.status(400).json({ error: 'Missing fields' });
+
+  // Validate amount - max 1% of reasonable max transaction
+  if (parseFloat(amount) <= 0 || parseFloat(amount) > 100) {
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
 
   try {
     const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${wallet_address}&select=*`, {
