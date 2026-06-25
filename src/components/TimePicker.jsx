@@ -39,9 +39,8 @@ export function TimePicker({value, onChange}){
       {open&&<div style={{
         position:'absolute',
         bottom:'calc(100% + 8px)',
-        left:'50%',
-        transform:'translateX(-50%)',
-        width:'280px',
+        right:0,
+        width:'260px',
         background:'var(--card)',
         border:'1px solid var(--b1)',
         borderRadius:14,
