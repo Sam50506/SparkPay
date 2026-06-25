@@ -49,9 +49,6 @@ import { buildChart } from './config';
 import { addrColor, isValidAddr } from './config';
 import { getProvider, sbFetch, sbInsert, sbSelect, sbUpdate } from './config';
 
-
-
-
 function AppInner() {
   const isAdminRoute = window.location.hash === '#admin';
   const[maintenanceMode,setMaintenanceMode]=useState(DEFAULT_MAINTENANCE);
@@ -157,7 +154,6 @@ function AppInner() {
   },[address]);
   useEffect(()=>{if(tab==='history'&&signer){loadDeletedHashes().then(()=>loadContractHistory());setTxPage(1);setTxSearch('');setTxFilter('all');setExpandedTx(null);}if(signer&&address){(async()=>{try{const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,signer.provider||provider);const scheduledTxns=txns.filter(t=>t.type==='scheduled'&&t.status==='scheduled');for(const st of scheduledTxns){const idMatch=st.id&&st.id.includes('_sched')?null:null;}const count=Number(await sched.paymentCount());const onChainMap={};for(let i=0;i<count;i++){const p=await sched.getPayment(i);if(p.sender.toLowerCase()===address.toLowerCase()){onChainMap[i]=p;}}setTxns(prev=>{let changed=false;const updated=prev.map(t=>{if(t.type==='scheduled'&&t.status==='scheduled'){const match=Object.entries(onChainMap).find(([id,p])=>p.recipient.toLowerCase()===t.recipient.toLowerCase()&&Math.abs(parseFloat(ethers.formatUnits(p.amount,18))-parseFloat(t.amount))<0.001&&Number(p.releaseTime)===Number(t.releaseTime||t.timestamp));if(match){const[,p]=match;if(p.executed){changed=true;return{...t,status:'confirmed'};}if(p.cancelled){changed=true;return{...t,status:'cancelled'};}}}return t;});if(changed)lsSave('arc_txhistory_'+address,updated);return changed?updated:prev;});}catch(e){console.log('sync error',e);}})();}},[tab,signer,address]);useEffect(()=>{if(tab==='rewards'&&address){fetchMyClaims();}},[tab,address]);useEffect(()=>{if(tab==='settings'&&address&&address.toLowerCase()==='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306'){sbSelect('cashback_claims','status=eq.pending&select=id').then(rows=>setPendingClaimsCount(rows?.length||0)).catch(()=>{});}},[tab,address]);
 
-
   const fetchMyClaims=async()=>{if(!address)return;setClaimsLoading(true);try{const rows=await sbSelect('cashback_claims','wallet_address=eq.'+address+'&order=timestamp.desc&limit=10');setMyClaimsHistory(rows||[]);if(rows&&rows.length>0&&rows[0].status==='paid'&&claimSubmitted===true){setClaimSubmitted('paid');setTimeout(()=>setClaimSubmitted(false),5000);}}catch(e){console.error(e);}setClaimsLoading(false);};
   const claimCashback=async()=>{const amt=parseFloat(claimAmt)||cashbackPending;if(cashbackPending<5||claimLoading||amt<5||amt>cashbackPending)return;setClaimLoading(true);try{
     await sbInsert('cashback_claims',{wallet_address:address,amount:amt,timestamp:new Date().toISOString(),status:'pending'});
@@ -173,13 +169,6 @@ function AppInner() {
   const connectBrowser=async(type,provObj)=>{try{const eth=provObj||(window.okxwallet&&(type==='OKX Wallet'||provObj?.isOkxWallet||provObj?.isOKExWallet)?window.okxwallet:null)||await getProvider();if(!eth){setStatus({type:'error',msg:'No wallet found. Install MetaMask.'});return;}await eth.request({method:'eth_requestAccounts'});const bp=new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});await ensureArc(eth);let name='Browser Wallet';if(eth.isMises||(window.mises?.ethereum===eth))name='Mises';else if(eth.isMetaMask&&!eth.isBraveWallet)name='MetaMask';else if(eth.isBraveWallet)name='Brave';else if(eth.isCoinbaseWallet)name='Coinbase';else if(eth.isOkxWallet||eth.isOKExWallet)name='OKX';setWalletName(name);await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'Connection failed'});}};
 
   const connectWC=async()=>{try{const wcp=await EthereumProvider.init({projectId:WC_ID,chains:[1],optionalChains:[ARC_CHAIN_ID],showQrModal:true,qrModalOptions:{themeMode:'light',themeVariables:{'--wcm-font-family':'inherit'}},methods:['eth_sendTransaction','personal_sign','wallet_addEthereumChain','wallet_switchEthereumChain'],events:['chainChanged','accountsChanged']});await wcp.enable();wcp.on('accountsChanged',a=>{if(!a.length)doDisconnect();else setAddress(a[0]);});wcp.on('disconnect',doDisconnect);try{await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902)await wcp.request({method:'wallet_addEthereumChain',params:[addArc({})]});}const bp=new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});wcProvRef.current=wcp;setWalletName('WalletConnect');await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'WalletConnect failed'});}};
-
-
-
-
-
-
-
 
   const exportCSV=()=>{const rows=[['Type','Hash','Recipient','Amount (USDC)','Country','Date','Status'],...txns.map(t=>['Send',t.hash||'',t.recipient||'',t.amount||'',t.country||'',fmtDate(t.timestamp),t.status||'']),...ls('arc_invoices',[]).map(i=>['Invoice',i.id||'',i.payer||'',i.amount||'',i.country||'',fmtDate(i.ts),i.paid?'Paid':'Unpaid']),...scheds.map(s=>['Scheduled','',s.addr||'',s.amount||'',s.country||'',s.next||'',s.freq||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sparkpay-history.csv';a.click();URL.revokeObjectURL(url);};
 
@@ -206,10 +195,6 @@ function AppInner() {
   const BOTTOM_TABS=[{id:'history',label:'History',ICN:IC.History},{id:'receive',label:'Receive',ICN:IC.Receive},{id:'send',label:'Send',ICN:IC.SendFab,fab:true},{id:'contacts',label:'Contacts',ICN:IC.Contacts},{id:'rewards',label:'Rewards',ICN:IC.Rewards}];
   const PAGE_TITLES={send:'Send USDC',multi:'Multi Send',invoice:'Invoice',pay:'Pay Invoice',contacts:'Contacts',schedule:'Scheduled',history:'History',rates:'Exchange Rates',fees:'Fee Comparison',rewards:'Rewards',settings:'Settings',about:'About SparkPay',faq:'FAQ',receive:'Receive',faucet:'Faucet'};
 
-
-
-
-
 const { handleSchedule, handleExecute, handleCancelSched } = useSchedule({ signer, address, newSched, setNewSched, setLoading, setStatus, setTxns, refreshBal });
 const batchGroups={};
 allTxns.forEach(t=>{if(!t.hash)return;if(!batchGroups[t.hash])batchGroups[t.hash]=[];batchGroups[t.hash].push(t);});
@@ -217,13 +202,6 @@ const dedupedTxns=Object.entries(batchGroups).map(([hash,txs])=>txs.length>1?{..
 const PAGE_SIZE=10;
 const filtered=dedupedTxns.filter(t=>{const ms=!txSearch||(t.recipient||'').toLowerCase().includes(txSearch.toLowerCase())||(t.hash||'').toLowerCase().includes(txSearch.toLowerCase());const mf=txFilter==='all'||(txFilter==='confirmed'&&(t.status==='confirmed'||t.status==='scheduled'))||(txFilter==='pending'&&(t.status==='pending'||t.status==='submitted'))||(txFilter==='failed'&&t.status==='failed');return ms&&mf;});
 const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
-
-
-
-
-
-
-
 
   if(!isAdminRoute&&maintenanceLoaded&&maintenanceMode&&address&&address.toLowerCase()!==ADMIN_ADDRESS){
     return(<div style={{position:'fixed',inset:0,background:'#0a0a0a',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
@@ -302,9 +280,6 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
     </div>
   );
 }
-
-
-
 
 const ConnectTroubleshoot=()=>{const[open,setOpen]=React.useState(false);const[item,setItem]=React.useState(null);const issues=[['My wallet is not showing up in the list.','Make sure your wallet app is installed on this device and you are using a browser that supports wallet connections. On mobile, try opening SparkPay directly inside your wallet app browser.'],['I approved the connection but nothing happened.','Close the wallet popup and try connecting again. Sometimes the connection request times out. If it keeps happening, refresh the page and try once more.'],['It says wrong network or chain.','SparkPay runs on Arc Testnet. Open your wallet, go to network settings, and switch to Arc Testnet. If Arc Testnet is not listed, SparkPay will add it automatically when you connect.'],['WalletConnect QR code is not appearing.','Make sure you are not blocking popups in your browser. Try switching to a different browser or use the direct Connect Wallet button instead.'],['I clicked WalletConnect but nothing happened.','WalletConnect takes a few seconds to load all supported wallets. Wait 6 to 7 seconds and the popup will appear on its own. Do not tap the button again.'],['Nothing is working.','Reach out on Telegram and describe what is happening. We will help you get connected.']];return(<div style={{marginTop:16}}><button onClick={()=>setOpen(o=>!o)} style={{background:'none',border:'none',color:'var(--tx3)',fontSize:12,fontWeight:600,cursor:'pointer',padding:'4px 0',display:'flex',alignItems:'center',gap:6,width:'100%',justifyContent:'center'}}><span>{open?'Hide':'Having trouble connecting?'}</span><span style={{fontSize:14}}>{open?'−':'+'}</span></button>{open&&<div style={{marginTop:12,borderRadius:12,border:'1px solid var(--b1)',overflow:'hidden'}}>{issues.map(([q,a],i)=>(<div key={i} style={{borderBottom:i<issues.length-1?'1px solid var(--b0)':'none'}}><div onClick={()=>setItem(item===i?null:i)} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 14px',cursor:'pointer'}}><div style={{fontSize:12,fontWeight:600,color:'var(--tx1)',paddingRight:8,textAlign:'left'}}>{q}</div><div style={{fontSize:16,color:'var(--tx3)',flexShrink:0}}>{item===i?'−':'+'}</div></div>{item===i&&<div style={{fontSize:12,color:'var(--tx2)',lineHeight:1.8,padding:'0 14px 12px'}}>{a}{i===issues.length-1&&<a href='https://t.me/Sam50506' target='_blank' rel='noreferrer' style={{display:'block',marginTop:10,color:'var(--ac)',fontWeight:700,textDecoration:'none'}}>Open Telegram</a>}</div>}</div>))}</div>}</div>);};
 
