@@ -39,7 +39,7 @@ export function TimePicker({value, onChange}){
       {open&&<div style={{
         position:'absolute',
         bottom:'calc(100% + 8px)',
-        left:0,right:0,
+        right:0,
         background:'var(--card)',
         border:'1px solid var(--b1)',
         borderRadius:14,
@@ -52,11 +52,7 @@ export function TimePicker({value, onChange}){
           {/* Hour */}
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Hour</div>
-            <div style={{height:156,overflowY:'scroll',display:'flex',flexDirection:'column',scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch',scrollBehavior:'smooth'}}>
-              {hours.map(h=>(
-                <div key={h} onClick={()=>setTime(h,mSnapped,isPM)} style={{minHeight:52,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:8,cursor:'pointer',fontSize:16,fontWeight:h===h12?700:400,background:h===h12?'var(--acd)':'transparent',color:h===h12?'var(--ac)':'var(--tx1)',scrollSnapAlign:'start',flexShrink:0}}>{h}</div>
-              ))}
-            </div>
+            <input type='number' min='1' max='12' value={parseInt(h12)} onChange={e=>{const v=Math.max(1,Math.min(12,parseInt(e.target.value)||1));setTime(String(v).padStart(2,'0'),mSnapped,isPM);}} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
 
           {/* Min */}
