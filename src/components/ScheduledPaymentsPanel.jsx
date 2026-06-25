@@ -88,7 +88,7 @@ function Countdown({releaseTime}){
   return(<span style={{fontFamily:'monospace',fontWeight:700,color:'var(--ac)',fontSize:13}}>{String(h).padStart(2,'0')}H : {String(m).padStart(2,'0')}M : {String(s).padStart(2,'0')}S</span>);
 }
 
-function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments}){
+function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading}){
   const isExpanded=expandedId===p.id;
   const isPending=st==='scheduled';
   const isProcessing=st==='processing';
@@ -287,7 +287,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     {/* Active Tab */}
     {activeTab==='active'&&<>
       {activePayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No active scheduled payments.</div>}
-      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments}/>)}
+      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading}/>)}
       {activePayments.length>LIMIT&&<button onClick={()=>setShowAllActive(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
         {showAllActive?'Show Less ↑':'Show All '+activePayments.length+' Payments ↓'}
       </button>}
@@ -296,7 +296,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     {/* History Tab */}
     {activeTab==='history'&&<>
       {historyPayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No payment history yet.</div>}
-      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments}/>)}
+      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading}/>)}
       {historyPayments.length>LIMIT&&<button onClick={()=>setShowAllHistory(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
         {showAllHistory?'Show Less ↑':'Show All '+historyPayments.length+' Payments ↓'}
       </button>}
