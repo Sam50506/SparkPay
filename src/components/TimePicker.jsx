@@ -53,7 +53,7 @@ export function TimePicker({value, onChange}){
           {/* Hour */}
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Hour</div>
-            <input type='number' min='1' max='12' value={h12} onChange={e=>{const v=Math.max(1,Math.min(12,parseInt(e.target.value)||1));setTime(String(v).padStart(2,'0'),mSnapped,isPM);}} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
+            <input type='number' min='1' max='12' value={h12} onChange={e=>{const raw=e.target.value;if(raw==='')return;const v=Math.max(1,Math.min(12,parseInt(raw)||1));setTime(String(v).padStart(2,'0'),m,isPM);}} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
 
           {/* Min */}
