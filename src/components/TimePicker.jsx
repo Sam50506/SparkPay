@@ -47,7 +47,7 @@ export function TimePicker({value, onChange}){
         padding:16,
         boxShadow:'0 -8px 32px rgba(0,0,0,0.22)'
       }}>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 80px',gap:8,marginBottom:12}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:8,marginBottom:12}}>
 
           {/* Hour */}
           <div>
@@ -74,7 +74,7 @@ export function TimePicker({value, onChange}){
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>AM/PM</div>
             <div style={{display:'flex',flexDirection:'column',gap:6}}>
               {['AM','PM'].map(p=>(
-                <div key={p} onClick={()=>setTime(h12,mSnapped,p==='PM')} style={{padding:'14px 8px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:(p==='PM')===isPM?700:400,background:(p==='PM')===isPM?'var(--acd)':'var(--elev)',color:(p==='PM')===isPM?'var(--ac)':'var(--tx1)',textAlign:'center',border:'1px solid ',borderColor:(p==='PM')===isPM?'var(--acs)':'var(--b1)'}}>{p}</div>
+                <div key={p} onClick={()=>setTime(h12,mSnapped,p==='PM')} style={{padding:'10px 6px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:(p==='PM')===isPM?700:400,background:(p==='PM')===isPM?'var(--acd)':'var(--elev)',color:(p==='PM')===isPM?'var(--ac)':'var(--tx1)',textAlign:'center',border:'1px solid ',borderColor:(p==='PM')===isPM?'var(--acs)':'var(--b1)'}}>{p}</div>
               ))}
             </div>
           </div>
