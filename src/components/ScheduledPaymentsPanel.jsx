@@ -88,6 +88,65 @@ function Countdown({releaseTime}){
   return(<span style={{fontFamily:'monospace',fontWeight:700,color:'var(--ac)',fontSize:13}}>{String(h).padStart(2,'0')}H : {String(m).padStart(2,'0')}M : {String(s).padStart(2,'0')}S</span>);
 }
 
+function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments}){
+  const isExpanded=expandedId===p.id;
+  const isPending=st==='scheduled';
+  const isProcessing=st==='processing';
+  const isCancelApproved=st==='cancel_approved';
+  const releaseDate=new Date(p.releaseTime*1000).toLocaleString('en',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+  const statusCfg={
+    executed:{bg:'rgba(23,229,176,.1)',cl:'var(--cy)',label:'Released'},
+    cancel_approved:{bg:'rgba(23,229,176,.1)',cl:'var(--cy)',label:'Refund Pending'},
+    cancelled_admin:{bg:'rgba(255,79,97,.1)',cl:'var(--re)',label:'Cancelled by Admin'},
+    cancelled_user:{bg:'rgba(255,79,97,.1)',cl:'var(--re)',label:'Cancelled by User'},
+    processing:{bg:'rgba(59,130,196,.15)',cl:'var(--ac)',label:'Payment in Progress'},
+    scheduled:{bg:'rgba(100,100,100,.08)',cl:'var(--tx3)',label:'Scheduled'},
+  }[st];
+
+  const editRequests=(requests[p.id]||[]).filter(r=>r.request_type==='edit');
+
+  return(<div style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}>
+    <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
+      {manageSched&&<input type="checkbox" checked={selectedSched.includes(p.id)} onChange={e=>setSelectedSched(prev=>e.target.checked?[...prev,p.id]:prev.filter(x=>x!==p.id))} style={{width:18,height:18,marginTop:2,flexShrink:0,cursor:'pointer'}}/>}
+      <div style={{flex:1}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+          <span style={{fontSize:16,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{parseFloat(p.amount).toFixed(2)}</span>
+          <span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>
+          {p.country&&<span className="ap-cc">{p.country}</span>}
+        </div>
+        <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:8}}>To: {p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div>
+        <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:statusCfg.bg,color:statusCfg.cl}}>{statusCfg.label}</span>
+        {isPending&&<div style={{marginTop:8,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+          <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
+          <Countdown releaseTime={p.releaseTime}/>
+        </div>}
+        {isProcessing&&<div onClick={()=>setExpandedId(isExpanded?null:p.id)} style={{marginTop:8,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6}}>
+          <span style={{fontSize:11,color:'var(--ac)',fontWeight:600}}>Tap for details</span>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2" style={{transform:isExpanded?'rotate(180deg)':'none',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
+        </div>}
+        {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be sent within the next 60 minutes.</div>}
+        {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
+          {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
+        </div>}
+        {isCancelApproved&&<div style={{marginTop:8,background:'rgba(23,229,176,.08)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--cy)',fontWeight:600}}>Refund is being processed to your wallet.</div>}
+        {editRequests.length>0&&<div style={{marginTop:8}}>
+          {editRequests.map((req,i)=>(
+            <div key={i} onClick={()=>setChangesModal(req)} style={{display:'inline-flex',alignItems:'center',gap:5,marginTop:4,cursor:'pointer',padding:'4px 10px',borderRadius:8,background:req.status==='approved'?'rgba(23,229,176,.08)':req.status==='rejected'?'rgba(255,79,97,.08)':'rgba(240,196,63,.08)',border:'1px solid '+(req.status==='approved'?'rgba(23,229,176,.2)':req.status==='rejected'?'rgba(255,79,97,.2)':'rgba(240,196,63,.2)')}}>
+              <span style={{fontSize:11,fontWeight:600,color:req.status==='approved'?'var(--cy)':req.status==='rejected'?'var(--re)':'#f59e0b'}}>{req.status==='approved'?'Edit Approved':req.status==='rejected'?'Edit Rejected':'Edit Pending'}</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          ))}
+        </div>}
+      </div>
+    </div>
+    <div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 10px',background:'var(--card)',borderRadius:10,marginBottom:isPending||isProcessing?10:0}}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span style={{fontSize:12,color:'var(--tx3)'}}>{releaseDate}</span>
+    </div>
+    {(isPending||isProcessing)&&<NeedHelpMenu paymentId={p.id} address={address} contractAddress={schedAddr} signer={signer} schedAbi={schedAbi} payment={p} onRefresh={fetchPayments}/>}
+  </div>);
+}
+
 export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,onCancel,loading}){
   const[payments,setPayments]=useState([]);
   const[fetching,setFetching]=useState(false);
@@ -98,6 +157,9 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   const[requests,setRequests]=useState({});
   const[expandedId,setExpandedId]=useState(null);
   const[changesModal,setChangesModal]=useState(null);
+  const[activeTab,setActiveTab]=useState('active');
+  const[showAllActive,setShowAllActive]=useState(false);
+  const[showAllHistory,setShowAllHistory]=useState(false);
 
   useEffect(()=>{const t=setInterval(()=>setNow(Math.floor(Date.now()/1000)),1000);return()=>clearInterval(t);},[]);
 
@@ -116,7 +178,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
       const sched=new ethers.Contract(schedAddr,schedAbi,provider);
       const count=Number(await sched.paymentCount());
       const results=[];
-      for(let i=count-1;i>=0&&results.length<20;i--){
+      for(let i=count-1;i>=0&&results.length<50;i--){
         const p=await sched.getPayment(i);
         if(p.sender.toLowerCase()===address.toLowerCase()){
           results.push({id:i,recipient:p.recipient,amount:ethers.formatUnits(p.amount,18),releaseTime:Number(p.releaseTime),executed:p.executed,cancelled:p.cancelled,country:p.country});
@@ -141,6 +203,15 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   };
 
   const visiblePayments=payments.filter(p=>!hiddenSched.has(p.id));
+
+  // Split into active (scheduled/processing) and history (executed/cancelled)
+  const activePayments=visiblePayments.filter(p=>{const st=getStatus(p);return st==='scheduled'||st==='processing';});
+  const historyPayments=visiblePayments.filter(p=>{const st=getStatus(p);return st==='executed'||st==='cancelled_admin'||st==='cancelled_user'||st==='cancel_approved';});
+
+  const LIMIT=5;
+  const shownActive=showAllActive?activePayments:activePayments.slice(0,LIMIT);
+  const shownHistory=showAllHistory?historyPayments:historyPayments.slice(0,LIMIT);
+
   if(visiblePayments.length===0&&!fetching)return null;
 
   const ChangesModal=()=>!changesModal?null:(
@@ -169,12 +240,21 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     </div>
   );
 
+  const tabStyle=(active)=>({
+    flex:1,padding:'9px 0',fontSize:13,fontWeight:700,cursor:'pointer',border:'none',borderRadius:10,
+    background:active?'var(--ac)':'transparent',
+    color:active?'#fff':'var(--tx3)',
+    transition:'all .15s',
+  });
+
   return(<div className="ap-card">
     <ChangesModal/>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+
+    {/* Header */}
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
       <div>
         <div className="ap-card-title" style={{marginBottom:2}}>Scheduled Payments</div>
-        <div style={{fontSize:12,color:'var(--tx3)'}}>{visiblePayments.filter(p=>{const st=getStatus(p);return st==='scheduled'||st==='processing';}).length} active</div>
+        <div style={{fontSize:12,color:'var(--tx3)'}}>{activePayments.length} active</div>
       </div>
       <div style={{display:'flex',gap:8}}>
         <button className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'5px 10px',marginTop:0,color:manageSched?'var(--re)':undefined}} onClick={()=>{setManageSched(m=>!m);setSelectedSched([]);}}>{manageSched?'Done':'Manage'}</button>
@@ -182,6 +262,17 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
       </div>
     </div>
 
+    {/* Tabs */}
+    <div style={{display:'flex',gap:4,background:'var(--elev)',borderRadius:12,padding:4,marginBottom:16}}>
+      <button style={tabStyle(activeTab==='active')} onClick={()=>setActiveTab('active')}>
+        Currently Scheduled {activePayments.length>0&&<span style={{fontSize:11,opacity:.8}}>({activePayments.length})</span>}
+      </button>
+      <button style={tabStyle(activeTab==='history')} onClick={()=>setActiveTab('history')}>
+        History {historyPayments.length>0&&<span style={{fontSize:11,opacity:.8}}>({historyPayments.length})</span>}
+      </button>
+    </div>
+
+    {/* Manage mode */}
     {manageSched&&<div style={{marginBottom:12}}>
       <div style={{fontSize:12,color:'var(--tx2)',background:'var(--card)',borderRadius:10,padding:'8px 12px',marginBottom:8}}>Select payments to hide from this view.</div>
       <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
@@ -193,64 +284,22 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
 
     {fetching&&visiblePayments.length===0&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'20px 0',fontSize:13}}>Loading...</div>}
 
-    {visiblePayments.map(p=>{
-      const st=getStatus(p);
-      const isExpanded=expandedId===p.id;
-      const isPending=st==='scheduled';
-      const isProcessing=st==='processing';
-      const isCancelApproved=st==='cancel_approved';
-      const releaseDate=new Date(p.releaseTime*1000).toLocaleString('en',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
-      const statusCfg={
-        executed:{bg:'rgba(23,229,176,.1)',cl:'var(--cy)',label:'Released'},
-        cancel_approved:{bg:'rgba(23,229,176,.1)',cl:'var(--cy)',label:'Refund Pending'},
-        cancelled_admin:{bg:'rgba(255,79,97,.1)',cl:'var(--re)',label:'Cancelled by Admin'},
-        cancelled_user:{bg:'rgba(255,79,97,.1)',cl:'var(--re)',label:'Cancelled by User'},
-        processing:{bg:'rgba(59,130,196,.15)',cl:'var(--ac)',label:'Payment in Progress'},
-        scheduled:{bg:'rgba(100,100,100,.08)',cl:'var(--tx3)',label:'Scheduled'},
-      }[st];
+    {/* Active Tab */}
+    {activeTab==='active'&&<>
+      {activePayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No active scheduled payments.</div>}
+      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments}/>)}
+      {activePayments.length>LIMIT&&<button onClick={()=>setShowAllActive(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
+        {showAllActive?'Show Less ↑':'Show All '+activePayments.length+' Payments ↓'}
+      </button>}
+    </>}
 
-      return(<div key={p.id} style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}>
-        <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
-          {manageSched&&<input type="checkbox" checked={selectedSched.includes(p.id)} onChange={e=>setSelectedSched(prev=>e.target.checked?[...prev,p.id]:prev.filter(x=>x!==p.id))} style={{width:18,height:18,marginTop:2,flexShrink:0,cursor:'pointer'}}/>}
-          <div style={{flex:1}}>
-            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
-              <span style={{fontSize:16,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)'}}>{parseFloat(p.amount).toFixed(2)}</span>
-              <span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>
-              {p.country&&<span className="ap-cc">{p.country}</span>}
-            </div>
-            <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:8}}>To: {p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div>
-            <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:statusCfg.bg,color:statusCfg.cl}}>{statusCfg.label}</span>
-            {isPending&&<div style={{marginTop:8,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
-              <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
-              <Countdown releaseTime={p.releaseTime}/>
-            </div>}
-            {isProcessing&&<div onClick={()=>setExpandedId(isExpanded?null:p.id)} style={{marginTop:8,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6}}>
-              <span style={{fontSize:11,color:'var(--ac)',fontWeight:600}}>Tap for details</span>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2" style={{transform:isExpanded?'rotate(180deg)':'none',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
-            </div>}
-            {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be sent within the next 60 minutes.</div>}
-            {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
-              {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
-            </div>}
-            {isCancelApproved&&<div style={{marginTop:8,background:'rgba(23,229,176,.08)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--cy)',fontWeight:600}}>Refund is being processed to your wallet.</div>}
-          </div>
-        </div>
-
-        <div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 10px',background:'var(--card)',borderRadius:10,marginBottom:10}}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span style={{fontSize:11,color:'var(--tx2)',fontWeight:500}}>{releaseDate}</span>
-        </div>
-
-        {requests[p.id]&&requests[p.id].filter(r=>r.request_type==='edit').slice(0,1).map((r,i)=>(
-          <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,padding:'6px 10px',borderRadius:8,marginBottom:10,background:r.status==='approved'?'rgba(23,229,176,.1)':r.status==='rejected'?'rgba(255,79,97,.1)':'rgba(240,196,63,.1)'}}>
-            <span style={{fontSize:11,fontWeight:700,color:r.status==='approved'?'var(--cy)':r.status==='rejected'?'var(--re)':'#f59e0b'}}>Edit Request: {r.status==='pending'?'Waiting for admin':r.status==='approved'?'Approved by admin':'Rejected by admin'}</span>
-            {(r.new_recipient||r.new_amount||r.new_date||r.new_time)&&<button onClick={()=>setChangesModal(r)} style={{background:'none',border:'1px solid currentColor',borderRadius:6,padding:'2px 8px',fontSize:10,fontWeight:700,cursor:'pointer',color:r.status==='approved'?'var(--cy)':r.status==='rejected'?'var(--re)':'#f59e0b',whiteSpace:'nowrap',flexShrink:0}}>Check here</button>}
-          </div>
-        ))}
-
-        {isPending&&<button className="ap-btn ap-btn-danger" style={{width:'100%',fontSize:12,padding:'10px 16px'}} onClick={()=>onCancel(p.id)} disabled={loading}>Cancel Payment</button>}
-        {isProcessing&&<NeedHelpMenu paymentId={p.id} address={address} contractAddress={schedAddr} signer={signer} schedAbi={schedAbi} payment={p} onRefresh={fetchPayments}/>}
-      </div>);
-    })}
+    {/* History Tab */}
+    {activeTab==='history'&&<>
+      {historyPayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No payment history yet.</div>}
+      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments}/>)}
+      {historyPayments.length>LIMIT&&<button onClick={()=>setShowAllHistory(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
+        {showAllHistory?'Show Less ↑':'Show All '+historyPayments.length+' Payments ↓'}
+      </button>}
+    </>}
   </div>);
 }
