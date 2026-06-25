@@ -58,11 +58,7 @@ export function TimePicker({value, onChange}){
           {/* Min */}
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Min</div>
-            <div style={{height:156,overflowY:'scroll',display:'flex',flexDirection:'column',scrollSnapType:'y mandatory',WebkitOverflowScrolling:'touch',scrollBehavior:'smooth'}}>
-              {mins.map(mn=>(
-                <div key={mn} onClick={()=>setTime(h12,mn,isPM)} style={{minHeight:52,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:8,cursor:'pointer',fontSize:16,fontWeight:mn===mSnapped?700:400,background:mn===mSnapped?'var(--acd)':'transparent',color:mn===mSnapped?'var(--ac)':'var(--tx1)',scrollSnapAlign:'start',flexShrink:0}}>{mn}</div>
-              ))}
-            </div>
+            <input type='number' min='0' max='59' value={parseInt(m)} onChange={e=>{const v=Math.max(0,Math.min(59,parseInt(e.target.value)||0));setTime(h12,String(v).padStart(2,'0'),isPM);}} onFocus={e=>e.target.select()} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
 
           {/* AM/PM */}
