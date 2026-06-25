@@ -8,7 +8,7 @@ const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || process.env.PAYOUT_PRIVATE_KEY;
 const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const RPC = 'https://rpc.testnet.arc.network';
-const SCHED_ADDR = '0x1Eb2088f3FE2bD64Dde3c770f87a5047f99b8946';
+const SCHED_ADDR = '0xBf17436D2bF9053b3969C5B085B4602f58ad9e87';
 const SCHED_ABI = [
   'function cancel(uint256 id) external',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'
