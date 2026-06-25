@@ -16,7 +16,7 @@ import QRModal from './components/QRModal';
 import OnboardingModal, { SparkPayLogo } from './components/OnboardingModal';
 import { IC } from './icons';
 import { NavTooltip, CashbackToast, ResumeModal, WalletPicker } from './components/Modals';
-import { NeedHelpMenu, OnChainSchedules } from './components/ScheduledPaymentsPanel';
+
 import { AdminPanel } from './components/AdminPanel';
 import QRScanner from './components/QRScanner';
 import RatesPage from './components/RatesPage';
