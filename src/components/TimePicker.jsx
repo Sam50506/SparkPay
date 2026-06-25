@@ -22,6 +22,9 @@ export function TimePicker({value, onChange}){
   // Snap minute to nearest 5
   const mSnapped = mins.reduce((a,b)=>Math.abs(parseInt(b)-parseInt(m))<Math.abs(parseInt(a)-parseInt(m))?b:a);
 
+  const [hourInput, setHourInput] = React.useState(h12);
+  const [minInput, setMinInput] = React.useState(m);
+
   const setTime = (newH12, newM, newPM) => {
     let h = parseInt(newH12);
     if(newPM && h!==12) h+=12;
@@ -53,7 +56,7 @@ export function TimePicker({value, onChange}){
           {/* Hour */}
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Hour</div>
-            <input type='number' min='1' max='12' value={h12} onChange={e=>{const raw=e.target.value;if(raw==='')return;const v=Math.max(1,Math.min(12,parseInt(raw)||1));setTime(String(v).padStart(2,'0'),m,isPM);}} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
+            <input type='number' min='1' max='12' value={hourInput} onChange={e=>{setHourInput(e.target.value);const v=parseInt(e.target.value);if(v>=1&&v<=12)setTime(String(v).padStart(2,'0'),m,isPM);}} onBlur={e=>{const v=Math.max(1,Math.min(12,parseInt(e.target.value)||1));setHourInput(String(v).padStart(2,'0'));setTime(String(v).padStart(2,'0'),m,isPM);}} style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
 
           {/* Min */}
