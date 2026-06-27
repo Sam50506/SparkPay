@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
-import { rateLimit } from './rateLimit.js';
+import { rateLimit } from '../src/lib/rateLimit.js';
 
 const RPC = 'https://rpc.testnet.arc.network';
 const SCHED_ADDR = '0x1Eb2088f3FE2bD64Dde3c770f87a5047f99b8946';

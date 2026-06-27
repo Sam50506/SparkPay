@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
-import { rateLimit } from './rateLimit.js';
+import { rateLimit } from '../src/lib/rateLimit.js';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;

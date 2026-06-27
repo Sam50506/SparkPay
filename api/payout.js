@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import { rateLimit } from './rateLimit.js';
+import { rateLimit } from '../src/lib/rateLimit.js';
 
 const RPC = 'https://rpc.testnet.arc.network';
 const CHAIN_ID = 5042002;

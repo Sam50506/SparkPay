@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { rateLimit } from './rateLimit.js';
+import { rateLimit } from '../src/lib/rateLimit.js';
 
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
