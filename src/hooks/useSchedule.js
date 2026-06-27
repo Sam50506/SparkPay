@@ -65,12 +65,12 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
       setNewSched({ addr: '', amount: '', country: '', freq: 'once', next: '', time: '' });
       setTimeout(refreshBal, 4000);
     } catch (e) {
-      console.error('Schedule error full:', e);
+      console.error('Schedule error full:', e, JSON.stringify(e));
       let msg = 'Scheduling failed: ' + (e?.reason || e?.shortMessage || e?.message || 'Unknown error');
       if (e?.code === 4001 || e?.code === 'ACTION_REJECTED') msg = 'Transaction cancelled.';
       else if (e?.message?.includes('Too early')) msg = 'Release time must be in the future.';
       else if (e?.message?.includes('insufficient')) msg = 'Insufficient balance to lock this amount.';
-      else if (e?.message?.includes('reverted')) msg = 'Transaction reverted. Check your balance and try again.';
+      else if (e?.message?.includes('reverted')) msg = 'Transaction reverted: '+(e?.reason||e?.data?.message||e?.error?.message||'Check your balance and ensure release time is at least 10 mins in the future.');
       setStatus({ type: 'error', msg });
     }
     setLoading(false);
