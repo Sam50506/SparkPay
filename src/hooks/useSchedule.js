@@ -20,8 +20,8 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
     }
     if (!signer) { setStatus({ type: 'error', msg: 'Connect your wallet first' }); return; }
     const releaseTime = Math.floor(new Date(newSched.next + 'T' + (newSched.time || '12:00')).getTime() / 1000);
-    if (releaseTime <= Math.floor(Date.now() / 1000)) {
-      setStatus({ type: 'error', msg: 'Release time must be in the future. Please select a later date or time.' });
+    if (releaseTime <= Math.floor(Date.now() / 1000) + 60) {
+      setStatus({ type: "error", msg: "Release time must be at least 1 minute in the future." });
       return;
     }
     setLoading(true);
