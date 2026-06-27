@@ -96,7 +96,7 @@ contract Remittance is ReentrancyGuard, Ownable {
     function batchSend(address token, address[] memory recipients, uint256[] memory amounts, string[] memory countries) external nonReentrant {
         require(recipients.length == amounts.length, "Length mismatch");
         require(recipients.length == countries.length, "Length mismatch");
-        require(recipients.length <= 50, "Max 50 recipients");
+        require(recipients.length <= 150, "Max 150 recipients");
         uint256 total = 0;
         for (uint256 i = 0; i < amounts.length; i++) {
             require(amounts[i] > 0, "Invalid amount");
