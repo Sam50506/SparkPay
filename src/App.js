@@ -125,7 +125,7 @@ function AppInner() {
 
   const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;
     try{
-      const r=await fetch('/api/cashback-award',{method:'POST',headers:{'Content-Type':'application/json','x-internal-secret':process.env.REACT_APP_INTERNAL_SECRET||''},body:JSON.stringify({wallet_address:address,amount:amt,tx_hash:txHash})});
+      const r=await fetch('/api/cashback',{method:'POST',headers:{'Content-Type':'application/json','x-internal-secret':process.env.REACT_APP_INTERNAL_SECRET||''},body:JSON.stringify({action:'award',wallet_address:address,amount:amt,tx_hash:txHash})});
       const d=await r.json();
       if(d.success){setCashbackPending(d.newBalance);}
     }catch(e){console.error('Cashback award failed:',e);}
@@ -156,7 +156,7 @@ function AppInner() {
 
   const fetchMyClaims=async()=>{if(!address)return;setClaimsLoading(true);try{const rows=await sbSelect('cashback_claims','wallet_address=eq.'+address+'&order=timestamp.desc&limit=10');setMyClaimsHistory(rows||[]);if(rows&&rows.length>0&&rows[0].status==='paid'&&claimSubmitted===true){setClaimSubmitted('paid');setTimeout(()=>setClaimSubmitted(false),5000);}}catch(e){console.error(e);}setClaimsLoading(false);};
   const claimCashback=async(turnstileToken)=>{const amt=parseFloat(claimAmt)||cashbackPending;if(cashbackPending<5||claimLoading||amt<5||amt>cashbackPending)return;if(!turnstileToken){setStatus({type:'error',msg:'Security check failed. Please try again.'});return;}setClaimLoading(true);try{
-    const claimRes=await fetch('/api/cashback-claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet_address:address,amount:amt,turnstileToken})});
+    const claimRes=await fetch('/api/cashback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'claim',wallet_address:address,amount:amt,turnstileToken})});
     const claimData=await claimRes.json();
     if(!claimRes.ok)throw new Error(claimData.error||'Claim failed');
     setClaimSubmitted(true);setCashbackPending(claimData.newBalance);setStatus({type:'success',msg:'Cashback claim submitted. Your USDC will be sent to your wallet shortly.'});
