@@ -1,4 +1,5 @@
 import { generateRegistrationOptions } from '@simplewebauthn/server';
+import { rateLimit } from './rateLimit.js';
 
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -7,13 +8,16 @@ const RP_NAME = 'SparkPay Admin';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  const allowed = await rateLimit(req, res, 'strict');
+  if (!allowed) return;
+
   const { address } = req.body;
   if (!address || address.toLowerCase() !== ADMIN_ADDRESS) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const rpID = req.headers.host.split(':')[0];
-
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
     rpID,
@@ -28,7 +32,6 @@ export default async function handler(req, res) {
     }
   });
 
-  // Store challenge
   await fetch(`${SB_URL}/rest/v1/webauthn_challenges`, {
     method: 'POST',
     headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },

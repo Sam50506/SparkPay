@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { rateLimit } from './rateLimit.js';
 
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -9,6 +10,10 @@ const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
 export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') return res.status(405).end();
+    
+    const allowed = await rateLimit(req, res, 'strict');
+    if (!allowed) return;
+
     const body = req.body || {};
     const { address, pin } = body;
     if (!address || String(address).toLowerCase() !== ADMIN_ADDRESS) {

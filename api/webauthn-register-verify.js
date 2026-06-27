@@ -1,4 +1,5 @@
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
+import { rateLimit } from './rateLimit.js';
 
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -6,6 +7,10 @@ const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  const allowed = await rateLimit(req, res, 'strict');
+  if (!allowed) return;
+
   const { address, response } = req.body;
   if (!address || address.toLowerCase() !== ADMIN_ADDRESS) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -14,7 +19,6 @@ export default async function handler(req, res) {
   const rpID = req.headers.host.split(':')[0];
   const origin = `https://${req.headers.host}`;
 
-  // Get latest challenge
   const cRes = await fetch(`${SB_URL}/rest/v1/webauthn_challenges?admin_address=eq.${ADMIN_ADDRESS}&order=created_at.desc&limit=1`, {
     headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
   });

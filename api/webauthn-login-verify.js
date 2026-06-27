@@ -1,5 +1,6 @@
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import jwt from 'jsonwebtoken';
+import { rateLimit } from './rateLimit.js';
 
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -8,6 +9,10 @@ const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  const allowed = await rateLimit(req, res, 'strict');
+  if (!allowed) return;
+
   const { address, response } = req.body;
   if (!address || address.toLowerCase() !== ADMIN_ADDRESS) {
     return res.status(401).json({ error: 'Unauthorized' });

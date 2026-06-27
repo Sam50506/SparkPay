@@ -1,3 +1,5 @@
+import { rateLimit } from './rateLimit.js';
+
 const SB_URL = process.env.REACT_APP_SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
@@ -5,10 +7,12 @@ const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  const allowed = await rateLimit(req, res, 'normal');
+  if (!allowed) return;
+
   const { wallet_address, amount, turnstileToken } = req.body;
   if (!wallet_address || !amount) return res.status(400).json({ error: 'Missing fields' });
 
-  // Verify Turnstile token
   try {
     const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
@@ -24,19 +28,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Insert claim
     await fetch(`${SB_URL}/rest/v1/cashback_claims`, {
       method: 'POST',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
       body: JSON.stringify({ wallet_address, amount, timestamp: new Date().toISOString(), status: 'pending' })
     });
 
-    // Deduct from balance
     const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${wallet_address}&select=*`, {
       headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
     });
@@ -46,11 +43,7 @@ export default async function handler(req, res) {
 
     await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${wallet_address}`, {
       method: 'PATCH',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ pending_amount: newBalance, updated_at: new Date().toISOString() })
     });
 

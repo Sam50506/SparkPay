@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
+import { rateLimit } from './rateLimit.js';
 
 const RPC = 'https://rpc.testnet.arc.network';
 const CHAIN_ID = 5042002;
@@ -10,7 +11,10 @@ const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  
+
+  const allowed = await rateLimit(req, res, 'strict');
+  if (!allowed) return;
+
   const authHeader = req.headers['authorization'];
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   let authorized = false;

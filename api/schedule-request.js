@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
+import { rateLimit } from './rateLimit.js';
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -30,9 +31,11 @@ const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
+  const allowed = await rateLimit(req, res, 'normal');
+  if (!allowed) return;
+
   const { action, request_id, payment_id, request_type, request_ids } = req.body;
 
-  // Handle delete action
   if (action === 'delete') {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -44,12 +47,8 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
     if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
-    if (!authorized) {
-      return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
-    }
-    if (!Array.isArray(request_ids) || request_ids.length === 0) {
-      return res.status(400).json({error: 'request_ids required'});
-    }
+    if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
+    if (!Array.isArray(request_ids) || request_ids.length === 0) return res.status(400).json({error: 'request_ids required'});
     try {
       const idsFilter = request_ids.join(',');
       await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=in.(${idsFilter})`, {
@@ -62,7 +61,6 @@ export default async function handler(req, res) {
     }
   }
 
-  // Handle approve/reject actions
   if (action === 'approve' || action === 'reject') {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -74,25 +72,20 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
     if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
-    if (!authorized) {
-      return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
-    }
+    if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
     try {
-
       if (action === 'approve' && request_type === 'cancel') {
         const provider = new ethers.JsonRpcProvider(RPC, {name: 'Arc Testnet', chainId: 5042002});
         const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
         const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
         const tx = await contract.cancel(payment_id, {gasPrice: ethers.parseUnits('100', 'gwei'), gasLimit: 100000});
         await tx.wait();
-
         await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
           method: 'PATCH',
           headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json'},
           body: JSON.stringify({cancelled: true})
         });
       }
-
       if (action === 'approve' && request_type === 'edit') {
         const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=eq.${request_id}&select=*`, {
           headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`}
@@ -100,11 +93,11 @@ export default async function handler(req, res) {
         const [editReq] = await reqRes.json();
         const updates = {};
         if (editReq.new_recipient) updates.recipient = editReq.new_recipient;
-        if (editReq.new_amount)    updates.amount = editReq.new_amount;
+        if (editReq.new_amount) updates.amount = editReq.new_amount;
         if (editReq.new_date) {
-  const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T00:00:00`;
-  updates.release_time = Math.floor(new Date(dateStr).getTime() / 1000);
-}
+          const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T00:00:00`;
+          updates.release_time = Math.floor(new Date(dateStr).getTime() / 1000);
+        }
         if (Object.keys(updates).length > 0) {
           await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
             method: 'PATCH',
@@ -113,46 +106,32 @@ export default async function handler(req, res) {
           });
         }
       }
-
       await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?id=eq.${request_id}`, {
         method: 'PATCH',
         headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json'},
         body: JSON.stringify({status: action === 'approve' ? 'approved' : 'rejected'})
       });
-
       await sendTelegram(`${action === 'approve' ? '✅ Approved' : '❌ Rejected'} request #${request_id} for payment #${payment_id}`);
       return res.json({success: true});
     } catch(e) {
-      console.error('CANCEL ERROR:', e.message, e?.reason, e?.code);
       return res.status(500).json({error: e.message, reason: e?.reason, code: e?.code});
     }
   }
 
-  // Handle new request submission
   const { payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date } = req.body;
-
   try {
     const r = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests`, {
       method: 'POST',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': `Bearer ${SB_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
+      headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation'},
       body: JSON.stringify({payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date, status: 'pending'})
     });
-
     if (!r.ok) throw new Error(await r.text());
-
     const msg = rtype === 'cancel'
       ? `🚨 <b>Cancel Request</b>\n\nPayment ID: #${pid}\nWallet: <code>${wallet_address}</code>\nReason: ${reason}\n\nReview in admin portal.`
       : `✏️ <b>Edit Request</b>\n\nPayment ID: #${pid}\nWallet: <code>${wallet_address}</code>\nNew Recipient: ${new_recipient||'-'}\nNew Amount: ${new_amount||'-'}\nNew Date: ${new_date||'-'}\n\nReview in admin portal.`;
-
     await sendTelegram(msg);
     res.status(200).json({success: true});
   } catch(e) {
-    console.error(e);
     res.status(500).json({error: e.message});
   }
 }
