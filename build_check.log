@@ -2,7 +2,7 @@
 > arc-remittance@1.0.0 build
 > craco build
 
-(node:8502) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(node:5906) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
 (Use `node --trace-deprecation ...` to show where the warning was created)
 Creating an optimized production build...
 Compiled with warnings.
@@ -151,6 +151,8 @@ src/App.js
   Line 49:10:     'addrColor' is defined but never used                                                                                                                                  no-unused-vars
   Line 49:21:     'isValidAddr' is defined but never used                                                                                                                                no-unused-vars
   Line 50:23:     'sbFetch' is defined but never used                                                                                                                                    no-unused-vars
+  Line 50:32:     'sbInsert' is defined but never used                                                                                                                                   no-unused-vars
+  Line 50:52:     'sbUpdate' is defined but never used                                                                                                                                   no-unused-vars
   Line 65:38:     'wcInitRef' is assigned a value but never used                                                                                                                         no-unused-vars
   Line 65:260:    'isResumed' is assigned a value but never used                                                                                                                         no-unused-vars
   Line 75:171:    'editSchedId' is assigned a value but never used                                                                                                                       no-unused-vars
@@ -163,7 +165,7 @@ src/App.js
   Line 154:5:     React Hook useCallback has a missing dependency: 'awardCashback'. Either include it or remove the dependency array                                                     react-hooks/exhaustive-deps
   Line 155:400:   'idMatch' is assigned a value but never used                                                                                                                           no-unused-vars
   Line 155:1299:  React Hook useEffect has missing dependencies: 'loadContractHistory', 'loadDeletedHashes', 'provider', and 'txns'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
-  Line 155:1384:  React Hook useEffect has a missing dependency: 'fetchMyClaims'. Either include it or remove the dependency array                                                       react-hooks/exhaustive-deps
+  Line 155:1424:  React Hook useEffect has a missing dependency: 'fetchMyClaims'. Either include it or remove the dependency array                                                       react-hooks/exhaustive-deps
   Line 175:9:     'schedHashes' is assigned a value but never used                                                                                                                       no-unused-vars
   Line 178:9:     'recentRecipients' is assigned a value but never used                                                                                                                  no-unused-vars
   Line 181:102:   'setInvId' is assigned a value but never used                                                                                                                          no-unused-vars
@@ -207,10 +209,10 @@ To ignore, add // eslint-disable-next-line to the line before.
 
 File sizes after gzip:
 
-  989.17 kB (-125 B)  build/static/js/main.4e9b015f.js
-  44.49 kB            build/static/js/769.0a8b12e8.chunk.js
-  5 kB                build/static/css/main.96906b90.css
-  4.98 kB             build/static/js/171.ae320931.chunk.js
+  993.58 kB (+4 B)  build/static/js/main.23e11830.js
+  44.49 kB          build/static/js/769.0a8b12e8.chunk.js
+  5 kB              build/static/css/main.96906b90.css
+  4.98 kB           build/static/js/171.ae320931.chunk.js
 
 The bundle size is significantly larger than recommended.
 Consider reducing it with code splitting: https://goo.gl/9VhYWB

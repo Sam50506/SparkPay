@@ -179,7 +179,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     if(pinValue!==pinConfirm){setPkError('PINs do not match');return;}
     setPkLoading(true);setPkError('');
     try{
-      const r=await fetch('/api/pin-setup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,pin:pinValue})});
+      const r=await fetch('/api/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'setup',address,pin:pinValue})});
       const d=await r.json();
       if(d.error)throw new Error(d.error);
       setPinSetup(true);setPinMode('verify');setPinValue('');setPinConfirm('');
@@ -190,7 +190,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const verifyPin=async()=>{
     setPkLoading(true);setPkError('');
     try{
-      const r=await fetch('/api/pin-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,pin:pinValue})});
+      const r=await fetch('/api/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',address,pin:pinValue})});
       const d=await r.json();
       if(d.error)throw new Error(d.error);
       sessionStorage.setItem('sp_admin_jwt',d.token);

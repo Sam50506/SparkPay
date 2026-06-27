@@ -1,0 +1,858 @@
+[33m81fb2711[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m redeploy ScheduledPayment with solc 0.8.20 for proper verification
+[33md114fe6f[m fix: remove unused faucet.js to stay within Vercel 12 function limit
+[33mda6633c0[m upgrade: Remittance redeployed with 150 max recipients
+[33macd40f8e[m upgrade: deploy Remittance with OpenZeppelin SafeERC20, ReentrancyGuard, Ownable
+[33mf5c9b39f[m feat: add Turnstile verification to cashback claim
+[33m200bb087[m fix: rewrite Remittance.sol with SafeERC20, ReentrancyGuard, Ownable, emergencyWithdraw
+[33me46c601b[m fix: wrap each payment in try/catch so one failure doesn't stop others
+[33m0c13d66f[m fix: update minimum release time message to 2 minutes
+[33m3f0f8172[m fix: require release time at least 1 minute in future to match contract
+[33m36c016ce[m fix: show actual revert reason when scheduling fails
+[33ma6c67731[m fix: auto-dismiss connected banner after 5s, improve refresh button styling
+[33med1dd8db[m feat: add larger refresh balance button left of disconnect
+[33macdc1f18[m feat: remove copy button, enlarge refresh balance icon
+[33m1863ad8e[m feat: add refresh balance button to header
+[33ma1bfae94[m fix: show Cancel button before release time, Need Help only after
+[33m29070b23[m fix: clear status on tab change, fix cancelled_admin label after release time
+[33md77a7a1f[m security: protect cashback-award API with internal secret
+[33m5eff44c8[m feat: add comprehensive Hardhat tests for ScheduledPayment contract
+[33m97b3b389[m update SCHED_ADDR to OpenZeppelin upgraded contract
+[33m7ada1936[m fix: pass onCancel and loading props to PaymentCard
+[33m918d18bf[m refactor: remove excessive blank lines from App.js
+[33mc9a4a2cb[m refactor: extract FaqPage component from App.js
+[33m47d4847e[m refactor: extract loadContractHistory into useContractHistory hook
+[33m2c1dc077[m fix: local state for hour and min inputs in TimePicker
+[33m105cfc9b[m fix: allow clearing hour input in TimePicker
+[33mfdf869c4[m fix: move TimePicker outside grid to full width
+[33m8984ed58[m fix: TimePicker align right
+[33md884c3b7[m fix: center TimePicker dropdown
+[33m79e95caf[m fix: AM/PM as full width row below hour and min
+[33m05f75bcd[m fix: minute manual input in TimePicker
+[33m36bff10b[m force redeploy
+[33m0263f1b3[m fix: TimePicker right-aligned, hour manual input
+[33m82f6d149[m fix: reduce AM/PM column width in TimePicker
+[33mbef8c82b[m fix: TimePicker opens upward, minute scrollable list, fix column widths
+[33mb44b41e8[m feat: add Active/History tabs with show more to ScheduledPaymentsPanel
+[33m099cae9e[m fix: update ScheduledPaymentsPanel with NeedHelpMenu and OnChainSchedules components
+[33m9f2e0cdf[m fix: match execute tx by payment ID and selector for accurate scheduled payment timestamps
+[33ma1e549b4[m fix: match cancel tx by payment ID from input data for accurate refund timestamps
+[33m8dd34d03[m fix: detect admin-initiated cancels in refund history by removing sender filter
+[33md32761bc[m fix: move refunds inline with transactions by timestamp, remove separate refunds section
+[33mf8ad7e67[m refactor: move 193-line CSS block from App.js to App.css (-193 lines)
+[33m9895699d[m fix: clarify payment ID is 0-based in manual execute error message and placeholder
+[33mfd2a7461[m fix: validate payment exists, not executed/cancelled, release time passed before manual execute
+[33m1b25e98a[m refactor: extract SendPage, InvoicePage, PayPage, SchedulePage — remove all renderXxx closures (-39 lines)
+[33m6308ab73[m refactor: delete all renderXxx wrappers and renderPage, inline switch directly (-8 lines)
+[33m70200ba0[m refactor: extract HistoryPage component, split fused batchGroups/renderHistory block
+[33m5b13cac3[m fix: ContactsPage Recent Recipients now uses allTxns (includes on-chain history)
+[33m2145405c[m refactor: extract RewardsPage and ContactsPage components
+[33ma005c439[m refactor: extract RewardsPage component (-3 lines, pure JSX extraction)
+[33m4404af68[m refactor: extract useSchedule hook (handleSchedule/Execute/CancelSched + SCHED_ABI, -69 lines)
+[33m042ce75a[m refactor: remove dead renderMulti closure (replaced by MultiSend component)
+[33m17f3462d[m fix: move convertedVal after useSend to fix initialization error
+[33mcaa7803c[m fix: load deletedHashes after address is available, not at init time
+[33m7c0f2d9f[m refactor: move awardCashback before refreshPendingTxns
+[33m3a5359ea[m Fix: remove unused IC import from ContactsPage
+[33mab760f07[m Revert "Extract ContactsPage component from App.js"
+[33meaab694f[m Extract ContactsPage component from App.js
+[33md1d576b0[m Extract useSend and useMulti hooks from App.js
+[33md3d5ff0d[m Revert "Extract cleanErr to config, useBalance and useCashback hooks"
+[33m667e674d[m Extract cleanErr to config, useBalance and useCashback hooks
+[33m78913acb[m fix: close Review Transfer modal after invoice payment
+[33m7b5a77bc[m refactor: extract invoice logic into useInvoices custom hook (step 22)
+[33m246c1fe0[m refactor: extract SettingsPage as real component with props (step 21)
+[33md2f23086[m refactor: extract AboutPage as real component (step 20)
+[33m90b36e35[m refactor: extract ReceivePage as real component with props (step 19)
+[33m3b8892f1[m refactor: extract RatesPage and FeesPage as real components with props (step 18)
+[33m8a95e3ae[m refactor: extract QRScanner to its own component file (step 17)
+[33m7d0aa8d3[m refactor: extract ScheduledRequests, ManualExecute, FailedTxns, AdminPanel to AdminPanel.jsx (step 16)
+[33m04564193[m fix: auto-refresh wallet balance and cashback balance every 15s so admin approvals reflect without manual reload
+[33m619bfbeb[m fix: add cashback logic to manual-execute.js and fix keeper.yml missing Supabase secrets
+[33m8f2f5b74[m fix: pass Supabase env vars to keeper.js for cashback awarding
+[33mc0c6f9cd[m refactor: extract NeedHelpMenu and OnChainSchedules to ScheduledPaymentsPanel.jsx (step 15, corrected boundaries)
+[33m6d0ae0ce[m feat: add delete action for admin scheduled payment requests
+[33mdaed2718[m refactor: extract IC icons and shared modals (NavTooltip, CashbackToast, ResumeModal, WalletPicker) - step 14
+[33mc4ec5e35[m refactor: extract IC icons and shared modals (NavTooltip, CashbackToast, ResumeModal, WalletPicker) - step 14
+[33m5cd8efd4[m refactor: extract SparkPayLogo and OnboardingModal to own component file (step 13)
+[33m1ab50c22[m refactor: extract QRModal to its own component file (step 12) + fix orphaned tail
+[33mc9443453[m fix: invoice details text color was too light to read against light blue background
+[33mc3b923d2[m refactor: extract ConfirmModal to its own component file (step 11)
+[33m9c3fd6ff[m refactor: extract CountrySelect to its own component file (step 10)
+[33m325ef90a[m refactor: extract getProvider and Supabase helpers to config.js (step 9)
+[33m11a80806[m refactor: extract SplashScreen to its own component file (step 8)
+[33m5fbe5371[m refactor: extract TimePicker to its own component file (step 7)
+[33md49cda7d[m refactor: extract addrColor and isValidAddr to config.js (step 6)
+[33me3905eb6[m refactor: extract buildChart to config.js (step 5) + fix stray braces
+[33m1685291d[m refactor: extract utility functions to config.js (step 4)
+[33mfc69f1b6[m refactor: extract REMIT_ABI and ERC20_ABI to config.js (step 3)
+[33m6562ac28[m refactor: extract country/currency data to config.js (step 2)
+[33m99ccd8c6[m refactor: extract constants to config.js (step 1 of splitting App.js)
+[33m19e7f131[m refactor: group admin panel sections with clear headers (Site Control, Payment Operations, Requests, Monitoring)
+[33m6b684704[m feat: show payment ID on scheduled payment cards
+[33m2341054e[m feat: admin portal - request filters, manual execute, failed txns view
+[33m673aefd4[m feat: add manage/hide functionality to admin scheduled payment requests
+[33m6c7e3666[m feat: add manage/hide functionality to scheduled payments matching history tab pattern
+[33m86e1f23c[m fix: mask PIN input, clear maintenance toggle, fix volume box wrap, use real logo in admin header
+[33mf2b04045[m feat: polish ScheduledRequests cards, replace emojis with SVG icons
+[33m6c1bf124[m feat: polish remaining admin cards with icon badges and resources nav list
+[33m7fa2839a[m feat: professional dashboard redesign - sticky header, sectioned layout, refined stat cards
+[33maaebb8b1[m fix: remove debug alert, maintenance mode now works correctly
+[33mc3d48d93[m debug: show maintenance fetch result
+[33m818558df[m fix: AdminPanel fetches fresh maintenance status on mount
+[33mb514eea5[m fix: actually enforce maintenance mode block for non-admin users
+[33m18788418[m fix: harden pin-verify with full error wrapping for diagnosis
+[33m7faa4e0d[m feat: PIN fallback screen for browsers without WebAuthn support
+[33m32b87404[m feat: add WebAuthn support detection and PIN fallback logic
+[33maa07c78f[m feat: add PIN-based fallback auth for browsers without WebAuthn support
+[33mc7faa9cc[m fix: increase WebAuthn timeout and relax userVerification requirement
+[33m44ff00bf[m fix: update WebAuthn API calls to match v13 credential shape
+[33mdb9d1b75[m feat: polish admin dashboard header and stat cards with icons
+[33m6b86c1ba[m feat: unified passkey JWT auth across all admin actions, clean Quick Links UI
+[33m7e75411b[m feat: accept passkey JWT for admin API auth alongside legacy admin key
+[33m37501994[m feat: show 5 recent requests with expand option in admin panel
+[33m2d1a38fb[m feat: replace onboarding emojis with custom SVG icons
+[33maa6320de[m build verified for passkey feature
+[33m84d11c8e[m feat: passkey gate UI before admin dashboard access
+[33me2754cb6[m feat: add passkey registration and login logic to admin panel
+[33m31a9e3b4[m feat: add WebAuthn passkey API endpoints for admin auth
+[33mbb56900e[m feat: collapsible transactions section, expanded by default
+[33ma3a3b061[m fix: move refunds section above transaction list for visibility
+[33m9a71d47c[m feat: show refunds section in history page
+[33mf7f88558[m fix: close JSX fragment and IIFE return properly in renderHistory
+[33m993cdd43[m persist deleted txns to Supabase — survive site data clears
+[33m001979a2[m fix deleted txns key mismatch — use arc_deleted_hashes_ consistently
+[33me4e546b6[m fix refund timestamp — use most recent cancel tx, remove duplicate local refund entry
+[33ma168ccda[m fix: missing semicolon in deletedHashes state
+[33m3255c6cf[m fix: bulk delete works for all txns including contract txns, persisted in localStorage
+[33mabeac098[m fix: use real block explorer timestamps for refunds, proper deduplication
+[33m1cfa5773[m fix: use releaseTime for refund timestamps, deduplicate refunds in history
+[33m878ae11a[m Fix duplicate scheduled payments in history, add time display
+[33m38e6ec12[m Fix history tab not loading scheduled payment events
+[33m4480b294[m fix: sync scheduled payment status (cancelled/refunded) on every load, not just History tab
+[33m340c798d[m fix: restore on-chain cancel call when admin approves cancellation request
+[33mb591b7e3[m fix: maintenance toggle was using undefined supabase client, now uses fetch
+[33me4c970c7[m fix: remove duplicate closing brace causing schedule-request.js to crash
+[33m5058c7e1[m fix: prevent contacts from being wiped on page refresh due to race condition
+[33m0111b97b[m fix: sync scheduled payment status (confirmed/cancelled) from on-chain when History tab opens
+[33me4e88f19[m fix: cancelled scheduled payments now show refund in history and update status
+[33m785c8a28[m fix: remove extra closing brace in NeedHelpMenu submit function
+[33mff165698[m feat: edit payment cancels old on-chain and creates new scheduled payment
+[33mc62cdbb0[m fix: cancel approval marks DB instead of on-chain, edit includes time in release_time
+[33m2d05a40c[m fix: sync contract address across all files to 0x1Eb2...46
+[33m9c0432e8[m fix: NeedHelpMenu undefined originalRecipient and originalAmount variables
+[33mdb026a82[m fix: history tab - received payments, scheduled labels, invoice type, sort order
+[33m362c501f[m fix: missing comma after contract_address in request payload
+[33mb517394d[m fix: remove extra closing div in time picker
+[33m66e67ca6[m feat: pass original recipient/amount in edit request for before/after comparison
+[33m172083eb[m feat: before/after comparison in edit request modal, check here button
+[33m571300cc[m close time picker on click outside
+[33ma5605b4f[m fix hour scroll speed — larger items with snap
+[33m678152a5[m replace minute scroll with direct number input in time picker
+[33m8f383ae1[m add scroll snap to time picker hour and minute lists
+[33m28939fdd[m allow any minute in time picker
+[33mb14ef5f4[m add schedule/cancel/refund to history, subtract refunds from chart volume
+[33m0a8f74a2[m replace native time input with custom TimePicker component
+[33mb8ee50a7[m split datetime-local into separate date and time inputs on schedule form
+[33m5003bb8b[m fix QR scanner — centered modal on PC, fullscreen on mobile
+[33m9de5b7f1[m fix: update processing time estimate to 60 minutes
+[33mc19e194c[m fix: keeper.js now points to correct SCHED_ADDR and awards cashback for scheduled payments
+[33mba2fd7ba[m feat: complete cashback migration to Supabase - now works for scheduled payments too
+[33mca6fb7d7[m feat: migrate cashback awarding to Supabase backend
+[33m75c7e904[m fix: update remaining 1 USDC cashback references to 5 USDC
+[33ma4e17635[m fix: change cashback claim minimum from 1 to 5 USDC
+[33m64c41c1a[m fix: extract wallet address from QR link URL
+[33m08321266[m fix: QR scanner black screen and cleanup issue
+[33m08658a0a[m feat: add QR code scanner to Send page
+[33m27e2c330[m fix: show admin cancel approval message and refund status to user
+[33mccde2a77[m update SCHED_ADDR to freshly compiled contract
+[33m80e92483[m update SCHED_ADDR to redeployed contract with executor cancel fix
+[33m26b86580[m fix: better error logging for cancel
+[33m3ce82f5d[m revert: restore original cancel flow
+[33m8b19a538[m fix: admin cancel only updates Supabase, user claims refund on-chain
+[33md573b941[m fix: show actual revert reason in error message
+[33m590b7111[m fix: 30s timeout on schedule tx.wait to prevent stuck state
+[33mb2dceee0[m feat: combined datetime picker, 12-hour format display for scheduled payments
+[33m9ac046a2[m fix: save contract_address with requests to prevent ID collision between contracts
+[33meb4d9f9c[m fix: remove signer.connect() call that breaks browser wallet signers
+[33m42aa39d1[m fix: log full schedule error to console for debugging
+[33m6229a50d[m fix: update scheduled payment contract to new address, executor can now cancel
+[33md3350e9b[m fix: add fallback RPCs to prevent rate limit on scheduling
+[33m659905d9[m fix: edit request now updates Supabase recipient, scheduler uses updated data
+[33m66deb7ea[m feat: add ChangesModal to render in OnChainSchedules
+[33m8a179dbc[m feat: show edit request details in admin portal, confirmation alert with changes
+[33mbfc5bc6f[m feat: add time field to edit payment request form
+[33m1dfb37c4[m fix: replace wallet signature auth with admin key for schedule requests
+[33me6cf110d[m fix: correct cancellation message, exclude cancel-approved from active count, auto-refresh handles status update
+[33md88c79ca[m fix: show refund confirmed message when cancel approved, prompt user to refresh
+[33m96867a10[m fix: hide processing message and redundant badge when cancel is approved
+[33m88ff645c[m fix: show cancellation approved status, hide processing message and NeedHelp when cancel approved
+[33m79abfdac[m feat: use wallet signature for admin approval authentication
+[33mce1ad20c[m fix: store admin key in localStorage for schedule request approval
+[33m45a5fa18[m fix: use correct scheduled payment contract address in API
+[33m49c4647d[m fix: poll scheduled payments every 10s for faster status updates
+[33m149cd093[m fix: use deployer private key for contract cancel
+[33mac89f280[m feat: admin approval triggers on-chain cancel via API
+[33m7f35d73f[m feat: show request status on payment cards
+[33mb74e7f2f[m feat: add ScheduledRequests component to admin panel
+[33m8e8350de[m Add Need Help menu with cancel/edit requests and Telegram notifications
+[33m40b53020[m Hide release/cancel buttons after scheduled time, show processing message
+[33mf65a0208[m Show processing state with delivery time estimate
+[33m3d8aed91[m Use blockchain time instead of device time, auto-refresh every 30s
+[33m90497684[m Redesign scheduled payments card UI
+[33m3017e340[m Global clean error messages using cleanErr helper
+[33m575a4750[m Clean error messages and early time validation for schedule
+[33m8a96b484[m Better error messages for scheduled payments
+[33m6afaaf86[m style schedule info note — subtle left border instead of colored box
+[33mdb3c3f07[m add instant bolt loader before React bundle loads
+[33m3d126449[m fix white flash before splash — set black background on html/body/root
+[33m5dcd2bed[m update favicon and PWA icons to SparkPay logo
+[33m7a99280a[m fix stray ) in FAQ section rendering
+[33m79daa4a8[m show release details (tx hash + time) after scheduled payment executes
+[33m67bea906[m fix country picker offset on PC in MultiSend component
+[33m8a9e7814[m fix country picker offset on PC — leaves mobile untouched
+[33mbd6cb5a7[m revert modal-bg left offset — was breaking connect screen
+[33mb66112d1[m fix country modal hidden behind sidebar on PC
+[33ma5d0a125[m update About page: fix em dash, real features, full contract addresses
+[33m47018c8a[m remove i tooltip button from sidebar nav items
+[33m517c58bf[m add desktop responsive layout
+[33m0c920fe4[m cleanup node_modules from git tracking
+[33mdd483908[m fix 404 routing for SPA
+[33m26771595[m fix: improve processing label style to match design system
+[33m2b608c43[m feat: hide cancel button and show processing when release time passed
+[33m0197e783[m fix: update frontend to new contract address
+[33md21531c5[m fix: update contract address and security fixes
+[33mae5044dc[m Update keeper with new contract address
+[33m6106a4d9[m Set new ScheduledPayment contract address
+[33m9d7c3bab[m Rewrite scheduled payments to use native ARC tokens
+[33m928543d9[m Set keeper to 30 mins
+[33m45e48e72[m Force keeper update
+[33m174d3565[m Fix keeper workflow to use master branch
+[33m7dc91c32[m Rewrite keeper.js clean version
+[33m994d6a49[m Fix keeper private key handling
+[33m1b92df1b[m Fix keeper.js syntax error
+[33mca7fca48[m Trigger Actions detection
+[33m31889b64[m Trigger workflow scan
+[33mabf72090[m Merge main into master, keep master package files
+[33m27019f95[m keeper.yml
+[33mf0de8ac5[m Fix keeper workflow
+[33m3a1b5978[m Trigger workflow detection
+[33ma95e9e4b[m Add GitHub Actions keeper bot for auto-executing scheduled payments
+[33madcff6ce[m Add real escrow scheduled payments via ScheduledPayment contract
+[33m034f7453[m fix: batch recipients show address | country | amount, dash for no country
+[33m782eb91e[m restore: 63bc38c - all work intact before cron issues
+[33mf47d4efd[m fix: restore App.js from 62d9851 and MultiSend from 3bf2390 - all pages working
+[33m27daf1e4[m revert: restore to c004bb9 - last stable before cron
+[33m0a9d88b2[m fix: renderSchedule and renderSettings inside AppInner scope
+[33m0aa881ed[m revert: restore App.js to pre-cron stable version
+[33m61c14f16[m fix: restore vercel.json to pre-cron version
+[33m376e80db[m fix: remove cron job
+[33md25a3ade[m fix: change cron to hourly to comply with Vercel Hobby plan
+[33m3bf2390b[m fix: renderSchedule was closing AppInner early, all pages after it were out of scope
+[33mc15c5f63[m force redeploy
+[33m761a1cf6[m fix: move renderSchedule and renderSettings inside component scope
+[33m62d98518[m fix: restore missing renderRates renderHistory renderReceive renderFees
+[33m669814e0[m force redeploy rewards fix
+[33me20db5f0[m fix: restore missing renderRewards function
+[33m83fa96ad[m fix: convert scheduler to ESM, remove type:module from package.json
+[33m4cf1e573[m fix: rename cron to scheduler to avoid Vercel conflict
+[33m1f4bc7bd[m force redeploy cron
+[33m8e379f48[m feat: cron job for automatic scheduled payment execution
+[33mc004bb99[m fix: use native value for scheduled payments, new contract deployed
+[33m567e3dd9[m Upgrade Schedule tab to real escrow payments via ScheduledPayment contract
+[33me51ab465[m Add ScheduledPayment escrow contract, remove hardhat from React app
+[33m3a3bf793[m Add ScheduledPayment escrow contract
+[33m63bc38cf[m Add transparent overlay to close sidebar on outside tap
+[33m931326f6[m Remove sidebar overlay dim
+[33m4f9effff[m Reduce sidebar overlay opacity
+[33me9181ad9[m Fix sidebar titles, logo bg, overlay z-index
+[33m330fde8e[m Fix sidebar section title color and class names
+[33ma11c1ae1[m Fix overlay close, remove logo bg, remove sidebar section titles
+[33m06c62085[m Fix ap-layout CSS to remove black space on send page
+[33m919a6e88[m Remove wallet connect question from FAQ
+[33mc91199c4[m Restore sidebar to app layout
+[33m11e1fbb0[m Fix troubleshoot question text alignment to left
+[33m095d6584[m Add WalletConnect delay FAQ to troubleshoot section
+[33m32fb2670[m Fix JSX structure in main app layout
+[33m2872d78d[m Remove marketing badges from connect page, keep troubleshoot
+[33m60adf835[m Add ConnectTroubleshoot component to wallet connect page
+[33m1b98c11c[m Add troubleshoot section to wallet connect page
+[33me01cbd69[m Fix FAQ component to use proper React component with useState
+[33m6a117031[m Rewrite FAQ with expandable sections and troubleshooting
+[33mcd5f6268[m Add FAQ page, rewrite About features in plain language
+[33me71bd0e6[m Remove dashes from About section
+[33m1dcfc1ed[m Rebrand About page to SparkPay, fix browser tab title
+[33mc3dd51a5[m Update country count to 150+
+[33me5cca52b[m Increase welcome logo size, reduce gap to headline
+[33m9f71fec4[m Reduce top padding on landing page
+[33me6d006dc[m Polish landing page: logo spacing, better subheadline
+[33md6d714ae[m Move logo area higher, increase logo size
+[33m9928517a[m Fix cashback not awarding correct amount on send
+[33m080e95c6[m Increase sidebar logo size and tighten gap
+[33m84c64fc7[m Add padding to PWA icons to prevent edge clipping
+[33me69a30ee[m Fix PWA icon crop to square
+[33m3a6ac97e[m Update PWA icons to SparkPay branding
+[33m5e4af6c4[m Update PWA icons and manifest description to SparkPay branding
+[33m5c51f09b[m replace sidebar SVG logo with sparkpay logo
+[33mc43b196d[m update sparkpay logo
+[33m648ba22c[m rebrand to sparkpay
+[33m75c58a6d[m remove radial glow background from splash screen
+[33m7265cc3e[m dark mode: clean black/white palette, keep blue accents
+[33mf0475c20[m rebrand ArcPay → SparkPay in manifest, index.html, service worker
+[33m59691c65[m rebrand ArcPay → SparkPay throughout dApp
+[33m65bdfd61[m revert splash to clean logo reveal — remove broken shard divs
+[33m86d0eb2e[m clean up logo reveal — shine sweep + proper bolt sizing
+[33mb03845ca[m increase bolt size and glow intensity on splash screen
+[33me4e73f5b[m replace glitch with glass shatter effect — 10 shards converge into bolt
+[33md4460b40[m fix splash screen animation timeline — tighten bolt/logo/sub/glow ordering
+[33m667b5943[m reduce SparkPay glitch duration and cycle count
+[33m00053091[m slow down SparkPay glitch animation timing
+[33m13775ce3[m feat: slower glitch shake, SparkPay reveals with scale+blur effect after glitch ends
+[33mbdfbc4a1[m fix: reduce glitch translate offsets so only text shifts not screen
+[33mdf0f2083[m fix: glitch runs independently before logo reveal, properly visible now
+[33m08577639[m fix: glitch effect longer duration, more iterations, bigger offset — actually visible now
+[33m03dd7a97[m fix: clean glitch splash rewrite — no duplicates, glitch layers properly fade out
+[33m6c7b8175[m fix: glitch layers now properly fade out after animation completes
+[33m519f1369[m feat: glitch reveal splash — flash, scan line, chromatic split, bolt pop
+[33m3b2e910e[m fix: pure black splash bg, bolder wider bolt with white-to-cyan gradient replacing 'a'
+[33me7d8411c[m feat: SparkPay splash inspired by Lottie — navy, bolt, rays, particles
+[33m918093cf[m Revert "fix: splash colors match dapp brand — blue to cyan gradient"
+[33m8b774485[m fix: splash colors match dapp brand — blue to cyan gradient
+[33m4182f739[m feat: clean dark SparkPay splash — bolt, wordmark, single gold line
+[33mf04c14bc[m feat: SparkPay splash screen with lightning bolt, sparks, glow and gradient bar
+[33m4ca489cc[m fix: match maintenance fetch key to maintenance_mode to sync with admin panel update
+[33m5b677e45[m Revert "fix: replace stale pdf worker with correct pdfjs-dist v6 worker"
+[33mce44f330[m fix: replace stale pdf worker with correct pdfjs-dist v6 worker
+[33m19429dec[m fix: close modal on wallet rejection in batch send
+[33m483afa73[m fix: cancel button on batch confirm modal now works
+[33m9a0c6720[m fix: add cancel button to batch confirm modal
+[33m30be5d5b[m fix: admin maintenance toggle now writes to Supabase instead of localStorage
+[33mad4bcdcc[m feat: maintenance mode stored in Supabase, affects all users globally
+[33me867ef3c[m fix: maintenance mode falls back to hardcoded default if localStorage cleared
+[33m721c4900[m feat: maintenance mode toggle via localStorage, no redeploy needed
+[33m1bad0fb0[m feat: admin portal at /#admin with dashboard, cashback, maintenance status
+[33m6222baf9[m feat: add maintenance mode, admin-only access
+[33m9f08302c[m fix: catch empty address rows in CSV when amount is present
+[33macfa1972[m fix: show non-0x addresses in CSV issues table instead of silently skipping
+[33ma8d8ca0e[m fix: show correct negative amount reason in CSV and XLSX, add fileRow to CSV issues
+[33m613246b1[m feat: show 'Send to Valid Recipients Only' button when import issues exist
+[33ma47c31b8[m fix: hide unreliable total count for PDF imports, show only valid imported count
+[33mde9fd824[m fix: exclude valid addresses from malformed scan, correct PDF total count
+[33m2632dc43[m fix: correct PDF total count, no double counting of addresses with bad amounts
+[33m3cbe7ad1[m fix: prevent Edit button clipping on right edge
+[33m6d456e0d[m fix: column gap, consistent row numbers, trim header label
+[33m21885238[m fix: show actual document row number, rename # to Row in file, more row spacing
+[33m6bccc724[m fix: capture highlightIdx before clearing to correctly remove resolved issue row
+[33m27e4434d[m feat: professional issues table with persistent highlight until row is fixed
+[33m78903113[m feat: Add & Edit scrolls to and highlights the new row instantly
+[33m0bd79c3a[m fix: detect negative amounts explicitly, tighten invalid address regex in PDF parser
+[33m651d5e47[m fix: flatten PDF text before parsing to catch line-wrapped addresses
+[33m33c32541[m feat: show categorized warning for partially-skipped rows in MultiSend imports
+[33m8cd29497[m fix: clear stale recipient list when a new file import fails
+[33m11480b91[m fix: show error and clear list for invalid plain CSV imports too
+[33m134a0be8[m fix: render proper times symbol on dismiss button
+[33mf22187b3[m feat: replace alert() with inline error banner in MultiSend
+[33m8b0fe798[m feat: extend splash screen duration to 2.5s
+[33md67e3dc9[m docs: update MultiSend format hint text
+[33mb91fa92f[m fix: reconstruct PDF table rows by position, scope amount/country past address
+[33mbf8f3b83[m fix: use legacy pdfjs-dist build for compatibility
+[33m6f8a0ab3[m fix: use non-minified pdf.js worker to avoid toHex bug
+[33m3c2b9cd2[m fix: serve pdf.js worker locally instead of CDN
+[33m347e4d68[m fix: use dynamic pdf.js worker version from unpkg
+[33mba87d839[m debug: show actual PDF parse error message
+[33m589467d4[m fix contact edit creating duplicate instead of updating
+[33m3c1833a8[m improve multisend import hint text
+[33m89c96015[m add XLSX and best-effort PDF import to MultiSend
+[33mddb29a02[m move country select sheet to top to avoid keyboard overlap
+[33md718d3ea[m shrink country select sheet height to avoid keyboard overlap
+[33m350cb458[m fix country select overlay positioning
+[33m9f4b1045[m feat: use CountrySelect with search in Contacts page
+[33m0a0321c5[m fix: remove flag icon from country list to match MultiSend exactly
+[33mb5eb193b[m fix: use fallback RPC URL for wallet_addEthereumChain in Brave
+[33m8675a400[m fix: compact pill style for OKX country select path too
+[33mdcf133b7[m fix: use compact pill style for country select everywhere
+[33mfda41fb1[m feat: add searchable bottom-sheet country picker to MultiSend
+[33m6b8926d7[m feat: expand country list in multisend to all countries
+[33mcefd5b84[m fix: country pill full width to match input styling
+[33m45ee0218[m feat: searchable country picker for all browsers
+[33mdb22817e[m feat: add search to country picker, remove currency code display
+[33m86ee280b[m feat: use all 155 countries in all country selectors
+[33m0526bac2[m feat: add all 155 countries with currencies to exchange rates
+[33m78cec767[m feat: alphabetical exchange rates list with search and flags
+[33m050e1606[m fix: remove leftover '.com' text in exchange rates subtitle
+[33m79b20ca3[m feat: show country flags with currency in exchange rates
+[33m81bfcc88[m feat: edit schedule via modal instead of filling main form
+[33m28fc7a58[m feat: edit scheduled payments
+[33m53fa2d0e[m feat: add time field to scheduled payments
+[33m4234b644[m fix: rename button to Send to All Wallets
+[33mcb77e066[m fix: chart matches by date not just weekday name
+[33m1523b787[m fix: exclude received txns from transfer volume chart
+[33m0d0ca9c7[m fix: cashback threshold text from 10 to 1 USDC
+[33m4c604ed4[m fix: save contacts per wallet address
+[33m42c8dae9[m fix: connect card JSX structure and dependencies
+[33m7c18f678[m fix: rewrite connect card with correct JSX structure
+[33m7ee86c9b[m fix: remove extra closing divs in connect card
+[33m305b64b3[m fix: remove duplicate div causing JSX syntax error
+[33mea931264[m fix: correct JSX syntax in trust signals
+[33m8b47a8d5[m fix: replace connect footer with trust signals
+[33m0c679535[m fix: simplify connect screen to show button without scrolling
+[33m86a7a929[m feat: premium minimal splash screen
+[33mb80d2f22[m fix: use Arc RPC directly for balance fetch
+[33md2c95c1e[m fix: restore OKX wallet detection by name
+[33m409f731c[m fix: revert connectBrowser to original simple provider selection
+[33m98dc253e[m fix: always use window.okxwallet for OKX to avoid proxy conflict
+[33m0ce0d190[m debug: log provider selection in connectBrowser
+[33m083e752e[m fix: use EIP-6963 provider directly for OKX connection
+[33mdfb7da4d[m fix: use window.okxwallet directly for OKX connection
+[33m5aa97322[m fix: use window.okxwallet when provObj.isOkxWallet is true
+[33mfde29f81[m debug: log wallet type in connectBrowser
+[33mdbf002ef[m fix: use wallet name to detect OKX more reliably
+[33me68aaa82[m fix: use window.okxwallet directly for OKX to avoid MM conflict
+[33m1dbdd568[m chore: redeploy with CI=false
+[33m4709b313[m fix: remove WC pre-initialization causing permission conflicts
+[33mece99662[m fix: replace amt with sendAmt in awardCashback call
+[33m85731379[m fix: move useState outside conditional in OKXSelect
+[33m14d7bf38[m chore: untrack .env file
+[33md8f2cbfc[m fix: always create fresh WC provider on connect
+[33m0ac11946[m fix: use optionalChains for Arc Testnet in WalletConnect
+[33meb972ee2[m feat: pre-initialize WalletConnect on page load
+[33md8b508e4[m fix: downgrade WalletConnect to stable version
+[33mea6a8f8e[m fix: add WalletConnect modal options for proper UI
+[33mc9b2345c[m fix: allow WalletConnect image sources in CSP
+[33m005965c1[m fix: remove WalletConnect from wallet picker
+[33m252a04f6[m revert: restore connect wallet to before WC changes
+[33me75a7803[m fix: show single connect button based on wallet availability
+[33m0cfbbe7a[m chore: trigger redeploy for WC env var
+[33mcca9507a[m feat: show WalletConnect prominently when no window.ethereum
+[33m23e2307c[m fix: filter out Solana wallets from EIP-6963 picker
+[33m166181bb[m fix: correct fee amount to 0.0005 USDC, add spacing
+[33me0963b26[m fix: remove recent recipients, move Review Transfer button up
+[33m58b2d936[m fix: improve address text contrast tx3 to tx2
+[33m3dc17d0b[m feat: contacts manage mode with checkboxes, stacked buttons
+[33m2a893108[m fix: reduce logo padding to 8%
+[33m24148ba6[m fix: uniform Send button width in recent recipients
+[33m5753dd99[m fix: increase logo padding for PWA icon
+[33mc6119817[m fix: uniform row height in recent recipients
+[33me187ca34[m fix: align buttons in recent recipients
+[33m67f097ec[m fix: shorten button labels in recent recipients
+[33mc18bb74b[m fix: logo with padding for PWA icon
+[33m926c9c12[m fix: rename Edit/Save buttons in recent recipients
+[33ma1746970[m fix: placeholder name Ahmed to Sam
+[33m29d8f2b0[m fix: add blank Select Country option in contacts form
+[33m259ea28f[m fix: PWA manifest with local icons and proper purposes
+[33mb2ec9072[m feat: contacts page with search, recent recipients, colored avatars
+[33mb5859e94[m fix: replace regex with simple address validation
+[33m4a2f87f5[m fix: regex syntax in JSX contacts validation
+[33mea19e9c9[m fix: remove invalid JSX array syntax in country select
+[33m45d1a271[m fix: remove newline in renderContacts causing syntax error
+[33m7f20d374[m feat: show contact name and edit button for saved addresses in recent recipients
+[33m811a9060[m fix: always show recent recipients regardless of contacts count
+[33m1f3a3d55[m fix: use regex for address validation in contacts
+[33m40163a1a[m fix: trim address before validation in save contact
+[33m5309665e[m fix: contact validation - name and address separately
+[33m9b640f67[m fix: add blank Select Country option in contacts form
+[33m1e5db7c2[m feat: colored avatars, save contact button, for recent recipients
+[33mcbd6a2e0[m fix: SVG person icon for recent recipients
+[33me647024d[m fix: better avatar for recent recipients
+[33m8a8a0243[m fix: replace hex chars with person icon in recent recipients
+[33mda2eb287[m fix: contacts add button width
+[33m74b01523[m fix: move contacts state to component level
+[33mbb298cf9[m feat: professional contacts page with search, add form, recent recipients
+[33m8a106c98[m fix: lower cashback claim threshold from 10 to 1 USDC
+[33mf7baf351[m fix: update cashback description text
+[33m6539595f[m feat: cashback 1% of amount, min 5 USDC, remove rarity
+[33mfbadc346[m fix: use actual logo image instead of SVG placeholder
+[33md4d06a0e[m feat: update app logo and favicon
+[33m3fec1c18[m fix: center align bottom nav items
+[33m0154a0f7[m fix: center align bottom nav items vertically
+[33mfe20d732[m fix: filter 0-value txns, add first page button
+[33m9f02652a[m feat: auto-remove txns older than 30 days on load
+[33m25c945c0[m feat: show both sent and received from explorer
+[33mb5fe0894[m fix: include contractTxns (received) in allTxns
+[33me5c3fcee[m fix: SendFab icon size 16x16 to match other menu icons
+[33m96d6b61b[m fix: use SendFab icon for sidebar Send menu item
+[33m22c094df[m fix: hide country flag for batch txns
+[33mf1be2d94[m fix: add else case for non-batch tx expanded details
+[33m07e839ef[m feat: show country flags per recipient in batch details
+[33m3ad48248[m trigger: redeploy after syntax fix
+[33m5ef3cca7[m fix: remove duplicate JSX block causing syntax error
+[33m0caa4ce0[m fix: escape colon in JSX Recipients label
+[33mbe9e9072[m fix: remove extra indentation causing syntax error
+[33m0f29686d[m fix: correct selectedTxns to use hash only
+[33m3e03ebd9[m feat: batch tx grouping, selection fix, recipients on expand
+[33md91ef94e[m feat: group batch txns, show recipients on expand, fix selection
+[33m5f0523c9[m fix: add unique id to handleSend rec object
+[33mce0330d1[m fix: checkbox uses id||hash for unique selection
+[33mf78ab1c6[m fix: remove row click selection, use only checkbox
+[33m8721409d[m fix: handle null selectedTxns array
+[33m4e5cb400[m fix: click row to toggle selection in manage mode
+[33mffc4a37e[m fix: disable row expand click when in manage mode
+[33meca60292[m fix: checkbox selection logic for manage mode
+[33m287e985f[m feat: show green received arrow for incoming txns
+[33m77ac4621[m feat: load received txns from Arc explorer API
+[33mdb9e2a25[m fix: correct sent arrow to point NE
+[33md2b3d49b[m fix: separate FAB icon from tx send/receive arrows
+[33m3426309b[m fix: correct arrow directions for sent/received icons
+[33me9a543cf[m feat: directional tx icons, checkbox multi-select delete
+[33me4123f1e[m feat: history with search, filter, date groups, expand, pagination
+[33mf1f72040[m fix: prevent double click on process payouts button
+[33m8c3a5a54[m fix: only show claim messages when actively claimed this session
+[33m4a238342[m fix: clear stale claim message when rewards tab opens
+[33m2940c430[m fix: show reward received message only once after claim
+[33m520c41cd[m feat: allow user to choose claim amount in rewards
+[33m58492d08[m fix: always show pending count on process payouts button
+[33m479bca36[m fix: remove duplicate settings useEffect
+[33meff07004[m fix: fetch pending claims count when settings tab opens
+[33mf0956bfc[m feat: show pending claims count on process payouts button
+[33m38684553[m fix: add confirmation before deleting transaction
+[33m077c766d[m feat: show info banner when manage mode is active
+[33ma1048785[m fix: add manageTxns state
+[33m406a2577[m fix: remove contractTxns merge to fix history white screen
+[33md97ade16[m feat: manage mode toggle to show delete buttons in history
+[33mb83b749e[m fix: restore loadContractHistory to fetch on-chain transactions
+[33m2eca096d[m fix: use service worker for notifications on mobile
+[33m26ddaeeb[m feat: refresh button updates pending tx status from blockchain
+[33m345f4ba4[m fix: improve receipt polling with blockNumber check
+[33m4edba1ec[m fix: update estimated fee to accurate 0.01 USDC
+[33md086568c[m feat: add service worker for PWA and notifications
+[33m0a405d04[m fix: use fallback RPC for receipt polling
+[33mafcd740a[m fix: normalize address checksum before sending
+[33m91cf7b72[m fix: accept any valid hex address format in send review
+[33m49178fab[m fix: add notification helper functions
+[33m78dd96d7[m fix: auto hide reward received message after 5 seconds
+[33ma91cfdf1[m feat: local push notifications for transactions and cashback
+[33m088fc729[m fix: update claim status to paid after refresh
+[33mde87bc72[m fix: hide USDC pending label when balance is zero
+[33m89883f52[m feat: add claim requests tracker in rewards page
+[33m27d860f8[m fix: use service role key for payout status updates
+[33m15d37a77[m fix: add supabase-js dependency for payout function
+[33m7c668818[m feat: add process payouts button for admin wallet only
+[33md7d0a8d1[m feat: automatic cashback payout serverless function
+[33mee5ad35a[m feat: wallet confirmation prompt modal for batch send
+[33m832b359a[m fix: accept any valid hex address format in multi send
+[33m26ba5573[m feat: show invalid address warning in MultiSend
+[33m5eb94bb5[m fix: use Inter font in dark mode same as light mode
+[33m4624c2fb[m fix: skip CSS splash in PWA mode
+[33m141cce48[m fix: remove PWA native splash to avoid double animation
+[33meb250f6f[m revert: restore splash screen for all users
+[33mcda893fd[m fix: skip splash animation after first launch in PWA
+[33m71a759ef[m fix: use ArcPay logo for PWA icons
+[33m798e142d[m fix: simplify PWA app name
+[33m53b6d1fe[m feat: enable PWA with service worker and updated manifest
+[33m800e45a6[m cleanup: remove debug logs from handleMulti
+[33m5d0535f2[m fix: disable broken contract history loading
+[33me6d67693[m fix: transaction list amount display for contract BigInt amounts
+[33m98c6435a[m fix: totalSent uses allTxns with proper 18 decimal parsing
+[33mcaedf671[m fix: improve allTxns dedup to check both hash fields
+[33m3ae238b0[m fix: correct amount parsing in buildChart for BigInt vs number
+[33m38f34df3[m fix: fmtUsdc use 18 decimals for Arc USDC
+[33m21405209[m fix: back to contract batchSend with proper Arc RPC gas estimation
+[33m984b67dd[m fix: use Arc RPC gas estimate with window.ethereum for MetaMask
+[33m840eb224[m fix: sequential direct sends for multi send
+[33ma97dbe6f[m force redeploy
+[33m54923b7d[m revert: restore App.js to working single send state
+[33m3c9b2929[m fix: use direct native transfers for all wallets in multi send
+[33mea15b7d4[m fix: correct confirmAction double-call pattern
+[33mdf90e996[m fix: change gas fallback from 100 gwei to 21 gwei
+[33m11f57d0a[m revert: back to working state before MultiSend fixes
+[33m416462b4[m fix: clean rewrite of handleMulti using ethers batchSend
+[33m60c739f0[m fix: throw error if txHash is null
+[33mb13aa918[m fix: proxy eth_call and eth_getBalance through Arc RPC on Mises
+[33mbb7284a6[m fix: detect Mises via window.misesEthereum for MM warning
+[33m92249444[m fix: warn Mises+MetaMask users to use WalletConnect
+[33m015bc93e[m fix: add unsafe-eval to CSP for MetaMask extension support
+[33mf541f0a1[m fix: use legacy gasPrice instead of EIP-1559 params
+[33m4f4e4e69[m fix: lower gas to 1 gwei for Arc Testnet
+[33ma7760b89[m fix: timeout fallback for waitForTransaction on Arc Testnet
+[33mcd15c455[m fix: manual ABI encode batchSend for MetaMask compatibility
+[33mdc34256d[m fix: use window.ethereum directly to bypass MetaMask gas validation
+[33mdd12921c[m fix: add nonce and chainId to populated transaction
+[33m3087b7aa[m fix: use populateTransaction for MetaMask compatibility
+[33m50b81210[m fix: direct sends for MetaMask, batchSend for others
+[33mcd157756[m debug: add console logs to find crash point
+[33ma110d3ef[m fix: handle address checksum for CSV imports
+[33m3398572a[m fix: use EIP-1559 gas params for MetaMask compatibility
+[33m9911cd43[m fix: lower gasPrice to 1 gwei for MetaMask
+[33mbd47dabc[m fix: use dynamic fixed gasLimit for batch send
+[33mcb1b2fcb[m fix: convert gasLimit to Number for ethers v6 compatibility
+[33m539b0625[m fix: improve gas estimation with fallback for MetaMask extension
+[33m363e9e2e[m fix: pre-estimate gas from RPC for MetaMask compatibility
+[33m08e89f02[m fix: lower gasLimit for metamask compatibility
+[33mea142516[m feat: update to new batchSend contract with native USDC
+[33m36451fde[m fix: add explicit gasLimit and gasPrice to batchSend
+[33mbf3c3b7d[m fix: add timeout to approve wait
+[33m37fbf55f[m fix: add gasLimit to approve call
+[33m2d7c2721[m feat: use batchSend contract for multi send
+[33m1baba1d3[m feat: deploy new contract with batchSend, update ABI
+[33m64d9786d[m fix: poll balance multiple times after multi send
+[33md8710a39[m fix: remove hardcoded gasLimit, let wallet estimate
+[33m39625b80[m fix: use wallet provider for gas in multi send
+[33m16cfc972[m feat: MultiSend component with CSV import
+[33m0ee8e317[m fix: remove all leftover faucet dead code
+[33m60b303d7[m fix: remove orphaned faucet dead code
+[33mc4b435f2[m refactor: remove old renderFaucet function
+[33mdba10f6f[m refactor: extract Faucet into separate component
+[33mbc1e793a[m refactor: extract Faucet into separate component
+[33m4bcfb26d[m docs: add README
+[33mb6a7ab6d[m fix: highlight Instantly in heading, remove dashes from features
+[33ma27aca98[m fix: remove dashes from copy text
+[33ma0f40612[m feat: add landing page before connect screen
+[33m9e22b1ec[m feat: add Open Graph meta tags for link previews
+[33m28ec331b[m fix: move country to own row in multi send
+[33m2d2d1e21[m fix: default country empty on all pages
+[33mea336ed0[m fix: scroll to top before opening country sheet
+[33me9c680b8[m fix: sheet always scrolls to top on open
+[33m70f9ac82[m fix: CountrySelect scroll to top on open
+[33mc95198fb[m fix: CountrySelect scroll to top on open
+[33m52465682[m fix: cancel button and None option in OKX country picker
+[33m5eb9e862[m fix: full width container for CountrySelect
+[33m5f06d11a[m fix: full width country select in multi send
+[33m07d85b8c[m fix: remove Pakistan default in Add Recipient button
+[33mb96030ff[m fix: remove Pakistan default, show None option in all country selects
+[33mc9a898f6[m fix: use CountrySelect everywhere instead of OKXSelect
+[33m8269fe91[m fix: update OKXSelect with working bottom sheet
+[33m9448a7e0[m fix: use same overlay select approach as CountrySelect for OKX
+[33m781996b1[m fix: sticky header in OKX bottom sheet, all options visible
+[33me7f664bd[m fix: show None option in bottom sheet
+[33mbaa30f75[m fix: bottom sheet height 55vh
+[33mc52a6625[m fix: bottom sheet starts from correct position
+[33m55092d1f[m feat: OKXSelect component for all country dropdowns in OKX browser
+[33m4f744a72[m fix: custom bottom sheet country picker for OKX browser
+[33m92a3ff44[m fix: revoke wallet permissions on disconnect
+[33m8b3f5f7d[m feat: add history, receive, contacts, rewards to sidebar on desktop
+[33m5c53fc3e[m fix: fill page background to remove black space
+[33mec98e586[m fix: tooltip position on desktop view
+[33m66637ccd[m fix: reduce splash screen duration
+[33m07802e0e[m fix: make country select work in OKX browser
+[33mf19c64f9[m fix: fallback to same tab if popup blocked
+[33m9678ec0a[m fix: remove page reload on chainChanged - fixes OKX browser login loop
+[33m62987069[m fix: only reload on actual chain change not on initial load
+[33m8550b137[m fix: delay disconnect on accountsChanged to prevent OKX browser false logout
+[33mcee3df85[m fix: better Arc Testnet network add flow with user feedback
+[33m47990e0d[m fix: use includes('okx') to catch all OKX wallet name variants
+[33made7274e[m fix: remove API name from exchange rate display
+[33m1418c981[m fix: skip confirm modal for OKX wallet
+[33mb1f0cfab[m fix: pass wallet name from EIP-6963 picker for OKX warning
+[33m160ad1a7[m fix: add OKX warning in confirm modal
+[33m3ab9d866[m fix: clarify confirm button shows wallet will ask again
+[33me85a1710[m fix: store tx history per wallet address
+[33m567bd8b9[m fix: improve logo design
+[33mc7b39764[m feat: replace all logos with CSS arch logo inspired by Arc
+[33maf65b966[m fix: force light default for all users, improve dark mode contrast
+[33me94d9789[m fix: light mode default + dark mode input colors + amount font
+[33ma872864f[m feat: new CSS arch logo inspired by Arc
+[33m0340433f[m fix: reload faucet cooldown when wallet address changes
+[33m7b1e48e3[m fix: poll balance directly from RPC to detect faucet claim
+[33m4ab31bd8[m feat: detect faucet claim by balance change
+[33m72da5794[m cleanup: remove captcha badge and imports
+[33m57072331[m fix: auto copy address and open faucet
+[33m69056594[m fix: open Circle faucet in new tab
+[33m1235c824[m feat: open Circle faucet in embedded iframe
+[33ma63b6d25[m force redeploy
+[33mb22619b9[m fix: remove captchaToken from GraphQL input, use header only
+[33m8fb6dac9[m fix: allow Google frames for hCaptcha in CSP
+[33m1b4ff4da[m fix: add body parser config and debug logs
+[33mf5e80da2[m fix: allow hCaptcha in CSP
+[33m36ba8202[m fix: move hcaptcha state to App component
+[33m57176a31[m feat: integrate hCaptcha for faucet
+[33mff24f7d3[m feat: add hcaptcha
+[33m34f41f45[m fix: captcha timeout, don't block without token
+[33mca9e2537[m fix: use grecaptcha directly without provider
+[33me0ddc65d[m feat: add reCAPTCHA v3 to faucet
+[33m1b937d69[m feat: add recaptcha v3
+[33ma1bcecc4[m fix: use token field instead of currency
+[33m196a678f[m fix: use blockchain field instead of chain
+[33m670f87f4[m fix: use destinationAddress field
+[33m37b39f3a[m fix: use hash field in GraphQL response
+[33m04568c14[m fix: try multiple field names in GraphQL
+[33m69e3f8b0[m fix: introspect GraphQL schema
+[33mbdcc17ab[m fix: remove success field from GraphQL query
+[33m38355a1f[m fix: correct GraphQL mutation name requestToken
+[33m2a49fb2f[m fix: use GraphQL faucet endpoint
+[33m92be3919[m fix: track faucet cooldown per wallet address
+[33mb8563c76[m fix: show full faucet response for debugging
+[33m5bfaad06[m fix: try public faucet endpoint directly
+[33mae5192c2[m fix: forward user IP to Circle faucet
+[33m3f172693[m fix: add idempotencyKey to faucet request
+[33mdfaf7a4c[m fix: log full Circle API response
+[33mbc76cc39[m fix: allow Google Fonts in CSP
+[33mecd3730f[m feat: serverless faucet proxy to hide API key
+[33me11f189e[m fix: move faucet state to App component
+[33m9c63384f[m fix: faucet white screen - remove broken color replace
+[33m01226dc2[m feat: add Faucet as separate page
+[33m0ec48448[m feat: EIP-6963 multi-wallet support, fix WC resume stuck
+[33m3d83146f[m fix: remove dark navy background from logo
+[33m09998ca8[m fix: transparent background on logo
+[33m66d075c9[m fix: topbar title color explicit tx1
+[33m755344ba[m fix: crisp light mode - solid button, clear inputs, visible nav
+[33m31fa4ba9[m fix: add Inter font for light mode
+[33m56ef66e8[m fix: proper crisp light mode with strong contrast
+[33m3e722f7d[m fix: crisp clean white light mode like Wise
+[33m396d5e71[m revert: clean CSS splash with text inside rings
+[33m74c69007[m revert: restore premium dark blue splash
+[33m7a58d26a[m revert: back to original dark theme
+[33m00237c54[m feat: redesign to clean light theme with orange accents
+[33m24e586f7[m feat: clean splash - text inside orbit rings, no logo image
+[33ma3a9b717[m fix: remove black background from logo
+[33mbfacd982[m feat: premium CSS splash animation with orbit rings and metallic text
+[33mef74a6b6[m fix: center lottie splash from start
+[33m5d784f4f[m feat: replace ArcLogo with new premium logo
+[33m6b75328e[m fix: center lottie and stronger edge fade
+[33m2bbb9dff[m fix: edge fade with linear gradients on all 4 sides
+[33m3e8bfc73[m fix: elliptical vignette for top/bottom edges
+[33m3d404f0b[m fix: stronger vignette on splash
+[33mb95a5b5f[m fix: add vignette fade to splash animation borders
+[33meb733c13[m fix: make lottie animation fullscreen
+[33m6fc611b1[m feat: add Lottie animation to splash screen
+[33m3c510ae3[m fix: update walletconnect to latest for proper wallet icons
+[33mf3e287e6[m fix: syntax error in onboarding modal
+[33mf759524f[m feat: add first-time onboarding tutorial
+[33mf14efbdb[m fix: remove bottom nav items from sidebar
+[33m9154ba0a[m fix: improve bottom nav - history, receive, send, contacts, rewards
+[33m8d44c659[m fix: allow unsafe-eval in CSP for Mises browser compatibility
+[33mfa1d6c67[m fix: enforce minimum gas price 100 gwei, prevent 0 gas transactions
+[33m9708615c[m fix: use pending nonce for all transactions
+[33m2257bc74[m fix: add Mises browser wallet detection and support
+[33m6c1d5778[m fix: try multiple RPCs for fee data, better Mises support
+[33mac581de2[m fix: use ARC_RPC for fee data, fixes Mises browser transactions
+[33m0f868af9[m fix: timeout fallback for getFeeData on Mises browser
+[33m49710d58[m fix: use ARC_RPC for receipt polling, fixes Mises browser pending issue
+[33m6020dcaf[m fix: auto reconnect wallet on resume instead of read-only mode
+[33m517a0198[m fix: remove read-only banner, show reconnect error on send attempt
+[33mee08a8cf[m fix: syntax error missing closing brace
+[33mf13aa5a0[m fix: allow send review without signer in resumed session
+[33mccb076d4[m fix: separate signer check from fields validation in send
+[33m47148afa[m fix: make description optional, separate wallet/fields errors
+[33m6c3a4a32[m fix: fetch balance on session resume
+[33m19434a57[m fix: clear status on tab switch
+[33mf0e86fc5[m fix: mark unconfirmed tx as pending not failed
+[33ma266bfff[m fix: add qrcode.react dependency
+[33m41d453f1[m feat: premium UI v2
+[33m4d391b1e[m feat: premium UI v2
+[33m5fc6284d[m feat: premium UI merged
+[33mf97e99b7[m UI: new dark layout, all 10 tabs preserved
+[33m93109ed1[m feat: new UI with all features
+[33m62ee12d8[m feat: new UI with all features
+[33m45752d3b[m feat: new UI with all features
+[33m5d8ab2fe[m feat: new UI with all features
+[33m4c46825a[m fix: force Vercel rebuild
+[33m2cc4d79b[m fix: JSX syntax errors in merge
+[33m15689a6d[m feat: new professional UI + splash + all features preserved
+[33mc33ddb71[m fix: no emojis + desktop responsive
+[33m5d8ebfc6[m fix: no emojis + desktop responsive
+[33m14b14173[m redesign: professional UI + demo data
+[33m5ebef261[m fix: Mises browser wallet detection
+[33mf0c1d6a8[m fix: proper MetaMask detection for Mises browser
+[33md1f9d6d8[m fix: remove strict CSP
+[33mbf3562d3[m fix: QuickNode RPC
+[33mfe598ead[m fix: add Supabase to CSP
+[33m676fce9d[m feat: Supabase invoice storage
+[33m669792af[m fix: switch to dRPC endpoint
+[33md9f910ec[m fix: gasPrice 50 gwei for contract calls
+[33m95951f51[m fix: wait for on-chain confirmation before success
+[33m25af0ccf[m debug: show full invoice error
+[33m407b0985[m fix: normalize addresses to avoid checksum error
+[33m6ecc521f[m fix: instant invoice ID + payment retry loop
+[33m1057f858[m fix: explicit gasPrice 2 gwei for Arc testnet
+[33mf1cf0da5[m fix: CSP allow unsafe-eval for ethers.js
+[33mf7f381ac[m fix: force rebuild with new contract v2
+[33mcf65814e[m fix: new contract + correct ABI
+[33m1d68ca34[m fix: invoice ID bytes32 validation + staticCall fix
+[33md3cf3d47[m fix: invoice ID from event log not staticCall
+[33m6a1ac2be[m fix: professional fonts - Bricolage Grotesque + Plus Jakarta Sans
+[33m1a8c561f[m rebuild: complete final App.js
+[33m63b4a383[m fix: native USDC send + correct balance display
+[33m542021c4[m[33m ([m[1;31morigin/fix/usdc-deduction-and-history[m[33m)[m fix: dark mode complete + chart amount + history
+[33m6e80093b[m fix: 5 bugs - transfer/history/darkmode/country/schedule
+[33m77decb04[m fix: wallet picker shows all injected providers including Mises
+[33m06ef464b[m fix: smart wallet picker detects installed wallets only
+[33mabc47c61[m fix: wallet picker + country placeholder + waitForTx
+[33mfdcc3a49[m fix: 500ms polling waitForTx + permanent history
+[33m41166c06[m fix: proper remittance flow + history from localStorage
+[33mde53874b[m fix: remove tx.wait() that hangs on Arc RPC
+[33m2f900234[m fix: transfer in ABI + smaller landing headline
+[33m0561cc28[m fix: add transfer to ERC20_ABI
+[33mc4ed0742[m feat: Syne font + dark mode + settings tab
+[33m6ab4cb04[m fix: add timeout to approve tx.wait()
+[33md4e11e2c[m fix: add 30s timeout to tx.wait()
+[33m40126b43[m fix: add gasPrice to bypass estimation
+[33m58cb199c[m feat: full dashboard 9 features
+[33m0cba71d5[m fix: Pure CommonJS in craco.config.cjs - no ES imports
+[33m19ae0aa2[m trigger redeploy
+[33m7c61f8bd[m fix: Ensure CommonJS module resolution in webpack config
+[33mff4e7fb2[m fix: pure CJS in craco.config.cjs
+[33mb4d538e4[m fix: rename craco config to .cjs
+[33md2a1cbad[m fix: force Node 18 via vercel.json
+[33mce420a84[m fix: pin node version to 18
+[33m661f9978[m fix: craco config ESM syntax for Node 24
+[33m3d80c83a[m fix: remove type module from package.json
+[33m9c9093be[m fix: recharts + updated App.js
+[33mc4212a6e[m add recharts dependency
+[33m70d9f68f[m fix contract use transfer
+[33m805ec7ee[m fix contract calls
+[33me9331cc5[m skip allowance
+[33me3d6a760[m skip allowance check
+[33m20592fff[m fix usdc abi
+[33m6811bca4[m fix checksum
+[33mfef4fa20[m fix wallet connect
+[33m1c30a627[m fix switchToArc
+[33m007a355d[m fix autoconnect
+[33ma31ea490[m fix network check
+[33m71add2c3[m fix rpc
+[33m06f5a791[m new UI redesign
+[33m3839d055[m fix connect wallet
+[33mb48b82a4[m new UI redesign
+[33mb4086b4e[m new UI redesign
+[33m43211240[m new UI redesign
+[33m7c8f5c87[m new UI
+[33mae2ce222[m git push origin master:mainRevert "new UI"
+[33m57561c4a[m new UI
+[33mc7bb7245[m new UI
+[33m1b952721[m new UI
+[33m804c924f[m App.js
+[33mee494723[m App.js
+[33me1486350[m App.js
+[33m48b620a0[m App.js
+[33m226b551f[m App.js
+[33m4deeb608[m package.json
+[33m7e93f61a[m .env
+[33m1c44b9c4[m vercel.json
+[33m4e5165d0[m vercel.json
+[33m8e831313[m add typescript
+[33m61c89521[m fix build
+[33m046bbc9a[m Delete package-lock.json
+[33m6d723129[m craco.config.js
+[33m31106232[m .env
+[33ma33f997d[m package.json
+[33m310c903d[m craco.config.js
+[33m94e10bbe[m package.json
+[33m2a55d2e0[m package.json
+[33mc2f9e8ce[m .env
+[33m74cd2c98[m reportWebVitals.js
+[33m82362945[m App.js
+[33m898d1e31[m package.json
+[33m23f6758d[m App.js
+[33m7e3af70b[m App.js
+[33mb9c5e9ac[m index.js
+[33mae137c76[m Package.json
+[33mc899e4f8[m App.js
+[33m799c9d5d[m App.js
+[33m3731cd3c[m App.js
+[33mbb5d65bc[m App.js
+[33mfef1ac9e[m App.js
+[33m26028526[m App.js
+[33mca506378[m App.js
+[33m3ce89334[m App.js
+[33m39d21651[m App.js
+[33m9273a349[m App.js
+[33m206f93d4[m App.js
+[33m49cf589e[m package.json
+[33mb9d291a2[m App.js
+[33m1372e4c9[m App.js
+[33me4dc17ec[m App.js
+[33m6819d2f5[m package.json
+[33m761fb703[m package.json
+[33md910a239[m App.js
+[33m5d8314fe[m App.js
+[33m10a851cc[m App.js
+[33m5bd4d18d[m App.js
+[33m0d5133b3[m Arc Remittance with all features
