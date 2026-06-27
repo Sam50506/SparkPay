@@ -210,11 +210,11 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const registerPasskey=async()=>{
     setPkLoading(true);setPkError('');
     try{
-      const optRes=await fetch('/api/webauthn-register-options',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
+      const optRes=await fetch('/api/webauthn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register-options',address})});
       const options=await optRes.json();
       if(options.error)throw new Error(options.error);
       const attResp=await startRegistration(options);
-      const verRes=await fetch('/api/webauthn-register-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,response:attResp})});
+      const verRes=await fetch('/api/webauthn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register-verify',address,response:attResp})});
       const verData=await verRes.json();
       if(!verData.verified)throw new Error(verData.error||'Registration failed');
       setPkRegistered(true);
@@ -228,11 +228,11 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const loginWithPasskey=async()=>{
     setPkLoading(true);setPkError('');
     try{
-      const optRes=await fetch('/api/webauthn-login-options',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address})});
+      const optRes=await fetch('/api/webauthn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login-options',address})});
       const options=await optRes.json();
       if(options.error)throw new Error(options.error);
       const authResp=await startAuthentication(options);
-      const verRes=await fetch('/api/webauthn-login-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address,response:authResp})});
+      const verRes=await fetch('/api/webauthn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login-verify',address,response:authResp})});
       const verData=await verRes.json();
       if(!verData.verified)throw new Error(verData.error||'Authentication failed');
       sessionStorage.setItem('sp_admin_jwt',verData.token);
