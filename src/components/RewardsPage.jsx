@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { IC } from '../icons';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 export default function RewardsPage({
   cashbackPending, claimAmt, setClaimAmt,
@@ -7,6 +8,8 @@ export default function RewardsPage({
   myClaimsHistory, claimsLoading, fetchMyClaims,
   cashbackHistory
 }) {
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const turnstileRef = useRef(null);
   const pct = Math.min((cashbackPending / 5) * 100, 100);
   return (
     <div>
@@ -32,7 +35,14 @@ export default function RewardsPage({
                     <input className="ap-input" type="number" placeholder={'Max '+parseFloat(cashbackPending).toFixed(3)} value={claimAmt} onChange={e=>setClaimAmt(e.target.value)} style={{marginBottom:0,flex:1}}/>
                     <button className="ap-btn ap-btn-sec" style={{marginTop:0,flexShrink:0}} onClick={()=>setClaimAmt(cashbackPending.toFixed(3))}>Max</button>
                   </div>
-                  <button className="ap-btn ap-btn-primary" onClick={claimCashback} disabled={claimLoading} style={{marginTop:0}}>
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={process.env.REACT_APP_TURNSTILE_SITE_KEY||''}
+                    onSuccess={(token)=>setTurnstileToken(token)}
+                    onExpire={()=>setTurnstileToken(null)}
+                    options={{appearance:'interaction-only'}}
+                  />
+                  <button className="ap-btn ap-btn-primary" onClick={()=>claimCashback(turnstileToken)} disabled={claimLoading||!turnstileToken} style={{marginTop:0}}>
                     {claimLoading?'Submitting...':'Claim '+(parseFloat(claimAmt)||cashbackPending).toFixed(3)+' USDC'}
                   </button>
                 </div>
