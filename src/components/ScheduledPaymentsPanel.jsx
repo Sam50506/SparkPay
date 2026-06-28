@@ -106,7 +106,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
 
   const editRequests=(requests[p.id]||[]).filter(r=>r.request_type==='edit');
 
-  return(<div style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)'}}>
+  return(<div style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)',position:'relative'}}>{isProcessing&&<div style={{position:'absolute',top:12,right:14,fontSize:10,fontWeight:700,color:'var(--ac)',background:'rgba(59,130,196,.1)',borderRadius:20,padding:'3px 8px'}}><KeeperCountdown suffix=' left to act'/></div>}
     <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
       {manageSched&&<input type="checkbox" checked={selectedSched.includes(p.id)} onChange={e=>setSelectedSched(prev=>e.target.checked?[...prev,p.id]:prev.filter(x=>x!==p.id))} style={{width:18,height:18,marginTop:2,flexShrink:0,cursor:'pointer'}}/>}
       <div style={{flex:1}}>
@@ -121,11 +121,11 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
           <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
           <Countdown releaseTime={p.releaseTime}/>
         </div>}
-        {isProcessing&&<div onClick={()=>setExpandedId(isExpanded?null:p.id)} style={{marginTop:8,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6}}>
+        {isProcessing&&<div onClick={()=>setExpandedId(isExpanded?null:p.id)} style={{marginTop:12,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6}}>
           <span style={{fontSize:11,color:'var(--ac)',fontWeight:600}}>Tap for details</span>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2" style={{transform:isExpanded?'rotate(180deg)':'none',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
         </div>}
-        {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be processed soon.<KeeperCountdown /></div>}
+        {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be processed soon.</div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
           {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { SB_URL } from '../config';
+import { SB_URL, SB_KEY } from '../config';
 
-export function KeeperCountdown() {
+export function KeeperCountdown({ suffix = ' to cancel' }) {
   const [secondsLeft, setSecondsLeft] = useState(null);
 
   useEffect(() => {
@@ -9,8 +9,8 @@ export function KeeperCountdown() {
       try {
         const res = await fetch(`${SB_URL}/rest/v1/keeper_status?id=eq.1&select=last_run`, {
           headers: {
-            'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`
+            'apikey': SB_KEY,
+            'Authorization': `Bearer ${SB_KEY}`
           }
         });
         const data = await res.json();
@@ -26,8 +26,7 @@ export function KeeperCountdown() {
   }, []);
 
   useEffect(() => {
-    if (secondsLeft === null) return;
-    if (secondsLeft <= 0) return;
+    if (secondsLeft === null || secondsLeft <= 0) return;
     const timer = setInterval(() => {
       setSecondsLeft(s => Math.max(0, s - 1));
     }, 1000);
@@ -39,9 +38,6 @@ export function KeeperCountdown() {
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
 
-  return (
-    <span style={{color: secondsLeft < 60 ? 'var(--re)' : 'var(--ac)', fontWeight: 700}}>
-      {secondsLeft === 0 ? 'Processing soon...' : `${mins}m ${secs}s to cancel`}
-    </span>
-  );
+  if (secondsLeft === 0) return <span>Processing soon...</span>;
+  return <span>{mins}m {secs}s{suffix}</span>;
 }
