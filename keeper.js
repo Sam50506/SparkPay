@@ -27,6 +27,13 @@ async function main() {
       const p = await contract.getPayment(i);
       if (p.executed || p.cancelled || Number(p.releaseTime) > now) { skipped++; continue; }
 
+      // Skip if pending cancel request
+      const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+      const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+      const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?payment_id=eq.${i}&status=eq.pending&request_type=eq.cancel`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } });
+      const reqs = await reqRes.json();
+      if (reqs.length > 0) { console.log("Skipping payment " + i + " — pending cancel request"); skipped++; continue; }
+
       console.log("Executing payment " + i);
       const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
       await tx.wait();
