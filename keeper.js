@@ -66,21 +66,14 @@ async function main() {
   }
 
   console.log(`Keeper finished — executed: ${executed}, failed: ${failed}, skipped: ${skipped}`);
-  if (failed > 0) process.exit(1);
+  
 }
 
-main().catch(e => { console.error(e.message); process.exit(1); });
+main().catch(e => { console.error(e.message); });
 // v3
 
 // Run every 5 minutes when on Railway
 if (process.env.RAILWAY_ENVIRONMENT) {
   setInterval(() => { main().catch(console.error); }, 5 * 60 * 1000);
-}
-
-// Keep process alive on Railway
-if (process.env.RAILWAY_ENVIRONMENT) {
-  main().catch(console.error);
-  setInterval(() => { main().catch(console.error); }, 5 * 60 * 1000);
-  // Keep alive
   setInterval(() => {}, 1 << 30);
 }
