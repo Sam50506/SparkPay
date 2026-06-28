@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { KeeperCountdown } from './KeeperCountdown';
 import { ethers } from 'ethers';
-import { SB_URL, SB_KEY, SCHED_ADDR, ls, lsSave } from '../config';
+import { SB_URL, SB_KEY, SCHED_ADDR, ls, lsSave, ALL_CURRENCY } from '../config';
 
 export function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,payment,onRefresh}){
   const[open,setOpen]=useState(false);
@@ -89,7 +89,7 @@ function Countdown({releaseTime}){
   return(<span style={{fontFamily:'monospace',fontWeight:700,color:'var(--ac)',fontSize:13}}>{String(h).padStart(2,'0')}H : {String(m).padStart(2,'0')}M : {String(s).padStart(2,'0')}S</span>);
 }
 
-function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading}){
+function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading,rates}){
   const isExpanded=expandedId===p.id;
   const isPending=st==='scheduled';
   const isProcessing=st==='processing';
@@ -100,7 +100,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
     cancel_approved:{bg:'rgba(23,229,176,.1)',cl:'var(--cy)',label:'Refund Pending'},
     cancelled_admin:{bg:'rgba(255,79,97,.1)',cl:'var(--re)',label:'Cancelled by Admin'},
     cancelled_user:{bg:'rgba(255,79,97,.1)',cl:'var(--re)',label:'Cancelled by User'},
-    processing:{bg:'rgba(59,130,196,.15)',cl:'var(--ac)',label:'Payment in Progress'},
+    processing:{bg:'rgba(59,130,196,.15)',cl:'var(--ac)',label:'Payment in Progress',pulse:true},
     scheduled:{bg:'rgba(100,100,100,.08)',cl:'var(--tx3)',label:'Scheduled'},
   }[st];
 
@@ -115,17 +115,16 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
           <span style={{fontSize:12,fontWeight:600,color:'var(--tx3)'}}>USDC</span>
           {p.country&&<span className="ap-cc">{p.country}</span>}
         </div>
+        {p.country&&rates&&rates[ALL_CURRENCY[p.country]]&&<div style={{fontSize:11,color:'var(--tx3)',marginBottom:4}}>≈ {(parseFloat(p.amount)*rates[ALL_CURRENCY[p.country]]).toLocaleString('en',{maximumFractionDigits:0})} {ALL_CURRENCY[p.country]}</div>}
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+        </div>
         <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:8}}>To: {p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div>
-        <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:statusCfg.bg,color:statusCfg.cl,display:'inline-block',marginBottom:8}}>{statusCfg.label}</span>
+        <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:statusCfg.bg,color:statusCfg.cl,display:'inline-flex',alignItems:'center',gap:6,marginBottom:8}}>{statusCfg.pulse&&<span style={{width:7,height:7,borderRadius:'50%',background:'var(--ac)',display:'inline-block',animation:'pulse 1.2s ease-in-out infinite'}}/>}{statusCfg.label}</span>
         {isPending&&<div style={{marginTop:8,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
           <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
           <Countdown releaseTime={p.releaseTime}/>
         </div>}
-        {isProcessing&&<div onClick={()=>setExpandedId(isExpanded?null:p.id)} style={{marginTop:12,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6}}>
-          <span style={{fontSize:11,color:'var(--ac)',fontWeight:600}}>Tap for details</span>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2" style={{transform:isExpanded?'rotate(180deg)':'none',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
-        </div>}
-        {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be processed soon.</div>}
+        {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining'/></div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
           {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}
@@ -148,7 +147,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
   </div>);
 }
 
-export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,onCancel,loading}){
+export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,onCancel,loading,rates}){
   const[payments,setPayments]=useState([]);
   const[fetching,setFetching]=useState(false);
   const[now,setNow]=useState(Math.floor(Date.now()/1000));
@@ -288,7 +287,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     {/* Active Tab */}
     {activeTab==='active'&&<>
       {activePayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No active scheduled payments.</div>}
-      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading}/>)}
+      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading} rates={rates}/>)}
       {activePayments.length>LIMIT&&<button onClick={()=>setShowAllActive(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
         {showAllActive?'Show Less ↑':'Show All '+activePayments.length+' Payments ↓'}
       </button>}
@@ -297,7 +296,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     {/* History Tab */}
     {activeTab==='history'&&<>
       {historyPayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No payment history yet.</div>}
-      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading}/>)}
+      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading} rates={rates}/>)}
       {historyPayments.length>LIMIT&&<button onClick={()=>setShowAllHistory(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
         {showAllHistory?'Show Less ↑':'Show All '+historyPayments.length+' Payments ↓'}
       </button>}

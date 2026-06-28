@@ -7,7 +7,7 @@ import { SCHED_ABI } from '../hooks/useSchedule';
 
 export default function SchedulePage({
   newSched, setNewSched, handleSchedule, handleExecute,
-  handleCancelSched, loading, address, provider, signer
+  handleCancelSched, loading, address, provider, signer, rates
 }) {
   return (
     <div>
@@ -24,7 +24,7 @@ export default function SchedulePage({
         <div style={{marginBottom:14}}><div className="ap-label">Release Time</div><TimePicker value={newSched.time||'12:00'} onChange={v=>setNewSched(s=>({...s,time:v}))}/></div>
         <button className="ap-btn ap-btn-primary" onClick={handleSchedule} disabled={loading}>{loading?'Processing...':'Lock and Schedule Payment'}</button>
       </div>
-      <OnChainSchedules address={address} provider={provider} signer={signer} schedAddr={SCHED_ADDR} schedAbi={SCHED_ABI} onExecute={handleExecute} onCancel={handleCancelSched} loading={loading}/>
+      <OnChainSchedules address={address} provider={provider} signer={signer} schedAddr={SCHED_ADDR} schedAbi={SCHED_ABI} onExecute={handleExecute} onCancel={handleCancelSched} loading={loading} rates={rates}/>
     </div>
   );
 }
