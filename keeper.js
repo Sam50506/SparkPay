@@ -71,3 +71,8 @@ async function main() {
 
 main().catch(e => { console.error(e.message); process.exit(1); });
 // v3
+
+// Run every 5 minutes when on Railway
+if (process.env.RAILWAY_ENVIRONMENT) {
+  setInterval(() => { main().catch(console.error); }, 5 * 60 * 1000);
+}
