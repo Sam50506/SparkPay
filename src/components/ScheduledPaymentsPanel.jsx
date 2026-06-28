@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { KeeperCountdown } from './KeeperCountdown';
 import { ethers } from 'ethers';
 import { SB_URL, SB_KEY, SCHED_ADDR, ls, lsSave } from '../config';
 
@@ -124,7 +125,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
           <span style={{fontSize:11,color:'var(--ac)',fontWeight:600}}>Tap for details</span>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2" style={{transform:isExpanded?'rotate(180deg)':'none',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
         </div>}
-        {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be sent within the next 60 minutes.</div>}
+        {isProcessing&&isExpanded&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment to <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</span> will be processed soon. </span></div><div style={{marginTop:6}}><KeeperCountdown /></div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
           {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}
