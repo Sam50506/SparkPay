@@ -106,7 +106,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
 
   const editRequests=(requests[p.id]||[]).filter(r=>r.request_type==='edit');
 
-  return(<div style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)',position:'relative'}}>{isProcessing&&<div style={{position:'absolute',top:12,right:14,fontSize:10,fontWeight:700,color:'var(--ac)',background:'rgba(59,130,196,.1)',borderRadius:20,padding:'3px 8px'}}><KeeperCountdown suffix=' left to act'/></div>}
+  return(<div style={{background:'var(--elev)',borderRadius:14,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b0)',position:'relative'}}>
     <div style={{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}}>
       {manageSched&&<input type="checkbox" checked={selectedSched.includes(p.id)} onChange={e=>setSelectedSched(prev=>e.target.checked?[...prev,p.id]:prev.filter(x=>x!==p.id))} style={{width:18,height:18,marginTop:2,flexShrink:0,cursor:'pointer'}}/>}
       <div style={{flex:1}}>
@@ -124,7 +124,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
           <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
           <Countdown releaseTime={p.releaseTime}/>
         </div>}
-        {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining'/></div>}
+        {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining to request cancellation or edits'/> — use the Need Help option below if needed.</div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
           {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}
