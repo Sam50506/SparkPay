@@ -116,7 +116,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
           {p.country&&<span className="ap-cc">{p.country}</span>}
         </div>
         <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginBottom:8}}>To: {p.recipient.slice(0,10)}...{p.recipient.slice(-6)}</div>
-        <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:statusCfg.bg,color:statusCfg.cl}}>{statusCfg.label}</span>
+        <span style={{fontSize:11,fontWeight:700,padding:'4px 12px',borderRadius:999,background:statusCfg.bg,color:statusCfg.cl,display:'inline-block',marginBottom:8}}>{statusCfg.label}</span>
         {isPending&&<div style={{marginTop:8,display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
           <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
           <Countdown releaseTime={p.releaseTime}/>
