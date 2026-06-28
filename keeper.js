@@ -76,3 +76,11 @@ main().catch(e => { console.error(e.message); process.exit(1); });
 if (process.env.RAILWAY_ENVIRONMENT) {
   setInterval(() => { main().catch(console.error); }, 5 * 60 * 1000);
 }
+
+// Keep process alive on Railway
+if (process.env.RAILWAY_ENVIRONMENT) {
+  main().catch(console.error);
+  setInterval(() => { main().catch(console.error); }, 5 * 60 * 1000);
+  // Keep alive
+  setInterval(() => {}, 1 << 30);
+}
