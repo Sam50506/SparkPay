@@ -124,7 +124,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
           <span style={{fontSize:11,color:'var(--tx3)'}}>Releases in</span>
           <Countdown releaseTime={p.releaseTime}/>
         </div>}
-        {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining to request cancellation or edits'/> — use the Need Help option below if needed.</div>}
+        {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining to request cancellation or edits. Use the Need Help option below if needed.'/></div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
           {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}
