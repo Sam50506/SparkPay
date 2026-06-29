@@ -16,9 +16,11 @@ export function KeeperCountdown({ suffix = ' to cancel' }) {
         const data = await res.json();
         if (data[0]?.last_run) {
           const lastRun = new Date(data[0].last_run).getTime();
-          const nextRun = lastRun + 15 * 60 * 1000;
           const now = Date.now();
-          setSecondsLeft(Math.max(0, Math.floor((nextRun - now) / 1000)));
+          const interval = 15 * 60 * 1000;
+          const elapsed = (now - lastRun) % interval;
+          const secondsUntilNext = Math.floor((interval - elapsed) / 1000);
+          setSecondsLeft(secondsUntilNext);
         }
       } catch (e) {}
     }
