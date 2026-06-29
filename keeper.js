@@ -79,13 +79,6 @@ async function main() {
     await fetch(`${SB_URL}/rest/v1/keeper_status`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify({ id: 1, last_run: new Date().toISOString() }) });
   } catch(e) { console.error("Failed to save keeper status:", e.message); }
 
-  // Save last run time
-  try {
-    const SB_URL = process.env.REACT_APP_SUPABASE_URL;
-    const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-    await fetch(`${SB_URL}/rest/v1/keeper_status`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify({ id: 1, last_run: new Date().toISOString() }) });
-  } catch(e) { console.error("Failed to save keeper status:", e.message); }
-
   console.log(`Keeper finished — executed: ${executed}, failed: ${failed}, skipped: ${skipped}`);
   
 }
@@ -93,8 +86,4 @@ async function main() {
 main().catch(e => { console.error(e.message); });
 // v3
 
-// Run every 5 minutes when on Railway
-if (process.env.RAILWAY_ENVIRONMENT) {
-  setInterval(() => { main().catch(console.error); }, 5 * 60 * 1000);
-  setInterval(() => {}, 1 << 30);
-}
+
