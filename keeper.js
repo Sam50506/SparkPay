@@ -39,6 +39,16 @@ async function main() {
       await tx.wait();
       console.log("Done: " + tx.hash);
       executed++;
+      // Save tx hash to Supabase
+      try {
+        const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+        const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+        await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
+          method: 'PATCH',
+          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tx_hash: tx.hash })
+        });
+      } catch(he) { console.error('Failed to save tx hash:', he.message); }
 
       try {
         const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
