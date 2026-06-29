@@ -197,7 +197,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   const getStatus=p=>{
     if(p.executed)return'executed';
     if(hasCancelApproved(p))return'cancel_approved';
-    if(p.cancelled)return hasCancelApproved(p)?'cancelled_admin':'cancelled_user';
+    if(p.cancelled)return hasCancelRequest(p)?'cancelled_admin':'cancelled_user';
     if(now>=p.releaseTime)return'processing';
     return'scheduled';
   };
