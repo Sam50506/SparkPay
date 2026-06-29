@@ -29,8 +29,19 @@ export function useContractHistory({ address, provider, setContractTxns }) {
             if (p.executed) {
               const execTx = schedTxs.find(t => t.input && t.input.startsWith('0xfe0d94c1') && parseInt('0x' + t.input.slice(10), 16) === i && t.isError === '0');
               const execTs = execTx ? parseInt(execTx.timeStamp) : Number(p.releaseTime);
+              // Fetch real tx hash from Supabase
+              let realHash = 'sched_exec_' + i;
+              try {
+                const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+                const SB_ANON = process.env.REACT_APP_SUPABASE_ANON_KEY;
+                const hashRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=tx_hash`, {
+                  headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` }
+                });
+                const hashData = await hashRes.json();
+                if (hashData[0]?.tx_hash) realHash = hashData[0].tx_hash;
+              } catch(e) {}
               if (!seenHashes.has('sched_exec_' + i)) {
-                allExplorer.push({ hash: 'sched_exec_' + i, recipient: p.recipient, sender: address, amount: amt, country: p.country, timestamp: execTs, status: 'confirmed', type: 'scheduled', label: 'Scheduled Payment' });
+                allExplorer.push({ hash: realHash, recipient: p.recipient, sender: address, amount: amt, country: p.country, timestamp: execTs, status: 'confirmed', type: 'scheduled', label: 'Scheduled Payment' });
                 seenHashes.add('sched_exec_' + i);
               }
             }
