@@ -22,10 +22,6 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
     }
     if (!signer) { setStatus({ type: 'error', msg: 'Connect your wallet first' }); return; }
     const releaseTime = Math.floor(new Date(newSched.next + 'T' + (newSched.time || '12:00')).getTime() / 1000);console.log('releaseTime:',releaseTime,'now:',Math.floor(Date.now()/1000),'diff:',releaseTime-Math.floor(Date.now()/1000));
-    if (releaseTime <= Math.floor(Date.now() / 1000) + 60) {
-      setStatus({ type: "error", msg: "Release time must be at least 1 minute in the future." });
-      return;
-    }
     setLoading(true);
     try {
       const amt = ethers.parseUnits(newSched.amount, 18);
@@ -72,7 +68,7 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
       if (e?.code === 4001 || e?.code === 'ACTION_REJECTED') msg = 'Transaction cancelled.';
       else if (e?.message?.includes('Too early')) msg = 'Release time must be in the future.';
       else if (e?.message?.includes('insufficient')) msg = 'Insufficient balance to lock this amount.';
-      else if (e?.message?.includes('reverted')) msg = 'Transaction reverted: '+(e?.reason||e?.data?.message||e?.error?.message||'Check your balance and ensure release time is at least 10 mins in the future.');
+      else if (e?.message?.includes('reverted')) msg = 'Transaction reverted: '+(e?.reason||e?.data?.message||e?.error?.message||'Make sure the release time is in the future and your balance covers the amount.');
       setStatus({ type: 'error', msg });
     }
     setLoading(false);
