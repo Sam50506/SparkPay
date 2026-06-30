@@ -17,25 +17,9 @@ export function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,
   const submit=async(type)=>{
     setLoading(true);
     try{
-      if(type==='edit'){
-        const contract=new ethers.Contract(contractAddress,schedAbi,signer);
-        const cancelTx=await contract.cancel(paymentId,{gasPrice:ethers.parseUnits('100','gwei'),gasLimit:100000});
-        await cancelTx.wait();
-        const recipient=newRecipient||payment.recipient;
-        const amount=newAmount?ethers.parseUnits(newAmount,18):ethers.parseUnits(payment.amount.toString(),18);
-        const dateStr=newDate?(newTime?`${newDate}T${newTime}:00`:`${newDate}T00:00:00`):null;
-        const releaseTime=dateStr?Math.floor(new Date(dateStr).getTime()/1000):payment.releaseTime;
-        if(releaseTime<=Math.floor(Date.now()/1000))throw new Error('Release time must be in the future');
-        const scheduleTx=await contract.schedule(recipient,releaseTime,payment.country||'',{value:amount,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
-        await scheduleTx.wait();
-        await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:'edit',reason:'On-chain edit completed',new_recipient:recipient,new_amount:newAmount||null,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
-        setDone(true);setOpen(false);setStep(null);
-        if(onRefresh)onRefresh();
-      } else {
-        const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:newAmount||null,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
-        if(!r.ok)throw new Error('Failed');
-        setDone(true);setOpen(false);setStep(null);
-      }
+      const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:newAmount||null,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
+      if(!r.ok)throw new Error('Failed');
+      setDone(true);setOpen(false);setStep(null);
     }catch(e){alert(e.message||'Failed to submit request. Please try again.');}
     setLoading(false);
   };
@@ -89,8 +73,57 @@ function Countdown({releaseTime}){
   return(<span style={{fontFamily:'monospace',fontWeight:700,color:'var(--ac)',fontSize:13}}>{String(h).padStart(2,'0')}H : {String(m).padStart(2,'0')}M : {String(s).padStart(2,'0')}S</span>);
 }
 
+function EditPaymentModal({payment,paymentId,signer,contractAddress,schedAbi,onClose,onSuccess}){
+  const[newRecipient,setNewRecipient]=useState('');
+  const[addAmount,setAddAmount]=useState('');
+  const[newDate,setNewDate]=useState('');
+  const[newTime,setNewTime]=useState('');
+  const[loading,setLoading]=useState(false);
+  const[error,setError]=useState('');
+
+  const submit=async()=>{
+    setLoading(true);setError('');
+    try{
+      const contract=new ethers.Contract(contractAddress,schedAbi,signer);
+      const recipientArg=newRecipient.trim()?ethers.getAddress(newRecipient.trim()):ethers.ZeroAddress;
+      let releaseTimeArg=0;
+      if(newDate){
+        const dateStr=newTime?`${newDate}T${newTime}:00`:`${newDate}T00:00:00`;
+        releaseTimeArg=Math.floor(new Date(dateStr).getTime()/1000);
+      }
+      const value=addAmount?ethers.parseUnits(addAmount,18):0n;
+      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
+      await tx.wait();
+      onSuccess();
+      onClose();
+    }catch(e){
+      setError(e?.reason||e?.shortMessage||e?.message||'Edit failed.');
+    }
+    setLoading(false);
+  };
+
+  return(<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={onClose}>
+    <div style={{background:'var(--card)',borderRadius:16,padding:20,width:'100%',maxWidth:380,boxShadow:'var(--shl)'}} onClick={e=>e.stopPropagation()}>
+      <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:4}}>Edit Payment</div>
+      <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Leave fields blank to keep current values. Updates apply on-chain immediately.</div>
+      <div className="ap-label">New Recipient Address</div>
+      <input className="ap-input" style={{marginBottom:10}} placeholder="0x..." value={newRecipient} onChange={e=>setNewRecipient(e.target.value)}/>
+      <div className="ap-label">Increase Amount By (USDC)</div>
+      <input className="ap-input" type="number" style={{marginBottom:10}} placeholder="0.00" value={addAmount} onChange={e=>setAddAmount(e.target.value)}/>
+      <div className="ap-label">New Release Date</div>
+      <input className="ap-input" type="date" style={{marginBottom:10}} value={newDate} onChange={e=>setNewDate(e.target.value)}/>
+      <div className="ap-label">New Release Time</div>
+      <input className="ap-input" type="time" style={{marginBottom:10}} value={newTime} onChange={e=>setNewTime(e.target.value)}/>
+      {error&&<div style={{fontSize:12,color:'var(--re)',marginBottom:10}}>{error}</div>}
+      <button className="ap-btn ap-btn-primary" style={{width:'100%'}} onClick={submit} disabled={loading||(!newRecipient&&!addAmount&&!newDate&&!newTime)}>{loading?'Submitting...':'Save Changes'}</button>
+      <button onClick={onClose} style={{marginTop:8,width:'100%',background:'none',border:'none',fontSize:12,color:'var(--tx3)',cursor:'pointer'}}>Cancel</button>
+    </div>
+  </div>);
+}
+
 function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading,rates}){
   const isExpanded=expandedId===p.id;
+  const[editOpen,setEditOpen]=useState(false);
   const isPending=st==='scheduled';
   const isProcessing=st==='processing';
   const isCancelApproved=st==='cancel_approved';
@@ -143,7 +176,12 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <span style={{fontSize:12,color:'var(--tx3)'}}>{releaseDate}</span>
     </div>
-    {isPending&&<button onClick={()=>onCancel(p.id)} style={{width:"100%",background:"none",border:"1px solid var(--re)",borderRadius:10,padding:"10px",fontSize:12,color:"var(--re)",fontWeight:600,cursor:"pointer"}}>Cancel Payment</button>}{isProcessing&&<NeedHelpMenu paymentId={p.id} address={address} contractAddress={schedAddr} signer={signer} schedAbi={schedAbi} payment={p} onRefresh={fetchPayments}/>}
+    {isPending&&<div style={{display:'flex',gap:8}}>
+      <button onClick={()=>onCancel(p.id)} style={{flex:1,background:"none",border:"1px solid var(--re)",borderRadius:10,padding:"10px",fontSize:12,color:"var(--re)",fontWeight:600,cursor:"pointer"}}>Cancel Payment</button>
+      <button onClick={()=>setEditOpen(true)} style={{flex:1,background:"none",border:"1px solid var(--ac)",borderRadius:10,padding:"10px",fontSize:12,color:"var(--ac)",fontWeight:600,cursor:"pointer"}}>Edit</button>
+    </div>}
+    {editOpen&&<EditPaymentModal payment={p} paymentId={p.id} signer={signer} contractAddress={schedAddr} schedAbi={schedAbi} onClose={()=>setEditOpen(false)} onSuccess={fetchPayments}/>}
+    {isProcessing&&<NeedHelpMenu paymentId={p.id} address={address} contractAddress={schedAddr} signer={signer} schedAbi={schedAbi} payment={p} onRefresh={fetchPayments}/>}
   </div>);
 }
 

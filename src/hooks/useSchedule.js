@@ -7,6 +7,8 @@ export const SCHED_ABI = [
   'function schedule(address payable recipient,uint256 releaseTime,string calldata country) external payable returns (uint256)',
   'function execute(uint256 id) external',
   'function cancel(uint256 id) external',
+  'function edit(uint256 id,address payable newRecipient,uint256 newReleaseTime,string calldata newCountry) external payable',
+  'function adminEdit(uint256 id,address payable newRecipient,uint256 newAmount,uint256 newReleaseTime,string calldata newCountry) external payable',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))',
   'function paymentCount() external view returns (uint256)'
 ];

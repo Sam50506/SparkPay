@@ -9,9 +9,10 @@ const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || process.env.PAYOUT_PRIVATE_KEY;
 const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 const RPC = 'https://rpc.testnet.arc.network';
-const SCHED_ADDR = '0xD8668A6b776e8b6aAcaAaad16240Bb57DcD89C57';
+const SCHED_ADDR = '0xF6A86c1e4372d4ab84072B93eE1798f173226a48';
 const SCHED_ABI = [
   'function cancel(uint256 id) external',
+  'function adminEdit(uint256 id, address payable newRecipient, uint256 newAmount, uint256 newReleaseTime, string calldata newCountry) external payable',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'
 ];
 
@@ -91,13 +92,33 @@ export default async function handler(req, res) {
           headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`}
         });
         const [editReq] = await reqRes.json();
+
+        const adminProvider = new ethers.JsonRpcProvider(RPC, {name: 'Arc Testnet', chainId: 5042002});
+        const adminWallet = new ethers.Wallet(PRIVATE_KEY, adminProvider);
+        const adminContract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, adminWallet);
+
+        const current = await adminContract.getPayment(payment_id);
+        const newRecipient = editReq.new_recipient || ethers.ZeroAddress;
+        const newAmount = editReq.new_amount ? ethers.parseUnits(editReq.new_amount.toString(), 18) : 0n;
+        let newReleaseTime = 0;
+        if (editReq.new_date) {
+          const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T00:00:00`;
+          newReleaseTime = Math.floor(new Date(dateStr).getTime() / 1000);
+        }
+
+        let value = 0n;
+        if (newAmount > 0n && newAmount > current.amount) value = newAmount - current.amount;
+
+        const editTx = await adminContract.adminEdit(
+          payment_id, newRecipient, newAmount, newReleaseTime, '',
+          {value, gasPrice: ethers.parseUnits('100', 'gwei'), gasLimit: 200000}
+        );
+        await editTx.wait();
+
         const updates = {};
         if (editReq.new_recipient) updates.recipient = editReq.new_recipient;
         if (editReq.new_amount) updates.amount = editReq.new_amount;
-        if (editReq.new_date) {
-          const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T00:00:00`;
-          updates.release_time = Math.floor(new Date(dateStr).getTime() / 1000);
-        }
+        if (newReleaseTime) updates.release_time = newReleaseTime;
         if (Object.keys(updates).length > 0) {
           await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${payment_id}`, {
             method: 'PATCH',
