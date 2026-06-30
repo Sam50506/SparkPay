@@ -102,8 +102,9 @@ export default async function handler(req, res) {
         const newAmount = editReq.new_amount ? ethers.parseUnits(editReq.new_amount.toString(), 18) : 0n;
         let newReleaseTime = 0;
         if (editReq.new_date) {
-          const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T00:00:00`;
-          newReleaseTime = Math.floor(new Date(dateStr).getTime() / 1000);
+          const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T12:00:00`;
+          // Parse as UTC to avoid timezone shifting
+          newReleaseTime = Math.floor(new Date(dateStr + 'Z').getTime() / 1000);
         }
 
         let value = 0n;
