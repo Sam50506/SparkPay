@@ -1,62 +1,46 @@
-# ArcPay — Cross Border USDC Remittance
+# SparkPay — Cross-Border USDC Remittance
 
-A cross border USDC remittance dApp built on Arc Testnet. Send USDC to 20+ countries instantly with zero fees, no KYC, and instant settlement.
+A full-stack Web3 remittance dApp built on Arc Testnet. Send USDC to 20+ countries instantly with zero fees, no KYC, and instant settlement.
 
-**Live:** https://arc-remittance.vercel.app
+**Live:** https://sparkpay.live
 
 ## Features
 
-- **Send USDC** — Instant transfers to any wallet on Arc Testnet
-- **Multi Send** — Send to multiple recipients in one session
-- **Invoice System** — Create and pay USDC invoices stored on Supabase
-- **Faucet** — Claim free testnet USDC via Circle Faucet
-- **Transaction History** — Real time status with on-chain confirmation
-- **Exchange Rates** — Live conversion rates for 20+ countries
-- **Fee Comparison** — ArcPay vs banks and other services
-- **Cashback Rewards** — Earn on every confirmed transaction
-- **Contacts** — Save frequent wallet addresses
-- **Scheduled Payments** — Set up recurring payment reminders
-- **QR Receive** — Generate QR code and payment links
-- **Dark and Light Mode** — Full theme support
+- Send USDC instantly to any wallet on Arc Testnet
+- Multi Send batch payments to up to 150 recipients
+- Scheduled Payments with on-chain escrow
+- Invoice creation and payment system
+- QR code generation and scanning
+- Cashback Rewards (1% on transactions 5+ USDC)
+- Contacts management
+- Transaction History with CSV export
+- Exchange Rates for 150+ countries
+- Fee Comparison vs traditional remittance
+- Admin Portal with maintenance mode
+- PWA support
+- Dark and Light Mode
 
-## Supported Wallets
+## Architecture
 
-- MetaMask, Brave, OKX, Rabby, Coinbase, Mises Browser
-- WalletConnect (300+ wallets)
+Frontend: React, deployed on Vercel
+Smart Contracts: Solidity, OpenZeppelin
+Backend: Vercel serverless functions, Supabase
+Automation: Railway cron with GitHub Actions fallback
+Security: Cloudflare Turnstile, internal API secrets
 
-## Network Details
+## Smart Contracts
 
-| | |
-|---|---|
-| Network | Arc Testnet |
-| Chain ID | 5042002 |
-| RPC | rpc.testnet.arc.network |
-| USDC Contract | 0x3600000000000000000000000000000000000000 |
-| Remittance Contract | 0x91F07CE441cD7c39C4c43EB86A7ABd6F9cc48F44 |
-| Block Explorer | testnet.arcscan.app |
+Arc Testnet, Chain ID 5042002
+
+ScheduledPayment: 0xD8668A6b776e8b6aAcaAaad16240Bb57DcD89C57
+Remittance: 0x6338e79f2C218E41A78D75E336867549E2c300ee
+
+Both verified on Arc explorer with automated test coverage.
 
 ## Tech Stack
 
-React, ethers.js v6, Supabase, WalletConnect v2, Recharts, Vercel
+React, ethers.js v6, Solidity, OpenZeppelin, Supabase, Vercel, Railway, Cloudflare Turnstile, WalletConnect v2, MetaMask
 
-## Getting Started
+## License
 
-    git clone https://github.com/Sam50506/arc-remittance.git
-    cd arc-remittance
-    npm install
-
-Create a .env file with:
-
-    REACT_APP_SUPABASE_URL=your_supabase_url
-    REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
-    REACT_APP_ARC_RPC=https://rpc.testnet.arc.network
-    REACT_APP_WC_ID=your_walletconnect_project_id
-    REACT_APP_CIRCLE_API_KEY=your_circle_api_key
-
-Then run: npm start
-
-## Built By
-
-Sam — https://x.com/Sam_50506
-
-Built on Arc Testnet as part of the Arc ecosystem.
+MIT
