@@ -1,4 +1,4 @@
-# SparkPay — Cross-Border USDC Remittance
+# SparkPay : Cross-Border USDC Remittance
 
 A full-stack Web3 remittance dApp built on Arc Testnet. Send USDC to 20+ countries instantly with zero fees, no KYC, and instant settlement.
 
