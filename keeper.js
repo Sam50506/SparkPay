@@ -25,7 +25,19 @@ async function main() {
   for (let i = 0; i < count; i++) {
     try {
       const p = await contract.getPayment(i);
-      if (p.executed || p.cancelled || Number(p.releaseTime) > now) { skipped++; continue; }
+      // Check Supabase for overridden release time
+      let releaseTime = Number(p.releaseTime);
+      try {
+        const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+        const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+        const ovRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=release_time`, {
+          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        });
+        const ovData = await ovRes.json();
+        if (ovData[0]?.release_time) releaseTime = Number(ovData[0].release_time);
+      } catch(e) {}
+
+      if (p.executed || p.cancelled || releaseTime > now) { skipped++; continue; }
 
       // Skip if pending cancel request
       const SB_URL = process.env.REACT_APP_SUPABASE_URL;
