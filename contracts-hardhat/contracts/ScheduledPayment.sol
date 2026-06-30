@@ -158,6 +158,20 @@ contract ScheduledPayment is ReentrancyGuard, Ownable, Pausable {
         emit PaymentEdited(id, p.recipient, p.amount, p.releaseTime);
     }
 
+    /**
+     * @notice Top up an existing payment's amount (sender only)
+     * @dev Used when a user approves an increase via an edit request - they pay the difference directly
+     */
+    function topUp(uint256 id) external payable nonReentrant whenNotPaused {
+        Payment storage p = payments[id];
+        require(msg.sender == p.sender, "Not authorized");
+        require(!p.executed, "Already executed");
+        require(!p.cancelled, "Already cancelled");
+        require(msg.value > 0, "Amount must be > 0");
+        p.amount += msg.value;
+        emit PaymentEdited(id, p.recipient, p.amount, p.releaseTime);
+    }
+
     function execute(uint256 id) external nonReentrant whenNotPaused onlyExecutorOrOwner {
         Payment storage p = payments[id];
         require(!p.executed, "Already executed");

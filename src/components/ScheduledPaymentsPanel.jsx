@@ -17,7 +17,19 @@ export function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,
   const submit=async(type)=>{
     setLoading(true);
     try{
-      const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:newAmount||null,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
+      let amountForRequest=newAmount||null;
+      if(type==='edit'&&newAmount){
+        const targetWei=ethers.parseUnits(newAmount,18);
+        const currentWei=ethers.parseUnits(payment.amount.toString(),18);
+        if(targetWei>currentWei){
+          const diff=targetWei-currentWei;
+          const contract=new ethers.Contract(contractAddress,schedAbi,signer);
+          const tx=await contract.topUp(paymentId,{value:diff,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:150000});
+          await tx.wait();
+          amountForRequest=null;
+        }
+      }
+      const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:amountForRequest,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
       if(!r.ok)throw new Error('Failed');
       setDone(true);setOpen(false);setStep(null);
     }catch(e){alert(e.message||'Failed to submit request. Please try again.');}
