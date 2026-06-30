@@ -64,7 +64,7 @@ export function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,
       <input className="ap-input" style={{marginBottom:10}} placeholder="0x..." value={newRecipient} onChange={e=>setNewRecipient(e.target.value)}/>
       <div className="ap-label">New Amount (USDC)</div>
       <input className="ap-input" type="number" style={{marginBottom:10}} placeholder="0.00" value={newAmount} onChange={e=>setNewAmount(e.target.value)}/>
-      <div className="ap-label">New Release Date</div>
+      <div style={{fontSize:11,color:"var(--tx3)",marginBottom:10,marginTop:-6}}>Enter the new total amount, not the difference.</div><div className="ap-label">New Release Date</div>
       <input className="ap-input" type="date" style={{marginBottom:10}} value={newDate} onChange={e=>setNewDate(e.target.value)}/>
       <div className="ap-label">New Release Time</div>
       <input className="ap-input" type="time" style={{marginBottom:10}} value={newTime} onChange={e=>setNewTime(e.target.value)}/>
@@ -117,12 +117,12 @@ function EditPaymentModal({payment,paymentId,signer,contractAddress,schedAbi,onC
   return(<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={onClose}>
     <div style={{background:'var(--card)',borderRadius:16,padding:20,width:'100%',maxWidth:380,boxShadow:'var(--shl)'}} onClick={e=>e.stopPropagation()}>
       <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:4}}>Edit Payment</div>
-      <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Leave fields blank to keep current values. Updates apply on-chain immediately.</div>
+      <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Leave fields blank to keep current values. Only fill what you want to change.</div>
       <div className="ap-label">New Recipient Address</div>
       <input className="ap-input" style={{marginBottom:10}} placeholder="0x..." value={newRecipient} onChange={e=>setNewRecipient(e.target.value)}/>
-      <div className="ap-label">Increase Amount By (USDC)</div>
+      <div className="ap-label">New Total Amount (USDC)</div>
       <input className="ap-input" type="number" style={{marginBottom:10}} placeholder="0.00" value={addAmount} onChange={e=>setAddAmount(e.target.value)}/>
-      <div className="ap-label">New Release Date</div>
+      <div style={{fontSize:11,color:"var(--tx3)",marginBottom:10,marginTop:-6}}>Enter the new total amount, not the difference.</div><div className="ap-label">New Release Date</div>
       <input className="ap-input" type="date" style={{marginBottom:10}} value={newDate} onChange={e=>setNewDate(e.target.value)}/>
       <div className="ap-label">New Release Time</div>
       <input className="ap-input" type="time" style={{marginBottom:10}} value={newTime} onChange={e=>setNewTime(e.target.value)}/>
