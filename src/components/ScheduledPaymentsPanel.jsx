@@ -100,11 +100,17 @@ function EditPaymentModal({payment,paymentId,signer,contractAddress,schedAbi,onC
       const recipientArg=newRecipient.trim()?ethers.getAddress(newRecipient.trim()):ethers.ZeroAddress;
       let releaseTimeArg=0;
       if(newDate){
-        const dateStr=newTime?`${newDate}T${newTime}:00`:`${newDate}T00:00:00`;
+        const timeStr=newTime||'12:00';
+        const dateStr=`${newDate}T${timeStr}:00`;
         releaseTimeArg=Math.floor(new Date(dateStr).getTime()/1000);
+        if(releaseTimeArg<=Math.floor(Date.now()/1000)){
+          setError('Release time must be in the future.');
+          setLoading(false);
+          return;
+        }
       }
-      const value=addAmount?ethers.parseUnits(addAmount,18):0n;
-      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:200000});
+      const value=addAmount&&parseFloat(addAmount)>0?ethers.parseUnits(String(parseFloat(addAmount)),18):0n;
+      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,newCountry||'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:300000});
       await tx.wait();
       onSuccess();
       onClose();
