@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 const RPC = 'https://rpc.testnet.arc.network';
-const SCHED_ADDR = '0xD8668A6b776e8b6aAcaAaad16240Bb57DcD89C57';
+const SCHED_ADDR = '0xfb319b6BFf115bDFc6B4b76e0155E9d224f37771';
 const PRIVATE_KEY = process.env.DEPLOYER_KEY || process.env.PAYOUT_PRIVATE_KEY;
 const SCHED_ABI = [
   'function execute(uint256 id) external',
