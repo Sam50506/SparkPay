@@ -102,9 +102,12 @@ export default async function handler(req, res) {
         const newAmount = editReq.new_amount ? ethers.parseUnits(editReq.new_amount.toString(), 18) : 0n;
         let newReleaseTime = 0;
         if (editReq.new_date) {
-          const dateStr = editReq.new_time ? `${editReq.new_date}T${editReq.new_time}:00` : `${editReq.new_date}T12:00:00`;
-          // Parse as UTC to avoid timezone shifting
-          newReleaseTime = Math.floor(new Date(dateStr + 'Z').getTime() / 1000);
+          const timeStr = editReq.new_time || '12:00';
+          const dateStr = `${editReq.new_date}T${timeStr}:00`;
+          const tzOffset = editReq.tz_offset != null ? Number(editReq.tz_offset) : 0;
+          // Parse as UTC then subtract offset to get correct UTC from local time
+          const utcMs = new Date(dateStr + 'Z').getTime() - (tzOffset * 60 * 1000);
+          newReleaseTime = Math.floor(utcMs / 1000);
         }
 
         let value = 0n;
@@ -140,12 +143,12 @@ export default async function handler(req, res) {
     }
   }
 
-  const { payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date } = req.body;
+  const { payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date, new_time: ntime, tz_offset } = req.body;
   try {
     const r = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests`, {
       method: 'POST',
       headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation'},
-      body: JSON.stringify({payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date, status: 'pending'})
+      body: JSON.stringify({payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date, new_time: ntime||null, tz_offset: tz_offset||null, status: 'pending'})
     });
     if (!r.ok) throw new Error(await r.text());
     const msg = rtype === 'cancel'
