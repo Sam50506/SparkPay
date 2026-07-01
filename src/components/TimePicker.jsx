@@ -60,7 +60,7 @@ export function TimePicker({value, onChange}){
               type='text' inputMode='numeric' maxLength={2}
               value={hourInput}
               onFocus={e=>e.target.select()}
-              onChange={e=>setHourInput(e.target.value.replace(/\D/g,''))}
+              onChange={e=>{const v=e.target.value.replace(/\D/g,'');if(v===''||parseInt(v)<=12)setHourInput(v);}}
               onBlur={e=>commitHour(e.target.value)}
               style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
@@ -70,7 +70,7 @@ export function TimePicker({value, onChange}){
               type='text' inputMode='numeric' maxLength={2}
               value={minInput}
               onFocus={e=>e.target.select()}
-              onChange={e=>setMinInput(e.target.value.replace(/\D/g,''))}
+              onChange={e=>{const v=e.target.value.replace(/\D/g,'');if(v===''||parseInt(v)<=59)setMinInput(v);}}
               onBlur={e=>commitMin(e.target.value)}
               style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
