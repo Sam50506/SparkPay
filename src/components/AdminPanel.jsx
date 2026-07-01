@@ -9,36 +9,81 @@ import { FailedTxns } from './admin/FailedTxns';
 import { Diagnostics } from './admin/Diagnostics';
 export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
 
+const IC = {
+  Tx: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+  Volume: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>,
+  Claims: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
+  Shield: ()=><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Logout: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+  Explorer: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  Maintenance: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>,
+  Payout: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+  Execute: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>,
+  Requests: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+  Monitor: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+  Diag: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Chevron: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>,
+  Passkey: ()=><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/><path d="M12 17v4"/></svg>,
+};
+
+const Section = ({icon, title, children, style={}}) => (
+  <div style={{marginBottom:32,...style}}>
+    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
+      <div style={{color:'var(--tx3)'}}>{icon}</div>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase'}}>{title}</div>
+    </div>
+    {children}
+  </div>
+);
+
+const Card = ({title, subtitle, children, style={}}) => (
+  <div className="ap-card" style={{marginBottom:16,...style}}>
+    {title && <div className="ap-card-title" style={{marginBottom:subtitle?4:children?14:0}}>{title}</div>}
+    {subtitle && <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>{subtitle}</div>}
+    {children}
+  </div>
+);
+
+const StatCard = ({label, value, icon, loading, accent=false}) => (
+  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{label}</div>
+      <div style={{width:30,height:30,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)'}}>{icon}</div>
+    </div>
+    <div style={{display:'flex',alignItems:'baseline',gap:6}}>
+      <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-0.5px',lineHeight:1}}>
+        {loading ? <span style={{opacity:0.2}}>—</span> : value}
+      </div>
+    </div>
+  </div>
+);
+
 export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
+  const [stats, setStats] = useState({txCount:0, volume:0, pendingClaims:0});
+  const [loading, setLoading] = useState(true);
+  const [pkLoading, setPkLoading] = useState(false);
+  const [pkRegistered, setPkRegistered] = useState(null);
+  const [pkAuthed, setPkAuthed] = useState(()=>!!sessionStorage.getItem('sp_admin_jwt'));
+  const [webauthnSupported, setWebauthnSupported] = useState(true);
+  const [pinSetup, setPinSetup] = useState(null);
+  const [pinValue, setPinValue] = useState('');
+  const [pinConfirm, setPinConfirm] = useState('');
+  const [pinMode, setPinMode] = useState('check');
+  const [pkError, setPkError] = useState('');
+  const [activeSection, setActiveSection] = useState('overview');
+
   useEffect(()=>{
     fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode&select=value',{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-    }).then(r=>r.json()).then(d=>{
-      if(d&&d[0])setMaintenanceMode(d[0].value==='true');
-    }).catch(()=>{});
+    }).then(r=>r.json()).then(d=>{if(d&&d[0])setMaintenanceMode(d[0].value==='true');}).catch(()=>{});
   },[]);
-  const[stats,setStats]=useState({txCount:0,volume:0,pendingClaims:0});
-  const[loading,setLoading]=useState(true);
-  const[pkLoading,setPkLoading]=useState(false);
-  const[pkRegistered,setPkRegistered]=useState(null);
-  const[pkAuthed,setPkAuthed]=useState(()=>{
-    const t=sessionStorage.getItem('sp_admin_jwt');
-    return !!t;
-  });
-  const[webauthnSupported,setWebauthnSupported]=useState(true);
-  const[pinSetup,setPinSetup]=useState(null);
-  const[pinValue,setPinValue]=useState('');
-  const[pinConfirm,setPinConfirm]=useState('');
-  const[pinMode,setPinMode]=useState('check');
 
   useEffect(()=>{
     (async()=>{
       const supported=typeof window!=='undefined'&&!!window.PublicKeyCredential;
       let platformAvailable=false;
-      if(supported){
-        try{platformAvailable=await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();}catch{}
-      }
+      if(supported){try{platformAvailable=await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();}catch{}}
       setWebauthnSupported(supported&&platformAvailable);
     })();
   },[]);
@@ -74,7 +119,6 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     }catch(e){setPkError(e.message);setPinValue('');}
     setPkLoading(false);
   };
-  const[pkError,setPkError]=useState('');
 
   useEffect(()=>{
     if(!isAdmin)return;
@@ -95,9 +139,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
       if(!verData.verified)throw new Error(verData.error||'Registration failed');
       setPkRegistered(true);
       alert('Passkey registered successfully!');
-    }catch(e){
-      setPkError(e.message||'Registration failed');
-    }
+    }catch(e){setPkError(e.message||'Registration failed');}
     setPkLoading(false);
   };
 
@@ -113,11 +155,10 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
       if(!verData.verified)throw new Error(verData.error||'Authentication failed');
       sessionStorage.setItem('sp_admin_jwt',verData.token);
       setPkAuthed(true);
-    }catch(e){
-      setPkError(e.message||'Authentication failed');
-    }
+    }catch(e){setPkError(e.message||'Authentication failed');}
     setPkLoading(false);
   };
+
   useEffect(()=>{
     if(!isAdmin)return;
     (async()=>{
@@ -137,203 +178,196 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     })();
   },[isAdmin]);
 
-  if(!address){
-    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
-      <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'#fff',marginBottom:12}}>Admin Access</div>
-      <div style={{fontSize:14,color:'rgba(255,255,255,0.6)'}}>Please connect your wallet to continue.</div>
-    </div>);
-  }
+  const signOut=()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();};
 
-  if(!isAdmin){
-    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
-      <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:900,color:'#fff',marginBottom:12}}>Access Denied</div>
-      <div style={{fontSize:14,color:'rgba(255,255,255,0.6)'}}>This page is restricted to administrators only.</div>
-    </div>);
-  }
+  // Auth screens
+const authScreen=(title,subtitle,content)=>(
+    <div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+      <div style={{width:72,height:72,borderRadius:20,background:'rgba(59,130,196,.1)',border:'1px solid rgba(59,130,196,.2)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:28,color:'var(--ac)'}}>
+        {title==='Admin Verification'?<IC.Passkey/>:<IC.Shield/>}
+      </div>
+      <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>{title}</div>
+      <div style={{fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:32,maxWidth:320,lineHeight:1.7}}>{subtitle}</div>
+      {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:20,maxWidth:300,padding:'10px 14px',borderRadius:10,background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)'}}>{pkError}</div>}
+      {content}
+    </div>
+  );
+
+  if(!address) return authScreen('Admin Access','Connect your wallet to continue.',null);
+  if(!isAdmin) return authScreen('Access Denied','This area is restricted to administrators only.',null);
 
   if(pkRegistered===null&&webauthnSupported){
-    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{color:'rgba(255,255,255,0.5)',fontSize:14}}>Loading...</div></div>);
+    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{fontSize:13,color:'rgba(255,255,255,0.4)'}}>Checking credentials...</div>
+    </div>);
   }
 
   if(!pkAuthed&&!webauthnSupported){
-    if(pinSetup===null){
-      return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{color:'rgba(255,255,255,0.5)',fontSize:14}}>Loading...</div></div>);
-    }
-    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
-      <div style={{width:64,height:64,borderRadius:20,background:'rgba(59,130,196,.12)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:24}}>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      </div>
-      <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>Admin Verification</div>
-      <div style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:24,maxWidth:300,lineHeight:1.6}}>{pinMode==='setup'?'Set a secure PIN to access the admin dashboard.':'Enter your PIN to access the admin dashboard.'}</div>
-      {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:16,maxWidth:300}}>{pkError}</div>}
-      <div style={{position:'relative',width:220,marginBottom:pinMode==='setup'?12:20}}>
-        <input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'transparent',caretColor:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none',WebkitTextSecurity:'disc'}}/>
-        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:8,pointerEvents:'none'}}>
-          {pinValue.length===0&&<span style={{color:'rgba(255,255,255,0.3)',fontSize:14}}>Enter PIN</span>}
-          {Array.from({length:pinValue.length}).map((_,i)=><div key={i} style={{width:9,height:9,borderRadius:999,background:'#fff'}}/>)}
+    return authScreen(
+      pinMode==='setup'?'Set Up Admin PIN':'Admin Verification',
+      pinMode==='setup'?'Create a secure PIN to protect the admin dashboard.':'Enter your PIN to access the admin dashboard.',
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,width:'100%',maxWidth:280}}>
+        <div style={{position:'relative',width:'100%'}}>
+          <input type="password" autoComplete={pinMode==='setup'?'new-password':'current-password'} inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} placeholder="Enter PIN" style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.12)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:16,textAlign:'center',letterSpacing:6,outline:'none'}}/>
         </div>
+        {pinMode==='setup'&&<div style={{position:'relative',width:'100%'}}>
+          <input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} placeholder="Confirm PIN" style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.12)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:16,textAlign:'center',letterSpacing:6,outline:'none'}}/>
+        </div>}
+        <button onClick={pinMode==='setup'?setupPin:verifyPin} disabled={pkLoading||pinValue.length<6} style={{width:'100%',background:'var(--ac)',border:'none',borderRadius:14,padding:'14px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',opacity:pkLoading||pinValue.length<6?0.5:1}}>
+          {pkLoading?'Verifying...':(pinMode==='setup'?'Set PIN':'Unlock')}
+        </button>
       </div>
-      {pinMode==='setup'&&<div style={{position:'relative',width:220,marginBottom:20}}>
-        <input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.05)',color:'transparent',caretColor:'#fff',fontSize:18,textAlign:'center',letterSpacing:6,outline:'none'}}/>
-        <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',gap:8,pointerEvents:'none'}}>
-          {pinConfirm.length===0&&<span style={{color:'rgba(255,255,255,0.3)',fontSize:14}}>Confirm PIN</span>}
-          {Array.from({length:pinConfirm.length}).map((_,i)=><div key={i} style={{width:9,height:9,borderRadius:999,background:'#fff'}}/>)}
-        </div>
-      </div>}
-      <button onClick={pinMode==='setup'?setupPin:verifyPin} disabled={pkLoading||pinValue.length<6} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',opacity:pkLoading||pinValue.length<6?0.5:1}}>
-        {pkLoading?'Verifying...':pinMode==='setup'?'Set PIN':'Unlock'}
-      </button>
-    </div>);
+    );
   }
 
   if(!pkAuthed&&webauthnSupported){
-    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
-      <div style={{width:64,height:64,borderRadius:20,background:'rgba(59,130,196,.12)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:24}}>
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="1.8"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/><path d="M12 17v4"/><path d="M9 9.5v2"/><path d="M15 9.5v2"/></svg>
-      </div>
-      <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>Admin Verification</div>
-      <div style={{fontSize:13,color:'rgba(255,255,255,0.5)',marginBottom:28,maxWidth:300,lineHeight:1.6}}>{pkRegistered?'Use your device biometrics or passkey to access the admin dashboard.':'Set up a passkey to secure this admin dashboard with device biometrics.'}</div>
-      {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:16,maxWidth:300}}>{pkError}</div>}
-      {pkRegistered?(
-        <button onClick={loginWithPasskey} disabled={pkLoading} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:10}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/></svg>
-          {pkLoading?'Verifying...':'Verify with Passkey'}
-        </button>
-      ):(
-        <button onClick={registerPasskey} disabled={pkLoading} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:10}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/></svg>
-          {pkLoading?'Setting up...':'Set Up Passkey'}
-        </button>
-      )}
-    </div>);
+    return authScreen(
+      'Admin Verification',
+      pkRegistered?'Use your device biometrics or passkey to access the admin dashboard.':'Set up a passkey to secure this dashboard.',
+      <button onClick={pkRegistered?loginWithPasskey:registerPasskey} disabled={pkLoading} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:10,opacity:pkLoading?0.6:1}}>
+        <IC.Passkey/>
+        {pkLoading?'Verifying...':(pkRegistered?'Verify with Passkey':'Set Up Passkey')}
+      </button>
+    );
   }
 
-  return(<div style={{minHeight:'100vh',background:'var(--bg)'}}>
-    <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',position:'sticky',top:0,zIndex:10}}>
-      <div style={{maxWidth:820,margin:'0 auto',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <SparkPayLogo size={32}/>
-          <div>
-            <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:800,color:'var(--tx1)',lineHeight:1.2}}>SparkPay</div>
-            <div style={{fontSize:10,color:'var(--tx3)',fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase'}}>Admin Console</div>
-          </div>
-        </div>
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 10px',borderRadius:999,background:'rgba(34,197,94,0.1)'}}>
-            <div style={{width:6,height:6,borderRadius:999,background:'#22c55e'}}/>
-            <span style={{fontSize:11,fontWeight:700,color:'#22c55e'}}>Verified</span>
-          </div>
-          <button onClick={()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();}} style={{background:'none',border:'1px solid var(--b1)',borderRadius:9,width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx2)'}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
+  const navItems = [
+    {id:'overview', label:'Overview'},
+    {id:'operations', label:'Operations'},
+    {id:'requests', label:'Requests'},
+    {id:'diagnostics', label:'Diagnostics'},
+    {id:'monitoring', label:'Monitoring'},
+  ];
 
-    <div style={{maxWidth:820,margin:'0 auto',padding:'28px 24px 60px'}}>
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Overview</div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:32}}>
-        <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-            <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>Total Transactions</div>
-            <div style={{width:28,height:28,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+  return(
+    <div style={{minHeight:'100vh',background:'var(--bg)'}}>
+      {/* Top bar */}
+      <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',position:'sticky',top:0,zIndex:10}}>
+        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',height:58}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <SparkPayLogo size={28}/>
+            <div>
+              <div style={{fontFamily:'var(--fd)',fontSize:14,fontWeight:800,color:'var(--tx1)',lineHeight:1.1}}>SparkPay</div>
+              <div style={{fontSize:9,color:'var(--tx3)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>Admin Console</div>
             </div>
           </div>
-          <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)',letterSpacing:'-0.5px'}}>{loading?<span style={{opacity:0.3}}>—</span>:stats.txCount}</div>
-        </div>
-        <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-            <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>Total Volume</div>
-            <div style={{width:28,height:28,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ac)" strokeWidth="2.2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{display:'flex',alignItems:'center',gap:6,padding:'4px 10px',borderRadius:999,background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.2)'}}>
+              <div style={{width:5,height:5,borderRadius:999,background:'#22c55e'}}/>
+              <span style={{fontSize:10,fontWeight:700,color:'#22c55e',letterSpacing:'.04em'}}>VERIFIED</span>
             </div>
+            <button onClick={signOut} style={{background:'none',border:'1px solid var(--b1)',borderRadius:8,width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx3)'}}>
+              <IC.Logout/>
+            </button>
           </div>
-          <div style={{display:'flex',alignItems:'baseline',gap:4,whiteSpace:'nowrap',overflow:'hidden'}}><span style={{fontSize:loading?26:(stats.volume>=10000?20:26),fontWeight:800,fontFamily:'var(--fd)',color:'var(--tx1)',letterSpacing:'-0.5px'}}>{loading?'—':stats.volume.toFixed(2)}</span><span style={{fontSize:13,fontWeight:600,color:'var(--tx3)'}}>USDC</span></div>
+        </div>
+        {/* Nav */}
+        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',gap:2,borderTop:'1px solid var(--b0)'}}>
+          {navItems.map(n=>(
+            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{padding:'10px 14px',background:'none',border:'none',fontSize:12,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s'}}>
+              {n.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Site Control</div>
-      <div className="ap-card" style={{marginBottom:32}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-          <div>
-            <div className="ap-card-title">Maintenance Mode</div>
-            <div style={{fontSize:13,color:'var(--tx2)',marginTop:4}}>{maintenanceMode?'Site is locked — only admin wallet can access SparkPay.':'Site is live and accessible to all users.'}</div>
+      {/* Content */}
+      <div style={{maxWidth:860,margin:'0 auto',padding:'32px 24px 60px'}}>
+
+        {/* Overview */}
+        {activeSection==='overview'&&<div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:32}}>
+            <StatCard label="Total Transactions" value={stats.txCount} icon={<IC.Tx/>} loading={loading}/>
+            <StatCard label="Total Volume" value={`${stats.volume.toFixed(2)} USDC`} icon={<IC.Volume/>} loading={loading}/>
+            <StatCard label="Pending Claims" value={stats.pendingClaims} icon={<IC.Claims/>} loading={loading} accent={stats.pendingClaims>0}/>
           </div>
-          <button onClick={async()=>{
-            const newVal=!maintenanceMode;
-            try{
-              await fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode',{
-                method:'PATCH',
-                headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
-                body:JSON.stringify({value:String(newVal)})
-              });
-              setMaintenanceMode(newVal);
-            }catch(e){alert('Failed to update maintenance mode: '+e.message);}
-          }} style={{width:48,height:28,borderRadius:999,border:'none',background:maintenanceMode?'#ef4444':'var(--b1)',position:'relative',cursor:'pointer',flexShrink:0,transition:'background .2s'}}>
-            <div style={{position:'absolute',top:3,left:maintenanceMode?23:3,width:22,height:22,borderRadius:999,background:'#fff',transition:'left .2s',boxShadow:'0 1px 3px rgba(0,0,0,0.3)'}}/>
-          </button>
-        </div>
-        <div style={{marginTop:14,display:'inline-flex',alignItems:'center',gap:6,padding:'5px 12px',borderRadius:999,background:maintenanceMode?'rgba(239,68,68,0.1)':'rgba(34,197,94,0.1)'}}>
-          <div style={{width:6,height:6,borderRadius:999,background:maintenanceMode?'#ef4444':'#22c55e'}}/>
-          <span style={{fontSize:11,fontWeight:700,color:maintenanceMode?'#ef4444':'#22c55e'}}>{maintenanceMode?'MAINTENANCE ACTIVE':'LIVE'}</span>
-        </div>
-      </div>
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Payment Operations</div>
-      <div className="ap-card" style={{marginBottom:16}}>
-        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:14}}>
-          <div>
-            <div className="ap-card-title">Cashback Payouts</div>
-            <div style={{fontSize:12,color:'var(--tx3)',marginTop:4}}>{loading?'Loading...':stats.pendingClaims+' pending claim'+(stats.pendingClaims===1?'':'s')}</div>
-          </div>
-          {stats.pendingClaims>0&&<div style={{width:8,height:8,borderRadius:999,background:'#f59e0b',marginTop:6}}/>}
-        </div>
-        <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={async()=>{
-          const token=sessionStorage.getItem('sp_admin_jwt');
-          if(!token){alert('Session expired. Please re-verify with passkey.');window.location.reload();return;}
-          try{
-            const r=await fetch('/api/payout',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}});
-            const d=await r.json();
-            alert(d.message+' Paid: '+d.paid);
-          }catch(e){alert('Error: '+e.message);}
-        }}>Process Pending Payouts</button>
-      </div>
+          <Section icon={<IC.Maintenance/>} title="Site Control">
+            <Card>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:'var(--tx1)',marginBottom:4}}>Maintenance Mode</div>
+                  <div style={{fontSize:12,color:'var(--tx3)'}}>{maintenanceMode?'Site locked — only admin wallet can access.':'Site is live and accessible to all users.'}</div>
+                </div>
+                <button onClick={async()=>{
+                  const newVal=!maintenanceMode;
+                  try{
+                    await fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode',{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({value:String(newVal)})});
+                    setMaintenanceMode(newVal);
+                  }catch(e){alert('Failed: '+e.message);}
+                }} style={{width:48,height:26,borderRadius:999,border:'none',background:maintenanceMode?'#ef4444':'var(--b1)',position:'relative',cursor:'pointer',flexShrink:0,transition:'background .2s'}}>
+                  <div style={{position:'absolute',top:3,left:maintenanceMode?25:3,width:20,height:20,borderRadius:999,background:'#fff',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.3)'}}/>
+                </button>
+              </div>
+              <div style={{marginTop:14,display:'inline-flex',alignItems:'center',gap:6,padding:'4px 12px',borderRadius:999,background:maintenanceMode?'rgba(239,68,68,0.08)':'rgba(34,197,94,0.08)',border:`1px solid ${maintenanceMode?'rgba(239,68,68,0.2)':'rgba(34,197,94,0.2)'}`}}>
+                <div style={{width:5,height:5,borderRadius:999,background:maintenanceMode?'#ef4444':'#22c55e'}}/>
+                <span style={{fontSize:10,fontWeight:700,color:maintenanceMode?'#ef4444':'#22c55e',letterSpacing:'.06em'}}>{maintenanceMode?'MAINTENANCE ACTIVE':'LIVE'}</span>
+              </div>
+            </Card>
+          </Section>
 
-      <div className="ap-card" style={{marginBottom:32}}>
-        <div className="ap-card-title" style={{marginBottom:4}}>Manual Execute</div>
-        <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Force-execute a scheduled payment if the cron/keeper bot fails.</div>
-        <ManualExecute/>
-      </div>
+          <Section icon={<IC.Explorer/>} title="Resources">
+            <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,overflow:'hidden'}}>
+              <a href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:'1px solid var(--b0)'}}>
+                <div style={{width:32,height:32,borderRadius:8,background:'var(--elev)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'var(--tx3)'}}><IC.Explorer/></div>
+                <div style={{flex:1,fontSize:13,fontWeight:600,color:'var(--tx1)'}}>View Admin Wallet on Explorer</div>
+                <IC.Chevron/>
+              </a>
+              <div onClick={signOut} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',cursor:'pointer'}}>
+                <div style={{width:32,height:32,borderRadius:8,background:'rgba(239,68,68,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'#ef4444'}}><IC.Logout/></div>
+                <div style={{flex:1,fontSize:13,fontWeight:600,color:'#ef4444'}}>Sign Out</div>
+              </div>
+            </div>
+          </Section>
+        </div>}
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Requests</div>
-      <div className="ap-card" style={{marginBottom:32}}>
-        <div className="ap-card-title" style={{marginBottom:14}}>Scheduled Payment Requests</div>
-        <ScheduledRequests/>
-      </div>
+        {/* Operations */}
+    {activeSection==='operations'&&<div>
+          <Section icon={<IC.Payout/>} title="Cashback Payouts">
+            <Card title="Process Payouts" subtitle={loading?'Loading...':stats.pendingClaims+' pending claim'+(stats.pendingClaims===1?'':'s')}>
+              <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={async()=>{
+                const token=sessionStorage.getItem('sp_admin_jwt');
+                if(!token){alert('Session expired.');window.location.reload();return;}
+                try{const r=await fetch('/api/payout',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}});const d=await r.json();alert(d.message+' Paid: '+d.paid);}catch(e){alert('Error: '+e.message);}
+              }}>Process Pending Payouts</button>
+            </Card>
+          </Section>
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Diagnostics</div><div className="ap-card" style={{marginBottom:32}}><div className="ap-card-title" style={{marginBottom:4}}>System Health</div><div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Run a full check on all SparkPay systems.</div><Diagnostics/></div><div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Monitoring</div>
-      <div className="ap-card" style={{marginBottom:32}}>
-        <div className="ap-card-title" style={{marginBottom:14}}>Failed Transactions</div>
-        <FailedTxns/>
-      </div>
+          <Section icon={<IC.Execute/>} title="Manual Execute">
+            <Card title="Force Execute Payment" subtitle="Manually trigger a scheduled payment if the keeper bot fails.">
+              <ManualExecute/>
+            </Card>
+          </Section>
+        </div>}
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Resources</div>
-      <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,overflow:'hidden'}}>
-        <a href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:'1px solid var(--b0)'}}>
-          <div style={{width:30,height:30,borderRadius:8,background:'var(--elev)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx2)" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </div>
-          <div style={{flex:1,fontSize:13,fontWeight:600,color:'var(--tx1)'}}>View Admin Wallet on Explorer</div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
-        <div onClick={()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();}} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',cursor:'pointer'}}>
-          <div style={{width:30,height:30,borderRadius:8,background:'rgba(239,68,68,0.1)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          </div>
-          <div style={{flex:1,fontSize:13,fontWeight:600,color:'#ef4444'}}>Sign Out</div>
-        </div>
+        {/* Requests */}
+        {activeSection==='requests'&&<div>
+          <Section icon={<IC.Requests/>} title="Scheduled Payment Requests">
+            <Card>
+              <ScheduledRequests/>
+            </Card>
+          </Section>
+        </div>}
+
+        {/* Diagnostics */}
+        {activeSection==='diagnostics'&&<div>
+          <Section icon={<IC.Diag/>} title="System Diagnostics">
+            <Card title="Health Check" subtitle="Run a full diagnostic across all SparkPay systems.">
+              <Diagnostics/>
+            </Card>
+          </Section>
+        </div>}
+
+        {/* Monitoring */}
+        {activeSection==='monitoring'&&<div>
+          <Section icon={<IC.Monitor/>} title="Failed Transactions">
+            <Card>
+              <FailedTxns/>
+            </Card>
+          </Section>
+        </div>}
+
       </div>
     </div>
-  </div>);
+  );
 }
