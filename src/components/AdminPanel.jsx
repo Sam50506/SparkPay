@@ -6,7 +6,8 @@ import { SparkPayLogo } from './OnboardingModal';
 import { ScheduledRequests } from './admin/ScheduledRequests';
 import { ManualExecute } from './admin/ManualExecute';
 import { FailedTxns } from './admin/FailedTxns';
-export { ScheduledRequests, ManualExecute, FailedTxns };
+import { Diagnostics } from './admin/Diagnostics';
+export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
 
 export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
@@ -311,7 +312,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
         <ScheduledRequests/>
       </div>
 
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Monitoring</div>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Diagnostics</div><div className="ap-card" style={{marginBottom:32}}><div className="ap-card-title" style={{marginBottom:4}}>System Health</div><div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Run a full check on all SparkPay systems.</div><Diagnostics/></div><div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:12}}>Monitoring</div>
       <div className="ap-card" style={{marginBottom:32}}>
         <div className="ap-card-title" style={{marginBottom:14}}>Failed Transactions</div>
         <FailedTxns/>
