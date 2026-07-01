@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export function Countdown({releaseTime}){
   const[now,setNow]=useState(Math.floor(Date.now()/1000));
-  useEffect(()=>{const t=setInterval(()=>setNow(Math.floor(Date.now()/1000)),1000);return()=>clearInterval(t);},[]);
+  useEffect(()=>{const t=setInterval(()=>setNow(Math.floor(Date.now()/1000)),1000);const onVisible=()=>{if(document.visibilityState==='visible')setNow(Math.floor(Date.now()/1000));};document.addEventListener('visibilitychange',onVisible);return()=>{clearInterval(t);document.removeEventListener('visibilitychange',onVisible);};},[]);
   const diff=releaseTime-now;
   if(diff<=0)return null;
   const h=Math.floor(diff/3600);
