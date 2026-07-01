@@ -22,7 +22,7 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
       return;
     }
     if (!signer) { setStatus({ type: 'error', msg: 'Connect your wallet first' }); return; }
-    const releaseTime = Math.floor(new Date(newSched.next + 'T' + (newSched.time || '12:00') + ':00Z').getTime() / 1000);console.log('releaseTime:',releaseTime,'now:',Math.floor(Date.now()/1000),'diff:',releaseTime-Math.floor(Date.now()/1000));
+    const localStr=newSched.next+'T'+(newSched.time||'12:00')+':00';const tzOffset=new Date().getTimezoneOffset();const releaseTime=Math.floor(new Date(localStr+'Z').getTime()/1000)-(tzOffset*60);
     setLoading(true);
     try {
       const amt = ethers.parseUnits(newSched.amount, 18);
