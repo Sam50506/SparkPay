@@ -3,6 +3,21 @@ import React from 'react';
 export function TimePicker({value, onChange}){
   const [open, setOpen] = React.useState(false);
   const wrapRef = React.useRef(null);
+  const [hourInput, setHourInput] = React.useState('');
+  const [minInput, setMinInput] = React.useState('');
+
+  const parsed = (value||'09:00').split(':');
+  const h24 = parseInt(parsed[0])||9;
+  const min = parsed[1]||'00';
+  const isPM = h24 >= 12;
+  const h12 = h24===0?12:h24>12?h24-12:h24;
+
+  React.useEffect(()=>{
+    if(open){
+      setHourInput(String(h12));
+      setMinInput(min);
+    }
+  },[open]);
 
   React.useEffect(()=>{
     if(!open) return;
@@ -11,17 +26,23 @@ export function TimePicker({value, onChange}){
     return()=>document.removeEventListener('mousedown',handler);
   },[open]);
 
-  const parsed = (value||'09:00').split(':');
-  const h24 = parseInt(parsed[0])||9;
-  const min = parsed[1]||'00';
-  const isPM = h24 >= 12;
-  const h12 = h24===0?12:h24>12?h24-12:h24;
-
   const update = (newH12, newMin, newIsPM) => {
     let h = parseInt(newH12)||12;
     if(newIsPM && h!==12) h+=12;
     if(!newIsPM && h===12) h=0;
     onChange(String(h).padStart(2,'0')+':'+String(newMin).padStart(2,'0'));
+  };
+
+  const commitHour = (val) => {
+    const v = Math.max(1, Math.min(12, parseInt(val)||1));
+    setHourInput(String(v));
+    update(v, minInput||min, isPM);
+  };
+
+  const commitMin = (val) => {
+    const v = Math.max(0, Math.min(59, parseInt(val)||0));
+    setMinInput(String(v).padStart(2,'0'));
+    update(hourInput||h12, v, isPM);
   };
 
   return(
@@ -35,30 +56,34 @@ export function TimePicker({value, onChange}){
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Hour</div>
-            <input type='text' inputMode='numeric' maxLength={2} value={h12}
+            <input
+              type='text' inputMode='numeric' maxLength={2}
+              value={hourInput}
               onFocus={e=>e.target.select()}
-              onChange={e=>{const raw=e.target.value.replace(/\D/g,'');if(raw==='')return;const v=parseInt(raw);if(v>=1&&v<=12)update(v,min,isPM);}}
-              onBlur={e=>{const v=Math.max(1,Math.min(12,parseInt(e.target.value)||1));update(v,min,isPM);}}
+              onChange={e=>setHourInput(e.target.value.replace(/\D/g,''))}
+              onBlur={e=>commitHour(e.target.value)}
               style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Min</div>
-            <input type='text' inputMode='numeric' maxLength={2} value={min}
+            <input
+              type='text' inputMode='numeric' maxLength={2}
+              value={minInput}
               onFocus={e=>e.target.select()}
-              onChange={e=>{const raw=e.target.value.replace(/\D/g,'');if(raw==='')return;const v=parseInt(raw);if(v>=0&&v<=59)update(h12,String(v).padStart(2,'0'),isPM);}}
-              onBlur={e=>{const v=Math.max(0,Math.min(59,parseInt(e.target.value)||0));update(h12,String(v).padStart(2,'0'),isPM);}}
+              onChange={e=>setMinInput(e.target.value.replace(/\D/g,''))}
+              onBlur={e=>commitMin(e.target.value)}
               style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
         </div>
         <div style={{display:'flex',gap:8,marginBottom:12}}>
           {['AM','PM'].map(p=>(
-            <div key={p} onClick={()=>update(h12,min,p==='PM')}
+            <div key={p} onClick={()=>update(hourInput||h12, minInput||min, p==='PM')}
               style={{flex:1,padding:'10px 4px',borderRadius:8,cursor:'pointer',fontSize:14,fontWeight:(p==='PM')===isPM?700:400,background:(p==='PM')===isPM?'var(--acd)':'var(--elev)',color:(p==='PM')===isPM?'var(--ac)':'var(--tx1)',textAlign:'center',border:'1px solid',borderColor:(p==='PM')===isPM?'var(--acs)':'var(--b1)'}}>
               {p}
             </div>
           ))}
         </div>
-        <button className="ap-btn ap-btn-primary" style={{width:'100%',fontSize:13,padding:'9px 0'}} onClick={()=>setOpen(false)}>Confirm</button>
+        <button className="ap-btn ap-btn-primary" style={{width:'100%',fontSize:13,padding:'9px 0'}} onClick={()=>{commitHour(hourInput);commitMin(minInput);setOpen(false);}}>Confirm</button>
       </div>}
     </div>
   );
