@@ -4,7 +4,8 @@ import { ethers } from 'ethers';
 import { SB_URL, SB_KEY, SCHED_ADDR, ls, lsSave, ALL_CURRENCY } from '../config';
 import { Countdown } from './scheduled/Countdown';
 import { EditPaymentModal } from './scheduled/EditPaymentModal';
-export { NeedHelpMenu } from './scheduled/NeedHelpMenu';
+import { NeedHelpMenu } from './scheduled/NeedHelpMenu';
+export { NeedHelpMenu };
 
 function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading,rates}){
   const isExpanded=expandedId===p.id;
