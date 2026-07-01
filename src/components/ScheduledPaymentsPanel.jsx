@@ -110,7 +110,7 @@ function EditPaymentModal({payment,paymentId,signer,contractAddress,schedAbi,onC
         }
       }
       const value=addAmount&&parseFloat(addAmount)>0?ethers.parseUnits(String(parseFloat(addAmount)),18):0n;
-      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,newCountry||'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:300000});
+      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:300000});
       await tx.wait();
       onSuccess();
       onClose();
