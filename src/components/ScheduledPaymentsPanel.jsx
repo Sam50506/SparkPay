@@ -29,7 +29,7 @@ export function NeedHelpMenu({paymentId,address,contractAddress,signer,schedAbi,
           amountForRequest=null;
         }
       }
-      const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:amountForRequest,new_date:newDate||null,new_time:newTime||null,contract_address:contractAddress,original_recipient:null,original_amount:null})});
+      const r=await fetch('/api/schedule-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:paymentId,wallet_address:address,request_type:type,reason:reason||null,new_recipient:newRecipient||null,new_amount:amountForRequest,new_date:newDate||null,new_time:newTime||null,tz_offset:-new Date().getTimezoneOffset(),contract_address:contractAddress,original_recipient:null,original_amount:null})});
       if(!r.ok)throw new Error('Failed');
       setDone(true);setOpen(false);setStep(null);
     }catch(e){alert(e.message||'Failed to submit request. Please try again.');}
