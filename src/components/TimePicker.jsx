@@ -35,15 +35,18 @@ export function TimePicker({value, onChange}){
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Hour</div>
-            <input type='number' min='1' max='12' value={h12}
-              onChange={e=>{const v=Math.max(1,Math.min(12,parseInt(e.target.value)||1));update(v,min,isPM);}}
+            <input type='text' inputMode='numeric' maxLength={2} value={h12}
+              onFocus={e=>e.target.select()}
+              onChange={e=>{const raw=e.target.value.replace(/\D/g,'');if(raw==='')return;const v=parseInt(raw);if(v>=1&&v<=12)update(v,min,isPM);}}
+              onBlur={e=>{const v=Math.max(1,Math.min(12,parseInt(e.target.value)||1));update(v,min,isPM);}}
               style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
           <div>
             <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6,textAlign:'center'}}>Min</div>
-            <input type='number' min='0' max='59' value={parseInt(min)}
-              onChange={e=>{const v=Math.max(0,Math.min(59,parseInt(e.target.value)||0));update(h12,String(v).padStart(2,'0'),isPM);}}
+            <input type='text' inputMode='numeric' maxLength={2} value={min}
               onFocus={e=>e.target.select()}
+              onChange={e=>{const raw=e.target.value.replace(/\D/g,'');if(raw==='')return;const v=parseInt(raw);if(v>=0&&v<=59)update(h12,String(v).padStart(2,'0'),isPM);}}
+              onBlur={e=>{const v=Math.max(0,Math.min(59,parseInt(e.target.value)||0));update(h12,String(v).padStart(2,'0'),isPM);}}
               style={{width:'100%',padding:'10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:18,fontWeight:700,textAlign:'center',outline:'none',boxSizing:'border-box'}}/>
           </div>
         </div>
