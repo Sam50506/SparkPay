@@ -10,22 +10,21 @@ import { Diagnostics } from './admin/Diagnostics';
 export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
 
 /* ---------- Theme ---------- */
-const T = {
-  bg: '#070B12',
-  card: '#0E1520',
-  elev: '#182233',
-  b0: 'rgba(148,163,184,0.08)',
-  b1: 'rgba(148,163,184,0.16)',
-  tx1: '#F1F5F9',
-tx2: '#A7B4C6',
-  tx3: '#64748B',
-  ac: '#3B82C4',
-  acSoft: 'rgba(59,130,196,0.12)',
-  acBorder: 'rgba(59,130,196,0.28)',
-  ok: '#22C55E',
-  err: '#EF4444',
-  fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif",
-  radius: 16,
+const darkT = {
+  bg: '#070B12', card: '#0E1520', elev: '#182233',
+  b0: 'rgba(148,163,184,0.08)', b1: 'rgba(148,163,184,0.16)',
+  tx1: '#F1F5F9', tx2: '#A7B4C6', tx3: '#64748B',
+  ac: '#3B82C4', acSoft: 'rgba(59,130,196,0.12)', acBorder: 'rgba(59,130,196,0.28)',
+  ok: '#22C55E', err: '#EF4444',
+  fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif", radius: 16,
+};
+const lightT = {
+  bg: '#F3F4F6', card: '#FFFFFF', elev: '#F9FAFB',
+  b0: 'rgba(0,0,0,0.06)', b1: 'rgba(0,0,0,0.12)',
+  tx1: '#111827', tx2: '#374151', tx3: '#6B7280',
+  ac: '#2563EB', acSoft: 'rgba(37,99,235,0.08)', acBorder: 'rgba(37,99,235,0.2)',
+  ok: '#059669', err: '#DC2626',
+  fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif", radius: 16,
 };
 
 const rootVars = {
@@ -126,7 +125,8 @@ const StatCard = ({label, value, icon, loading, accent=false}) => (
 );
 
 /* ---------- Component ---------- */
-export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
+export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode,dm,setDm}){
+  const T = dm ? darkT : lightT;
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
   const [stats, setStats] = useState({txCount:0, volume:0, pendingClaims:0});
   const [loading, setLoading] = useState(true);
@@ -333,6 +333,12 @@ return(
               style={{width:6,height:6,borderRadius:999,background:T.ok,boxShadow:`0 0 8px ${T.ok}`,animation:'spPulse 2s infinite'}}/>
               <span style={{fontSize:10,fontWeight:700,color:T.ok,letterSpacing:'.06em'}}>VERIFIED</span>
             </div>
+            <button onClick={()=>setDm&&setDm(d=>!d)} title={dm?"Switch to Light Mode":"Switch to Dark Mode"} style={{background:T.elev,border:`1px solid ${T.b1}`,borderRadius:10,width:34,height:34,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:T.tx3,transition:'all .15s'}}>
+              {dm
+                ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              }
+            </button>
             <button onClick={signOut} title="Sign Out" style={{background:T.elev,border:`1px solid ${T.b1}`,borderRadius:10,width:34,height:34,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:T.tx3,transition:'all .15s'}}>
               <IC.Logout/>
             </button>
