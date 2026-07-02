@@ -76,11 +76,11 @@ export default function RewardsPage({
           ))}
         </div>
       )}
-      {cashbackHistory.length>0&&(
+      {myClaimsHistory.length>0&&(
         <div className="ap-card">
           <div className="ap-card-title">Cashback History</div>
           <div className="ap-div"/>
-          {cashbackHistory.slice(0,10).map((item,i)=>(
+          {myClaimsHistory.slice(0,10).map((item,i)=>(
             <div key={i} className="ap-reward-item">
               <div style={{display:'flex',alignItems:'center',gap:10}}>
                 <div style={{width:32,height:32,borderRadius:10,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)',flexShrink:0}}>
@@ -88,10 +88,10 @@ export default function RewardsPage({
                 </div>
                 <div>
                   <div style={{fontSize:13,fontWeight:600,color:'var(--tx1)'}}>+{item.amount} USDC</div>
-                  <div style={{fontSize:11,color:'var(--tx3)',marginTop:1}}>{new Date(item.ts).toLocaleDateString('en',{month:'short',day:'numeric'})}</div>
+                  <div style={{fontSize:11,color:'var(--tx3)',marginTop:1}}>{new Date(item.timestamp).toLocaleDateString('en',{month:'short',day:'numeric'})}</div>
                 </div>
               </div>
-              <span className={'ap-cb-rarity '+(item.rarity==='Epic'?'ap-rarity-epic':item.rarity==='Rare'?'ap-rarity-rare':'ap-rarity-common')}>{item.rarity}</span>
+              <span style={{fontSize:11,fontWeight:600,color:item.status==='paid'?'var(--cy)':'var(--ye)',background:item.status==='paid'?'rgba(23,229,176,0.08)':'rgba(240,196,63,0.08)',padding:'2px 8px',borderRadius:999}}>{item.status==='paid'?'Paid':'Pending'}</span>
             </div>
           ))}
         </div>

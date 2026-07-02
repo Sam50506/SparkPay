@@ -74,7 +74,7 @@ function AppInner() {
   const[contacts,setContacts]=useState([]);const[contactsLoaded,setContactsLoaded]=useState(false);const[cName,setCName]=useState('');const[cAddr,setCAddr]=useState('');const[cCtry,setCCtry]=useState('');const[editId,setEditId]=useState(null);
   const[scheds,setScheds]=useState(()=>ls('arc_scheds',[]));const[newSched,setNewSched]=useState({addr:'',amount:'',country:'',freq:'weekly',next:'',time:'09:00'});const[editSchedId,setEditSchedId]=useState(null);const[editSchedData,setEditSchedData]=useState(null);
   const[defCtry,setDefCtry]=useState(()=>ls('arc_ctry',''));
-  const[cashbackPending,setCashbackPending]=useState(0);const[cashbackHistory,setCashbackHistory]=useState(()=>ls('arc_cashback_history',[]));
+  const[cashbackPending,setCashbackPending]=useState(0);const[cashbackHistory,setCashbackHistory]=useState([]);
   useEffect(()=>{
     if(!address)return;
     const fetchCashback=()=>{
@@ -95,7 +95,7 @@ function AppInner() {
   useEffect(()=>lsSave('arc_dm',dm),[dm]);
   useEffect(()=>lsSave('arc_ctry',defCtry),[defCtry]);
   
-  useEffect(()=>lsSave('arc_cashback_history',cashbackHistory),[cashbackHistory]);
+  // cashbackHistory now fetched from Supabase, not localStorage
   useEffect(()=>{if(address)lsSave('arc_session',{address,walletType:walletName,ts:Date.now()});},[address,walletName]);
   useEffect(()=>{if(!splash){const s=ls('arc_session',null);if(s&&s.address&&!address&&Date.now()-s.ts<86400000){setSavedSession(s);setShowResumeModal(true);}}},[splash]);// eslint-disable-line
   useEffect(()=>{const p=new URLSearchParams(window.location.search);const pa=p.get('pay');const pamt=p.get('amount');if(pa){setSendTo(pa);if(pamt)setSendAmt(pamt);setTab('send');}const inv=p.get('inv');if(inv){try{const i=JSON.parse(atob(inv));const s=ls('arc_invoices',[]);if(!s.find(x=>x.id===i.id))lsSave('arc_invoices',[i,...s]);setPayId(i.id);setTab('pay');}catch{}}},[]);
