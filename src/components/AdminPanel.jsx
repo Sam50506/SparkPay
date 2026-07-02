@@ -81,9 +81,9 @@ const Section = ({icon, title, children, style={}}) => (
 );
 
 const Card = ({title, subtitle, children, style={}}) => (
-  <div style={{background:`linear-gradient(180deg,rgba(59,130,196,0.04),transparent 40%),${T.card}`,border:`1px solid ${T.b0}`,borderRadius:T.radius,padding:'18px 18px',marginBottom:16,boxShadow:'0 1px 0 rgba(255,255,255,0.03) inset',...style}}>
-    {title && <div style={{fontSize:14,fontWeight:700,color:T.tx1,letterSpacing:'-.2px',marginBottom:subtitle?4:children?14:0}}>{title}</div>}
-    {subtitle && <div style={{fontSize:12,color:T.tx3,marginBottom:14,lineHeight:1.5}}>{subtitle}</div>}
+  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 18px',marginBottom:16,...style}}>
+    {title && <div style={{fontSize:14,fontWeight:700,color:'var(--tx1)',letterSpacing:'-.2px',marginBottom:subtitle?4:children?14:0}}>{title}</div>}
+    {subtitle && <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14,lineHeight:1.5}}>{subtitle}</div>}
     {children}
   </div>
 );
@@ -105,12 +105,12 @@ const Skeleton = ({w=60,h=26}) => (
 );
 
 const StatCard = ({label, value, icon, loading, accent=false}) => (
-  <div className="sp-hover-lift" style={{background:T.card,border:`1px solid ${accent?T.acBorder:T.b0}`,borderRadius:18,padding:'18px',position:'relative',overflow:'hidden'}}>
+  <div className="sp-hover-lift" style={{background:'var(--card)',border:`1px solid ${accent?'var(--acs)':'var(--b0)'}`,borderRadius:18,padding:'18px',position:'relative',overflow:'hidden'}}>
     <div style={{position:'absolute',inset:0,background:accent
       ?`radial-gradient(220px 120px at 85% -10%,rgba(59,130,196,0.18),transparent 70%)`
       :'linear-gradient(135deg,rgba(255,255,255,0.025) 0%,transparent 55%)',pointerEvents:'none'}}/>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
-      <div style={{width:38,height:38,borderRadius:11,background:accent?T.acSoft:T.elev,border:`1px solid ${accent?T.acBorder:T.b1}`,display:'flex',alignItems:'center',justifyContent:'center',color:accent?T.ac:T.tx2}}>{icon}</div>
+      <div style={{width:38,height:38,borderRadius:11,background:accent?'var(--acd)':'var(--elev)',border:`1px solid ${accent?'var(--acs)':'var(--b1)'}`,display:'flex',alignItems:'center',justifyContent:'center',color:accent?'var(--ac)':'var(--tx2)'}}>{icon}</div>
       {accent&&<div style={{width:8,height:8,borderRadius:'50%',background:T.ac,boxShadow:`0 0 10px ${T.ac}`,animation:'spPulse 2s infinite'}}/>}
     </div>
     <div style={{fontSize:27,fontWeight:900,fontFamily:T.fd,color:accent?T.ac:T.tx1,letterSpacing:'-1px',lineHeight:1,marginBottom:7,fontVariantNumeric:'tabular-nums'}}>
