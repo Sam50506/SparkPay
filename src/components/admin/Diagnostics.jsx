@@ -56,7 +56,7 @@ export function Diagnostics() {
       const provider = new ethers.JsonRpcProvider(RPC, { name: 'Arc Testnet', chainId: 5042002 });
       const block = await provider.getBlockNumber();
       const ms = Date.now() - start;
-      setCheck('rpc', STATUS.pass, `Responding in ${ms}ms — latest block #${block}`);
+      setCheck('rpc', STATUS.pass, `Responding in ${ms}ms - latest block #${block}`);
 
       // 2. Schedule Contract
       setCheck('sched', STATUS.loading);
@@ -79,7 +79,7 @@ export function Diagnostics() {
           if (overdue.length === 0) {
             setCheck('overdue', STATUS.pass, 'No overdue payments found');
           } else {
-            setCheck('overdue', STATUS.fail, `${overdue.length} payment(s) overdue — IDs: ${overdue.join(', ')}`);
+            setCheck('overdue', STATUS.fail, `${overdue.length} payment(s) overdue - IDs: ${overdue.join(', ')}`);
           }
         } catch (e) {
           setCheck('overdue', STATUS.fail, e.message);
@@ -87,7 +87,7 @@ export function Diagnostics() {
 
       } catch (e) {
         setCheck('sched', STATUS.fail, e.message);
-        setCheck('overdue', STATUS.fail, 'Could not check — schedule contract failed');
+        setCheck('overdue', STATUS.fail, 'Could not check - schedule contract failed');
       }
 
       // 4. USDC Contract
@@ -106,7 +106,7 @@ export function Diagnostics() {
         const bal = await provider.getBalance(ADMIN_ADDRESS);
         const arc = parseFloat(ethers.formatUnits(bal, 18));
         if (arc < 0.1) {
-          setCheck('gas', STATUS.warn, `Low balance — ${arc.toFixed(4)} ARC. May not have enough gas.`);
+          setCheck('gas', STATUS.warn, `Low balance - ${arc.toFixed(4)} ARC. May not have enough gas.`);
         } else {
           setCheck('gas', STATUS.pass, `Admin wallet has ${arc.toFixed(4)} ARC`);
         }
@@ -115,11 +115,11 @@ export function Diagnostics() {
       }
 
     } catch (e) {
-      setCheck('rpc', STATUS.fail, `RPC unreachable — ${e.message}`);
-      setCheck('sched', STATUS.fail, 'Could not check — RPC failed');
-      setCheck('overdue', STATUS.fail, 'Could not check — RPC failed');
-      setCheck('usdc', STATUS.fail, 'Could not check — RPC failed');
-      setCheck('gas', STATUS.fail, 'Could not check — RPC failed');
+      setCheck('rpc', STATUS.fail, `RPC unreachable - ${e.message}`);
+      setCheck('sched', STATUS.fail, 'Could not check - RPC failed');
+      setCheck('overdue', STATUS.fail, 'Could not check - RPC failed');
+      setCheck('usdc', STATUS.fail, 'Could not check - RPC failed');
+      setCheck('gas', STATUS.fail, 'Could not check - RPC failed');
     }
 
     // 6. Supabase
@@ -145,7 +145,7 @@ export function Diagnostics() {
         const lastRun = new Date(d[0].last_run);
         const minsAgo = Math.floor((Date.now() - lastRun.getTime()) / 60000);
         if (minsAgo > 20) {
-          setCheck('keeper', STATUS.warn, `Last run ${minsAgo} minutes ago — expected every 15 mins`);
+          setCheck('keeper', STATUS.warn, `Last run ${minsAgo} minutes ago - expected every 15 mins`);
         } else {
           setCheck('keeper', STATUS.pass, `Last run ${minsAgo} minutes ago at ${lastRun.toLocaleTimeString()}`);
         }

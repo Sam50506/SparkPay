@@ -378,7 +378,7 @@ return(
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:14}}>
                 <div>
                   <div style={{fontSize:14,fontWeight:700,color:T.tx1,marginBottom:4}}>Maintenance Mode</div>
-                  <div style={{fontSize:12,color:T.tx3,lineHeight:1.5}}>{maintenanceMode?'Site locked — only admin wallet can access.':'Site is live and accessible to all users.'}</div>
+                  <div style={{fontSize:12,color:T.tx3,lineHeight:1.5}}>{maintenanceMode?'Site locked - only admin wallet can access.':'Site is live and accessible to all users.'}</div>
                 </div>
                 <button onClick={async()=>{
                   const newVal=!maintenanceMode;
