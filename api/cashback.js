@@ -30,7 +30,13 @@ export default async function handler(req, res) {
       const rows = await getRes.json();
       const current = rows[0]?.pending_amount || 0;
       const newBalance = parseFloat((parseFloat(current) + parseFloat(amount)).toFixed(3));
-      await sb('cashback_balances', { method: 'POST', headers: { 'Prefer': 'resolution=merge-duplicates' }, body: JSON.stringify({ wallet_address, pending_amount: newBalance, updated_at: new Date().toISOString() }) });
+      if (rows[0]) {
+        // Update existing
+        await sb(`cashback_balances?wallet_address=eq.${wallet_address}`, { method: 'PATCH', body: JSON.stringify({ pending_amount: newBalance, updated_at: new Date().toISOString() }) });
+      } else {
+        // Insert new
+        await sb('cashback_balances', { method: 'POST', body: JSON.stringify({ wallet_address, pending_amount: newBalance, updated_at: new Date().toISOString() }) });
+      }
       return res.json({ success: true, newBalance });
     } catch (e) {
       return res.status(500).json({ error: e.message });
