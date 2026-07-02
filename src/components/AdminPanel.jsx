@@ -315,13 +315,13 @@ return(
       <GlobalFX/>
 
       {/* Top bar */}
-      <div style={{borderBottom:`1px solid ${T.b0}`,background:'rgba(11,17,26,0.85)',backdropFilter:'blur(14px)',WebkitBackdropFilter:'blur(14px)',position:'sticky',top:0,zIndex:10}}>
+      <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',backdropFilter:'blur(14px)',WebkitBackdropFilter:'blur(14px)',position:'sticky',top:0,zIndex:10}}>
         <div className="sp-topbar" style={{maxWidth:860,margin:'0 auto',padding:'0 20px',display:'flex',alignItems:'center',justifyContent:'space-between',height:62}}>
           <div style={{display:'flex',alignItems:'center',gap:12}}>
             <SparkPayLogo size={32}/>
             <div>
-              <div style={{fontFamily:T.fd,fontSize:15,fontWeight:900,color:T.tx1,lineHeight:1.1,letterSpacing:'-.3px'}}>SparkPay</div>
-              <div style={{fontSize:9,color:T.ac,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase'}}>Admin Console</div>
+              <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-.3px'}}>SparkPay</div>
+              <div style={{fontSize:9,color:'var(--ac)',fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase'}}>Admin Console</div>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
@@ -399,7 +399,7 @@ return(
 
           <Section icon={<IC.Explorer/>} title="Resources">
             <div style={{background:T.card,border:`1px solid ${T.b0}`,borderRadius:T.radius,overflow:'hidden'}}>
-              <a className="sp-row" href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:`1px solid ${T.b0}`,transition:'background .14s'}}>
+              <a className="sp-row" href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:'1px solid var(--b0)',transition:'background .14s'}}>
                 <div style={{width:32,height:32,borderRadius:9,background:T.elev,border:`1px solid ${T.b1}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:T.tx2}}><IC.Explorer/></div>
                 <div style={{flex:1,fontSize:13,fontWeight:600,color:T.tx1}}>View Admin Wallet on Explorer</div>
                 <span style={{color:T.tx3,display:'flex'}}><IC.Chevron/></span>
