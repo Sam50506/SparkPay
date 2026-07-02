@@ -9,6 +9,53 @@ import { FailedTxns } from './admin/FailedTxns';
 import { Diagnostics } from './admin/Diagnostics';
 export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
 
+/* ---------- Theme ---------- */
+const T = {
+  bg: '#070B12',
+  card: '#0E1520',
+  elev: '#182233',
+  b0: 'rgba(148,163,184,0.08)',
+  b1: 'rgba(148,163,184,0.16)',
+  tx1: '#F1F5F9',
+tx2: '#A7B4C6',
+  tx3: '#64748B',
+  ac: '#3B82C4',
+  acSoft: 'rgba(59,130,196,0.12)',
+  acBorder: 'rgba(59,130,196,0.28)',
+  ok: '#22C55E',
+  err: '#EF4444',
+  fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif",
+  radius: 16,
+};
+
+const rootVars = {
+  '--bg': T.bg, '--card': T.card, '--elev': T.elev,
+  '--b0': T.b0, '--b1': T.b1,
+  '--tx1': T.tx1, '--tx2': T.tx2, '--tx3': T.tx3,
+  '--ac': T.ac, '--acd': T.acSoft, '--fd': T.fd,
+};
+
+const GlobalFX = () => (
+  <style>{`
+    @keyframes spPulse{0%,100%{opacity:1}50%{opacity:.35}}
+    @keyframes spShimmer{0%{background-position:-180px 0}100%{background-position:180px 0}}
+    @keyframes spFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .sp-nav{scrollbar-width:none;-ms-overflow-style:none}
+    .sp-nav::-webkit-scrollbar{display:none}
+    .sp-fade{animation:spFadeUp .28s ease both}
+    .sp-hover-lift{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+    .sp-hover-lift:hover{transform:translateY(-2px);border-color:${T.acBorder}!important;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+    .sp-row:hover{background:${T.elev}}
+    @media(max-width:520px){
+      .sp-stats{grid-template-columns:repeat(2,1fr)!important}
+      .sp-stats>*:last-child{grid-column:1/-1}
+      .sp-topbar{padding:0 14px!important}
+      .sp-content{padding:18px 14px 90px!important}
+    }
+  `}</style>
+);
+
+/* ---------- Icons (unchanged) ---------- */
 const IC = {
   Tx: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
   Volume: ()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>,
@@ -26,38 +73,59 @@ const IC = {
   Passkey: ()=><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M6 11v2a6 6 0 0 0 12 0v-2"/><path d="M12 17v4"/></svg>,
 };
 
+/* ---------- UI primitives ---------- */
 const Section = ({icon, title, children, style={}}) => (
-  <div style={{marginBottom:32,...style}}>
-    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
-      <div style={{color:'var(--tx3)'}}>{icon}</div>
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase'}}>{title}</div>
+  <div style={{marginBottom:36,...style}}>
+    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+      <div style={{width:30,height:30,borderRadius:9,background:T.acSoft,border:`1px solid ${T.acBorder}`,display:'flex',alignItems:'center',justifyContent:'center',color:T.ac,flexShrink:0}}>{icon}</div>
+      <div style={{fontSize:13,fontWeight:800,color:T.tx1,letterSpacing:'.02em',textTransform:'uppercase'}}>{title}</div>
+      <div style={{flex:1,height:1,background:`linear-gradient(90deg,${T.b1},transparent)`}}/>
     </div>
     {children}
   </div>
 );
 
 const Card = ({title, subtitle, children, style={}}) => (
-  <div className="ap-card" style={{marginBottom:16,...style}}>
-    {title && <div className="ap-card-title" style={{marginBottom:subtitle?4:children?14:0}}>{title}</div>}
-    {subtitle && <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>{subtitle}</div>}
+  <div style={{background:`linear-gradient(180deg,rgba(59,130,196,0.04),transparent 40%),${T.card}`,border:`1px solid ${T.b0}`,borderRadius:T.radius,padding:'18px 18px',marginBottom:16,boxShadow:'0 1px 0 rgba(255,255,255,0.03) inset',...style}}>
+    {title && <div style={{fontSize:14,fontWeight:700,color:T.tx1,letterSpacing:'-.2px',marginBottom:subtitle?4:children?14:0}}>{title}</div>}
+    {subtitle && <div style={{fontSize:12,color:T.tx3,marginBottom:14,lineHeight:1.5}}>{subtitle}</div>}
     {children}
   </div>
 );
 
+const PrimaryBtn = ({children, disabled, onClick, style={}}) => (
+  <button onClick={onClick} disabled={disabled} style={{
+    background:`linear-gradient(180deg,#4A94D6,${T.ac})`,
+    border:'1px solid rgba(255,255,255,0.12)',borderRadius:13,padding:'13px 20px',
+    color:'#fff',fontSize:13.5,fontWeight:700,cursor:disabled?'default':'pointer',
+    opacity:disabled?0.5:1,letterSpacing:'.01em',
+    boxShadow:`0 4px 14px rgba(59,130,196,0.3), 0 1px 0 rgba(255,255,255,0.15) inset`,
+    display:'inline-flex',alignItems:'center',justifyContent:'center',gap:10,
+    transition:'filter .15s,transform .12s', ...style
+  }}>{children}</button>
+);
+
+const Skeleton = ({w=60,h=26}) => (
+  <div style={{height:h,width:w,borderRadius:6,background:`linear-gradient(90deg,${T.elev} 25%,rgba(148,163,184,0.14) 50%,${T.elev} 75%)`,backgroundSize:'180px 100%',animation:'spShimmer 1.4s infinite linear'}}/>
+);
+
 const StatCard = ({label, value, icon, loading, accent=false}) => (
-  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{label}</div>
-      <div style={{width:30,height:30,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)'}}>{icon}</div>
+  <div className="sp-hover-lift" style={{background:T.card,border:`1px solid ${accent?T.acBorder:T.b0}`,borderRadius:18,padding:'18px',position:'relative',overflow:'hidden'}}>
+    <div style={{position:'absolute',inset:0,background:accent
+      ?`radial-gradient(220px 120px at 85% -10%,rgba(59,130,196,0.18),transparent 70%)`
+      :'linear-gradient(135deg,rgba(255,255,255,0.025) 0%,transparent 55%)',pointerEvents:'none'}}/>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
+      <div style={{width:38,height:38,borderRadius:11,background:accent?T.acSoft:T.elev,border:`1px solid ${accent?T.acBorder:T.b1}`,display:'flex',alignItems:'center',justifyContent:'center',color:accent?T.ac:T.tx2}}>{icon}</div>
+      {accent&&<div style={{width:8,height:8,borderRadius:'50%',background:T.ac,boxShadow:`0 0 10px ${T.ac}`,animation:'spPulse 2s infinite'}}/>}
     </div>
-    <div style={{display:'flex',alignItems:'baseline',gap:6}}>
-      <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-0.5px',lineHeight:1}}>
-        {loading ? <span style={{opacity:0.2}}>—</span> : value}
-      </div>
+    <div style={{fontSize:27,fontWeight:900,fontFamily:T.fd,color:accent?T.ac:T.tx1,letterSpacing:'-1px',lineHeight:1,marginBottom:7,fontVariantNumeric:'tabular-nums'}}>
+      {loading?<Skeleton/>:value}
     </div>
+    <div style={{fontSize:10.5,color:T.tx3,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>{label}</div>
   </div>
 );
 
+/* ---------- Component ---------- */
 export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const isAdmin = address && address.toLowerCase()===ADMIN_ADDRESS;
   const [stats, setStats] = useState({txCount:0, volume:0, pendingClaims:0});
@@ -73,7 +141,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
   const [pkError, setPkError] = useState('');
   const [activeSection, setActiveSection] = useState('overview');
 
-  useEffect(()=>{
+useEffect(()=>{
     fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode&select=value',{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
     }).then(r=>r.json()).then(d=>{if(d&&d[0])setMaintenanceMode(d[0].value==='true');}).catch(()=>{});
@@ -88,7 +156,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     })();
   },[]);
 
-  useEffect(()=>{
+useEffect(()=>{
     if(!isAdmin||webauthnSupported)return;
     fetch(SB_URL+'/rest/v1/admin_pin?admin_address=eq.'+ADMIN_ADDRESS+'&select=id',{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
@@ -108,7 +176,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     setPkLoading(false);
   };
 
-  const verifyPin=async()=>{
+const verifyPin=async()=>{
     setPkLoading(true);setPkError('');
     try{
       const r=await fetch('/api/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',address,pin:pinValue})});
@@ -127,7 +195,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     }).then(r=>r.json()).then(d=>setPkRegistered(d&&d.length>0)).catch(()=>setPkRegistered(false));
   },[isAdmin]);
 
-  const registerPasskey=async()=>{
+const registerPasskey=async()=>{
     setPkLoading(true);setPkError('');
     try{
       const optRes=await fetch('/api/webauthn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register-options',address})});
@@ -143,7 +211,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     setPkLoading(false);
   };
 
-  const loginWithPasskey=async()=>{
+const loginWithPasskey=async()=>{
     setPkLoading(true);setPkError('');
     try{
       const optRes=await fetch('/api/webauthn',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login-options',address})});
@@ -159,7 +227,7 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     setPkLoading(false);
   };
 
-  useEffect(()=>{
+useEffect(()=>{
     if(!isAdmin)return;
     (async()=>{
       try{
@@ -178,105 +246,125 @@ export function AdminPanel({address,signer,maintenanceMode,setMaintenanceMode}){
     })();
   },[isAdmin]);
 
-  const signOut=()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();};
+const signOut=()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();};
 
-  // Auth screens
-const authScreen=(title,subtitle,content)=>(
-    <div style={{minHeight:'100vh',background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
-      <div style={{width:72,height:72,borderRadius:20,background:'rgba(59,130,196,.1)',border:'1px solid rgba(59,130,196,.2)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:28,color:'var(--ac)'}}>
-        {title==='Admin Verification'?<IC.Passkey/>:<IC.Shield/>}
+  /* ---------- Auth screens ---------- */
+  const authScreen=(title,subtitle,content)=>(
+    <div style={{...rootVars,minHeight:'100vh',background:`radial-gradient(700px 420px at 50% -8%,rgba(59,130,196,0.14),transparent 65%),${T.bg}`,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center',fontFamily:T.fd}}>
+      <GlobalFX/>
+      <div className="sp-fade" style={{width:'100%',maxWidth:380,background:T.card,border:`1px solid ${T.b0}`,borderRadius:24,padding:'40px 28px',boxShadow:'0 24px 60px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset',display:'flex',flexDirection:'column',alignItems:'center'}}>
+        <div style={{width:72,height:72,borderRadius:20,background:T.acSoft,border:`1px solid ${T.acBorder}`,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:26,color:T.ac,boxShadow:`0 0 40px rgba(59,130,196,0.25)`}}>
+          {title==='Admin Verification'?<IC.Passkey/>:<IC.Shield/>}
+        </div>
+        <div style={{fontFamily:T.fd,fontSize:23,fontWeight:900,color:T.tx1,marginBottom:8,letterSpacing:'-.4px'}}>{title}</div>
+        <div style={{fontSize:13,color:T.tx3,marginBottom:28,maxWidth:300,lineHeight:1.7}}>{subtitle}</div>
+        {pkError&&<div style={{fontSize:12,color:T.err,marginBottom:20,maxWidth:300,padding:'10px 14px',borderRadius:10,background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)'}}>{pkError}</div>}
+        {content}
       </div>
-      <div style={{fontFamily:'var(--fd)',fontSize:24,fontWeight:900,color:'#fff',marginBottom:8}}>{title}</div>
-      <div style={{fontSize:13,color:'rgba(255,255,255,0.45)',marginBottom:32,maxWidth:320,lineHeight:1.7}}>{subtitle}</div>
-      {pkError&&<div style={{fontSize:12,color:'#ef4444',marginBottom:20,maxWidth:300,padding:'10px 14px',borderRadius:10,background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)'}}>{pkError}</div>}
-      {content}
     </div>
   );
 
-  if(!address) return authScreen('Admin Access','Connect your wallet to continue.',null);
+if(!address) return authScreen('Admin Access','Connect your wallet to continue.',null);
   if(!isAdmin) return authScreen('Access Denied','This area is restricted to administrators only.',null);
 
   if(pkRegistered===null&&webauthnSupported){
-    return(<div style={{minHeight:'100vh',background:'#000',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{fontSize:13,color:'rgba(255,255,255,0.4)'}}>Checking credentials...</div>
+    return(<div style={{minHeight:'100vh',background:T.bg,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:T.fd}}>
+      <GlobalFX/>
+      <div style={{fontSize:13,color:T.tx3,animation:'spPulse 1.6s infinite'}}>Checking credentials...</div>
     </div>);
   }
 
-  if(!pkAuthed&&!webauthnSupported){
+  const pinInputStyle = {
+    width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:13,
+    border:`1px solid ${T.b1}`,background:T.elev,color:T.tx1,fontSize:16,
+    textAlign:'center',letterSpacing:6,outline:'none',fontFamily:T.fd,
+  };
+
+if(!pkAuthed&&!webauthnSupported){
     return authScreen(
       pinMode==='setup'?'Set Up Admin PIN':'Admin Verification',
       pinMode==='setup'?'Create a secure PIN to protect the admin dashboard.':'Enter your PIN to access the admin dashboard.',
-      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:16,width:'100%',maxWidth:280}}>
-        <div style={{position:'relative',width:'100%'}}>
-          <input type="password" autoComplete={pinMode==='setup'?'new-password':'current-password'} inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} placeholder="Enter PIN" style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.12)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:16,textAlign:'center',letterSpacing:6,outline:'none'}}/>
-        </div>
-        {pinMode==='setup'&&<div style={{position:'relative',width:'100%'}}>
-          <input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} placeholder="Confirm PIN" style={{width:'100%',boxSizing:'border-box',padding:'14px 16px',borderRadius:14,border:'1px solid rgba(255,255,255,0.12)',background:'rgba(255,255,255,0.05)',color:'#fff',fontSize:16,textAlign:'center',letterSpacing:6,outline:'none'}}/>
-        </div>}
-        <button onClick={pinMode==='setup'?setupPin:verifyPin} disabled={pkLoading||pinValue.length<6} style={{width:'100%',background:'var(--ac)',border:'none',borderRadius:14,padding:'14px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',opacity:pkLoading||pinValue.length<6?0.5:1}}>
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:14,width:'100%',maxWidth:280}}>
+        <input type="password" autoComplete={pinMode==='setup'?'new-password':'current-password'} inputMode="numeric" maxLength={12} value={pinValue} onChange={e=>setPinValue(e.target.value.replace(/\D/g,''))} placeholder="Enter PIN" style={pinInputStyle}/>
+        {pinMode==='setup'&&<input type="password" autoComplete="new-password" inputMode="numeric" maxLength={12} value={pinConfirm} onChange={e=>setPinConfirm(e.target.value.replace(/\D/g,''))} placeholder="Confirm PIN" style={pinInputStyle}/>}
+        <PrimaryBtn onClick={pinMode==='setup'?setupPin:verifyPin} disabled={pkLoading||pinValue.length<6} style={{width:'100%'}}>
           {pkLoading?'Verifying...':(pinMode==='setup'?'Set PIN':'Unlock')}
-        </button>
+        </PrimaryBtn>
       </div>
     );
   }
 
-  if(!pkAuthed&&webauthnSupported){
+if(!pkAuthed&&webauthnSupported){
     return authScreen(
       'Admin Verification',
       pkRegistered?'Use your device biometrics or passkey to access the admin dashboard.':'Set up a passkey to secure this dashboard.',
-      <button onClick={pkRegistered?loginWithPasskey:registerPasskey} disabled={pkLoading} style={{background:'var(--ac)',border:'none',borderRadius:14,padding:'14px 32px',color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:10,opacity:pkLoading?0.6:1}}>
+      <PrimaryBtn onClick={pkRegistered?loginWithPasskey:registerPasskey} disabled={pkLoading}>
         <IC.Passkey/>
         {pkLoading?'Verifying...':(pkRegistered?'Verify with Passkey':'Set Up Passkey')}
-      </button>
+      </PrimaryBtn>
     );
   }
 
   const navItems = [
-    {id:'overview', label:'Overview'},
-    {id:'operations', label:'Operations'},
-    {id:'requests', label:'Requests'},
-    {id:'diagnostics', label:'Diagnostics'},
-    {id:'monitoring', label:'Monitoring'},
+    {id:'overview', label:'Overview', icon:IC.Tx},
+    {id:'operations', label:'Operations', icon:IC.Payout},
+    {id:'requests', label:'Requests', icon:IC.Requests},
+    {id:'diagnostics', label:'Diagnostics', icon:IC.Diag},
+    {id:'monitoring', label:'Monitoring', icon:IC.Monitor},
   ];
 
-  return(
-    <div style={{minHeight:'100vh',background:'var(--bg)'}}>
+return(
+    <div style={{...rootVars,minHeight:'100vh',background:`radial-gradient(900px 300px at 50% -6%,rgba(59,130,196,0.10),transparent 60%),${T.bg}`,fontFamily:T.fd}}>
+      <GlobalFX/>
+
       {/* Top bar */}
-      <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',position:'sticky',top:0,zIndex:10}}>
-        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',height:58}}>
-          <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <SparkPayLogo size={28}/>
+      <div style={{borderBottom:`1px solid ${T.b0}`,background:'rgba(11,17,26,0.85)',backdropFilter:'blur(14px)',WebkitBackdropFilter:'blur(14px)',position:'sticky',top:0,zIndex:10}}>
+        <div className="sp-topbar" style={{maxWidth:860,margin:'0 auto',padding:'0 20px',display:'flex',alignItems:'center',justifyContent:'space-between',height:62}}>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <SparkPayLogo size={32}/>
             <div>
-              <div style={{fontFamily:'var(--fd)',fontSize:14,fontWeight:800,color:'var(--tx1)',lineHeight:1.1}}>SparkPay</div>
-              <div style={{fontSize:9,color:'var(--tx3)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>Admin Console</div>
+              <div style={{fontFamily:T.fd,fontSize:15,fontWeight:900,color:T.tx1,lineHeight:1.1,letterSpacing:'-.3px'}}>SparkPay</div>
+              <div style={{fontSize:9,color:T.ac,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase'}}>Admin Console</div>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <div style={{display:'flex',alignItems:'center',gap:6,padding:'4px 10px',borderRadius:999,background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.2)'}}>
-              <div style={{width:5,height:5,borderRadius:999,background:'#22c55e'}}/>
-              <span style={{fontSize:10,fontWeight:700,color:'#22c55e',letterSpacing:'.04em'}}>VERIFIED</span>
+            <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 12px',borderRadius:999,background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.18)'}}>
+              <div
+              style={{width:6,height:6,borderRadius:999,background:T.ok,boxShadow:`0 0 8px ${T.ok}`,animation:'spPulse 2s infinite'}}/>
+              <span style={{fontSize:10,fontWeight:700,color:T.ok,letterSpacing:'.06em'}}>VERIFIED</span>
             </div>
-            <button onClick={signOut} style={{background:'none',border:'1px solid var(--b1)',borderRadius:8,width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx3)'}}>
+            <button onClick={signOut} title="Sign Out" style={{background:T.elev,border:`1px solid ${T.b1}`,borderRadius:10,width:34,height:34,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:T.tx3,transition:'all .15s'}}>
               <IC.Logout/>
             </button>
           </div>
         </div>
+
         {/* Nav */}
-        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',gap:2,borderTop:'1px solid var(--b0)'}}>
-          {navItems.map(n=>(
-            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{padding:'10px 14px',background:'none',border:'none',fontSize:12,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s'}}>
-              {n.label}
-            </button>
-          ))}
+        <div className="sp-nav" style={{maxWidth:860,margin:'0 auto',display:'flex',gap:6,overflowX:'auto',WebkitOverflowScrolling:'touch',padding:'0 14px 12px'}}>
+          {navItems.map(n=>{
+            const active=activeSection===n.id;
+            return(
+              <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{
+                flexShrink:0,display:'flex',alignItems:'center',gap:8,padding:'8px 15px',
+                borderRadius:999,cursor:'pointer',whiteSpace:'nowrap',
+                fontSize:12,fontWeight:700,letterSpacing:'.02em',transition:'all .16s',
+                background:active?T.acSoft:'transparent',
+                border:`1px solid ${active?T.acBorder:'transparent'}`,
+                color:active?T.ac:T.tx3,
+              }}>
+                <n.icon/>{n.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Content */}
-      <div style={{maxWidth:860,margin:'0 auto',padding:'32px 24px 60px'}}>
+      <div className="sp-content" style={{maxWidth:860,margin:'0 auto',padding:'26px 20px 90px'}}>
 
         {/* Overview */}
-        {activeSection==='overview'&&<div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:32}}>
+        {activeSection==='overview'&&<div className="sp-fade">
+          <div className="sp-stats" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12,marginBottom:30}}>
             <StatCard label="Total Transactions" value={stats.txCount} icon={<IC.Tx/>} loading={loading}/>
             <StatCard label="Total Volume" value={`${stats.volume.toFixed(2)} USDC`} icon={<IC.Volume/>} loading={loading}/>
             <StatCard label="Pending Claims" value={stats.pendingClaims} icon={<IC.Claims/>} loading={loading} accent={stats.pendingClaims>0}/>
@@ -284,10 +372,10 @@ const authScreen=(title,subtitle,content)=>(
 
           <Section icon={<IC.Maintenance/>} title="Site Control">
             <Card>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:14}}>
                 <div>
-                  <div style={{fontSize:14,fontWeight:700,color:'var(--tx1)',marginBottom:4}}>Maintenance Mode</div>
-                  <div style={{fontSize:12,color:'var(--tx3)'}}>{maintenanceMode?'Site locked — only admin wallet can access.':'Site is live and accessible to all users.'}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:T.tx1,marginBottom:4}}>Maintenance Mode</div>
+                  <div style={{fontSize:12,color:T.tx3,lineHeight:1.5}}>{maintenanceMode?'Site locked — only admin wallet can access.':'Site is live and accessible to all users.'}</div>
                 </div>
                 <button onClick={async()=>{
                   const newVal=!maintenanceMode;
@@ -295,41 +383,41 @@ const authScreen=(title,subtitle,content)=>(
                     await fetch(SB_URL+'/rest/v1/settings?key=eq.maintenance_mode',{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({value:String(newVal)})});
                     setMaintenanceMode(newVal);
                   }catch(e){alert('Failed: '+e.message);}
-                }} style={{width:48,height:26,borderRadius:999,border:'none',background:maintenanceMode?'#ef4444':'var(--b1)',position:'relative',cursor:'pointer',flexShrink:0,transition:'background .2s'}}>
-                  <div style={{position:'absolute',top:3,left:maintenanceMode?25:3,width:20,height:20,borderRadius:999,background:'#fff',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.3)'}}/>
+                }} style={{width:48,height:26,borderRadius:999,border:'none',background:maintenanceMode?T.err:T.b1,position:'relative',cursor:'pointer',flexShrink:0,transition:'background .2s'}}>
+                  <div style={{position:'absolute',top:3,left:maintenanceMode?25:3,width:20,height:20,borderRadius:999,background:'#fff',transition:'left .2s',boxShadow:'0 1px 4px rgba(0,0,0,0.35)'}}/>
                 </button>
               </div>
               <div style={{marginTop:14,display:'inline-flex',alignItems:'center',gap:6,padding:'4px 12px',borderRadius:999,background:maintenanceMode?'rgba(239,68,68,0.08)':'rgba(34,197,94,0.08)',border:`1px solid ${maintenanceMode?'rgba(239,68,68,0.2)':'rgba(34,197,94,0.2)'}`}}>
-                <div style={{width:5,height:5,borderRadius:999,background:maintenanceMode?'#ef4444':'#22c55e'}}/>
-                <span style={{fontSize:10,fontWeight:700,color:maintenanceMode?'#ef4444':'#22c55e',letterSpacing:'.06em'}}>{maintenanceMode?'MAINTENANCE ACTIVE':'LIVE'}</span>
+                <div style={{width:5,height:5,borderRadius:999,background:maintenanceMode?T.err:T.ok}}/>
+                <span style={{fontSize:10,fontWeight:700,color:maintenanceMode?T.err:T.ok,letterSpacing:'.06em'}}>{maintenanceMode?'MAINTENANCE ACTIVE':'LIVE'}</span>
               </div>
             </Card>
           </Section>
 
           <Section icon={<IC.Explorer/>} title="Resources">
-            <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,overflow:'hidden'}}>
-              <a href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:'1px solid var(--b0)'}}>
-                <div style={{width:32,height:32,borderRadius:8,background:'var(--elev)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'var(--tx3)'}}><IC.Explorer/></div>
-                <div style={{flex:1,fontSize:13,fontWeight:600,color:'var(--tx1)'}}>View Admin Wallet on Explorer</div>
-                <IC.Chevron/>
+            <div style={{background:T.card,border:`1px solid ${T.b0}`,borderRadius:T.radius,overflow:'hidden'}}>
+              <a className="sp-row" href={'https://testnet.arcscan.app/address/'+ADMIN_ADDRESS} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',textDecoration:'none',borderBottom:`1px solid ${T.b0}`,transition:'background .14s'}}>
+                <div style={{width:32,height:32,borderRadius:9,background:T.elev,border:`1px solid ${T.b1}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:T.tx2}}><IC.Explorer/></div>
+                <div style={{flex:1,fontSize:13,fontWeight:600,color:T.tx1}}>View Admin Wallet on Explorer</div>
+                <span style={{color:T.tx3,display:'flex'}}><IC.Chevron/></span>
               </a>
-              <div onClick={signOut} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',cursor:'pointer'}}>
-                <div style={{width:32,height:32,borderRadius:8,background:'rgba(239,68,68,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:'#ef4444'}}><IC.Logout/></div>
-                <div style={{flex:1,fontSize:13,fontWeight:600,color:'#ef4444'}}>Sign Out</div>
+              <div className="sp-row" onClick={signOut} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',cursor:'pointer',transition:'background .14s'}}>
+                <div style={{width:32,height:32,borderRadius:9,background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.18)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:T.err}}><IC.Logout/></div>
+                <div style={{flex:1,fontSize:13,fontWeight:600,color:T.err}}>Sign Out</div>
               </div>
             </div>
           </Section>
         </div>}
 
         {/* Operations */}
-    {activeSection==='operations'&&<div>
+        {activeSection==='operations'&&<div className="sp-fade">
           <Section icon={<IC.Payout/>} title="Cashback Payouts">
             <Card title="Process Payouts" subtitle={loading?'Loading...':stats.pendingClaims+' pending claim'+(stats.pendingClaims===1?'':'s')}>
-              <button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={async()=>{
+              <PrimaryBtn onClick={async()=>{
                 const token=sessionStorage.getItem('sp_admin_jwt');
                 if(!token){alert('Session expired.');window.location.reload();return;}
                 try{const r=await fetch('/api/payout',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}});const d=await r.json();alert(d.message+' Paid: '+d.paid);}catch(e){alert('Error: '+e.message);}
-              }}>Process Pending Payouts</button>
+              }}>Process Pending Payouts</PrimaryBtn>
             </Card>
           </Section>
 
@@ -341,7 +429,7 @@ const authScreen=(title,subtitle,content)=>(
         </div>}
 
         {/* Requests */}
-        {activeSection==='requests'&&<div>
+        {activeSection==='requests'&&<div className="sp-fade">
           <Section icon={<IC.Requests/>} title="Scheduled Payment Requests">
             <Card>
               <ScheduledRequests/>
@@ -350,7 +438,7 @@ const authScreen=(title,subtitle,content)=>(
         </div>}
 
         {/* Diagnostics */}
-        {activeSection==='diagnostics'&&<div>
+        {activeSection==='diagnostics'&&<div className="sp-fade">
           <Section icon={<IC.Diag/>} title="System Diagnostics">
             <Card title="Health Check" subtitle="Run a full diagnostic across all SparkPay systems.">
               <Diagnostics/>
@@ -359,7 +447,7 @@ const authScreen=(title,subtitle,content)=>(
         </div>}
 
         {/* Monitoring */}
-        {activeSection==='monitoring'&&<div>
+        {activeSection==='monitoring'&&<div className="sp-fade">
           <Section icon={<IC.Monitor/>} title="Failed Transactions">
             <Card>
               <FailedTxns/>
