@@ -27,10 +27,10 @@ const IC = {
 };
 
 const Section = ({icon, title, children, style={}}) => (
-  <div style={{marginBottom:32,...style}}>
-    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
-      <div style={{color:'var(--tx3)'}}>{icon}</div>
-      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase'}}>{title}</div>
+  <div style={{marginBottom:28,...style}}>
+    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12,paddingBottom:10,borderBottom:'1px solid var(--b0)'}}>
+      <div style={{width:28,height:28,borderRadius:8,background:'var(--elev)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)'}}>{icon}</div>
+      <div style={{fontSize:13,fontWeight:700,color:'var(--tx1)'}}>{title}</div>
     </div>
     {children}
   </div>
@@ -45,16 +45,13 @@ const Card = ({title, subtitle, children, style={}}) => (
 );
 
 const StatCard = ({label, value, icon, loading, accent=false}) => (
-  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
-    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{label}</div>
-      <div style={{width:30,height:30,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)'}}>{icon}</div>
+  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'16px',position:'relative',overflow:'hidden'}}>
+    <div style={{position:'absolute',top:0,right:0,width:60,height:60,borderRadius:'0 16px 0 60px',background:accent?'rgba(59,130,246,0.08)':'rgba(255,255,255,0.03)'}}/>
+    <div style={{width:36,height:36,borderRadius:10,background:accent?'rgba(59,130,246,0.12)':'var(--elev)',display:'flex',alignItems:'center',justifyContent:'center',color:accent?'var(--ac)':'var(--tx3)',marginBottom:12}}>{icon}</div>
+    <div style={{fontSize:22,fontWeight:800,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-0.5px',lineHeight:1,marginBottom:4}}>
+      {loading ? <span style={{opacity:0.2}}>—</span> : value}
     </div>
-    <div style={{display:'flex',alignItems:'baseline',gap:6}}>
-      <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-0.5px',lineHeight:1}}>
-        {loading ? <span style={{opacity:0.2}}>—</span> : value}
-      </div>
-    </div>
+    <div style={{fontSize:11,color:'var(--tx3)',fontWeight:600}}>{label}</div>
   </div>
 );
 
@@ -262,10 +259,11 @@ const authScreen=(title,subtitle,content)=>(
           </div>
         </div>
         {/* Nav */}
-        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',gap:2,borderTop:'1px solid var(--b0)',overflowX:'auto',WebkitOverflowScrolling:'touch',scrollbarWidth:'none'}}>
+        <div style={{maxWidth:860,margin:'0 auto',display:'flex',borderTop:'1px solid var(--b0)',overflowX:'auto',WebkitOverflowScrolling:'touch',scrollbarWidth:'none',msOverflowStyle:'none'}}>
           {navItems.map(n=>(
-            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{padding:'10px 14px',background:'none',border:'none',fontSize:12,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s',whiteSpace:'nowrap',flexShrink:0,display:'flex',alignItems:'center',gap:5}}>
-              {n.icon&&<n.icon/>}{n.label}
+            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{flex:1,minWidth:80,padding:'10px 8px',background:'none',border:'none',fontSize:11,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+              <div style={{opacity:activeSection===n.id?1:0.5}}>{n.icon&&<n.icon/>}</div>
+              {n.label}
             </button>
           ))}
         </div>
