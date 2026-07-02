@@ -48,11 +48,15 @@ export default async function handler(req, res) {
     const provider = new ethers.JsonRpcProvider(RPC, { name: 'Arc Testnet', chainId: CHAIN_ID });
     const wallet = new ethers.Wallet(process.env.PAYOUT_PRIVATE_KEY, provider);
 
-    const USDC_ADDR = process.env.REACT_APP_USDC_ADDR || '0x3600000000000000000000000000000000000000';
+    const USDC_ADDR = process.env.REACT_APP_USDC_ADDR || '0x3600000000000000000000000000000000000000'; // Arc-native USDC ERC20 interface
     const ERC20_ABI = ['function transfer(address to, uint256 amount) returns (bool)', 'function decimals() view returns (uint8)'];
     const usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, wallet);
-    let decimals = 18;
-    try { decimals = await usdc.decimals(); } catch {}
+    let decimals;
+    try {
+      decimals = await usdc.decimals();
+    } catch (e) {
+      return res.status(500).json({ error: 'Could not read USDC decimals() - refusing to guess. Check USDC_ADDR. ' + e.message });
+    }
 
     const results = [];
     for (const claim of claims) {
@@ -64,7 +68,13 @@ export default async function handler(req, res) {
           gasLimit: 100000,
           gasPrice
         });
-        await tx.wait();
+        const receipt = await tx.wait();
+        const transferEvent = receipt.logs.some(log => log.address.toLowerCase() === USDC_ADDR.toLowerCase());
+        if (receipt.status !== 1 || !transferEvent) {
+          await supabase.from('cashback_claims').update({ status: 'failed', tx_hash: tx.hash }).eq('id', claim.id);
+          results.push({ wallet: claim.wallet_address, amount: claim.amount, tx: tx.hash, status: 'failed', error: 'No transfer event emitted - funds likely not moved' });
+          continue;
+        }
         await supabase.from('cashback_claims').update({ status: 'paid', tx_hash: tx.hash }).eq('id', claim.id);
         results.push({ wallet: claim.wallet_address, amount: claim.amount, tx: tx.hash, status: 'paid' });
       } catch (e) {
