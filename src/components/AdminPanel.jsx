@@ -73,8 +73,8 @@ const Section = ({icon, title, children, style={}}) => (
   <div style={{marginBottom:36,...style}}>
     <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
       <div style={{width:30,height:30,borderRadius:9,background:'var(--acd)',border:'1px solid var(--acs)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)',flexShrink:0}}>{icon}</div>
-      <div style={{fontSize:13,fontWeight:800,color:'var(--tx1)',letterSpacing:'.02em',textTransform:'uppercase'}}>{title}</div>
-      <div style={{flex:1,height:1,background:'linear-gradient(90deg,var(--b1),transparent)'}}/>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--tx1)',letterSpacing:'.02em',textTransform:'none'}}>{title}</div>
+      
     </div>
     {children}
   </div>
@@ -116,7 +116,7 @@ const StatCard = ({label, value, icon, loading, accent=false}) => (
     <div style={{fontSize:27,fontWeight:900,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-1px',lineHeight:1,marginBottom:7,fontVariantNumeric:'tabular-nums'}}>
       {loading?<Skeleton/>:value}
     </div>
-    <div style={{fontSize:10.5,color:'var(--tx3)',fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>{label}</div>
+    <div style={{fontSize:10.5,color:'var(--tx3)',fontWeight:700,letterSpacing:'.08em',textTransform:'none'}}>{label}</div>
   </div>
 );
 
@@ -250,7 +250,7 @@ const rootVars = {'--bg':T.bg,'--card':T.card,'--elev':T.elev,'--b0':T.b0,'--b1'
     <div style={{...rootVars,minHeight:'100vh',background:`radial-gradient(700px 420px at 50% -8%,rgba(59,130,196,0.14),transparent 65%),${T.bg}`,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center',fontFamily:T.fd}}>
       <GlobalFX/>
       <div className="sp-fade" style={{width:'100%',maxWidth:380,background:T.card,border:`1px solid ${T.b0}`,borderRadius:24,padding:'40px 28px',boxShadow:'0 24px 60px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset',display:'flex',flexDirection:'column',alignItems:'center'}}>
-        <div style={{width:72,height:72,borderRadius:20,background:T.acSoft,border:`1px solid ${T.acBorder}`,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:26,color:T.ac,boxShadow:`0 0 40px rgba(59,130,196,0.25)`}}>
+        <div style={{width:72,height:72,borderRadius:20,background:T.acSoft,border:`1px solid ${T.acBorder}`,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:26,color:T.ac,}}>
           {title==='Admin Verification'?<IC.Passkey/>:<IC.Shield/>}
         </div>
         <div style={{fontFamily:T.fd,fontSize:23,fontWeight:900,color:T.tx1,marginBottom:8,letterSpacing:'-.4px'}}>{title}</div>
@@ -321,7 +321,7 @@ return(
             <SparkPayLogo size={32}/>
             <div>
               <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-.3px'}}>SparkPay</div>
-              <div style={{fontSize:9,color:'var(--ac)',fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase'}}>Admin Console</div>
+              <div style={{fontSize:9,color:'var(--ac)',fontWeight:700,letterSpacing:'.14em',textTransform:'none'}}>admin</div>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
