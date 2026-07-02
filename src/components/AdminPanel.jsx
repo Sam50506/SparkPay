@@ -238,9 +238,9 @@ useEffect(()=>{
         setStats(s=>({...s,txCount:txs.length,volume}));
       }catch{}
       try{
-        const r2=await fetch('/api/payout',{method:'GET'});
+        const r2=await fetch(SB_URL+'/rest/v1/cashback_claims?status=eq.pending&select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
         const d2=await r2.json();
-        setStats(s=>({...s,pendingClaims:d2.pending||0}));
+        setStats(s=>({...s,pendingClaims:Array.isArray(d2)?d2.length:0}));
       }catch{}
       setLoading(false);
     })();
