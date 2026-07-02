@@ -48,16 +48,20 @@ export default async function handler(req, res) {
     const provider = new ethers.JsonRpcProvider(RPC, { name: 'Arc Testnet', chainId: CHAIN_ID });
     const wallet = new ethers.Wallet(process.env.PAYOUT_PRIVATE_KEY, provider);
 
+    const USDC_ADDR = process.env.REACT_APP_USDC_ADDR || '0x3600000000000000000000000000000000000000';
+    const ERC20_ABI = ['function transfer(address to, uint256 amount) returns (bool)', 'function decimals() view returns (uint8)'];
+    const usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, wallet);
+    let decimals = 18;
+    try { decimals = await usdc.decimals(); } catch {}
+
     const results = [];
     for (const claim of claims) {
       try {
         const feeData = await provider.getFeeData();
         const gasPrice = feeData?.gasPrice || ethers.parseUnits('21', 'gwei');
-        const value = ethers.parseUnits(claim.amount.toString(), 18);
-        const tx = await wallet.sendTransaction({
-          to: claim.wallet_address,
-          value,
-          gasLimit: 21000,
+        const amount = ethers.parseUnits(claim.amount.toString(), decimals);
+        const tx = await usdc.transfer(claim.wallet_address, amount, {
+          gasLimit: 100000,
           gasPrice
         });
         await tx.wait();
