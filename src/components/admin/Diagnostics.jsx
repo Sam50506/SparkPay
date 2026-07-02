@@ -7,7 +7,7 @@ const SCHED_ABI = [
   'function paymentCount() external view returns (uint256)',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'
 ];
-const ERC20_ABI = ['function totalSupply() view returns (uint256)'];
+const ERC20_ABI = ['function balanceOf(address) view returns (uint256)'];
 
 const STATUS = { pass: 'pass', fail: 'fail', warn: 'warn', loading: 'loading' };
 
@@ -94,7 +94,7 @@ export function Diagnostics() {
       setCheck('usdc', STATUS.loading);
       try {
         const usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, provider);
-        await usdc.totalSupply();
+        await usdc.balanceOf('0x0000000000000000000000000000000000000001');
         setCheck('usdc', STATUS.pass, `Contract at ${USDC_ADDR.slice(0,10)}... is responding`);
       } catch (e) {
         setCheck('usdc', STATUS.fail, e.message);
