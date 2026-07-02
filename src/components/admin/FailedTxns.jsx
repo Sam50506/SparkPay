@@ -36,6 +36,6 @@ export function FailedTxns(){
       </div>
       <div style={{fontSize:11,fontFamily:'monospace',color:'var(--tx2)',wordBreak:'break-all'}}>{t.hash}</div>
       <a href={'https://testnet.arcscan.app/tx/'+t.hash} target="_blank" rel="noreferrer" style={{fontSize:11,color:'var(--ac)',marginTop:4,display:'inline-block'}}>View on Explorer</a>
-    </div>)}
+    </div>))}
   </div>);
 }
