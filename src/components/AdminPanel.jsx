@@ -10,14 +10,6 @@ import { Diagnostics } from './admin/Diagnostics';
 export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
 
 /* ---------- Theme ---------- */
-let T = {
-  bg: '#070B12', card: '#0E1520', elev: '#182233',
-  b0: 'rgba(148,163,184,0.08)', b1: 'rgba(148,163,184,0.16)',
-  tx1: '#F1F5F9', tx2: '#A7B4C6', tx3: '#64748B',
-  ac: '#3B82C4', acSoft: 'rgba(59,130,196,0.12)', acBorder: 'rgba(59,130,196,0.28)',
-  ok: '#22C55E', err: '#EF4444',
-  fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif", radius: 16,
-};
 const darkT = {
   bg: '#070B12', card: '#0E1520', elev: '#182233',
   b0: 'rgba(148,163,184,0.08)', b1: 'rgba(148,163,184,0.16)',
@@ -27,20 +19,16 @@ const darkT = {
   fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif", radius: 16,
 };
 const lightT = {
-  bg: '#F3F4F6', card: '#FFFFFF', elev: '#F9FAFB',
-  b0: 'rgba(0,0,0,0.06)', b1: 'rgba(0,0,0,0.12)',
-  tx1: '#111827', tx2: '#374151', tx3: '#6B7280',
-  ac: '#2563EB', acSoft: 'rgba(37,99,235,0.08)', acBorder: 'rgba(37,99,235,0.2)',
-  ok: '#059669', err: '#DC2626',
+  bg: '#F8FAFC', card: '#FFFFFF', elev: '#F1F5F9',
+  b0: 'rgba(0,0,0,0.07)', b1: 'rgba(0,0,0,0.13)',
+  tx1: '#0F172A', tx2: '#334155', tx3: '#64748B',
+  ac: '#2563EB', acSoft: 'rgba(37,99,235,0.08)', acBorder: 'rgba(37,99,235,0.22)',
+  ok: '#16A34A', err: '#DC2626',
   fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif", radius: 16,
 };
-
-const rootVars = {
-  '--bg': T.bg, '--card': T.card, '--elev': T.elev,
-  '--b0': T.b0, '--b1': T.b1,
-  '--tx1': T.tx1, '--tx2': T.tx2, '--tx3': T.tx3,
-  '--ac': T.ac, '--acd': T.acSoft, '--fd': T.fd,
-};
+const ThemeCtx = React.createContext(darkT);
+const useT = () => React.useContext(ThemeCtx);
+const T = darkT; // fallback for module-level usage
 
 const GlobalFX = () => (
   <style>{`
