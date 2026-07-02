@@ -10,6 +10,14 @@ import { Diagnostics } from './admin/Diagnostics';
 export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
 
 /* ---------- Theme ---------- */
+let T = {
+  bg: '#070B12', card: '#0E1520', elev: '#182233',
+  b0: 'rgba(148,163,184,0.08)', b1: 'rgba(148,163,184,0.16)',
+  tx1: '#F1F5F9', tx2: '#A7B4C6', tx3: '#64748B',
+  ac: '#3B82C4', acSoft: 'rgba(59,130,196,0.12)', acBorder: 'rgba(59,130,196,0.28)',
+  ok: '#22C55E', err: '#EF4444',
+  fd: "'Inter','SF Pro Display',system-ui,-apple-system,sans-serif", radius: 16,
+};
 const darkT = {
   bg: '#070B12', card: '#0E1520', elev: '#182233',
   b0: 'rgba(148,163,184,0.08)', b1: 'rgba(148,163,184,0.16)',
