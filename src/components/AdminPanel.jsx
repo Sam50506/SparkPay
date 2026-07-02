@@ -28,9 +28,9 @@ const IC = {
 
 const Section = ({icon, title, children, style={}}) => (
   <div style={{marginBottom:32,...style}}>
-    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-      <div style={{width:32,height:32,borderRadius:10,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)',flexShrink:0}}>{icon}</div>
-      <div style={{fontSize:14,fontWeight:700,color:'var(--tx1)',letterSpacing:'-.2px'}}>{title}</div>
+    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
+      <div style={{color:'var(--tx3)'}}>{icon}</div>
+      <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',letterSpacing:'.08em',textTransform:'uppercase'}}>{title}</div>
     </div>
     {children}
   </div>
@@ -45,16 +45,16 @@ const Card = ({title, subtitle, children, style={}}) => (
 );
 
 const StatCard = ({label, value, icon, loading, accent=false}) => (
-  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:18,padding:'20px',position:'relative',overflow:'hidden',transition:'transform .15s',cursor:'default'}}>
-    <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg,${accent?'rgba(59,130,246,0.06)':'rgba(255,255,255,0.02)'} 0%,transparent 60%)`,pointerEvents:'none'}}/>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
-      <div style={{width:40,height:40,borderRadius:12,background:accent?'rgba(59,130,246,0.12)':'var(--elev)',border:`1px solid ${accent?'rgba(59,130,246,0.2)':'var(--b1)'}`,display:'flex',alignItems:'center',justifyContent:'center',color:accent?'var(--ac)':'var(--tx2)'}}>{icon}</div>
-      {accent&&<div style={{width:8,height:8,borderRadius:'50%',background:'var(--ac)',animation:'pulse 2s infinite'}}/>}
+  <div style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'18px 20px'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+      <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600}}>{label}</div>
+      <div style={{width:30,height:30,borderRadius:8,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)'}}>{icon}</div>
     </div>
-    <div style={{fontSize:28,fontWeight:900,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-1px',lineHeight:1,marginBottom:6}}>
-      {loading?<div style={{height:28,width:60,borderRadius:6,background:'var(--elev)',animation:'pulse 1.5s infinite'}}/>:value}
+    <div style={{display:'flex',alignItems:'baseline',gap:6}}>
+      <div style={{fontSize:26,fontWeight:800,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-0.5px',lineHeight:1}}>
+        {loading ? <span style={{opacity:0.2}}>—</span> : value}
+      </div>
     </div>
-    <div style={{fontSize:11,color:'var(--tx3)',fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase'}}>{label}</div>
   </div>
 );
 
@@ -232,40 +232,39 @@ const authScreen=(title,subtitle,content)=>(
   }
 
   const navItems = [
-    {id:'overview', label:'Overview', icon:IC.Tx},
-    {id:'operations', label:'Operations', icon:IC.Payout},
-    {id:'requests', label:'Requests', icon:IC.Requests},
-    {id:'diagnostics', label:'Diagnostics', icon:IC.Diag},
-    {id:'monitoring', label:'Monitoring', icon:IC.Monitor},
+    {id:'overview', label:'Overview'},
+    {id:'operations', label:'Operations'},
+    {id:'requests', label:'Requests'},
+    {id:'diagnostics', label:'Diagnostics'},
+    {id:'monitoring', label:'Monitoring'},
   ];
 
   return(
     <div style={{minHeight:'100vh',background:'var(--bg)'}}>
       {/* Top bar */}
       <div style={{borderBottom:'1px solid var(--b0)',background:'var(--card)',position:'sticky',top:0,zIndex:10}}>
-        <div style={{maxWidth:860,margin:'0 auto',padding:'0 20px',display:'flex',alignItems:'center',justifyContent:'space-between',height:60}}>
-          <div style={{display:'flex',alignItems:'center',gap:12}}>
-            <SparkPayLogo size={32}/>
+        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',alignItems:'center',justifyContent:'space-between',height:58}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <SparkPayLogo size={28}/>
             <div>
-              <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-.3px'}}>SparkPay</div>
-              <div style={{fontSize:9,color:'var(--ac)',fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase'}}>Admin Console</div>
+              <div style={{fontFamily:'var(--fd)',fontSize:14,fontWeight:800,color:'var(--tx1)',lineHeight:1.1}}>SparkPay</div>
+              <div style={{fontSize:9,color:'var(--tx3)',fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>Admin Console</div>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 12px',borderRadius:999,background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.15)'}}>
-              <div style={{width:6,height:6,borderRadius:999,background:'#22c55e',animation:'pulse 2s infinite'}}/>
-              <span style={{fontSize:10,fontWeight:700,color:'#22c55e',letterSpacing:'.06em'}}>VERIFIED</span>
+            <div style={{display:'flex',alignItems:'center',gap:6,padding:'4px 10px',borderRadius:999,background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.2)'}}>
+              <div style={{width:5,height:5,borderRadius:999,background:'#22c55e'}}/>
+              <span style={{fontSize:10,fontWeight:700,color:'#22c55e',letterSpacing:'.04em'}}>VERIFIED</span>
             </div>
-            <button onClick={signOut} title="Sign Out" style={{background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:10,width:34,height:34,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx3)',transition:'all .15s'}}>
+            <button onClick={signOut} style={{background:'none',border:'1px solid var(--b1)',borderRadius:8,width:32,height:32,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',color:'var(--tx3)'}}>
               <IC.Logout/>
             </button>
           </div>
         </div>
         {/* Nav */}
-        <div style={{maxWidth:860,margin:'0 auto',display:'flex',borderTop:'1px solid var(--b0)',overflowX:'auto',WebkitOverflowScrolling:'touch',scrollbarWidth:'none',msOverflowStyle:'none',padding:'0 8px'}}>
+        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',gap:2,borderTop:'1px solid var(--b0)'}}>
           {navItems.map(n=>(
-            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{flex:1,minWidth:72,padding:'8px 6px',background:'none',border:'none',fontSize:10,fontWeight:700,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s',whiteSpace:'nowrap',display:'flex',flexDirection:'column',alignItems:'center',gap:5,letterSpacing:'.03em'}}>
-              <div style={{width:28,height:28,borderRadius:8,background:activeSection===n.id?'var(--acd)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'all .14s',color:activeSection===n.id?'var(--ac)':'var(--tx3)'}}>{n.icon&&<n.icon/>}</div>
+            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{padding:'10px 14px',background:'none',border:'none',fontSize:12,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s'}}>
               {n.label}
             </button>
           ))}
@@ -273,11 +272,11 @@ const authScreen=(title,subtitle,content)=>(
       </div>
 
       {/* Content */}
-      <div style={{maxWidth:860,margin:'0 auto',padding:'24px 20px 80px'}}>
+      <div style={{maxWidth:860,margin:'0 auto',padding:'32px 24px 60px'}}>
 
         {/* Overview */}
         {activeSection==='overview'&&<div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12,marginBottom:28}}>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:32}}>
             <StatCard label="Total Transactions" value={stats.txCount} icon={<IC.Tx/>} loading={loading}/>
             <StatCard label="Total Volume" value={`${stats.volume.toFixed(2)} USDC`} icon={<IC.Volume/>} loading={loading}/>
             <StatCard label="Pending Claims" value={stats.pendingClaims} icon={<IC.Claims/>} loading={loading} accent={stats.pendingClaims>0}/>
