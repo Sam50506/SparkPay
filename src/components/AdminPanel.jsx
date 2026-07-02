@@ -232,11 +232,11 @@ const authScreen=(title,subtitle,content)=>(
   }
 
   const navItems = [
-    {id:'overview', label:'Overview'},
-    {id:'operations', label:'Operations'},
-    {id:'requests', label:'Requests'},
-    {id:'diagnostics', label:'Diagnostics'},
-    {id:'monitoring', label:'Monitoring'},
+    {id:'overview', label:'Overview', icon:IC.Tx},
+    {id:'operations', label:'Operations', icon:IC.Payout},
+    {id:'requests', label:'Requests', icon:IC.Requests},
+    {id:'diagnostics', label:'Diagnostics', icon:IC.Diag},
+    {id:'monitoring', label:'Monitoring', icon:IC.Monitor},
   ];
 
   return(
@@ -262,10 +262,10 @@ const authScreen=(title,subtitle,content)=>(
           </div>
         </div>
         {/* Nav */}
-        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',gap:2,borderTop:'1px solid var(--b0)'}}>
+        <div style={{maxWidth:860,margin:'0 auto',padding:'0 24px',display:'flex',gap:2,borderTop:'1px solid var(--b0)',overflowX:'auto',WebkitOverflowScrolling:'touch',scrollbarWidth:'none'}}>
           {navItems.map(n=>(
-            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{padding:'10px 14px',background:'none',border:'none',fontSize:12,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s'}}>
-              {n.label}
+            <button key={n.id} onClick={()=>setActiveSection(n.id)} style={{padding:'10px 14px',background:'none',border:'none',fontSize:12,fontWeight:600,color:activeSection===n.id?'var(--ac)':'var(--tx3)',borderBottom:`2px solid ${activeSection===n.id?'var(--ac)':'transparent'}`,cursor:'pointer',transition:'all .14s',whiteSpace:'nowrap',flexShrink:0,display:'flex',alignItems:'center',gap:5}}>
+              {n.icon&&<n.icon/>}{n.label}
             </button>
           ))}
         </div>
@@ -276,7 +276,7 @@ const authScreen=(title,subtitle,content)=>(
 
         {/* Overview */}
         {activeSection==='overview'&&<div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:32}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))',gap:14,marginBottom:32}}>
             <StatCard label="Total Transactions" value={stats.txCount} icon={<IC.Tx/>} loading={loading}/>
             <StatCard label="Total Volume" value={`${stats.volume.toFixed(2)} USDC`} icon={<IC.Volume/>} loading={loading}/>
             <StatCard label="Pending Claims" value={stats.pendingClaims} icon={<IC.Claims/>} loading={loading} accent={stats.pendingClaims>0}/>
