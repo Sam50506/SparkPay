@@ -72,9 +72,9 @@ const IC = {
 const Section = ({icon, title, children, style={}}) => (
   <div style={{marginBottom:36,...style}}>
     <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
-      <div style={{width:30,height:30,borderRadius:9,background:T.acSoft,border:`1px solid ${T.acBorder}`,display:'flex',alignItems:'center',justifyContent:'center',color:T.ac,flexShrink:0}}>{icon}</div>
-      <div style={{fontSize:13,fontWeight:800,color:T.tx1,letterSpacing:'.02em',textTransform:'uppercase'}}>{title}</div>
-      <div style={{flex:1,height:1,background:`linear-gradient(90deg,${T.b1},transparent)`}}/>
+      <div style={{width:30,height:30,borderRadius:9,background:'var(--acd)',border:'1px solid var(--acs)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ac)',flexShrink:0}}>{icon}</div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--tx1)',letterSpacing:'.02em',textTransform:'uppercase'}}>{title}</div>
+      <div style={{flex:1,height:1,background:'linear-gradient(90deg,var(--b1),transparent)'}}/>
     </div>
     {children}
   </div>
@@ -101,7 +101,7 @@ const PrimaryBtn = ({children, disabled, onClick, style={}}) => (
 );
 
 const Skeleton = ({w=60,h=26}) => (
-  <div style={{height:h,width:w,borderRadius:6,background:`linear-gradient(90deg,${T.elev} 25%,rgba(148,163,184,0.14) 50%,${T.elev} 75%)`,backgroundSize:'180px 100%',animation:'spShimmer 1.4s infinite linear'}}/>
+  <div style={{height:h,width:w,borderRadius:6,background:'linear-gradient(90deg,var(--elev) 25%,var(--b1) 50%,var(--elev) 75%)',backgroundSize:'180px 100%',animation:'spShimmer 1.4s infinite linear'}}/>
 );
 
 const StatCard = ({label, value, icon, loading, accent=false}) => (
