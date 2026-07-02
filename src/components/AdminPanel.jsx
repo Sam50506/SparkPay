@@ -320,8 +320,10 @@ return(
           <div style={{display:'flex',alignItems:'center',gap:12}}>
             <SparkPayLogo size={32}/>
             <div>
-              <div style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-.3px'}}>SparkPay</div>
-              <div style={{fontSize:9,color:'var(--ac)',fontWeight:700,letterSpacing:'.14em',textTransform:'none'}}>admin</div>
+              <div style={{display:'flex',alignItems:'center',gap:7}}>
+                <span style={{fontFamily:'var(--fd)',fontSize:15,fontWeight:900,color:'var(--tx1)',letterSpacing:'-.3px'}}>SparkPay</span>
+                <span style={{fontSize:10,fontWeight:600,color:'var(--tx3)',background:'var(--elev)',border:'1px solid var(--b1)',borderRadius:5,padding:'1px 6px'}}>Admin</span>
+              </div>
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
