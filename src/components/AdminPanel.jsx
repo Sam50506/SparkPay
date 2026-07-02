@@ -242,7 +242,8 @@ useEffect(()=>{
     })();
   },[isAdmin]);
 
-const signOut=()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();};
+const rootVars = {'--bg':T.bg,'--card':T.card,'--elev':T.elev,'--b0':T.b0,'--b1':T.b1,'--tx1':T.tx1,'--tx2':T.tx2,'--tx3':T.tx3,'--ac':T.ac,'--acd':T.acSoft,'--fd':T.fd};
+  const signOut=()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();};
 
   /* ---------- Auth screens ---------- */
   const authScreen=(title,subtitle,content)=>(
