@@ -8,17 +8,23 @@ export function FailedTxns(){
   const fetchFailed=async()=>{
     setLoading(true);
     try{
-      const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+ADMIN_ADDRESS+'&sort=desc');
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+ADMIN_ADDRESS+'&sort=desc&page=1&offset=50', {signal: controller.signal});
+      clearTimeout(timeout);
       const d=await r.json();
       const failed=(d.result||[]).filter(t=>t.isError==='1').slice(0,15);
       setTxns(failed);
-    }catch(e){console.error(e);}
+    }catch(e){
+      if(e.name==='AbortError') console.error('Request timed out');
+      else console.error(e);
+    }
     setLoading(false);
   };
 
   React.useEffect(()=>{fetchFailed();},[]);
 
-  if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading...</div>;
+  if(loading)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>Loading failed transactions...</div>;
   if(txns.length===0)return <div style={{fontSize:13,color:'var(--tx3)',padding:'12px 0'}}>No failed transactions found.</div>;
 
   return(<div>
@@ -30,6 +36,6 @@ export function FailedTxns(){
       </div>
       <div style={{fontSize:11,fontFamily:'monospace',color:'var(--tx2)',wordBreak:'break-all'}}>{t.hash}</div>
       <a href={'https://testnet.arcscan.app/tx/'+t.hash} target="_blank" rel="noreferrer" style={{fontSize:11,color:'var(--ac)',marginTop:4,display:'inline-block'}}>View on Explorer</a>
-    </div>))}
+    </div>)}
   </div>);
 }
