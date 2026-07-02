@@ -93,9 +93,8 @@ export function Diagnostics() {
       // 4. USDC Contract
       setCheck('usdc', STATUS.loading);
       try {
-        const usdc = new ethers.Contract(USDC_ADDR, ERC20_ABI, provider);
-        await usdc.balanceOf('0x0000000000000000000000000000000000000001');
-        setCheck('usdc', STATUS.pass, `Contract at ${USDC_ADDR.slice(0,10)}... is responding`);
+        const testBal = await provider.getBalance('0x0000000000000000000000000000000000000001');
+        setCheck('usdc', STATUS.pass, `Native USDC responding - test balance: ${ethers.formatUnits(testBal, 18)} USDC`);
       } catch (e) {
         setCheck('usdc', STATUS.fail, e.message);
       }
