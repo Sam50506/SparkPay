@@ -111,12 +111,12 @@ const StatCard = ({label, value, icon, loading, accent=false}) => (
       :'linear-gradient(135deg,rgba(255,255,255,0.025) 0%,transparent 55%)',pointerEvents:'none'}}/>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
       <div style={{width:38,height:38,borderRadius:11,background:accent?'var(--acd)':'var(--elev)',border:`1px solid ${accent?'var(--acs)':'var(--b1)'}`,display:'flex',alignItems:'center',justifyContent:'center',color:accent?'var(--ac)':'var(--tx2)'}}>{icon}</div>
-      {accent&&<div style={{width:8,height:8,borderRadius:'50%',background:T.ac,boxShadow:`0 0 10px ${T.ac}`,animation:'spPulse 2s infinite'}}/>}
+      {accent&&<div style={{width:8,height:8,borderRadius:'50%',background:'var(--ac)',boxShadow:'0 0 10px var(--ac)',animation:'spPulse 2s infinite'}}/>}
     </div>
-    <div style={{fontSize:27,fontWeight:900,fontFamily:T.fd,color:accent?T.ac:T.tx1,letterSpacing:'-1px',lineHeight:1,marginBottom:7,fontVariantNumeric:'tabular-nums'}}>
+    <div style={{fontSize:27,fontWeight:900,fontFamily:'var(--fd)',color:accent?'var(--ac)':'var(--tx1)',letterSpacing:'-1px',lineHeight:1,marginBottom:7,fontVariantNumeric:'tabular-nums'}}>
       {loading?<Skeleton/>:value}
     </div>
-    <div style={{fontSize:10.5,color:T.tx3,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>{label}</div>
+    <div style={{fontSize:10.5,color:'var(--tx3)',fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>{label}</div>
   </div>
 );
 
