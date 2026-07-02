@@ -2,7 +2,7 @@
 import { ethers } from 'ethers';
 
 export const ARC_CHAIN_ID=5042002, ARC_CHAIN_HEX='0x4CEF52';
-export const DEFAULT_MAINTENANCE=true;
+export const DEFAULT_MAINTENANCE=false;
 export const ADMIN_ADDRESS='0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 export const ARC_RPC    = process.env.REACT_APP_ARC_RPC||'';
 export const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
