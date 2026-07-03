@@ -31,9 +31,13 @@ export default function HistoryPage({
   const [exportCount, setExportCount] = useState(50);
 
   const buildLocalChart = (days) => {
-    const slots = Array.from({length: days}, (_, i) => {
-      const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
-      return { label: days <= 7 ? d.toLocaleDateString('en',{weekday:'short'}) : d.toLocaleDateString('en',{month:'numeric',day:'numeric'}), date: d, sent: 0 };
+    const totalDays = days === 'all' ? Math.max(1, Math.ceil((Date.now() - Math.min(...allTxns.map(tx=>Number(tx.timestamp)*1000).filter(Boolean))) / 86400000)) : days;
+    const slots = Array.from({length: totalDays}, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (totalDays - 1 - i));
+      const label = totalDays <= 7
+        ? d.toLocaleDateString('en',{weekday:'short'})
+        : `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+      return { label, date: d, sent: 0 };
     });
     allTxns.filter(tx => !tx.received && tx.type !== 'refund' && tx.type !== 'received' && tx.status !== 'cancelled' && tx.status !== 'scheduled').forEach(tx => {
       const ts = Number(tx.timestamp);
@@ -138,7 +142,14 @@ export default function HistoryPage({
         <div className="ap-card">
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
               <div className="ap-card-title">Transfer Volume</div>
-              <div style={{display:'flex',gap:4}}>{[7,14,30].map(r=>(<button key={r} onClick={()=>setChartRange(r)} style={{padding:'4px 10px',borderRadius:8,border:`1px solid ${chartRange===r?'var(--ac)':'var(--b1)'}`,background:chartRange===r?'var(--acd)':'none',color:chartRange===r?'var(--ac)':'var(--tx3)',fontSize:11,fontWeight:700,cursor:'pointer'}}>{r}d</button>))}</div>
+              <select value={chartRange} onChange={e=>setChartRange(e.target.value==='all'?'all':Number(e.target.value))} style={{padding:'5px 10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:12,fontWeight:600,outline:'none',cursor:'pointer'}}>
+                <option value={1}>1 Day</option>
+                <option value={7}>7 Days</option>
+                <option value={30}>1 Month</option>
+                <option value={180}>6 Months</option>
+                <option value={365}>1 Year</option>
+                <option value="all">All Time</option>
+              </select>
             </div>
           <div style={{marginTop:16}}>
             <ResponsiveContainer width="100%" height={160}>
@@ -150,7 +161,7 @@ export default function HistoryPage({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--b0)"/>
-                <XAxis dataKey="label" tick={{fontSize:11,fill:'var(--tx3)'}} axisLine={false} tickLine={false} interval={chartRange===7?0:chartRange===14?1:3} angle={chartRange>7?-35:0} textAnchor={chartRange>7?"end":"middle"} height={chartRange>7?40:20}/>
+                <XAxis dataKey="label" tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} interval={chartRange===1?0:chartRange<=7?0:chartRange<=30?1:chartRange<=180?6:13} angle={chartRange>7?-35:0} textAnchor={chartRange>7?'end':'middle'} height={chartRange>7?40:20}/>
                 <YAxis tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?(v/1000).toFixed(1).replace('.0','')+'k':Math.round(v)} width={35} tickCount={5} allowDecimals={false}/>
                 <Tooltip contentStyle={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:10,fontSize:13,color:'var(--tx1)'}}/>
                 <Area type="monotone" dataKey="sent" stroke="#3B82C4" fill="url(#cg)" strokeWidth={2} name="Sent (USDC)"/>
