@@ -31,3 +31,9 @@ svg, svg *, .recharts-wrapper, .recharts-surface {
   user-select: none !important;
   -webkit-user-select: none !important;
 }
+
+svg:focus { outline: none !important; }
+svg *:focus { outline: none !important; }
+.recharts-wrapper:focus { outline: none !important; }
+.recharts-surface:focus { outline: none !important; }
+div:focus { outline: none !important; }
