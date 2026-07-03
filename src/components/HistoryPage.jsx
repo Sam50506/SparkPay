@@ -115,6 +115,18 @@ export default function HistoryPage({
     hashes.forEach(h => sbInsert('deleted_txns', {wallet_address: address, tx_hash: h}).catch(() => {}));
   };
 
+
+  const buildLocalChart = (rangeDays) => {
+    const now = new Date();
+    const result = Array.from({length: rangeDays}, (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (rangeDays - 1 - i));
+      return { label: d.toLocaleDateString('en', {month:'short',day:'numeric'}), date: d, sent: 0 };
+    });
+    return result;
+  };
+
+  const localChartData = buildLocalChart(chartRange);
   return (
     <div>
       {showExport && (
