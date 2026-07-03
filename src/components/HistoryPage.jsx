@@ -82,7 +82,7 @@ export default function HistoryPage({
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--b0)"/>
                 <XAxis dataKey="label" tick={{fontSize:11,fill:'var(--tx3)'}} axisLine={false} tickLine={false}/>
-                <YAxis tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?Math.round(v/1000)+'k':v} width={35}/>
+                <YAxis tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?(v/1000).toFixed(1).replace('.0','')+'k':Math.round(v)} width={35} tickCount={5} allowDecimals={false}/>
                 <Tooltip contentStyle={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:10,fontSize:13,color:'var(--tx1)'}}/>
                 <Area type="monotone" dataKey="sent" stroke="#3B82C4" fill="url(#cg)" strokeWidth={2} name="Sent (USDC)"/>
               </AreaChart>

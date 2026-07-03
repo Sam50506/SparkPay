@@ -2,7 +2,7 @@
 > arc-remittance@1.0.0 build
 > craco build
 
-(node:14238) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(node:19083) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
 (Use `node --trace-deprecation ...` to show where the warning was created)
 Creating an optimized production build...
 Compiled with warnings.
@@ -219,10 +219,10 @@ To ignore, add // eslint-disable-next-line to the line before.
 
 File sizes after gzip:
 
-  999.4 kB (+42 B)  build/static/js/main.d7ede831.js
-  44.49 kB          build/static/js/769.0a8b12e8.chunk.js
-  5 kB              build/static/css/main.96906b90.css
-  4.98 kB           build/static/js/171.ae320931.chunk.js
+  999.47 kB (+72 B)  build/static/js/main.821bcd0b.js
+  44.49 kB           build/static/js/769.0a8b12e8.chunk.js
+  5 kB               build/static/css/main.96906b90.css
+  4.98 kB            build/static/js/171.ae320931.chunk.js
 
 The bundle size is significantly larger than recommended.
 Consider reducing it with code splitting: https://goo.gl/9VhYWB
