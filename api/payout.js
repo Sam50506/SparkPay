@@ -78,7 +78,22 @@ export default async function handler(req, res) {
         await supabase.from('cashback_claims').update({ status: 'paid', tx_hash: tx.hash }).eq('id', claim.id);
         results.push({ wallet: claim.wallet_address, amount: claim.amount, tx: tx.hash, status: 'paid' });
       } catch (e) {
-        results.push({ wallet: claim.wallet_address, amount: claim.amount, error: e.message, status: 'failed' });
+        let msg = e.message;
+        if (msg && msg.toLowerCase().includes('insufficient funds')) {
+          msg = 'Payout wallet has insufficient funds (gas or USDC balance)';
+        } else if (msg && msg.toLowerCase().includes('transfer amount exceeds balance')) {
+          msg = 'Payout wallet does not have enough USDC to cover this payout';
+        }
+        results.push({ wallet: claim.wallet_address, amount: claim.amount, error: msg, status: 'failed' });
+      }
+    }
+
+    // If a specific claim was requested, surface its result as a top-level error/success
+    // so the admin UI (which only checks `error`) reflects the real outcome.
+    if (claim_id && results.length === 1) {
+      const r = results[0];
+      if (r.status !== 'paid') {
+        return res.status(200).json({ error: r.error || 'Payout failed', paid: 0, results });
       }
     }
 
