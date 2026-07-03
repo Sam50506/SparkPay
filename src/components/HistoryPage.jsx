@@ -173,7 +173,7 @@ export default function HistoryPage({
             </div>
           <div style={{marginTop:16}}>
             <ResponsiveContainer width="100%" height={160} style={{outline:"none"}}>
-              <AreaChart data={localChartData} margin={{top:8,right:8,left:0,bottom:0}}>
+              <AreaChart data={localChartData} margin={{top:8,right:8,left:0,bottom:0}} style={{outline:"none"}} className="no-outline">
                 <defs>
                   <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3B82C4" stopOpacity={0.2}/>
