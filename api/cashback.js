@@ -63,12 +63,30 @@ export default async function handler(req, res) {
     }
 
     try {
-      await sb('cashback_claims', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ wallet_address, amount, timestamp: new Date().toISOString(), status: 'pending' }) });
+      const insertRes = await sb('cashback_claims', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ wallet_address, amount, timestamp: new Date().toISOString(), status: 'pending' }) });
+      if (!insertRes.ok) {
+        const errBody = await insertRes.text();
+        console.error('cashback_claims insert failed:', insertRes.status, errBody);
+        return res.status(500).json({ error: 'Failed to record claim: ' + errBody });
+      }
+
       const getRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}&select=*`);
+      if (!getRes.ok) {
+        const errBody = await getRes.text();
+        console.error('cashback_balances fetch failed:', getRes.status, errBody);
+        return res.status(500).json({ error: 'Failed to read balance: ' + errBody });
+      }
       const rows = await getRes.json();
       const current = rows[0]?.pending_amount || 0;
       const newBalance = parseFloat((parseFloat(current) - parseFloat(amount)).toFixed(3));
-      await sb(`cashback_balances?wallet_address=eq.${wallet_address}`, { method: 'PATCH', body: JSON.stringify({ pending_amount: newBalance, updated_at: new Date().toISOString() }) });
+
+      const patchRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}`, { method: 'PATCH', body: JSON.stringify({ pending_amount: newBalance, updated_at: new Date().toISOString() }) });
+      if (!patchRes.ok) {
+        const errBody = await patchRes.text();
+        console.error('cashback_balances patch failed:', patchRes.status, errBody);
+        return res.status(500).json({ error: 'Failed to update balance: ' + errBody });
+      }
+
       return res.json({ success: true, newBalance });
     } catch (e) {
       return res.status(500).json({ error: e.message });
