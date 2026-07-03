@@ -51,10 +51,7 @@ export default function HistoryPage({
   };
   const localChartData = buildLocalChart(chartRange);
 
-    const slots = Array.from({length:days},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1-i));return{label:days<=7?d.toLocaleDateString('en',{weekday:'short'}):d.toLocaleDateString('en',{month:'numeric',day:'numeric'}),date:d,sent:0};});
-    allTxns.filter(tx=>!tx.received&&tx.type!=='refund'&&tx.type!=='received'&&tx.status!=='cancelled'&&tx.status!=='scheduled').forEach(tx=>{const ts=Number(tx.timestamp);if(!ts||ts<1000000)return;const txDate=new Date(ts*1000);const slot=slots.find(d=>d.date.toDateString()===txDate.toDateString());if(slot){let n;if(typeof tx.amount==='bigint'||(typeof tx.amount==='object'&&tx.amount!==null)){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
-    return slots;
-  };
+
   const doExport = () => {
     let data = allTxns;
     if (exportRange === 'today') data = allTxns.filter(t => new Date(Number(t.timestamp)*1000).toDateString() === new Date().toDateString());
