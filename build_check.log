@@ -2,7 +2,7 @@
 > arc-remittance@1.0.0 build
 > craco build
 
-(node:20389) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(node:30732) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
 (Use `node --trace-deprecation ...` to show where the warning was created)
 Creating an optimized production build...
 Compiled with warnings.
@@ -179,6 +179,7 @@ src/components/AdminPanel.jsx
   Line 31:7:    'useT' is assigned a value but never used                                                                                                                                                                                                            no-unused-vars
   Line 134:10:  'pinSetup' is assigned a value but never used                                                                                                                                                                                                        no-unused-vars
   Line 145:5:   React Hook useEffect has a missing dependency: 'setMaintenanceMode'. Either include it or remove the dependency array. If 'setMaintenanceMode' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  Line 244:33:  React Hook useEffect has a missing dependency: 'fetchStats'. Either include it or remove the dependency array                                                                                                                                        react-hooks/exhaustive-deps
 
 src/components/CountrySelect.jsx
   Line 7:9:     'sheetRef' is assigned a value but never used  no-unused-vars
@@ -218,10 +219,10 @@ To ignore, add // eslint-disable-next-line to the line before.
 
 File sizes after gzip:
 
-  999.29 kB (+411 B)  build/static/js/main.aff24953.js
-  44.49 kB            build/static/js/769.0a8b12e8.chunk.js
-  5 kB                build/static/css/main.96906b90.css
-  4.98 kB             build/static/js/171.ae320931.chunk.js
+  999.36 kB (+63 B)  build/static/js/main.86edf1b3.js
+  44.49 kB           build/static/js/769.0a8b12e8.chunk.js
+  5 kB               build/static/css/main.96906b90.css
+  4.98 kB            build/static/js/171.ae320931.chunk.js
 
 The bundle size is significantly larger than recommended.
 Consider reducing it with code splitting: https://goo.gl/9VhYWB

@@ -224,24 +224,24 @@ const loginWithPasskey=async()=>{
     setPkLoading(false);
   };
 
-useEffect(()=>{
+const fetchStats=async()=>{
     if(!isAdmin)return;
-    (async()=>{
-      try{
-        const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+ADMIN_ADDRESS+'&sort=desc');
-        const d=await r.json();
-        const txs=d.result||[];
-        const volume=txs.reduce((s,t)=>s+parseFloat(ethers.formatUnits(t.value||'0',18)),0);
-        setStats(s=>({...s,txCount:txs.length,volume}));
-      }catch{}
-      try{
-        const r2=await fetch(SB_URL+'/rest/v1/cashback_claims?status=eq.pending&select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-        const d2=await r2.json();
-        setStats(s=>({...s,pendingClaims:Array.isArray(d2)?d2.length:0}));
-      }catch{}
-      setLoading(false);
-    })();
-  },[isAdmin]);
+    setLoading(true);
+    try{
+      const r=await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address='+ADMIN_ADDRESS+'&sort=desc');
+      const d=await r.json();
+      const txs=d.result||[];
+      const volume=txs.reduce((s,t)=>s+parseFloat(ethers.formatUnits(t.value||'0',18)),0);
+      setStats(s=>({...s,txCount:txs.length,volume}));
+    }catch{}
+    try{
+      const r2=await fetch(SB_URL+'/rest/v1/cashback_claims?status=eq.pending&select=id',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+      const d2=await r2.json();
+      setStats(s=>({...s,pendingClaims:Array.isArray(d2)?d2.length:0}));
+    }catch{}
+    setLoading(false);
+  };
+  useEffect(()=>{fetchStats();},[isAdmin]);
 
 const rootVars = {'--bg':T.bg,'--card':T.card,'--elev':T.elev,'--b0':T.b0,'--b1':T.b1,'--tx1':T.tx1,'--tx2':T.tx2,'--tx3':T.tx3,'--ac':T.ac,'--acd':T.acSoft,'--fd':T.fd};
   const signOut=()=>{sessionStorage.removeItem('sp_admin_jwt');window.location.hash='';window.location.reload();};
@@ -375,6 +375,7 @@ return(
             <StatCard label="Total Volume" value={`${stats.volume.toFixed(2)} USDC`} icon={<IC.Volume/>} loading={loading}/>
             <StatCard label="Pending Claims" value={stats.pendingClaims} icon={<IC.Claims/>} loading={loading} accent={stats.pendingClaims>0}/>
           </div>
+          <div style={{display:'flex',justifyContent:'flex-end',marginBottom:20,marginTop:-14}}><button onClick={fetchStats} disabled={loading} style={{background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'6px 16px',fontSize:12,fontWeight:600,color:'var(--tx2)',cursor:'pointer'}}>{loading?'Refreshing...':'Refresh Stats'}</button></div>
 
           <Section icon={<IC.Maintenance/>} title="Site Control">
             <Card>
