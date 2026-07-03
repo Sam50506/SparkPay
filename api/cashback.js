@@ -6,8 +6,8 @@ const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET;
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
 
 const sb = (path, opts={}) => fetch(`${SB_URL}/rest/v1/${path}`, {
-  headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', ...opts.headers },
-  ...opts
+  ...opts,
+  headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', ...(opts.headers||{}) },
 });
 
 export default async function handler(req, res) {
