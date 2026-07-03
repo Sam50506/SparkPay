@@ -4,6 +4,7 @@ import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 import { ADMIN_ADDRESS, SB_URL, SB_KEY } from '../config';
 import { SparkPayLogo } from './OnboardingModal';
 import { ScheduledRequests } from './admin/ScheduledRequests';
+import { CashbackClaims } from './admin/CashbackClaims';
 import { ManualExecute } from './admin/ManualExecute';
 import { FailedTxns } from './admin/FailedTxns';
 import { Diagnostics } from './admin/Diagnostics';
@@ -417,12 +418,8 @@ return(
         {/* Operations */}
         {activeSection==='operations'&&<div className="sp-fade">
           <Section icon={<IC.Payout/>} title="Cashback Payouts">
-            <Card title="Process Payouts" subtitle={loading?'Loading...':stats.pendingClaims+' pending claim'+(stats.pendingClaims===1?'':'s')}>
-              <PrimaryBtn onClick={async()=>{
-                const token=sessionStorage.getItem('sp_admin_jwt');
-                if(!token){alert('Session expired.');window.location.reload();return;}
-                try{const r=await fetch('/api/payout',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}});const d=await r.json();alert(d.message+' Paid: '+d.paid);}catch(e){alert('Error: '+e.message);}
-              }}>Process Pending Payouts</PrimaryBtn>
+            <Card title="Pending Claims" subtitle="Review and approve or reject each claim individually.">
+              <CashbackClaims/>
             </Card>
           </Section>
 

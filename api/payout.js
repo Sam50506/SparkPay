@@ -35,10 +35,10 @@ export default async function handler(req, res) {
   );
 
   try {
-    const { data: claims, error } = await supabase
-      .from('cashback_claims')
-      .select('*')
-      .eq('status', 'pending');
+    const { claim_id } = req.body || {};
+    let query = supabase.from('cashback_claims').select('*').eq('status', 'pending');
+    if (claim_id) query = query.eq('id', claim_id);
+    const { data: claims, error } = await query;
 
     if (error) throw error;
     if (!claims || claims.length === 0) {
