@@ -37,3 +37,10 @@ svg *:focus { outline: none !important; }
 .recharts-wrapper:focus { outline: none !important; }
 .recharts-surface:focus { outline: none !important; }
 div:focus { outline: none !important; }
+
+g[tabindex], g[tabindex]:focus {
+  outline: none !important;
+}
+[class*="recharts-zIndex"]:focus {
+  outline: none !important;
+}
