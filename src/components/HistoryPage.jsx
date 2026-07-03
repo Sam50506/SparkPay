@@ -190,74 +190,65 @@ export default function HistoryPage({
             </div>
           </div>
         )}
-          {filtered.length===0
-          ? <div style={{textAlign:'center',color:'var(--tx3)',padding:'40px 0',fontSize:14}}>No transactions found</div>
+        {filtered.length===0
+          ? <div style={{textAlign:'center',color:'var(--tx3)',padding:'32px 0',fontSize:14}}>No transactions found</div>
           : Object.entries(groupedNR).map(([date,txs])=>(
-               <div key={date} style={{marginBottom:8}}>
-                <div style={{fontSize:10,fontWeight:800,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'0.12em',padding:'12px 0 6px',display:'flex',alignItems:'center',gap:8}}>
-                  <span>{date}</span><span style={{flex:1,height:'1px',background:'var(--b0)'}}/>
-                </div>
+              <div key={date}>
+                <div style={{fontSize:11,fontWeight:700,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:1,padding:'8px 0 4px'}}>{date}</div>
                 {txs.map((t,i)=>{
-                   const isExp = expandedTx === t._idx;
-                   const amt = fmtAmt(t);
-                   const isReceived = t.received || t.type==='received';
-                   const isRefund = t.type==='refund';
-                   const amtColor = isReceived||isRefund ? '#17E5B0' : '#FFFFFF';
-                   const amtPrefix = isReceived||isRefund ? '+' : '-';
-                   const iconBg = isReceived||isRefund ? 'rgba(23,229,176,0.12)' : 'rgba(77,159,224,0.12)';
-                   const iconColor = isReceived||isRefund ? '#17E5B0' : '#4D9FE0';
-                   const label = t.type==='scheduled'?'Scheduled':t.type==='received'?'Received':t.type==='invoice'?'Invoice':t.type==='refund'?'Refund':t.isBatch?'Batch ('+t.batchTxns.length+')':'Transfer';
-                   return(
-                     <div key={i} style={{marginBottom:4}}>
-                       <div onClick={()=>{if(!manageTxns)setExpandedTx(isExp?null:t._idx);}} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',borderRadius:14,background:isExp?'var(--elev)':'var(--card)',border:`1px solid ${isExp?'var(--b2)':'var(--b0)'}`,cursor:'pointer',transition:'all 0.15s'}}>
-                        <div style={{width:40,height:40,borderRadius:12,background:iconBg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                  const isExp = expandedTx === t._idx;
+                  const amt = fmtAmt(t);
+                  return(
+                    <div key={i}>
+                      <div className="ap-hist-row" onClick={()=>{if(!manageTxns)setExpandedTx(isExp?null:t._idx);}} style={{cursor:'pointer'}}>
+                        <div className="ap-hist-icon">
                           {manageTxns
-                           ? <input type="checkbox" checked={!!(selectedTxns||[]).includes(t.hash)} onChange={e=>{e.stopPropagation();setSelectedTxns(prev=>e.target.checked?[...(Array.isArray(prev)?prev:[]),t.hash]:(Array.isArray(prev)?prev:[]).filter(h=>h!==t.hash));}} style={{width:18,height:18,cursor:'pointer'}} onClick={e=>e.stopPropagation()}/>
-                           : <span style={{fontSize:18,color:iconColor}}>{isReceived||isRefund?'↓':'↑'}</span>
+                            ? <input type="checkbox" checked={!!(selectedTxns||[]).includes(t.hash)} onChange={e=>{e.stopPropagation();setSelectedTxns(prev=>e.target.checked?[...(Array.isArray(prev)?prev:[]),t.hash]:(Array.isArray(prev)?prev:[]).filter(h=>h!==t.hash));}} style={{width:18,height:18,cursor:'pointer'}} onClick={e=>e.stopPropagation()}/>
+                            : <IC.Send received={t.received}/>
                           }
                         </div>
                         <div style={{flex:1,minWidth:0}}>
-                           <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:3}}>
-                             <span style={{fontWeight:700,color:'var(--tx1)',fontSize:14}}>{label}</span>
-                             {!t.isBatch&&t.country&&<span style={{fontSize:10,fontWeight:800,background:'rgba(77,159,224,0.12)',color:'var(--ac)',borderRadius:4,padding:'1px 5px'}}>{ALL_CC[t.country]||'?'}</span>}
-                             {t.isBatch&&<span style={{fontSize:10,padding:'1px 6px',borderRadius:4,background:'rgba(59,130,196,.15)',color:'var(--ac)',fontWeight:700}}>BATCH</span>}
-                             <span style={{fontSize:10,fontWeight:700,padding:'2px 7px',borderRadius:999,background:t.status==='confirmed'?'rgba(23,229,176,.1)':t.status==='failed'?'rgba(255,79,97,.1)':'rgba(240,196,63,.1)',color:t.status==='confirmed'?'#17E5B0':t.status==='failed'?'#FF4F61':'#F0C43F',marginLeft:'auto'}}>{(t.status||'pending').toUpperCase()}</span>
-                           </div>
-                           <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{short(t.recipient)||'—'}</div>
+                          <div style={{fontWeight:700,color:'var(--tx1)',fontSize:14,display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                            {!t.isBatch&&t.country&&<span className="ap-cc">{ALL_CC[t.country]||'?'}</span>}
+                            {t.type==='scheduled'?'Scheduled Payment':t.type==='received'?'Received':t.type==='invoice'?'Invoice Payment':t.type==='refund'?'Refund':t.isBatch?'Batch Send ('+t.batchTxns.length+' recipients)':(t.country||'Transfer')}
+                            <span className={txBadge(t.status)}>{t.status||'pending'}</span>
+                            {t.isBatch&&<span style={{fontSize:11,padding:'2px 8px',borderRadius:999,background:'rgba(59,130,196,.15)',color:'var(--ac)',fontWeight:600}}>Batch</span>}
+                          </div>
+                          <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace',marginTop:3,overflow:'hidden',textOverflow:'ellipsis'}}>{short(t.recipient)}</div>
                         </div>
-                        <div style={{textAlign:'right',flexShrink:0,marginLeft:8}}>
-                          <div style={{fontWeight:800,color:amtColor,fontSize:15,letterSpacing:'-0.3px'}}>{amtPrefix}{amt}</div>
-                          <div style={{fontSize:10,color:'var(--tx3)',marginTop:2}}>USDC · {fmtTime(t.timestamp)}</div>
+                        <div style={{textAlign:'right',flexShrink:0}}>
+                          <div style={{fontWeight:700,color:'var(--tx1)',fontSize:14}}>{amt} USDC</div>
+                          <div style={{fontSize:11,color:'var(--tx3)',marginTop:3}}>{fmtDate(t.timestamp)}{t.type!=='refund'&&t.timestamp?' '+fmtTime(t.timestamp):''}</div>
                         </div>
                       </div>
                       {isExp&&(
-                         <div style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--b1)',borderTop:'none',borderRadius:'0 0 14px 14px',padding:'12px 14px',fontSize:12,color:'var(--tx2)',marginTop:-4}}>
-                           {t.isBatch
-                            ? <div style={{marginBottom:8}}>
-                                <span style={{color:'var(--tx3)',fontWeight:700,fontSize:11,textTransform:'uppercase',letterSpacing:'0.08em',display:'block',marginBottom:6}}>Recipients</span>
+                        <div style={{background:'var(--elev)',borderRadius:10,padding:'10px 14px',marginBottom:8,fontSize:12,color:'var(--tx2)'}}>
+                          {t.isBatch
+                            ? <div style={{marginBottom:6}}>
+                                <span style={{color:'var(--tx3)',fontWeight:600,display:'block',marginBottom:4}}>Recipients:</span>
                                 {t.batchTxns.map((bt,bi)=>(
-                                  <div key={bi} style={{display:'grid',gridTemplateColumns:'1fr 1fr 80px',gap:8,alignItems:'center',padding:'6px 0',borderBottom:'1px solid var(--b0)'}}>
-                                    <span style={{fontFamily:'monospace',fontSize:11,color:'var(--tx1)'}}>{short(bt.recipient)}</span>
-                                    <span style={{fontSize:11,color:'var(--tx3)'}}>{bt.country||'—'}</span>
-                                    <span style={{fontWeight:700,fontSize:11,textAlign:'right',color:'var(--tx1)'}}>{parseFloat(bt.amount).toFixed(2)} USDC</span>
+                                  <div key={bi} style={{display:'grid',gridTemplateColumns:'1fr 1fr 80px',gap:8,alignItems:'center',padding:'5px 0',borderBottom:'1px solid var(--b0)'}}>
+                                    <span style={{fontFamily:'monospace',fontSize:11,color:'var(--tx1)',overflow:'hidden',textOverflow:'ellipsis'}}>{short(bt.recipient)}</span>
+                                    <span style={{fontSize:11,color:'var(--tx2)'}}>{bt.country||'—'}</span>
+                                    <span style={{fontWeight:600,fontSize:11,textAlign:'right'}}>{parseFloat(bt.amount).toFixed(2)} USDC</span>
                                   </div>
                                 ))}
                               </div>
-                            : <div style={{marginBottom:6,display:'flex',gap:6}}><span style={{color:'var(--tx3)',fontWeight:600,flexShrink:0}}>To:</span><span style={{fontFamily:'monospace',wordBreak:'break-all',color:'var(--tx1)'}}>{t.recipient}</span></div>
-                           }
-                           {t.hash&&!t.hash.startsWith('0xdemo')&&<div style={{marginBottom:8,display:'flex',gap:6}}><span style={{color:'var(--tx3)',fontWeight:600,flexShrink:0}}>Tx:</span><span style={{fontFamily:'monospace',wordBreak:'break-all',color:'var(--tx2)',fontSize:11}}>{t.hash}</span></div>}
-                           <div style={{display:'flex',gap:8,marginTop:10}}>
-                             {t.hash&&!t.hash.startsWith('0xdemo')&&<a href={'https://testnet.arcscan.app/tx/'+t.hash} target="_blank" rel="noreferrer" style={{fontSize:11,padding:'6px 12px',borderRadius:8,background:'var(--elev)',border:'1px solid var(--b2)',color:'var(--ac)',fontWeight:600,textDecoration:'none'}}>View on Explorer ↗</a>}
-                             {manageTxns&&<button onClick={e=>{e.stopPropagation();if(window.confirm('Delete this transaction?')){deleteOneTx(t.hash);}}} style={{background:'rgba(255,79,97,0.1)',border:'1px solid rgba(255,79,97,0.2)',color:'var(--re)',cursor:'pointer',padding:'6px 12px',fontSize:11,borderRadius:8,fontWeight:700}}>Delete</button>}
-                           </div>
-                         </div>
+                            : <div style={{marginBottom:6}}><span style={{color:'var(--tx3)'}}>To: </span><span style={{fontFamily:'monospace',wordBreak:'break-all'}}>{t.recipient}</span></div>
+                          }
+                          {t.hash&&!t.hash.startsWith('0xdemo')&&<div style={{marginBottom:6}}><span style={{color:'var(--tx3)'}}>Hash: </span><span style={{fontFamily:'monospace',wordBreak:'break-all'}}>{t.hash}</span></div>}
+                          <div style={{display:'flex',gap:8,marginTop:8}}>
+                            {t.hash&&!t.hash.startsWith('0xdemo')&&<a href={'https://testnet.arcscan.app/tx/'+t.hash} target="_blank" rel="noreferrer" className="ap-btn ap-btn-sec" style={{fontSize:11,padding:'5px 10px'}}>View on Explorer</a>}
+                            {manageTxns&&<button onClick={e=>{e.stopPropagation();if(window.confirm('Delete this transaction?')){deleteOneTx(t.hash);}}} style={{background:'var(--re)',border:'none',color:'#fff',cursor:'pointer',padding:'5px 10px',fontSize:11,borderRadius:8,fontWeight:600}}>Delete</button>}
+                          </div>
+                        </div>
                       )}
                     </div>
-                   );
+                  );
                 })}
-               </div>
-             ))
-          }
+              </div>
+            ))
+        }
         {totalPages>1&&(
           <div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:8,marginTop:12}}>
             <button onClick={()=>setTxPage(1)} disabled={txPage===1} className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'6px 12px'}}>«</button>
