@@ -26,9 +26,38 @@ export default function HistoryPage({
   address, deletedHashes, setDeletedHashes, setTxns
 }) {
   const [showExport, setShowExport] = useState(false);
+  const [chartRange, setChartRange] = useState(7);
+  const [chartRange, setChartRange] = useState(7);
   const [exportRange, setExportRange] = useState('all');
   const [exportCount, setExportCount] = useState(50);
 
+  const buildLocalChart = (days) => {
+    const slots = Array.from({length: days}, (_, i) => {
+      const d = new Date(); d.setDate(d.getDate() - (days - 1 - i));
+      return { label: days <= 7 ? d.toLocaleDateString('en',{weekday:'short'}) : d.toLocaleDateString('en',{month:'numeric',day:'numeric'}), date: d, sent: 0 };
+    });
+    allTxns.filter(tx => !tx.received && tx.type !== 'refund' && tx.type !== 'received' && tx.status !== 'cancelled' && tx.status !== 'scheduled').forEach(tx => {
+      const ts = Number(tx.timestamp);
+      if (!ts || ts < 1000000) return;
+      const txDate = new Date(ts * 1000);
+      const slot = slots.find(d => d.date.toDateString() === txDate.toDateString());
+      if (slot) {
+        let n;
+        if (typeof tx.amount === 'bigint' || (typeof tx.amount === 'object' && tx.amount !== null)) { try { n = parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()), 18)); } catch { n = 0; } }
+        else { n = parseFloat(tx.amount); }
+        slot.sent += isNaN(n) ? 0 : n;
+      }
+    });
+    return slots;
+  };
+  const localChartData = buildLocalChart(chartRange);
+
+  const buildLocalChart = (days) => {
+    const slots = Array.from({length:days},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(days-1-i));return{label:days<=7?d.toLocaleDateString('en',{weekday:'short'}):d.toLocaleDateString('en',{month:'numeric',day:'numeric'}),date:d,sent:0};});
+    allTxns.filter(tx=>!tx.received&&tx.type!=='refund'&&tx.type!=='received'&&tx.status!=='cancelled'&&tx.status!=='scheduled').forEach(tx=>{const ts=Number(tx.timestamp);if(!ts||ts<1000000)return;const txDate=new Date(ts*1000);const slot=slots.find(d=>d.date.toDateString()===txDate.toDateString());if(slot){let n;if(typeof tx.amount==='bigint'||(typeof tx.amount==='object'&&tx.amount!==null)){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
+    return slots;
+  };
+  const localChartData = buildLocalChart(chartRange);
   const doExport = () => {
     let data = allTxns;
     if (exportRange === 'today') data = allTxns.filter(t => new Date(Number(t.timestamp)*1000).toDateString() === new Date().toDateString());
@@ -112,10 +141,13 @@ export default function HistoryPage({
       )}
       {allTxns.length > 0 && (
         <div className="ap-card">
-          <div className="ap-card-title">Transfer Volume</div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div className="ap-card-title">Transfer Volume</div>
+              <div style={{display:'flex',gap:4}}>{[7,14,30].map(r=>(<button key={r} onClick={()=>setChartRange(r)} style={{padding:'4px 10px',borderRadius:8,border:`1px solid ${chartRange===r?'var(--ac)':'var(--b1)'}`,background:chartRange===r?'var(--acd)':'none',color:chartRange===r?'var(--ac)':'var(--tx3)',fontSize:11,fontWeight:700,cursor:'pointer'}}>{r}d</button>))}</div>
+            </div>
           <div style={{marginTop:16}}>
             <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={chartData} margin={{top:8,right:8,left:0,bottom:0}}>
+              <AreaChart data={localChartData} margin={{top:8,right:8,left:0,bottom:0}}>
                 <defs>
                   <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#3B82C4" stopOpacity={0.2}/>
