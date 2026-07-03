@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import React from 'react';
+import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { IC } from '../icons';
@@ -25,6 +25,29 @@ export default function HistoryPage({
   exportCSV, refreshPendingTxns, loadContractHistory,
   address, deletedHashes, setDeletedHashes, setTxns
 }) {
+  const [showExport, setShowExport] = useState(false);
+  const [exportRange, setExportRange] = useState('all');
+  const [exportCount, setExportCount] = useState(50);
+
+  const doExport = () => {
+    let data = allTxns;
+    if (exportRange === 'today') data = allTxns.filter(t => new Date(Number(t.timestamp)*1000).toDateString() === new Date().toDateString());
+    else if (exportRange === 'week') { const w = new Date(); w.setDate(w.getDate()-7); data = allTxns.filter(t => new Date(Number(t.timestamp)*1000) >= w); }
+    else if (exportRange === 'month') { const m = new Date(); m.setMonth(m.getMonth()-1); data = allTxns.filter(t => new Date(Number(t.timestamp)*1000) >= m); }
+    else if (exportRange === 'count') data = allTxns.slice(0, exportCount);
+    const rows = [['Type','Hash','Recipient','Amount (USDC)','Country','Date','Status'], ...data.map(t => {
+      let amt = t.amount;
+      if (typeof amt === 'bigint' || (typeof amt === 'object' && amt !== null)) { try { amt = parseFloat(ethers.formatUnits(BigInt(amt.toString()), 18)); } catch { amt = 0; } }
+      return [t.type||'Send', t.hash||'', t.recipient||'', parseFloat(amt||0).toFixed(2), t.country||'', fmtDate(t.timestamp), t.status||''];
+    })];
+    const csv = rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'sparkpay-history.csv'; a.click();
+    URL.revokeObjectURL(url);
+    setShowExport(false);
+  };
+
   const today = new Date();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -68,6 +91,25 @@ export default function HistoryPage({
 
   return (
     <div>
+      {showExport && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>setShowExport(false)}>
+          <div style={{background:'var(--card)',borderRadius:16,padding:24,width:'100%',maxWidth:360,boxShadow:'var(--shl)'}} onClick={e=>e.stopPropagation()}>
+            <div style={{fontSize:16,fontWeight:800,color:'var(--tx1)',marginBottom:4}}>Export Transactions</div>
+            <div style={{fontSize:12,color:'var(--tx3)',marginBottom:20}}>Choose what to include in your CSV export.</div>
+            {[['all','All transactions'],['today','Today only'],['week','Last 7 days'],['month','Last 30 days'],['count','Custom count']].map(([val,label])=>(
+              <div key={val} onClick={()=>setExportRange(val)} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',borderRadius:10,marginBottom:6,border:`1px solid ${exportRange===val?'var(--ac)':'var(--b1)'}`,background:exportRange===val?'var(--acd)':'var(--elev)',cursor:'pointer'}}>
+                <div style={{width:16,height:16,borderRadius:'50%',border:`2px solid ${exportRange===val?'var(--ac)':'var(--b1)'}`,background:exportRange===val?'var(--ac)':'transparent',flexShrink:0}}/>
+                <span style={{fontSize:13,fontWeight:600,color:'var(--tx1)'}}>{label}</span>
+              </div>
+            ))}
+            {exportRange==='count'&&<input className="ap-input" type="number" value={exportCount} onChange={e=>setExportCount(Math.max(1,parseInt(e.target.value)||50))} placeholder="Number of transactions" style={{marginTop:8,marginBottom:0}}/>}
+            <div style={{display:'flex',gap:10,marginTop:16}}>
+              <button className="ap-btn ap-btn-ghost" style={{flex:1}} onClick={()=>setShowExport(false)}>Cancel</button>
+              <button className="ap-btn ap-btn-primary" style={{flex:2,marginTop:0}} onClick={doExport}>Export CSV</button>
+            </div>
+          </div>
+        </div>
+      )}
       {allTxns.length > 0 && (
         <div className="ap-card">
           <div className="ap-card-title">Transfer Volume</div>
@@ -97,7 +139,7 @@ export default function HistoryPage({
             <div style={{fontSize:12,color:'var(--tx3)',marginTop:2}}>Total sent: {totalSent.toFixed(2)} USDC</div>
           </div>
           <div style={{display:'flex',gap:8}}>
-            <button className="ap-btn ap-btn-sec" onClick={exportCSV} style={{fontSize:12,padding:'7px 12px'}}>Export CSV</button>
+            <button className="ap-btn ap-btn-sec" onClick={()=>setShowExport(true)} style={{fontSize:12,padding:'7px 12px'}}>Export CSV</button>
             <button className="ap-btn ap-btn-sec" onClick={async()=>{await refreshPendingTxns();loadContractHistory();}} style={{fontSize:12,padding:'7px 12px'}}>Refresh</button>
             <button className="ap-btn ap-btn-sec" onClick={()=>setManageTxns(m=>!m)} style={{fontSize:12,padding:'7px 12px',color:manageTxns?'var(--re)':undefined}}>{manageTxns?'Done':'Manage'}</button>
           </div>
