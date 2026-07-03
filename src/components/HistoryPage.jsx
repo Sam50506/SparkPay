@@ -183,7 +183,14 @@ export default function HistoryPage({
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--b0)"/>
                 <XAxis dataKey="label" tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} interval={chartRange===1?2:chartRange<=7?0:chartRange<=30?1:chartRange<=180?6:13} angle={chartRange>7?-35:0} textAnchor={chartRange>7?'end':'middle'} height={chartRange>7?40:20}/>
                 <YAxis tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?(v/1000).toFixed(1).replace('.0','')+'k':Math.round(v)} width={35} tickCount={5} allowDecimals={false}/>
-                <Tooltip contentStyle={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:10,fontSize:13,color:'var(--tx1)'}}/>
+                <Tooltip
+                cursor={{stroke:'var(--b2)',strokeWidth:1,strokeDasharray:'4 2'}}
+                contentStyle={{background:'var(--card)',border:'none',borderRadius:10,fontSize:12,color:'var(--tx1)',boxShadow:'0 4px 20px rgba(0,0,0,0.15)',padding:'6px 12px'}}
+                labelStyle={{color:'var(--tx3)',fontWeight:700,fontSize:11,marginBottom:2}}
+                itemStyle={{color:'var(--ac)',fontWeight:700,padding:0}}
+                separator=" · "
+                formatter={(value)=>[value.toFixed(2)+' USDC','']}
+              />
                 <Area type="monotone" dataKey="sent" stroke="#3B82C4" fill="url(#cg)" strokeWidth={2} name="Sent (USDC)"/>
               </AreaChart>
             </ResponsiveContainer>
