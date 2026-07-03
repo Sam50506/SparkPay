@@ -31,6 +31,26 @@ export default function HistoryPage({
   const [exportCount, setExportCount] = useState(50);
 
   const buildLocalChart = (days) => {
+    if (days === 1) {
+      const hours = Array.from({length: 24}, (_, i) => {
+        const d = new Date(); d.setMinutes(0,0,0); d.setHours(d.getHours() - (23 - i));
+        const label = d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',hour12:false});
+        return { label, date: d, sent: 0, isHour: true, hourVal: d.getHours() };
+      });
+      allTxns.filter(tx => !tx.received && tx.type !== 'refund' && tx.type !== 'received' && tx.status !== 'cancelled' && tx.status !== 'scheduled').forEach(tx => {
+        const ts = Number(tx.timestamp);
+        if (!ts || ts < 1000000) return;
+        const txDate = new Date(ts * 1000);
+        const slot = hours.find(h => h.date.toDateString() === txDate.toDateString() && h.hourVal === txDate.getHours());
+        if (slot) {
+          let n;
+          if (typeof tx.amount === 'bigint' || (typeof tx.amount === 'object' && tx.amount !== null)) { try { n = parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()), 18)); } catch { n = 0; } }
+          else { n = parseFloat(tx.amount); }
+          slot.sent += isNaN(n) ? 0 : n;
+        }
+      });
+      return hours;
+    }
     const totalDays = days === 'all' ? Math.max(1, Math.ceil((Date.now() - Math.min(...allTxns.map(tx=>Number(tx.timestamp)*1000).filter(Boolean))) / 86400000)) : days;
     const slots = Array.from({length: totalDays}, (_, i) => {
       const d = new Date(); d.setDate(d.getDate() - (totalDays - 1 - i));
@@ -161,7 +181,7 @@ export default function HistoryPage({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--b0)"/>
-                <XAxis dataKey="label" tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} interval={chartRange===1?0:chartRange<=7?0:chartRange<=30?1:chartRange<=180?6:13} angle={chartRange>7?-35:0} textAnchor={chartRange>7?'end':'middle'} height={chartRange>7?40:20}/>
+                <XAxis dataKey="label" tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} interval={chartRange===1?2:chartRange<=7?0:chartRange<=30?1:chartRange<=180?6:13} angle={chartRange>7?-35:0} textAnchor={chartRange>7?'end':'middle'} height={chartRange>7?40:20}/>
                 <YAxis tick={{fontSize:10,fill:'var(--tx3)'}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?(v/1000).toFixed(1).replace('.0','')+'k':Math.round(v)} width={35} tickCount={5} allowDecimals={false}/>
                 <Tooltip contentStyle={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:10,fontSize:13,color:'var(--tx1)'}}/>
                 <Area type="monotone" dataKey="sent" stroke="#3B82C4" fill="url(#cg)" strokeWidth={2} name="Sent (USDC)"/>
