@@ -78,12 +78,14 @@ export default async function handler(req, res) {
         await supabase.from('cashback_claims').update({ status: 'paid', tx_hash: tx.hash }).eq('id', claim.id);
         results.push({ wallet: claim.wallet_address, amount: claim.amount, tx: tx.hash, status: 'paid' });
       } catch (e) {
-        let msg = e.message;
-        if (msg && msg.toLowerCase().includes('insufficient funds')) {
-          msg = 'Payout wallet has insufficient funds (gas or USDC balance)';
-        } else if (msg && msg.toLowerCase().includes('transfer amount exceeds balance')) {
+        const raw = (e.shortMessage || e.reason || e.message || 'Unknown error').toLowerCase();
+        let msg = 'Payout failed. Please check the payout wallet balance.';
+        if (raw.includes('insufficient funds')) {
+          msg = 'Payout wallet has insufficient funds for gas';
+        } else if (raw.includes('transfer amount exceeds balance') || raw.includes('execution reverted')) {
           msg = 'Payout wallet does not have enough USDC to cover this payout';
         }
+        console.error('Payout tx failed for claim', claim.id, e.message);
         results.push({ wallet: claim.wallet_address, amount: claim.amount, error: msg, status: 'failed' });
       }
     }
