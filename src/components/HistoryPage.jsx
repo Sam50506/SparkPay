@@ -27,7 +27,6 @@ export default function HistoryPage({
 }) {
   const [showExport, setShowExport] = useState(false);
   const [chartRange, setChartRange] = useState(7);
-  const [chartRange, setChartRange] = useState(7);
   const [exportRange, setExportRange] = useState('all');
   const [exportCount, setExportCount] = useState(50);
 
@@ -57,7 +56,6 @@ export default function HistoryPage({
     allTxns.filter(tx=>!tx.received&&tx.type!=='refund'&&tx.type!=='received'&&tx.status!=='cancelled'&&tx.status!=='scheduled').forEach(tx=>{const ts=Number(tx.timestamp);if(!ts||ts<1000000)return;const txDate=new Date(ts*1000);const slot=slots.find(d=>d.date.toDateString()===txDate.toDateString());if(slot){let n;if(typeof tx.amount==='bigint'||(typeof tx.amount==='object'&&tx.amount!==null)){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
     return slots;
   };
-  const localChartData = buildLocalChart(chartRange);
   const doExport = () => {
     let data = allTxns;
     if (exportRange === 'today') data = allTxns.filter(t => new Date(Number(t.timestamp)*1000).toDateString() === new Date().toDateString());
