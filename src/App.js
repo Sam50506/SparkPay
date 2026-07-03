@@ -159,7 +159,7 @@ function AppInner() {
     const claimRes=await fetch('/api/cashback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'claim',wallet_address:address,amount:amt,turnstileToken})});
     const claimData=await claimRes.json();
     if(!claimRes.ok)throw new Error(claimData.error||'Claim failed');
-    setClaimSubmitted(true);setCashbackPending(claimData.newBalance);setStatus({type:'success',msg:'Cashback claim submitted. Your USDC will be sent to your wallet shortly.'});
+    setClaimSubmitted(true);setCashbackPending(claimData.newBalance);
   }catch(e){setStatus({type:'error',msg:'Claim failed: '+e.message});}setClaimLoading(false);};
 
   const addArc=p=>({chainId:ARC_CHAIN_HEX,chainName:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:[ARC_RPC||ARC_RPC_FALLBACK],blockExplorerUrls:['https://testnet.arcscan.app'],...p});
