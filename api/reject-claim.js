@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const { claim_id } = req.body;
   if (!claim_id) return res.status(400).json({ error: 'claim_id required' });
 
-  const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
   const { error } = await supabase.from('cashback_claims').update({ status: 'rejected' }).eq('id', claim_id);
   if (error) return res.status(500).json({ error: error.message });
   return res.json({ success: true });

@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   }
 
   const supabase = createClient(
-    process.env.REACT_APP_SUPABASE_URL,
+    process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
   );
 

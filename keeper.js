@@ -28,7 +28,7 @@ async function main() {
       // Check Supabase for overridden release time
       let releaseTime = Number(p.releaseTime);
       try {
-        const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+        const SB_URL = process.env.SUPABASE_URL;
         const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
         const ovRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=release_time`, {
           headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
@@ -40,7 +40,7 @@ async function main() {
       if (p.executed || p.cancelled || releaseTime > now) { skipped++; continue; }
 
       // Skip if pending cancel request
-      const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+      const SB_URL = process.env.SUPABASE_URL;
       const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
       const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?payment_id=eq.${i}&status=eq.pending&request_type=eq.cancel`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } });
       const reqs = await reqRes.json();
@@ -53,7 +53,7 @@ async function main() {
       executed++;
       // Save tx hash to Supabase
       try {
-        const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+        const SB_URL = process.env.SUPABASE_URL;
         const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
         await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
           method: 'PATCH',
@@ -66,7 +66,7 @@ async function main() {
         const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
         if (sendAmount >= 5) {
           const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
-          const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+          const SB_URL = process.env.SUPABASE_URL;
           const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
           const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${p.sender}&select=*`, {
             headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
@@ -96,7 +96,7 @@ async function main() {
 
   // Save last run time
   try {
-    const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+    const SB_URL = process.env.SUPABASE_URL;
     const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
     await fetch(`${SB_URL}/rest/v1/keeper_status`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify({ id: 1, last_run: new Date().toISOString() }) });
   } catch(e) { console.error("Failed to save keeper status:", e.message); }

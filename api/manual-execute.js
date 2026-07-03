@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       const sendAmount = parseFloat(ethers.formatUnits(payment.amount, 18));
       if (sendAmount >= 5) {
         const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
-        const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+        const SB_URL = process.env.SUPABASE_URL;
         const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
         const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${payment.sender}&select=*`, {
           headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }

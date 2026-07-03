@@ -1,6 +1,6 @@
 import { rateLimit } from '../src/lib/rateLimit.js';
 
-const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET;
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
