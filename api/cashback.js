@@ -4,6 +4,21 @@ const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET;
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
+async function sendTelegramAlert(message) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
+    });
+  } catch (e) {
+    console.error('Telegram alert failed:', e.message);
+  }
+}
 
 const sb = (path, opts={}) => fetch(`${SB_URL}/rest/v1/${path}`, {
   ...opts,
@@ -69,6 +84,10 @@ export default async function handler(req, res) {
         console.error('cashback_claims insert failed:', insertRes.status, errBody);
         return res.status(500).json({ error: 'Failed to record claim: ' + errBody });
       }
+
+      sendTelegramAlert(
+        `💰 <b>New Cashback Claim</b>\n\nAmount: <b>${amount} USDC</b>\nWallet: <code>${wallet_address}</code>`
+      );
 
       const getRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}&select=*`);
       if (!getRes.ok) {
