@@ -60,7 +60,7 @@ export async function awaitReceipt(provider,hash,ms=120000){
 }
 
 export function buildChart(txns){
-  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return{label:d.toLocaleDateString('en',{weekday:'short',month:'numeric',day:'numeric'}).replace(',',''),date:d,sent:0};});
+  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(6-i));return{label:d.toLocaleDateString('en',{weekday:'short'}),date:d,sent:0};});
   txns.filter(tx=>!tx.received&&tx.type!=='refund'&&tx.status!=='cancelled'&&tx.status!=='scheduled').forEach(tx=>{const txDate=new Date(Number(tx.timestamp)*1000);const label=txDate.toLocaleDateString('en',{weekday:'short'});const slot=days.find(d=>d.label===label&&d.date.toDateString()===txDate.toDateString());if(slot){let n;if(typeof tx.amount==='bigint'||typeof tx.amount==='object'){try{n=parseFloat(ethers.formatUnits(BigInt(tx.amount.toString()),18));}catch{n=0;}}else{n=parseFloat(tx.amount);}slot.sent+=isNaN(n)?0:n;}});
   return days;
 }
