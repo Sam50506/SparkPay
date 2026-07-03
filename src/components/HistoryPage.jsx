@@ -125,9 +125,9 @@ export default function HistoryPage({
           <div style={{background:'var(--card)',borderRadius:16,padding:24,width:'100%',maxWidth:360,boxShadow:'var(--shl)'}} onClick={e=>e.stopPropagation()}>
             <div style={{fontSize:16,fontWeight:800,color:'var(--tx1)',marginBottom:4}}>Export Transactions</div>
             <div style={{fontSize:12,color:'var(--tx3)',marginBottom:20}}>Choose what to include in your CSV export.</div>
-            {[['all','All transactions'],['today','Today only'],['week','Last 7 days'],['month','Last 30 days'],['count','Custom count']].map(([val,label])=>(
+            {[['all','All transactions'],['today','Today only'],['week','Last 7 days'],['month','Last 30 days'],['count','Custom count (min. 5)']].map(([val,label])=>(
               <div key={val} onClick={()=>setExportRange(val)} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',borderRadius:10,marginBottom:6,border:`1px solid ${exportRange===val?'var(--ac)':'var(--b1)'}`,background:exportRange===val?'var(--acd)':'var(--elev)',cursor:'pointer'}}>
-                <div style={{width:16,height:16,borderRadius:'50%',border:`2px solid ${exportRange===val?'var(--ac)':'var(--b1)'}`,background:exportRange===val?'var(--ac)':'transparent',flexShrink:0}}/>
+                <div style={{width:18,height:18,borderRadius:'50%',border:`2px solid ${exportRange===val?'var(--ac)':'var(--b1)'}`,background:'transparent',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}>{exportRange===val&&<div style={{width:9,height:9,borderRadius:'50%',background:'var(--ac)'}}/>}</div>
                 <span style={{fontSize:13,fontWeight:600,color:'var(--tx1)'}}>{label}</span>
               </div>
             ))}
