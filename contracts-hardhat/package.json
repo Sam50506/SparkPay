@@ -17,7 +17,7 @@
     "@nomicfoundation/hardhat-verify": "^3.0.20",
     "chai": "^4.5.0",
     "ethers": "^6.16.0",
-    "hardhat": "^2.19.4",
+    "hardhat": "^3.9.1",
     "solc": "^0.8.28"
   },
   "dependencies": {
