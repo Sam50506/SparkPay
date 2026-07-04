@@ -79,33 +79,31 @@ export default async function handler(req, res) {
     }
 
     try {
+      // Atomic check-and-decrement: claim_cashback() only succeeds if pending_amount >= amount,
+      // preventing concurrent claims from both reading a stale balance and double-spending.
+      const rpcRes = await sb('rpc/claim_cashback', {
+        method: 'POST',
+        body: JSON.stringify({ p_wallet: wallet_address, p_amt: parseFloat(amount) })
+      });
+      if (!rpcRes.ok) {
+        const errBody = await rpcRes.text();
+        console.error('claim_cashback RPC failed:', rpcRes.status, errBody);
+        return res.status(400).json({ error: 'Insufficient balance or claim failed' });
+      }
+      const newBalance = await rpcRes.json();
+
       const insertRes = await sb('cashback_claims', { method: 'POST', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ wallet_address, amount, timestamp: new Date().toISOString(), status: 'pending' }) });
       if (!insertRes.ok) {
         const errBody = await insertRes.text();
-        console.error('cashback_claims insert failed:', insertRes.status, errBody);
+        console.error('cashback_claims insert failed after balance already decremented:', insertRes.status, errBody);
+        // Balance was already atomically decremented — refund it since the claim record failed to save
+        await sb('rpc/increment_cashback', { method: 'POST', body: JSON.stringify({ wallet: wallet_address, amt: parseFloat(amount) }) }).catch(() => {});
         return res.status(500).json({ error: 'Failed to record claim: ' + errBody });
       }
 
       sendTelegramAlert(
         `💰 <b>New Cashback Claim</b>\n\nAmount: <b>${amount} USDC</b>\nWallet: <code>${wallet_address}</code>`
       );
-
-      const getRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}&select=*`);
-      if (!getRes.ok) {
-        const errBody = await getRes.text();
-        console.error('cashback_balances fetch failed:', getRes.status, errBody);
-        return res.status(500).json({ error: 'Failed to read balance: ' + errBody });
-      }
-      const rows = await getRes.json();
-      const current = rows[0]?.pending_amount || 0;
-      const newBalance = parseFloat((parseFloat(current) - parseFloat(amount)).toFixed(3));
-
-      const patchRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}`, { method: 'PATCH', body: JSON.stringify({ pending_amount: newBalance, updated_at: new Date().toISOString() }) });
-      if (!patchRes.ok) {
-        const errBody = await patchRes.text();
-        console.error('cashback_balances patch failed:', patchRes.status, errBody);
-        return res.status(500).json({ error: 'Failed to update balance: ' + errBody });
-      }
 
       return res.json({ success: true, newBalance });
     } catch (e) {
