@@ -84,14 +84,11 @@ async function processPayment(contract, i, now, counters) {
   try {
     const p = await contract.getPayment(i);
 
-    let releaseTime = Number(p.releaseTime);
-    try {
-      const ovRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=release_time`, {
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-      });
-      const ovData = await ovRes.json();
-      if (ovData[0]?.release_time) releaseTime = Number(ovData[0].release_time);
-    } catch (e) {}
+    // SECURITY: on-chain state is the only source of truth for execution decisions.
+    // Supabase is used elsewhere purely to discover candidate IDs faster — never to
+    // override whether a payment is due, executed, or cancelled. A bad/stale DB row
+    // (e.g. release_time=0) must never cause early or incorrect execution.
+    const releaseTime = Number(p.releaseTime);
 
     if (p.executed || p.cancelled || releaseTime > now) { counters.skipped++; return; }
 
