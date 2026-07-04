@@ -13,7 +13,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.1.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
-    "@nomicfoundation/hardhat-network-helpers": "^1.1.2",
+    "@nomicfoundation/hardhat-network-helpers": "^3.0.11",
     "@nomicfoundation/hardhat-verify": "^3.0.20",
     "chai": "^4.5.0",
     "ethers": "^6.16.0",
