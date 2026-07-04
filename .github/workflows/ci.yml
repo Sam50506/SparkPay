@@ -31,7 +31,7 @@ jobs:
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
         with:
-          target: '.'
+          target: 'contracts-hardhat'
           slither-args: '--filter-paths "node_modules"'
           node-version: '22'
           solc-version: '0.8.35'
