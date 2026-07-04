@@ -27,7 +27,7 @@ contract ScheduledPayment is ReentrancyGuard, Ownable, Pausable {
 
     event PaymentScheduled(uint256 indexed id, address indexed sender, address indexed recipient, uint256 amount, uint256 releaseTime, string country);
     event PaymentExecuted(uint256 indexed id, address recipient, uint256 amount);
-    event PaymentCancelled(uint256 indexed id, address sender, uint256 amount);
+    event PaymentCancelled(uint256 indexed id, address sender, uint256 amount, uint256 refundAmount);
     event PaymentEdited(uint256 indexed id, address recipient, uint256 amount, uint256 releaseTime);
     event ExecutorUpdated(address indexed oldExecutor, address indexed newExecutor);
     event EmergencyWithdraw(address indexed to, uint256 amount);
@@ -190,13 +190,14 @@ contract ScheduledPayment is ReentrancyGuard, Ownable, Pausable {
         require(msg.sender == p.sender || msg.sender == executor || msg.sender == owner(), "Not authorized");
         require(!p.executed, "Already executed");
         require(!p.cancelled, "Already cancelled");
-        require(!p.executed && block.timestamp < p.releaseTime || msg.sender == executor || msg.sender == owner(), "Too late to cancel");
+        require((!p.executed && block.timestamp < p.releaseTime) || (msg.sender == executor || msg.sender == owner()), "Too late to cancel");
 
+        uint256 refundAmt = p.amount;
         p.cancelled = true;
-        (bool success,) = payable(p.sender).call{value: p.amount}("");
+        (bool success,) = payable(p.sender).call{value: refundAmt}("");
         require(success, "Refund failed");
 
-        emit PaymentCancelled(id, p.sender, p.amount);
+        emit PaymentCancelled(id, p.sender, refundAmt, refundAmt);
     }
 
     function getPayment(uint256 id) external view returns (Payment memory) { return payments[id]; }
