@@ -34,3 +34,4 @@ node_modules/
 contracts-hardhat/node_modules/
 contracts-hardhat/ScheduledPayment.abi.json
 contracts-hardhat/ScheduledPayment.bytecode.txt
+build_check.log
