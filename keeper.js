@@ -137,22 +137,19 @@ async function main() {
           const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
           const SB_URL = process.env.SUPABASE_URL;
           const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-          const getRes = await fetch(`${SB_URL}/rest/v1/cashback_balances?wallet_address=eq.${p.sender}&select=*`, {
-            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-          });
-          const rows = await getRes.json();
-          const current = rows[0]?.pending_amount || 0;
-          const newBalance = parseFloat((parseFloat(current) + cashbackAmt).toFixed(3));
-          await fetch(`${SB_URL}/rest/v1/cashback_balances`, {
+          const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/increment_cashback`, {
             method: 'POST',
             headers: {
               'apikey': SB_KEY,
               'Authorization': `Bearer ${SB_KEY}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'resolution=merge-duplicates'
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ wallet_address: p.sender, pending_amount: newBalance, updated_at: new Date().toISOString() })
+            body: JSON.stringify({ wallet: p.sender, amt: cashbackAmt })
           });
+          if (!rpcRes.ok) {
+            const errBody = await rpcRes.text();
+            console.error('increment_cashback RPC failed:', rpcRes.status, errBody);
+          }
           console.log("Cashback awarded: " + cashbackAmt + " to " + p.sender);
         }
       } catch (ce) { console.error("Cashback failed for payment " + i + ":", ce.message); }

@@ -41,17 +41,18 @@ export default async function handler(req, res) {
     if (parseFloat(amount) <= 0 || parseFloat(amount) > 100) return res.status(400).json({ error: 'Invalid amount' });
 
     try {
-      const getRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}&select=*`);
-      const rows = await getRes.json();
-      const current = rows[0]?.pending_amount || 0;
-      const newBalance = parseFloat((parseFloat(current) + parseFloat(amount)).toFixed(3));
-      if (rows[0]) {
-        // Update existing
-        await sb(`cashback_balances?wallet_address=eq.${wallet_address}`, { method: 'PATCH', body: JSON.stringify({ pending_amount: newBalance, updated_at: new Date().toISOString() }) });
-      } else {
-        // Insert new
-        await sb('cashback_balances', { method: 'POST', body: JSON.stringify({ wallet_address, pending_amount: newBalance, updated_at: new Date().toISOString() }) });
+      const rpcRes = await sb('rpc/increment_cashback', {
+        method: 'POST',
+        body: JSON.stringify({ wallet: wallet_address, amt: parseFloat(amount) })
+      });
+      if (!rpcRes.ok) {
+        const errBody = await rpcRes.text();
+        console.error('increment_cashback RPC failed:', rpcRes.status, errBody);
+        return res.status(500).json({ error: 'Failed to award cashback: ' + errBody });
       }
+      const getRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}&select=pending_amount`);
+      const rows = await getRes.json();
+      const newBalance = rows[0]?.pending_amount ?? null;
       return res.json({ success: true, newBalance });
     } catch (e) {
       return res.status(500).json({ error: e.message });
