@@ -243,3 +243,12 @@ svg *:focus,
 g:focus {
   outline: none !important;
 }
+
+.ap-spin-earth {
+  display: inline-block;
+  animation: ap-spin-earth-rotate 4s linear infinite;
+}
+@keyframes ap-spin-earth-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

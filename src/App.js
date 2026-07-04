@@ -268,12 +268,17 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
               <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
             </div>
             <div style={{textAlign:'center',marginBottom:40}}>
-              <div style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-0.5px',marginBottom:12}}>Send USDC<br/><span style={{color:'var(--ac)'}}>Globally.</span></div>
+              <div style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-0.5px',marginBottom:12}}>Send USDC<br/><span style={{color:'var(--ac)'}}>GL<span className="ap-spin-earth" role="img" aria-label="O">🌍</span>BALLY.</span></div>
               <div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6}}>Send money across borders instantly.<br/>Zero fees. Instant settlement. Powered by Arc.</div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:32}}>
-              {[['150+','Countries'],['~0','Fees'],['Instant','Settlement']].map(([v,l])=>(
-                <div key={l} style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:14,padding:'14px 8px',textAlign:'center'}}>
+              {[
+                ['150+','Countries', <svg key="g" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>],
+                ['~0','Fees', <svg key="z" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>],
+                ['Instant','Settlement', <svg key="c" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>]
+              ].map(([v,l,icon])=>(
+                <div key={l} style={{background:'var(--acd)',border:'1px solid var(--acs)',borderRadius:14,padding:'14px 8px',textAlign:'center'}}>
+                  <div style={{color:'var(--ac)',display:'flex',justifyContent:'center',marginBottom:6}}>{icon}</div>
                   <div style={{fontFamily:'var(--fd)',fontSize:18,fontWeight:900,color:'var(--ac)'}}>{v}</div>
                   <div style={{fontSize:10,color:'var(--tx3)',marginTop:3,fontWeight:600}}>{l}</div>
                 </div>
