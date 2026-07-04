@@ -85,39 +85,32 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(RPC, 5042002);
   const wallet = new ethers.Wallet(key, provider);
   const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
+  const count = Number(await contract.paymentCount());
   const now = Math.floor(Date.now() / 1000);
-
-  const SB_URL = process.env.SUPABASE_URL;
-  const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+  console.log("Checking " + count + " payments");
 
   let executed = 0, failed = 0, skipped = 0;
 
-  // Only fetch candidates that are due, not cancelled, and not yet marked executed —
-  // instead of looping every payment ID from 0 to paymentCount every run.
-  const candRes = await fetch(
-    `${SB_URL}/rest/v1/scheduled_payments?release_time=lte.${now}&executed=eq.false&cancelled=eq.false&select=payment_id`,
-    { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
-  );
-  const candidates = await candRes.json();
-  console.log("Checking " + candidates.length + " candidate payment(s)");
-
-  for (const row of candidates) {
-    const i = row.payment_id;
+  for (let i = 0; i < count; i++) {
     try {
       const p = await contract.getPayment(i);
+      // Check Supabase for overridden release time
+      let releaseTime = Number(p.releaseTime);
+      try {
+        const SB_URL = process.env.SUPABASE_URL;
+        const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+        const ovRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=release_time`, {
+          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        });
+        const ovData = await ovRes.json();
+        if (ovData[0]?.release_time) releaseTime = Number(ovData[0].release_time);
+      } catch(e) {}
 
-      // Self-heal: if chain shows executed/cancelled but Supabase didn't know, sync it and skip.
-      if (p.executed || p.cancelled) {
-        await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
-          method: 'PATCH',
-          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ executed: p.executed, cancelled: p.cancelled })
-        }).catch(() => {});
-        skipped++;
-        continue;
-      }
+      if (p.executed || p.cancelled || releaseTime > now) { skipped++; continue; }
 
       // Skip if pending cancel request
+      const SB_URL = process.env.SUPABASE_URL;
+      const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
       const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?payment_id=eq.${i}&status=eq.pending&request_type=eq.cancel`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } });
       const reqs = await reqRes.json();
       if (reqs.length > 0) { console.log("Skipping payment " + i + " — pending cancel request"); skipped++; continue; }
@@ -127,19 +120,23 @@ async function main() {
       await tx.wait();
       console.log("Done: " + tx.hash);
       executed++;
-      // Mark executed + save tx hash in one update
+      // Save tx hash to Supabase
       try {
+        const SB_URL = process.env.SUPABASE_URL;
+        const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
         await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
           method: 'PATCH',
           headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tx_hash: tx.hash, executed: true })
+          body: JSON.stringify({ tx_hash: tx.hash })
         });
-      } catch(he) { console.error('Failed to save tx hash/executed flag:', he.message); }
+      } catch(he) { console.error('Failed to save tx hash:', he.message); }
 
       try {
         const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
         if (sendAmount >= 5) {
           const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
+          const SB_URL = process.env.SUPABASE_URL;
+          const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
           const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/increment_cashback`, {
             method: 'POST',
             headers: {
