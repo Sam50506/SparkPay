@@ -230,3 +230,16 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
   .ap-tip-pop{left:auto;right:calc(100% + 10px)}
 }
 @media(min-width:769px){.mob-show{display:none!important}}
+
+/* Fix: Recharts renders internal SVG/g elements with tabindex for accessibility,
+   which some mobile browsers (notably Mises) show a persistent black focus-ring
+   outline on after tap, instead of clearing it on blur like most browsers do. */
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus,
+.recharts-surface *:focus,
+svg:focus,
+svg *:focus,
+g:focus {
+  outline: none !important;
+}
