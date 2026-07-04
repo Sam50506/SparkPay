@@ -164,9 +164,12 @@ export default async function handler(req, res) {
       body: JSON.stringify({payment_id: pid, wallet_address, request_type: rtype, reason, new_recipient, new_amount, new_date, new_time: ntime||null, tz_offset: tz_offset||null, status: 'pending'})
     });
     if (!r.ok) throw new Error(await r.text());
+    // Mask wallet address in Telegram alerts to limit PII exposure if the bot token
+    // is ever leaked/logged — full details remain visible in the admin portal itself.
+    const maskedWallet = wallet_address ? `${wallet_address.slice(0,6)}...${wallet_address.slice(-4)}` : 'unknown';
     const msg = rtype === 'cancel'
-      ? `🚨 <b>Cancel Request</b>\n\nPayment ID: #${pid}\nWallet: <code>${wallet_address}</code>\nReason: ${reason}\n\nReview in admin portal.`
-      : `✏️ <b>Edit Request</b>\n\nPayment ID: #${pid}\nWallet: <code>${wallet_address}</code>\nNew Recipient: ${new_recipient||'-'}\nNew Amount: ${new_amount||'-'}\nNew Date: ${new_date||'-'}\n\nReview in admin portal.`;
+      ? `🚨 <b>Cancel Request</b>\n\nPayment ID: #${pid}\nWallet: <code>${maskedWallet}</code>\n\nReview in admin portal.`
+      : `✏️ <b>Edit Request</b>\n\nPayment ID: #${pid}\nWallet: <code>${maskedWallet}</code>\n\nReview in admin portal.`;
     await sendTelegram(msg);
     res.status(200).json({success: true});
   } catch(e) {
