@@ -25,6 +25,13 @@ jobs:
       - name: Run Solhint
         run: npx solhint 'contracts/**/*.sol'
 
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.0
+        with:
+          target: 'contracts-hardhat'
+          slither-args: '--filter-paths "node_modules"'
+          node-version: '22'
+
       - name: Run Hardhat tests
         run: npx hardhat test
 
