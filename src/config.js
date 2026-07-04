@@ -68,15 +68,35 @@ export function buildChart(txns){
 export function addrColor(addr){const colors=['#3B82F6','#8B5CF6','#EC4899','#F59E0B','#10B981','#EF4444','#06B6D4','#F97316'];return colors[parseInt(addr.slice(2,4),16)%colors.length];}
 export function isValidAddr(a){return a.trim().length===42&&a.trim().slice(0,2).toLowerCase()==='0x';}
 
+// Fail fast if any critical address is malformed — a silently wrong USDC/contract
+// address could send real funds to the wrong place with no warning.
+(function validateCriticalAddresses(){
+  const critical = { SCHED_ADDR, REMIT_ADDR, USDC_ADDR };
+  const bad = Object.entries(critical).filter(([, v]) => !isValidAddr(v));
+  if (bad.length > 0) {
+    const msg = 'FATAL: invalid contract address(es) in config: ' + bad.map(([k]) => k).join(', ');
+    console.error(msg);
+    if (typeof window !== 'undefined') window.__SPARKPAY_CONFIG_INVALID__ = msg;
+  }
+})();
+
+// A provider is only trustworthy if it actually implements the EIP-1193 request()
+// method — boolean flags like isMetaMask/isMises can be spoofed by any injected
+// script, but a working request() function is at minimum a real provider surface.
+function isRealProvider(p) {
+  return !!p && typeof p.request === 'function';
+}
+
 export function getProvider() {
   return new Promise((resolve) => {
     const tryResolve = () => {
-      if(window.mises?.ethereum) return window.mises.ethereum;
-      const {ethereum}=window; if(!ethereum) return null;
+      if(isRealProvider(window.mises?.ethereum)) return window.mises.ethereum;
+      const {ethereum}=window; if(!isRealProvider(ethereum)) return null;
       if(ethereum.providers?.length>0){
-        const mises=ethereum.providers.find(p=>p.isMises);if(mises)return mises;
-        const mm=ethereum.providers.find(p=>p.isMetaMask&&!p.isBraveWallet);if(mm)return mm;
-        return ethereum.providers[0];
+        const mises=ethereum.providers.find(p=>p.isMises&&isRealProvider(p));if(mises)return mises;
+        const mm=ethereum.providers.find(p=>p.isMetaMask&&!p.isBraveWallet&&isRealProvider(p));if(mm)return mm;
+        const firstValid=ethereum.providers.find(isRealProvider);
+        return firstValid||null;
       }
       if(ethereum.isMises) return ethereum;
       if(ethereum.isMetaMask||ethereum._metamask) return ethereum;
