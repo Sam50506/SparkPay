@@ -123,9 +123,9 @@ function AppInner() {
   }catch(e){return new Set(ls('arc_deleted_hashes_'+address,[]));}
 },[address]);
 
-  const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount||parseFloat(txAmount)<5)return;const amt=parseFloat((parseFloat(txAmount)*0.01).toFixed(3));if(amt<=0)return;
+  const awardCashback=useCallback(async(txHash,txAmount)=>{if(!txAmount)return;let amountWei;try{amountWei=ethers.parseUnits(txAmount.toString(),18);}catch{return;}const FIVE_USDC_WEI=ethers.parseUnits('5',18);if(amountWei<FIVE_USDC_WEI)return;const cashbackWei=amountWei/100n;if(cashbackWei<=0n)return;const cashbackAmtStr=ethers.formatUnits(cashbackWei,18);const amt=parseFloat(cashbackAmtStr);
     try{
-      const r=await fetch('/api/cashback',{method:'POST',headers:{'Content-Type':'application/json','x-internal-secret':process.env.REACT_APP_INTERNAL_SECRET||'sparkpay_internal_2805'},body:JSON.stringify({action:'award',wallet_address:address,amount:amt,tx_hash:txHash})});
+      const r=await fetch('/api/cashback',{method:'POST',headers:{'Content-Type':'application/json','x-internal-secret':process.env.REACT_APP_INTERNAL_SECRET||'sparkpay_internal_2805'},body:JSON.stringify({action:'award',wallet_address:address,amount:cashbackAmtStr,tx_hash:txHash})});
       const d=await r.json();
       if(d.success){setCashbackPending(d.newBalance);}
     }catch(e){console.error('Cashback award failed:',e);}
