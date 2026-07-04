@@ -34,6 +34,7 @@ jobs:
           target: 'contracts-hardhat'
           slither-args: '--filter-paths "node_modules"'
           node-version: '22'
+          solc-version: '0.8.35'
 
       - name: Run Hardhat tests
         run: npx hardhat test
