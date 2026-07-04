@@ -103,11 +103,13 @@ async function processPayment(contract, i, now, counters) {
     counters.executed++;
 
     try {
-      await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
+      const patchRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
         method: 'PATCH',
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify({ tx_hash: tx.hash, executed: true })
       });
+      if (!patchRes.ok) console.error('PATCH failed:', await patchRes.text());
+      else console.log('Supabase updated for payment', i);
     } catch (he) { console.error('Failed to save tx hash/executed flag:', he.message); }
 
     try {
