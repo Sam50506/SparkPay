@@ -6,7 +6,7 @@ import { rateLimit } from '../src/lib/rateLimit.js';
 const RPC = 'https://rpc.testnet.arc.network';
 const CHAIN_ID = 5042002;
 const ADMIN_KEY = process.env.PAYOUT_ADMIN_KEY;
-const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
+const JWT_SECRET = process.env.PAYOUT_JWT_SECRET;
 const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
 
 export default async function handler(req, res) {

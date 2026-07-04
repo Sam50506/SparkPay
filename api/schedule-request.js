@@ -27,7 +27,7 @@ async function sendTelegram(msg) {
 }
 
 const ADMIN_KEY = process.env.PAYOUT_ADMIN_KEY;
-const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
+const JWT_SECRET = process.env.PAYOUT_JWT_SECRET;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
