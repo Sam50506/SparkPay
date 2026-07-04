@@ -11,11 +11,19 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+<<<<<<< HEAD
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.1.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "chai": "^6.2.2",
+=======
+    "@nomicfoundation/hardhat-chai-matchers": "^2.1.2",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.1.2",
+    "@nomicfoundation/hardhat-verify": "^3.0.20",
+    "chai": "^4.5.0",
+>>>>>>> 2c2469630f0552068b45c118143f9189abca6fa9
     "ethers": "^6.16.0",
     "hardhat": "^2.19.4",
     "solc": "^0.8.28"
