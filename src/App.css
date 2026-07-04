@@ -246,9 +246,9 @@ g:focus {
 
 .ap-spin-earth {
   display: inline-block;
-  animation: ap-spin-earth-rotate 4s linear infinite;
+  animation: ap-spin-earth-rotate 7s linear infinite;
 }
 @keyframes ap-spin-earth-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
 }
