@@ -28,6 +28,9 @@ jobs:
       - name: Run Solhint
         run: npx solhint 'contracts/**/*.sol'
 
+      - name: Compile contracts (for Slither)
+        run: npx hardhat compile --force
+
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
         with:
@@ -35,6 +38,7 @@ jobs:
           slither-args: '--filter-paths "node_modules"'
           node-version: '22'
           solc-version: '0.8.35'
+          ignore-compile: true
 
       - name: Run Hardhat tests
         run: npx hardhat test
