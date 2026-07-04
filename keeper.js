@@ -21,6 +21,9 @@ const PAYOUT_WALLET_ADDRESS = process.env.PAYOUT_WALLET_ADDRESS;
 const USDC_ADDR = process.env.REACT_APP_USDC_ADDR || "0x3600000000000000000000000000000000000000";
 const LOW_BALANCE_THRESHOLD = 20;
 
+const SB_URL = process.env.SUPABASE_URL;
+const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
+
 async function sendTelegramAlert(message) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     console.error("Telegram not configured, skipping alert");
@@ -51,8 +54,6 @@ async function checkPayoutBalance(provider) {
 
     if (balance >= LOW_BALANCE_THRESHOLD) return;
 
-    const SB_URL = process.env.SUPABASE_URL;
-    const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
     const statusRes = await fetch(`${SB_URL}/rest/v1/keeper_status?id=eq.1&select=last_balance_alert`, {
       headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
     });
@@ -79,101 +80,116 @@ async function checkPayoutBalance(provider) {
   }
 }
 
+async function processPayment(contract, i, now, counters) {
+  try {
+    const p = await contract.getPayment(i);
+
+    let releaseTime = Number(p.releaseTime);
+    try {
+      const ovRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=release_time`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+      });
+      const ovData = await ovRes.json();
+      if (ovData[0]?.release_time) releaseTime = Number(ovData[0].release_time);
+    } catch (e) {}
+
+    if (p.executed || p.cancelled || releaseTime > now) { counters.skipped++; return; }
+
+    const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?payment_id=eq.${i}&status=eq.pending&request_type=eq.cancel`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } });
+    const reqs = await reqRes.json();
+    if (reqs.length > 0) { console.log("Skipping payment " + i + " — pending cancel request"); counters.skipped++; return; }
+
+    console.log("Executing payment " + i);
+    const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
+    await tx.wait();
+    console.log("Done: " + tx.hash);
+    counters.executed++;
+
+    try {
+      await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tx_hash: tx.hash, executed: true })
+      });
+    } catch (he) { console.error('Failed to save tx hash/executed flag:', he.message); }
+
+    try {
+      const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
+      if (sendAmount >= 5) {
+        const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
+        const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/increment_cashback`, {
+          method: 'POST',
+          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wallet: p.sender, amt: cashbackAmt })
+        });
+        if (!rpcRes.ok) {
+          const errBody = await rpcRes.text();
+          console.error('increment_cashback RPC failed:', rpcRes.status, errBody);
+        }
+        console.log("Cashback awarded: " + cashbackAmt + " to " + p.sender);
+      }
+    } catch (ce) { console.error("Cashback failed for payment " + i + ":", ce.message); }
+
+  } catch (e) {
+    console.error("Payment " + i + " failed:", e.message);
+    counters.failed++;
+  }
+}
+
 async function main() {
   if (!PRIVATE_KEY) { console.error("No private key"); process.exit(1); }
   const key = PRIVATE_KEY.startsWith('0x') ? PRIVATE_KEY : '0x' + PRIVATE_KEY;
   const provider = new ethers.JsonRpcProvider(RPC, 5042002);
   const wallet = new ethers.Wallet(key, provider);
   const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
-  const count = Number(await contract.paymentCount());
   const now = Math.floor(Date.now() / 1000);
-  console.log("Checking " + count + " payments");
 
-  let executed = 0, failed = 0, skipped = 0;
+  const onChainCount = Number(await contract.paymentCount());
 
-  for (let i = 0; i < count; i++) {
-    try {
-      const p = await contract.getPayment(i);
-      // Check Supabase for overridden release time
-      let releaseTime = Number(p.releaseTime);
-      try {
-        const SB_URL = process.env.SUPABASE_URL;
-        const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-        const ovRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=release_time`, {
-          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-        });
-        const ovData = await ovRes.json();
-        if (ovData[0]?.release_time) releaseTime = Number(ovData[0].release_time);
-      } catch(e) {}
+  let sbCount = null;
+  try {
+    const countRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?select=payment_id`, {
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    const rows = await countRes.json();
+    sbCount = Array.isArray(rows) ? rows.length : null;
+  } catch (e) {
+    console.error("Could not read scheduled_payments count, falling back to full sweep:", e.message);
+  }
 
-      if (p.executed || p.cancelled || releaseTime > now) { skipped++; continue; }
+  const counters = { executed: 0, failed: 0, skipped: 0 };
+  const inSync = sbCount !== null && sbCount === onChainCount;
 
-      // Skip if pending cancel request
-      const SB_URL = process.env.SUPABASE_URL;
-      const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-      const reqRes = await fetch(`${SB_URL}/rest/v1/scheduled_payment_requests?payment_id=eq.${i}&status=eq.pending&request_type=eq.cancel`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } });
-      const reqs = await reqRes.json();
-      if (reqs.length > 0) { console.log("Skipping payment " + i + " — pending cancel request"); skipped++; continue; }
-
-      console.log("Executing payment " + i);
-      const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
-      await tx.wait();
-      console.log("Done: " + tx.hash);
-      executed++;
-      // Save tx hash to Supabase
-      try {
-        const SB_URL = process.env.SUPABASE_URL;
-        const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-        await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}`, {
-          method: 'PATCH',
-          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tx_hash: tx.hash })
-        });
-      } catch(he) { console.error('Failed to save tx hash:', he.message); }
-
-      try {
-        const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
-        if (sendAmount >= 5) {
-          const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
-          const SB_URL = process.env.SUPABASE_URL;
-          const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-          const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/increment_cashback`, {
-            method: 'POST',
-            headers: {
-              'apikey': SB_KEY,
-              'Authorization': `Bearer ${SB_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ wallet: p.sender, amt: cashbackAmt })
-          });
-          if (!rpcRes.ok) {
-            const errBody = await rpcRes.text();
-            console.error('increment_cashback RPC failed:', rpcRes.status, errBody);
-          }
-          console.log("Cashback awarded: " + cashbackAmt + " to " + p.sender);
-        }
-      } catch (ce) { console.error("Cashback failed for payment " + i + ":", ce.message); }
-
-    } catch (e) {
-      console.error("Payment " + i + " failed:", e.message);
-      failed++;
+  if (inSync) {
+    console.log(`Supabase in sync (${sbCount}/${onChainCount}) — using fast candidate query`);
+    const candRes = await fetch(
+      `${SB_URL}/rest/v1/scheduled_payments?release_time=lte.${now}&executed=eq.false&cancelled=eq.false&select=payment_id`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+    );
+    const candidates = await candRes.json();
+    console.log("Checking " + candidates.length + " candidate payment(s)");
+    for (const row of candidates) {
+      await processPayment(contract, row.payment_id, now, counters);
+    }
+  } else {
+    console.warn(`SYNC MISMATCH: Supabase has ${sbCount ?? 'unknown'} rows, on-chain has ${onChainCount}. Falling back to full on-chain sweep for safety.`);
+    await sendTelegramAlert(
+      `⚠️ <b>SparkPay Keeper Sync Warning</b>\n\nSupabase rows: <b>${sbCount ?? 'unknown'}</b>\nOn-chain paymentCount: <b>${onChainCount}</b>\n\nFalling back to full sweep this run. Investigate the data gap.`
+    );
+    console.log("Checking all " + onChainCount + " payments (full sweep)");
+    for (let i = 0; i < onChainCount; i++) {
+      await processPayment(contract, i, now, counters);
     }
   }
 
-  // Save last run time
   try {
-    const SB_URL = process.env.SUPABASE_URL;
-    const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
     await fetch(`${SB_URL}/rest/v1/keeper_status`, { method: "POST", headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`, "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates" }, body: JSON.stringify({ id: 1, last_run: new Date().toISOString() }) });
-  } catch(e) { console.error("Failed to save keeper status:", e.message); }
+  } catch (e) { console.error("Failed to save keeper status:", e.message); }
 
   await checkPayoutBalance(provider);
 
-  console.log(`Keeper finished — executed: ${executed}, failed: ${failed}, skipped: ${skipped}`);
-  
+  console.log(`Keeper finished — mode: ${inSync ? 'fast' : 'full-sweep-fallback'}, executed: ${counters.executed}, failed: ${counters.failed}, skipped: ${counters.skipped}`);
 }
 
 main().catch(e => { console.error(e.message); });
-// v3
-
-
+// v4 - hybrid with self-healing sync check
