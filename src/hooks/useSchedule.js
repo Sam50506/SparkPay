@@ -55,15 +55,16 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
         const sched2 = new ethers.Contract(SCHED_ADDR, SCHED_ABI, signer.provider || signer);
         const count = Number(await sched2.paymentCount());
         const newId = count - 1;
-        await sbFetch('/rest/v1/scheduled_payments', {
+        await fetch('/api/schedule-request', {
           method: 'POST',
-          headers: { 'Prefer': 'resolution=merge-duplicates' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            action: 'create',
             payment_id: newId, sender: address, recipient: ethers.getAddress(newSched.addr.trim()),
             amount: newSched.amount, release_time: releaseTime, country: newSched.country || '',
-            executed: false, cancelled: false, tx_hash: tx.hash
+            tx_hash: tx.hash
           })
-        });
+        }).then(async r => { if (!r.ok) throw new Error(await r.text()); });
       } catch (dbErr) { console.error('Failed to save scheduled_payments row:', dbErr.message); }
       const schedRec = {
         id: tx.hash + '_sched', hash: tx.hash, recipient: newSched.addr,

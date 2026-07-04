@@ -37,6 +37,21 @@ export default async function handler(req, res) {
 
   const { action, request_id, payment_id, request_type, request_ids } = req.body;
 
+  if (action === 'create') {
+    const { payment_id: newId, sender, recipient, amount, release_time, country, tx_hash } = req.body;
+    try {
+      const r = await fetch(`${SB_URL}/rest/v1/scheduled_payments`, {
+        method: 'POST',
+        headers: {'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=representation'},
+        body: JSON.stringify({payment_id: newId, sender, recipient, amount, release_time, country: country || '', executed: false, cancelled: false, tx_hash})
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return res.status(200).json({success: true});
+    } catch(e) {
+      return res.status(500).json({error: e.message});
+    }
+  }
+
   if (action === 'delete') {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
