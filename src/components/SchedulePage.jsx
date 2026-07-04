@@ -108,9 +108,9 @@ export default function SchedulePage({
           <div>
             <div style={{background:'var(--b2)',borderRadius:12,padding:16,marginBottom:16}}>
               <div style={{fontSize:12,color:'var(--tx3)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:12,fontWeight:700}}>Review Before Locking</div>
-              <div style={{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13}}>
-                <span style={{color:'var(--tx3)'}}>Recipient</span>
-                <span style={{fontFamily:'monospace',color:'var(--tx1)'}}>{addrTrimmed}</span>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13,gap:12}}>
+                <span style={{color:'var(--tx3)',flexShrink:0}}>Recipient</span>
+                <span style={{fontFamily:'monospace',color:'var(--tx1)',wordBreak:'break-all',textAlign:'right',minWidth:0}}>{addrTrimmed}</span>
               </div>
               <div style={{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13}}>
                 <span style={{color:'var(--tx3)'}}>Amount</span>
