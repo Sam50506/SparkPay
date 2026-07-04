@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     if (!hasValidSecret && !hasValidSession) {
       return res.status(401).json({ error: 'Setup requires ADMIN_SETUP_SECRET header or an authenticated admin session' });
     }
-    if (!pin || pin.length < 6) return res.status(400).json({ error: 'PIN must be at least 6 digits' });
+    if (!pin || pin.length < 8) return res.status(400).json({ error: 'PIN must be at least 8 digits' });
     try {
       const pinHash = await bcrypt.hash(pin, 10);
       await fetch(`${SB_URL}/rest/v1/admin_pin`, {
@@ -63,8 +63,40 @@ export default async function handler(req, res) {
       });
       const rows = await r.json();
       if (!Array.isArray(rows) || rows.length === 0) return res.status(404).json({ error: 'No PIN set up' });
-      const valid = await bcrypt.compare(String(pin), rows[0].pin_hash);
-      if (!valid) return res.status(401).json({ error: 'Incorrect PIN' });
+      const row = rows[0];
+
+      if (row.locked_until && new Date(row.locked_until) > new Date()) {
+        const mins = Math.ceil((new Date(row.locked_until) - new Date()) / 60000);
+        return res.status(423).json({ error: `Too many failed attempts. Try again in ${mins} minute(s).` });
+      }
+
+      const valid = await bcrypt.compare(String(pin), row.pin_hash);
+      if (!valid) {
+        const attempts = (row.failed_attempts || 0) + 1;
+        const update = { failed_attempts: attempts };
+        if (attempts >= 5) {
+          update.locked_until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+          update.failed_attempts = 0;
+        }
+        await fetch(SB_URL + '/rest/v1/admin_pin?admin_address=eq.' + ADMIN_ADDRESS, {
+          method: 'PATCH',
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify(update)
+        });
+        if (update.locked_until) {
+          return res.status(423).json({ error: 'Too many failed attempts. Locked for 24 hours.' });
+        }
+        return res.status(401).json({ error: 'Incorrect PIN' });
+      }
+
+      if (row.failed_attempts > 0 || row.locked_until) {
+        await fetch(SB_URL + '/rest/v1/admin_pin?admin_address=eq.' + ADMIN_ADDRESS, {
+          method: 'PATCH',
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ failed_attempts: 0, locked_until: null })
+        });
+      }
+
       const token = jwt.sign({ address: ADMIN_ADDRESS, ts: Date.now() }, JWT_SECRET, { expiresIn: '12h' });
       return res.status(200).json({ verified: true, token });
     } catch (e) {
