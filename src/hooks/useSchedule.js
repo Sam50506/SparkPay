@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { ethers } from 'ethers';
-import { SCHED_ADDR, sbFetch } from '../config';
+import { SCHED_ADDR, sbFetch, awaitReceipt } from '../config';
 import { lsSave, ls } from '../config';
 
 export const SCHED_ABI = [
@@ -35,6 +35,38 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
         { value: amt, gasPrice: ethers.parseUnits('100', 'gwei'), gasLimit: 200000 }
       );
       setStatus({ type: 'info', msg: 'Transaction submitted! Waiting for confirmation...' });
+
+      const finalizeSchedule = async () => {
+        setStatus({ type: 'success', msg: 'Payment scheduled! USDC locked in escrow until ' + new Date(releaseTime * 1000).toLocaleString() });
+        try {
+          const sched2 = new ethers.Contract(SCHED_ADDR, SCHED_ABI, signer.provider || signer);
+          const count = Number(await sched2.paymentCount());
+          const newId = count - 1;
+          await fetch('/api/schedule-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'create',
+              payment_id: newId, sender: address, recipient: ethers.getAddress(newSched.addr.trim()),
+              amount: newSched.amount, release_time: releaseTime, country: newSched.country || '',
+              tx_hash: tx.hash
+            })
+          }).then(async r => { if (!r.ok) throw new Error(await r.text()); });
+        } catch (dbErr) { console.error('Failed to save scheduled_payments row:', dbErr.message); }
+        const schedRec = {
+          id: tx.hash + '_sched', hash: tx.hash, recipient: newSched.addr,
+          amount: parseFloat(newSched.amount), country: newSched.country,
+          timestamp: releaseTime, status: 'scheduled', type: 'scheduled', releaseTime
+        };
+        setTxns(prev => {
+          const u = [schedRec, ...prev.slice(0, 499)];
+          lsSave('arc_txhistory_' + address, u);
+          return u;
+        });
+        setNewSched({ addr: '', amount: '', country: '', freq: 'once', next: '', time: '' });
+        setTimeout(refreshBal, 4000);
+      };
+
       try {
         await Promise.race([
           tx.wait(),
@@ -42,42 +74,23 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
         ]);
       } catch (waitErr) {
         if (waitErr.message === 'timeout') {
-          setStatus({ type: 'success', msg: 'Payment scheduled! USDC locked in escrow until ' + new Date(releaseTime * 1000).toLocaleString() + ' (Confirmation pending)' });
-          setNewSched({ addr: '', amount: '', country: '', freq: 'once', next: '', time: '' });
-          setTimeout(refreshBal, 4000);
+          // Do NOT claim success yet — the tx may still fail. Keep polling in the
+          // background and only finalize (DB insert, history, form reset) once we
+          // actually have a confirmed receipt. If it never confirms, tell the user.
+          setStatus({ type: 'info', msg: 'Still confirming on-chain (this can take a bit longer than usual)... Transaction hash: ' + tx.hash });
           setLoading(false);
+          awaitReceipt(signer.provider || signer, tx.hash, 300000).then(receipt => {
+            if (receipt) {
+              finalizeSchedule();
+            } else {
+              setStatus({ type: 'error', msg: 'Could not confirm transaction after 5 minutes. Check the tx hash on the block explorer before retrying: ' + tx.hash });
+            }
+          });
           return;
         }
         throw waitErr;
       }
-      setStatus({ type: 'success', msg: 'Payment scheduled! USDC locked in escrow until ' + new Date(releaseTime * 1000).toLocaleString() });
-      try {
-        const sched2 = new ethers.Contract(SCHED_ADDR, SCHED_ABI, signer.provider || signer);
-        const count = Number(await sched2.paymentCount());
-        const newId = count - 1;
-        await fetch('/api/schedule-request', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'create',
-            payment_id: newId, sender: address, recipient: ethers.getAddress(newSched.addr.trim()),
-            amount: newSched.amount, release_time: releaseTime, country: newSched.country || '',
-            tx_hash: tx.hash
-          })
-        }).then(async r => { if (!r.ok) throw new Error(await r.text()); });
-      } catch (dbErr) { console.error('Failed to save scheduled_payments row:', dbErr.message); }
-      const schedRec = {
-        id: tx.hash + '_sched', hash: tx.hash, recipient: newSched.addr,
-        amount: parseFloat(newSched.amount), country: newSched.country,
-        timestamp: releaseTime, status: 'scheduled', type: 'scheduled', releaseTime
-      };
-      setTxns(prev => {
-        const u = [schedRec, ...prev.slice(0, 499)];
-        lsSave('arc_txhistory_' + address, u);
-        return u;
-      });
-      setNewSched({ addr: '', amount: '', country: '', freq: 'once', next: '', time: '' });
-      setTimeout(refreshBal, 4000);
+      await finalizeSchedule();
     } catch (e) {
       console.error('Schedule error full:', e, JSON.stringify(e));
       let msg = 'Scheduling failed: ' + (e?.reason || e?.shortMessage || e?.message || 'Unknown error');
