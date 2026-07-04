@@ -34,6 +34,10 @@ export default function SendPage({
             </div>
           </div>
           {sendAmt&&<div style={{fontSize:12,color:'var(--tx3)',marginTop:8}}>${parseFloat(sendAmt)||0} USD</div>}
+          {sendAmt&&parseFloat(sendAmt)>0&&(parseFloat(sendAmt)>=5
+            ? <div style={{fontSize:12,color:'var(--ac)',marginTop:4}}>You'll earn ~{(parseFloat(sendAmt)*0.01).toFixed(3)} USDC cashback</div>
+            : <div style={{fontSize:12,color:'var(--tx3)',marginTop:4}}>Send {(5-parseFloat(sendAmt)).toFixed(2)} USDC more to earn 1% cashback</div>
+          )}
         </div>
         <div className="ap-recv-divider"><div className="ap-recv-icon"><IC.ArrowDown/></div></div>
         <div className="ap-send-panel recv">
