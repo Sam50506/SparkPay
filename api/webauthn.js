@@ -4,7 +4,7 @@ import { rateLimit } from '../src/lib/rateLimit.js';
 
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
-const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
+const ADMIN_ADDRESS = (process.env.ADMIN_ADDRESS || '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306').toLowerCase();
 const JWT_SECRET = process.env.PAYOUT_JWT_SECRET;
 const RP_NAME = 'SparkPay Admin';
 

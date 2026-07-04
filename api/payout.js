@@ -7,7 +7,7 @@ const RPC = 'https://rpc.testnet.arc.network';
 const CHAIN_ID = 5042002;
 const ADMIN_KEY = process.env.PAYOUT_ADMIN_KEY;
 const JWT_SECRET = process.env.PAYOUT_JWT_SECRET;
-const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
+const ADMIN_ADDRESS = (process.env.ADMIN_ADDRESS || '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306').toLowerCase();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   if (token) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
-      if (decoded.address === ADMIN_ADDRESS) authorized = true;
+      if (decoded.address?.toLowerCase() === ADMIN_ADDRESS) authorized = true;
     } catch (e) {}
   }
     if (!authorized) {
