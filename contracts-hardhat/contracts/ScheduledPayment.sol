@@ -27,8 +27,7 @@ contract ScheduledPayment is ReentrancyGuard, Ownable, Pausable {
 
     event PaymentScheduled(uint256 indexed id, address indexed sender, address indexed recipient, uint256 amount, uint256 releaseTime, string country);
     event PaymentExecuted(uint256 indexed id, address recipient, uint256 amount);
-    // Adjusted PaymentCancelled to match tests (id, sender, amount)
-    event PaymentCancelled(uint256 indexed id, address sender, uint256 amount);
+    event PaymentCancelled(uint256 indexed id, address sender, uint256 amount, uint256 refundAmount);
     event PaymentEdited(uint256 indexed id, address recipient, uint256 amount, uint256 releaseTime);
     event ExecutorUpdated(address indexed oldExecutor, address indexed newExecutor);
     event EmergencyWithdraw(address indexed to, uint256 amount);
@@ -198,8 +197,7 @@ contract ScheduledPayment is ReentrancyGuard, Ownable, Pausable {
         (bool success,) = payable(p.sender).call{value: refundAmt}("");
         require(success, "Refund failed");
 
-        // Emit three-arg PaymentCancelled to match tests
-        emit PaymentCancelled(id, p.sender, refundAmt);
+        emit PaymentCancelled(id, p.sender, refundAmt, refundAmt);
     }
 
     function getPayment(uint256 id) external view returns (Payment memory) { return payments[id]; }

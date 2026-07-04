@@ -136,7 +136,7 @@ describe("ScheduledPayment", function () {
 
       await expect(tx)
         .to.emit(contract, "PaymentCancelled")
-        .withArgs(paymentId, sender.address, ONE_ETH);
+        .withArgs(paymentId, sender.address, ONE_ETH, ONE_ETH);
     });
 
     it("executor can cancel", async function () {
