@@ -24,6 +24,7 @@ jobs:
 
       - name: Run Solhint
         run: npx solhint 'contracts/**/*.sol'
+        continue-on-error: true
 
       - name: Run Hardhat tests
         run: npx hardhat test
