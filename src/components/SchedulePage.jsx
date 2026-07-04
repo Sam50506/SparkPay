@@ -60,11 +60,6 @@ export default function SchedulePage({
 
         {!confirming && (
           <>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14,fontSize:12,color:'var(--tx2)'}}>
-              <span>Available balance</span>
-              <span style={{fontWeight:700,color:'var(--tx1)',fontFamily:'var(--fd)'}}>${balance ?? '0.00'}</span>
-            </div>
-
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}>
               <div style={{position:'relative'}}>
                 <div className="ap-label">Recipient Address</div>
