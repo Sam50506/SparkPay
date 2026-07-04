@@ -11,9 +11,10 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.1.2",
-    "@nomicfoundation/hardhat-verify": "^3.0.20",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
     "chai": "^6.2.2",
     "ethers": "^6.16.0",
     "hardhat": "^2.19.4",
