@@ -111,19 +111,23 @@ async function processPayment(contract, i, now, counters) {
     } catch (he) { console.error('Failed to save tx hash/executed flag:', he.message); }
 
     try {
-      const sendAmount = parseFloat(ethers.formatUnits(p.amount, 18));
-      if (sendAmount >= 5) {
-        const cashbackAmt = parseFloat((sendAmount * 0.01).toFixed(3));
+      // Compute cashback in integer wei-space (BigInt) to avoid any floating-point
+      // precision loss. Only convert to a decimal string at the very end, for display
+      // and for passing to Postgres NUMERIC (which accepts exact decimal strings).
+      const FIVE_USDC_WEI = ethers.parseUnits("5", 18);
+      if (p.amount >= FIVE_USDC_WEI) {
+        const cashbackWei = p.amount / 100n; // exact 1%, integer division, no rounding drift
+        const cashbackAmtStr = ethers.formatUnits(cashbackWei, 18);
         const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/increment_cashback`, {
           method: 'POST',
           headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet: p.sender, amt: cashbackAmt })
+          body: JSON.stringify({ wallet: p.sender, amt: cashbackAmtStr })
         });
         if (!rpcRes.ok) {
           const errBody = await rpcRes.text();
           console.error('increment_cashback RPC failed:', rpcRes.status, errBody);
         }
-        console.log("Cashback awarded: " + cashbackAmt + " to " + p.sender);
+        console.log("Cashback awarded: " + cashbackAmtStr + " to " + p.sender);
       }
     } catch (ce) { console.error("Cashback failed for payment " + i + ":", ce.message); }
 

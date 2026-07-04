@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     try {
       const rpcRes = await sb('rpc/increment_cashback', {
         method: 'POST',
-        body: JSON.stringify({ wallet: wallet_address, amt: parseFloat(amount) })
+        body: JSON.stringify({ wallet: wallet_address, amt: String(amount) })
       });
       if (!rpcRes.ok) {
         const errBody = await rpcRes.text();
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
       // preventing concurrent claims from both reading a stale balance and double-spending.
       const rpcRes = await sb('rpc/claim_cashback', {
         method: 'POST',
-        body: JSON.stringify({ p_wallet: wallet_address, p_amt: parseFloat(amount) })
+        body: JSON.stringify({ p_wallet: wallet_address, p_amt: String(amount) })
       });
       if (!rpcRes.ok) {
         const errBody = await rpcRes.text();
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
         const errBody = await insertRes.text();
         console.error('cashback_claims insert failed after balance already decremented:', insertRes.status, errBody);
         // Balance was already atomically decremented — refund it since the claim record failed to save
-        await sb('rpc/increment_cashback', { method: 'POST', body: JSON.stringify({ wallet: wallet_address, amt: parseFloat(amount) }) }).catch(() => {});
+        await sb('rpc/increment_cashback', { method: 'POST', body: JSON.stringify({ wallet: wallet_address, amt: String(amount) }) }).catch(() => {});
         return res.status(500).json({ error: 'Failed to record claim: ' + errBody });
       }
 
