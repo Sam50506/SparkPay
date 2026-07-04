@@ -77,19 +77,34 @@ export default async function handler(req, res) {
       const credRes = await sb(`webauthn_credentials?admin_address=eq.${ADMIN_ADDRESS}`);
       const creds = await credRes.json();
       if (!creds.length) return res.status(404).json({ error: 'No passkey registered' });
-      const cred = creds[0];
+      const matchingCred = creds.find(c => c.credential_id === response.id) || null;
+      const candidates = matchingCred ? [matchingCred] : creds;
 
       const cRes = await sb(`webauthn_challenges?admin_address=eq.${ADMIN_ADDRESS}&order=created_at.desc&limit=1`);
       const challenges = await cRes.json();
       if (!challenges.length) return res.status(400).json({ error: 'No challenge found' });
 
-      const verification = await verifyAuthenticationResponse({
-        response, expectedChallenge: challenges[0].challenge, expectedOrigin: origin, expectedRPID: rpID,
-        credential: { id: cred.credential_id, publicKey: Buffer.from(cred.public_key, 'base64url'), counter: cred.counter }
-      });
-      if (!verification.verified) return res.status(400).json({ error: 'Verification failed' });
+      let verification = null;
+      let matchedCred = null;
+      for (const c of candidates) {
+        try {
+          const v = await verifyAuthenticationResponse({
+            response, expectedChallenge: challenges[0].challenge, expectedOrigin: origin, expectedRPID: rpID,
+            credential: { id: c.credential_id, publicKey: Buffer.from(c.public_key, 'base64url'), counter: c.counter }
+          });
+          if (v.verified) { verification = v; matchedCred = c; break; }
+        } catch (e) { /* try next candidate */ }
+      }
+      if (!verification || !matchedCred) return res.status(400).json({ error: 'Verification failed' });
 
-      await sb(`webauthn_credentials?admin_address=eq.${ADMIN_ADDRESS}`, { method: 'PATCH', body: JSON.stringify({ counter: verification.authenticationInfo.newCounter }) });
+      const updateRes = await sb(
+        `webauthn_credentials?admin_address=eq.${ADMIN_ADDRESS}&credential_id=eq.${matchedCred.credential_id}&counter=eq.${matchedCred.counter}`,
+        { method: 'PATCH', headers: { 'Prefer': 'return=representation' }, body: JSON.stringify({ counter: verification.authenticationInfo.newCounter }) }
+      );
+      const updated = await updateRes.json();
+      if (!Array.isArray(updated) || updated.length === 0) {
+        return res.status(409).json({ error: 'Concurrent login detected, please try again' });
+      }
       const token = jwt.sign({ address: ADMIN_ADDRESS, ts: Date.now() }, JWT_SECRET, { expiresIn: '12h' });
       return res.json({ verified: true, token });
     }
