@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { ethers } from 'ethers';
-import { SCHED_ADDR } from '../config';
+import { SCHED_ADDR, sbFetch } from '../config';
 import { lsSave, ls } from '../config';
 
 export const SCHED_ABI = [
@@ -51,6 +51,20 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
         throw waitErr;
       }
       setStatus({ type: 'success', msg: 'Payment scheduled! USDC locked in escrow until ' + new Date(releaseTime * 1000).toLocaleString() });
+      try {
+        const sched2 = new ethers.Contract(SCHED_ADDR, SCHED_ABI, signer.provider || signer);
+        const count = Number(await sched2.paymentCount());
+        const newId = count - 1;
+        await sbFetch('/rest/v1/scheduled_payments', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates' },
+          body: JSON.stringify({
+            payment_id: newId, sender: address, recipient: ethers.getAddress(newSched.addr.trim()),
+            amount: newSched.amount, release_time: releaseTime, country: newSched.country || '',
+            executed: false, cancelled: false, tx_hash: tx.hash
+          })
+        });
+      } catch (dbErr) { console.error('Failed to save scheduled_payments row:', dbErr.message); }
       const schedRec = {
         id: tx.hash + '_sched', hash: tx.hash, recipient: newSched.addr,
         amount: parseFloat(newSched.amount), country: newSched.country,
