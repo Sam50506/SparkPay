@@ -168,7 +168,43 @@ function AppInner() {
 
   const connectBrowser=async(type,provObj)=>{try{const eth=provObj||(window.okxwallet&&(type==='OKX Wallet'||provObj?.isOkxWallet||provObj?.isOKExWallet)?window.okxwallet:null)||await getProvider();if(!eth){setStatus({type:'error',msg:'No wallet found. Install MetaMask.'});return;}await eth.request({method:'eth_requestAccounts'});const bp=new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});await ensureArc(eth);let name='Browser Wallet';if(eth.isMises||(window.mises?.ethereum===eth))name='Mises';else if(eth.isMetaMask&&!eth.isBraveWallet)name='MetaMask';else if(eth.isBraveWallet)name='Brave';else if(eth.isCoinbaseWallet)name='Coinbase';else if(eth.isOkxWallet||eth.isOKExWallet)name='OKX';setWalletName(name);await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'Connection failed'});}};
 
-  const connectWC=async()=>{try{const wcp=await EthereumProvider.init({projectId:WC_ID,chains:[1],optionalChains:[ARC_CHAIN_ID],showQrModal:true,qrModalOptions:{themeMode:'light',themeVariables:{'--wcm-font-family':'inherit'}},methods:['eth_sendTransaction','personal_sign','wallet_addEthereumChain','wallet_switchEthereumChain'],events:['chainChanged','accountsChanged']});await wcp.enable();wcp.on('accountsChanged',a=>{if(!a.length)doDisconnect();else setAddress(a[0]);});wcp.on('disconnect',doDisconnect);try{await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902)await wcp.request({method:'wallet_addEthereumChain',params:[addArc({})]});}const bp=new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});wcProvRef.current=wcp;setWalletName('WalletConnect');await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'WalletConnect failed'});}};
+  // Resume must reconnect to the EXACT same wallet the user used before, not just
+// any wallet matching loose flag heuristics (which is what getProvider() does).
+// EIP-6963 gives each wallet a stable, unambiguous name via announceProvider —
+// use that to find the right one first, falling back to legacy flag matching,
+// and only as a last resort falling back to the generic auto-detect.
+const findProviderByName=(walletType)=>new Promise(resolve=>{
+  if(!walletType||walletType==='WalletConnect'||walletType==='Browser Wallet'){resolve(null);return;}
+  const found=[];
+  const handler=(e)=>{const {info,provider}=e.detail;if(!found.find(w=>w.info.uuid===info.uuid))found.push({info,provider});};
+  window.addEventListener('eip6963:announceProvider',handler);
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  setTimeout(()=>{
+    window.removeEventListener('eip6963:announceProvider',handler);
+    const match=found.find(w=>w.info.name.toLowerCase().includes(walletType.toLowerCase())||walletType.toLowerCase().includes(w.info.name.toLowerCase()));
+    if(match){resolve(match.provider);return;}
+    // Fallback: legacy provider-array flag matching (same logic as WalletPicker's else-branch)
+    const eth=window.ethereum;
+    if(eth){
+      const providers=eth.providers?.length?eth.providers:[eth];
+      const byFlag=providers.find(p=>{
+        const wt=walletType.toLowerCase();
+        if(wt.includes('metamask'))return p.isMetaMask&&!p.isBraveWallet;
+        if(wt.includes('brave'))return p.isBraveWallet;
+        if(wt.includes('coinbase'))return p.isCoinbaseWallet;
+        if(wt.includes('rabby'))return p.isRabby;
+        if(wt.includes('okx'))return p.isOkxWallet||p.isOKExWallet;
+        if(wt.includes('trust'))return p.isTrust;
+        if(wt.includes('mises'))return p.isMises||window.mises?.ethereum===p;
+        return false;
+      });
+      if(byFlag){resolve(byFlag);return;}
+    }
+    resolve(null);
+  },250);
+});
+
+const connectWC=async()=>{try{const wcp=await EthereumProvider.init({projectId:WC_ID,chains:[1],optionalChains:[ARC_CHAIN_ID],showQrModal:true,qrModalOptions:{themeMode:'light',themeVariables:{'--wcm-font-family':'inherit'}},methods:['eth_sendTransaction','personal_sign','wallet_addEthereumChain','wallet_switchEthereumChain'],events:['chainChanged','accountsChanged']});await wcp.enable();wcp.on('accountsChanged',a=>{if(!a.length)doDisconnect();else setAddress(a[0]);});wcp.on('disconnect',doDisconnect);try{await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902)await wcp.request({method:'wallet_addEthereumChain',params:[addArc({})]});}const bp=new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});wcProvRef.current=wcp;setWalletName('WalletConnect');await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'WalletConnect failed'});}};
 
   const exportCSV=()=>{const rows=[['Type','Hash','Recipient','Amount (USDC)','Country','Date','Status'],...txns.map(t=>['Send',t.hash||'',t.recipient||'',t.amount||'',t.country||'',fmtDate(t.timestamp),t.status||'']),...ls('arc_invoices',[]).map(i=>['Invoice',i.id||'',i.payer||'',i.amount||'',i.country||'',fmtDate(i.ts),i.paid?'Paid':'Unpaid']),...scheds.map(s=>['Scheduled','',s.addr||'',s.amount||'',s.country||'',s.next||'',s.freq||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sparkpay-history.csv';a.click();URL.revokeObjectURL(url);};
 
@@ -218,7 +254,7 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
       {splash&&<SplashScreen onDone={()=>setSplash(false)}/>}{!splash&&showOnboarding&&<OnboardingModal onDone={()=>{lsSave('arc_onboarded',true);setShowOnboarding(false);}}/>}
       {showWalletPrompt&&<div style={{position:'fixed',inset:0,zIndex:1000,background:'rgba(0,0,0,0.7)',display:'flex',alignItems:'flex-end',justifyContent:'center',padding:'0 16px 32px'}}><div style={{background:'var(--card)',borderRadius:24,padding:'28px 24px',width:'100%',maxWidth:480,textAlign:'center'}}><div style={{width:56,height:56,borderRadius:16,background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}><svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='var(--ac)' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><rect x='2' y='7' width='20' height='14' rx='2'/><path d='M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2'/><line x1='12' y1='12' x2='12' y2='16'/><line x1='10' y1='14' x2='14' y2='14'/></svg></div><div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:8}}>Confirm in Your Wallet</div><div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6,marginBottom:20}}>Open your wallet extension and confirm the transaction to complete the batch send to all recipients.</div><div style={{fontSize:12,color:'var(--tx3)'}}>Waiting for your confirmation...</div><button onClick={()=>setShowWalletPrompt(false)} style={{marginTop:20,background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'8px 24px',color:'var(--tx2)',fontSize:13,cursor:'pointer'}}>Cancel</button></div></div>}
         {showFaucetFrame&&<div style={{position:'fixed',inset:0,zIndex:999,background:'#000',display:'flex',flexDirection:'column'}}><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',background:'#111'}}><span style={{color:'#fff',fontWeight:700}}>Circle Faucet</span><button onClick={()=>setShowFaucetFrame(false)} style={{background:'none',border:'none',color:'#fff',fontSize:20,cursor:'pointer'}}>×</button></div><iframe src={'https://faucet.circle.com/?address='+address+'&blockchain=ARC&token=USDC'} style={{flex:1,border:'none',width:'100%'}} title="Circle Faucet"/></div>}
-      {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={()=>{setShowResumeModal(false);const wt=savedSession.walletType||'';if(wt&&wt!=='WalletConnect'){connectBrowser(wt);}else{setShowPicker(true);}}} onNew={()=>setShowResumeModal(false)}/>}
+      {showResumeModal&&savedSession&&<ResumeModal session={savedSession} onResume={async()=>{setShowResumeModal(false);const wt=savedSession.walletType||'';if(wt&&wt!=='WalletConnect'){const matchedProvider=await findProviderByName(wt);if(matchedProvider){connectBrowser(wt,matchedProvider);}else{setStatus({type:'error',msg:'Could not find '+wt+' — please choose your wallet.'});setShowPicker(true);}}else{setShowPicker(true);}}} onNew={()=>setShowResumeModal(false)}/>}
       {showConfirm&&confirmData&&<ConfirmModal data={confirmData} walletName={walletName} onConfirm={()=>{if(confirmAction)confirmAction()();}} onCancel={()=>{setShowConfirm(false);setConfirmData(null);setConfirmAction(null);}}/>}
       {showQR&&address&&<QRModal address={address} onClose={()=>setShowQR(false)}/>}
       {showCashbackToast&&cashbackToastData&&<CashbackToast amount={cashbackToastData.amount} rarity={cashbackToastData.rarity} onClose={()=>setShowCashbackToast(false)}/>}
