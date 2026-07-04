@@ -17,6 +17,11 @@ export const SCHED_ABI = [
 export function useSchedule({ signer, address, newSched, setNewSched, setLoading, setStatus, setTxns, refreshBal }) {
 
   const handleSchedule = useCallback(async () => {
+    const releaseTimeCheck = Math.floor(new Date(newSched.next+'T'+(newSched.time||'12:00')+':00').getTime()/1000);
+    if (releaseTimeCheck < Math.floor(Date.now()/1000) + 120) {
+      setStatus({ type: 'error', msg: 'Release time must be at least 2 minutes in the future.' });
+      return;
+    }
     if (!newSched.addr || !newSched.amount || !newSched.next) {
       setStatus({ type: 'error', msg: 'Fill all required fields' });
       return;
