@@ -22,8 +22,9 @@ export async function rateLimit(req, res, type = "normal") {
     }
     return true;
   } catch (e) {
-    // If Upstash is down or limit exceeded, allow request through
+    // Fail CLOSED: if Upstash is down, block the request rather than allow unlimited traffic
     console.error("Rate limit error:", e.message);
-    return true;
+    res.status(503).json({ error: "Service temporarily unavailable, please try again shortly." });
+    return false;
   }
 }
