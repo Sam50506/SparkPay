@@ -62,8 +62,7 @@ export default async function handler(req, res) {
         if (decoded.address === ADMIN_ADDRESS) authorized = true;
       } catch (e) {}
     }
-    if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
-    if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
+        if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
     if (!Array.isArray(request_ids) || request_ids.length === 0) return res.status(400).json({error: 'request_ids required'});
     try {
       const idsFilter = request_ids.join(',');
@@ -87,8 +86,7 @@ export default async function handler(req, res) {
         if (decoded.address === ADMIN_ADDRESS) authorized = true;
       } catch (e) {}
     }
-    if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
-    if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
+        if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
     try {
       if (action === 'approve' && request_type === 'cancel') {
         const provider = new ethers.JsonRpcProvider(RPC, {name: 'Arc Testnet', chainId: 5042002});

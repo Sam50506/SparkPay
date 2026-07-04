@@ -24,8 +24,7 @@ export default async function handler(req, res) {
       if (decoded.address === ADMIN_ADDRESS) authorized = true;
     } catch (e) {}
   }
-  if (!authorized && req.headers['x-admin-key'] === ADMIN_KEY) authorized = true;
-  if (!authorized) {
+    if (!authorized) {
     return res.status(401).json({ error: 'Unauthorized - please re-verify with passkey' });
   }
 
