@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { rateLimit } from '../src/lib/rateLimit.js';
 
 const RPC = 'https://rpc.testnet.arc.network';
-const SCHED_ADDR = '0xfb319b6BFf115bDFc6B4b76e0155E9d224f37771';
+const SCHED_ADDR = '0x79a1C363Afd912212B7581F735a9096fB453F8be';
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || process.env.PAYOUT_PRIVATE_KEY;
 const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
 const SCHED_ABI = [
