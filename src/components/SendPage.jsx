@@ -18,18 +18,6 @@ export default function SendPage({
 
   return (
     <>
-      {contacts.length>0&&(
-        <div style={{marginBottom:16}}>
-          <div className="ap-label">Quick Select</div>
-          <div className="ap-quick-wrap">
-            {contacts.map(c=>(
-              <button key={c.id} className="ap-quick-pill" onClick={()=>{setSendTo(c.address);setSendCtry(c.country);}}>
-                <span className="ap-cc">{ALL_CC[c.country]||'?'}</span>{c.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
       <div className="ap-send-card">
         <div className="ap-send-panel">
           <div className="ap-send-lbl">You Send</div>
