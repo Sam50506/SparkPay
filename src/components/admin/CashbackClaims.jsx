@@ -5,6 +5,8 @@ export function CashbackClaims() {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const fetchClaims = async () => {
     setLoading(true);
@@ -38,8 +40,9 @@ export function CashbackClaims() {
     setActionLoading(null);
   };
 
-  const reject = async (claim) => {
-    if (!window.confirm(`Reject claim of ${claim.amount} USDC from ${short(claim.wallet_address)}?`)) return;
+  const reject = async () => {
+    if (!rejectReason.trim()) { alert('Please provide a reason for rejection.'); return; }
+    const claim = rejectModal;
     const token = sessionStorage.getItem('sp_admin_jwt');
     if (!token) { alert('Session expired.'); window.location.reload(); return; }
     setActionLoading('reject_' + claim.id);
@@ -47,10 +50,12 @@ export function CashbackClaims() {
       const r = await fetch('/api/reject-claim', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ claim_id: claim.id })
+        body: JSON.stringify({ claim_id: claim.id, reason: rejectReason.trim() })
       });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
+      setRejectModal(null);
+      setRejectReason('');
       fetchClaims();
     } catch (e) { alert('Error: ' + e.message); }
     setActionLoading(null);
@@ -61,6 +66,28 @@ export function CashbackClaims() {
 
   return (
     <div>
+      {rejectModal && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.6)',zIndex:300,display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+          <div style={{background:'var(--card)',border:'1px solid var(--b1)',borderRadius:16,padding:24,width:'100%',maxWidth:360}}>
+            <div style={{fontSize:16,fontWeight:700,color:'var(--tx1)',marginBottom:4}}>Reject Claim</div>
+            <div style={{fontSize:12,color:'var(--tx3)',marginBottom:16}}>{parseFloat(rejectModal.amount).toFixed(3)} USDC from {short(rejectModal.wallet_address)}</div>
+            <div style={{fontSize:12,fontWeight:600,color:'var(--tx2)',marginBottom:6}}>Reason for rejection <span style={{color:'var(--re)'}}>*</span></div>
+            <textarea
+              value={rejectReason}
+              onChange={e=>setRejectReason(e.target.value)}
+              placeholder="e.g. Suspicious activity, duplicate claim..."
+              rows={3}
+              style={{width:'100%',padding:'10px 12px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:13,outline:'none',resize:'none',boxSizing:'border-box',marginBottom:16,fontFamily:'inherit'}}
+            />
+            <div style={{display:'flex',gap:10}}>
+              <button onClick={()=>{setRejectModal(null);setRejectReason('');}} style={{flex:1,background:'none',border:'1px solid var(--b1)',color:'var(--tx2)',borderRadius:10,padding:'10px',fontSize:13,fontWeight:600,cursor:'pointer'}}>Cancel</button>
+              <button onClick={reject} disabled={!!actionLoading} style={{flex:1,background:'rgba(255,79,97,.1)',border:'1px solid var(--re)',color:'var(--re)',borderRadius:10,padding:'10px',fontSize:13,fontWeight:700,cursor:'pointer',opacity:actionLoading?0.6:1}}>
+                {actionLoading?'Rejecting...':'Confirm Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {claims.map(c => (
         <div key={c.id} style={{background:'var(--elev)',borderRadius:12,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b1)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
@@ -75,8 +102,8 @@ export function CashbackClaims() {
             <button onClick={()=>approve(c)} disabled={!!actionLoading} style={{flex:2,background:'var(--ac)',border:'none',color:'#fff',borderRadius:10,padding:'10px',fontSize:13,fontWeight:700,cursor:'pointer',opacity:actionLoading?0.6:1}}>
               {actionLoading===c.id?'Paying...':'Approve & Pay'}
             </button>
-            <button onClick={()=>reject(c)} disabled={!!actionLoading} style={{flex:1,background:'none',border:'1px solid var(--re)',color:'var(--re)',borderRadius:10,padding:'10px',fontSize:13,fontWeight:700,cursor:'pointer',opacity:actionLoading?0.6:1}}>
-              {actionLoading==='reject_'+c.id?'Rejecting...':'Reject'}
+            <button onClick={()=>{setRejectModal(c);setRejectReason('');}} disabled={!!actionLoading} style={{flex:1,background:'none',border:'1px solid var(--re)',color:'var(--re)',borderRadius:10,padding:'10px',fontSize:13,fontWeight:700,cursor:'pointer',opacity:actionLoading?0.6:1}}>
+              Reject
             </button>
           </div>
         </div>

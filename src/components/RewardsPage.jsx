@@ -66,9 +66,10 @@ export default function RewardsPage({
               </div>
               <div style={{display:'flex',alignItems:'center',gap:8}}>
                 {claim.tx_hash&&<a href={'https://testnet.arcscan.app/tx/'+claim.tx_hash} target="_blank" rel="noreferrer" style={{fontSize:11,color:'var(--ac)'}}>View Tx</a>}
+              {claim.status==='rejected'&&claim.rejection_reason&&<div style={{fontSize:11,color:'var(--re)',marginTop:4,maxWidth:160,textAlign:'right'}}>{claim.rejection_reason}</div>}
                 <span style={{fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:999,
-                  background:claim.status==='paid'?'rgba(23,229,176,.1)':claim.status==='failed'?'rgba(255,79,97,.1)':'rgba(59,130,196,.1)',
-                  color:claim.status==='paid'?'var(--cy)':claim.status==='failed'?'var(--re)':'var(--ac)'}}>
+                  background:claim.status==='paid'?'rgba(23,229,176,.1)':claim.status==='failed'||claim.status==='rejected'?'rgba(255,79,97,.1)':claim.status==='pending'?'rgba(240,196,63,.1)':'rgba(59,130,196,.1)',
+                  color:claim.status==='paid'?'var(--cy)':claim.status==='failed'||claim.status==='rejected'?'var(--re)':claim.status==='pending'?'#f59e0b':'var(--ac)'}}>
                   {claim.status}
                 </span>
               </div>
