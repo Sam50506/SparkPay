@@ -10,7 +10,6 @@ const SplashScreen = ({ onDone }) => {
   return (
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'#000',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',opacity:exit?0:1,transition:'opacity .5s ease',overflow:'hidden'}}>
       <style>{`
-        @keyframes sp-flash{0%{opacity:0}10%{opacity:0.25}20%{opacity:0}35%{opacity:0.12}50%{opacity:0}100%{opacity:0}}
         @keyframes sp-logoin{0%{opacity:0;transform:scale(1.08);filter:blur(6px)}60%{filter:blur(0)}100%{opacity:1;transform:scale(1);filter:blur(0)}}
         @keyframes sp-bolt{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
         @keyframes sp-bar{from{width:0}to{width:100%}}
@@ -19,8 +18,6 @@ const SplashScreen = ({ onDone }) => {
         @keyframes sp-shine{0%{left:-40%;opacity:0}50%{opacity:1}100%{left:120%;opacity:0}}
       `}</style>
 
-      {/* Flash */}
-      <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#4B8CF5,#17E5B0)',animation:'sp-flash .7s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
 
 
