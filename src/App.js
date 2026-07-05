@@ -268,7 +268,7 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
               <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
             </div>
             <div style={{textAlign:'center',marginBottom:40}}>
-              <div style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-0.5px',marginBottom:12}}>Send USDC<br/><span style={{color:'var(--ac)'}}>GL<span className="ap-spin-earth-wrap" role="img" aria-label="O" style={{width:54,height:54,fontSize:54,lineHeight:1}}><span className="ap-earth-face">🌍</span><span className="ap-earth-face">🌎</span><span className="ap-earth-face">🌏</span></span>BALLY.</span></div>
+              <div style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-0.5px',marginBottom:12}}>Send USDC<br/><span style={{color:'var(--ac)'}}>GL<span className="ap-spin-earth-wrap" role="img" aria-label="O" style={{width:36,height:36,fontSize:36,lineHeight:1}}><span className="ap-earth-face">🌍</span><span className="ap-earth-face">🌎</span><span className="ap-earth-face">🌏</span></span>BALLY.</span></div>
               <div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6}}>Send money across borders instantly.<br/>Zero fees. Instant settlement. Powered by Arc.</div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:32}}>
