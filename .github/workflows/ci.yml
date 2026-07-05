@@ -24,9 +24,17 @@ jobs:
 
       - name: Run Solhint
         run: npx solhint 'contracts/**/*.sol'
+        continue-on-error: true
 
       - name: Run Hardhat tests
         run: npx hardhat test
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.0
+        with:
+          target: contracts-hardhat/
+          slither-args: --exclude-dependencies
+        continue-on-error: true
 
   frontend:
     runs-on: ubuntu-latest

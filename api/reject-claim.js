@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
-const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
+const ADMIN_ADDRESS = (process.env.ADMIN_ADDRESS || '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306').toLowerCase();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   const token = req.headers['authorization']?.replace('Bearer ', '');
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.address !== ADMIN_ADDRESS) throw new Error('Unauthorized');
+    if (decoded.address?.toLowerCase() !== ADMIN_ADDRESS) throw new Error('Unauthorized');
   } catch { return res.status(401).json({ error: 'Unauthorized' }); }
 
   const { claim_id } = req.body;
