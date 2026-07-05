@@ -17,12 +17,20 @@ const SplashScreen = ({ onDone }) => {
         @keyframes sp-sub{from{opacity:0}to{opacity:1}}
         @keyframes sp-glow{from{opacity:0}to{opacity:1}}
         @keyframes sp-shine{0%{left:-40%;opacity:0}50%{opacity:1}100%{left:120%;opacity:0}}
+        @keyframes sp-comet{0%{transform:translate(-46vw,-32vh) rotate(-38deg) scaleX(1);opacity:0}8%{opacity:1}88%{opacity:1}100%{transform:translate(0,0) rotate(-38deg) scaleX(0.3);opacity:0}}
+        @keyframes sp-impact{0%{transform:scale(0);opacity:0.9}60%{opacity:0.5}100%{transform:scale(5);opacity:0}}
       `}</style>
 
       {/* Flash */}
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,#4B8CF5,#17E5B0)',animation:'sp-flash .7s ease forwards',pointerEvents:'none',zIndex:2}}/>
 
 
+
+      {/* Comet trail igniting the bolt */}
+      <div style={{position:'absolute',left:'50%',top:'50%',width:0,height:0,zIndex:2,pointerEvents:'none'}}>
+        <div style={{position:'absolute',width:70,height:3,borderRadius:2,background:'linear-gradient(90deg,transparent,#7AACFF,#fff)',animation:'sp-comet .55s cubic-bezier(.3,0,.2,1) forwards',transformOrigin:'right center'}}/>
+        <div style={{position:'absolute',width:16,height:16,marginLeft:-8,marginTop:-8,borderRadius:'50%',background:'radial-gradient(circle,#fff,#7AACFF 60%,transparent 75%)',animation:'sp-impact .5s ease .5s forwards',opacity:0}}/>
+      </div>
 
       {/* Logo */}
       <div style={{display:'flex',flexDirection:'column',alignItems:'center',position:'relative',opacity:0,animation:'sp-logoin .6s cubic-bezier(.22,1,.36,1) 0.3s forwards'}}>
