@@ -259,7 +259,7 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
       {showQR&&address&&<QRModal address={address} onClose={()=>setShowQR(false)}/>}
       {showCashbackToast&&cashbackToastData&&<CashbackToast amount={cashbackToastData.amount} rarity={cashbackToastData.rarity} onClose={()=>setShowCashbackToast(false)}/>}
 
-      {!splash&&!address&&(
+      {!address&&(
         <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto'}}>
           {/* Hero Section */}
           <div style={{maxWidth:480,margin:'0 auto',padding:'16px 24px 0'}}>
