@@ -7,9 +7,9 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const SB_URL = process.env.SUPABASE_URL;
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || process.env.PAYOUT_PRIVATE_KEY;
-const ADMIN_ADDRESS = '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306';
+const ADMIN_ADDRESS = (process.env.ADMIN_ADDRESS || '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306').toLowerCase();
 const RPC = 'https://rpc.testnet.arc.network';
-const SCHED_ADDR = '0xfb319b6BFf115bDFc6B4b76e0155E9d224f37771';
+const SCHED_ADDR = '0x79a1C363Afd912212B7581F735a9096fB453F8be';
 const SCHED_ABI = [
   'function cancel(uint256 id) external',
   'function adminEdit(uint256 id, address payable newRecipient, uint256 newAmount, uint256 newReleaseTime, string calldata newCountry) external payable',
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     if (token) {
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        if (decoded.address === ADMIN_ADDRESS) authorized = true;
+        if (decoded.address?.toLowerCase() === ADMIN_ADDRESS) authorized = true;
       } catch (e) {}
     }
         if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     if (token) {
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        if (decoded.address === ADMIN_ADDRESS) authorized = true;
+        if (decoded.address?.toLowerCase() === ADMIN_ADDRESS) authorized = true;
       } catch (e) {}
     }
         if (!authorized) return res.status(401).json({error: 'Unauthorized - please re-verify with passkey'});
