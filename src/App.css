@@ -256,7 +256,7 @@ g:focus {
   border-radius: 50%;
   overflow: hidden;
   position: relative;
-  vertical-align: -0.08em;
+  vertical-align: -20px;
   background: #6db8e8;
 }
 .ap-earth-globe::before {
