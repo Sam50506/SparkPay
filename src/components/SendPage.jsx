@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { IC } from '../icons';
 import { ALL_CC, CURRENCY } from '../config';
 import CountrySelect from './CountrySelect';
@@ -9,6 +9,12 @@ export default function SendPage({
   sendCtry, setSendCtry, convertedVal,
   showScanner, setShowScanner, handleSendReview, loading
 }) {
+  const [showContactsPicker, setShowContactsPicker] = useState(false);
+  const filteredC = (contacts||[]).filter(c =>
+    c.address?.toLowerCase().includes(sendTo.toLowerCase()) ||
+    c.name?.toLowerCase().includes(sendTo.toLowerCase())
+  );
+
   return (
     <>
       {contacts.length>0&&(
@@ -54,6 +60,19 @@ export default function SendPage({
         <div className="ap-label">Recipient Address</div>
         <div style={{display:'flex',gap:8,marginBottom:14}}>
           <input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:0,flex:1}}/>
+          <div style={{position:"relative"}}>
+            <button type="button" onMouseDown={()=>setShowContactsPicker(v=>!v)} className="ap-btn-icon" style={{flexShrink:0,color:"var(--ac)"}} title="Pick from contacts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
+            {showContactsPicker && filteredC.length > 0 && (
+              <div style={{position:"absolute",top:"110%",right:0,zIndex:20,background:"var(--card)",border:"1px solid var(--b1)",borderRadius:10,width:220,maxHeight:200,overflowY:"auto",boxShadow:"0 4px 16px rgba(0,0,0,.2)"}}>
+                {filteredC.map(c=>(
+                  <div key={c.id} onMouseDown={()=>{setSendTo(c.address);if(c.country)setSendCtry(c.country);setShowContactsPicker(false);}} style={{padding:"8px 12px",cursor:"pointer",borderBottom:"1px solid var(--b0)"}}>
+                    <div style={{fontWeight:600,fontSize:13,color:"var(--tx1)"}}>{c.name}</div>
+                    <div style={{fontSize:11,color:"var(--tx3)",fontFamily:"monospace"}}>{c.address.slice(0,6)}...{c.address.slice(-4)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <button type="button" onClick={()=>setShowScanner(true)} className="ap-btn-icon" style={{flexShrink:0}} title="Scan QR Code">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14.01"/><line x1="18" y1="14" x2="18" y2="14.01"/><line x1="14" y1="18" x2="14" y2="18.01"/><line x1="18" y1="18" x2="18" y2="18.01"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="14" y1="21" x2="21" y2="21"/></svg>
           </button>
