@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 const SplashScreen = ({ onDone }) => {
   const [exit, setExit] = useState(false);
   useEffect(() => {
-    const t1=setTimeout(()=>setExit(true),3000);
-    const t2=setTimeout(()=>onDone(),3400);
+    const t1=setTimeout(()=>setExit(true),1500);
+    const t2=setTimeout(()=>onDone(),1900);
     return()=>{clearTimeout(t1);clearTimeout(t2);}
   }, [onDone]);
   return (
