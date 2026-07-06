@@ -283,6 +283,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           Import File
         </button>
         <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
+        {contacts?.length>0 && (
           <button
             className="ap-btn ap-btn-sec"
             style={{ fontSize: 12, padding: "7px 12px", flexShrink: 0, marginTop: 0, marginLeft: 8 }}
@@ -290,10 +291,11 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           >
             Choose from Contacts
           </button>
+        )}
       </div>
 
       {showContactsPicker && (
-        <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={e=>e.stopPropagation()}>
+        <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}}>
           <div style={{background:'var(--card)',borderRadius:16,width:'100%',maxWidth:400,maxHeight:'70vh',display:'flex',flexDirection:'column',boxShadow:'0 24px 60px rgba(0,0,0,0.4)'}} onClick={e=>e.stopPropagation()}>
             <div style={{padding:'16px 20px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
               <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:10}}>Choose Contacts</div>
@@ -381,6 +383,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
                     >
                       Edit
                     </button>
+                  )}
                   {isLinked && (
                     <button
                       onClick={() => {
@@ -392,12 +395,16 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
                     >
                       Go to row
                     </button>
+                  )}
                   {!recoverable && (
                     <span style={{ fontSize: 11, color: 'var(--tx3)' }}>—</span>
+                  )}
                 </div>
               </div>
             );
+          })}
         </div>
+      )}
 
       <div style={{ background: 'var(--elev)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: 'var(--tx3)', marginBottom: 14 }}>
         Format required: wallet address, amount, country (optional)
@@ -437,12 +444,14 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
               >
                 ×
               </button>
+            )}
           </div>
           <div style={{ marginTop: 6 }}>
             {i === 0 && <div className="ap-label">Country</div>}
             <CountrySelect value={r.country} onChange={v => setMulti(p => p.map((x, j) => j === i ? { ...x, country: v } : x))} />
           </div>
         </div>
+      ))}
 
       <button
         className="ap-btn ap-btn-ghost"
