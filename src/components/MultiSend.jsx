@@ -325,6 +325,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
             </div>
           </div>
         </div>
+      )}
 
       {fileError && (
         <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#ef4444', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
