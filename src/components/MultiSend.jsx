@@ -283,7 +283,6 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           Import File
         </button>
         <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
-        {contacts?.length>0 && (
           <button
             className="ap-btn ap-btn-sec"
             style={{ fontSize: 12, padding: "7px 12px", flexShrink: 0, marginTop: 0, marginLeft: 8 }}
@@ -291,8 +290,6 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           >
             Choose from Contacts
           </button>
-        )}
-      </div>
 
       {showContactsPicker && (
         <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}}>
