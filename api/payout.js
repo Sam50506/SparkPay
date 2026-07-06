@@ -60,6 +60,10 @@ export default async function handler(req, res) {
     const results = [];
     for (const claim of claims) {
       try {
+        if (!ethers.isAddress(claim.wallet_address)) {
+          results.push({ wallet: claim.wallet_address, amount: claim.amount, error: 'Invalid address', status: 'failed' });
+          continue;
+        }
         const feeData = await provider.getFeeData();
         const gasPrice = feeData?.gasPrice || ethers.parseUnits('21', 'gwei');
         const amount = ethers.parseUnits(claim.amount.toString(), decimals);
