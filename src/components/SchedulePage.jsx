@@ -15,6 +15,7 @@ export default function SchedulePage({
 }) {
   const [confirming, setConfirming] = useState(false);
   const [showContacts, setShowContacts] = useState(false);
+  const [contactSearch, setContactSearch] = useState('');
 
   const addrTrimmed = (newSched.addr || '').trim();
   const addrValid = addrTrimmed.length === 0 || isValidAddr(addrTrimmed);
@@ -32,13 +33,15 @@ export default function SchedulePage({
     : null;
 
   const filteredContacts = (contacts || []).filter(c =>
-    c.name?.toLowerCase().includes((newSched.addr || '').toLowerCase()) ||
-    c.address?.toLowerCase().includes((newSched.addr || '').toLowerCase())
+    !contactSearch ||
+    c.name?.toLowerCase().includes(contactSearch.toLowerCase()) ||
+    c.address?.toLowerCase().includes(contactSearch.toLowerCase())
   );
 
   const pickContact = (c) => {
     setNewSched(s => ({ ...s, addr: c.address, country: c.country || s.country }));
     setShowContacts(false);
+    setContactSearch('');
   };
 
   const onConfirmClick = () => {
@@ -61,31 +64,49 @@ export default function SchedulePage({
         {!confirming && (
           <>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:14}}>
-              <div style={{position:'relative'}}>
+              <div>
                 <div className="ap-label">Recipient Address</div>
                 <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                <input
-                  className="ap-input"
-                  style={{marginBottom:0,borderColor:addrValid?undefined:"var(--err,#ef4444)",flex:1}}
-                  placeholder="0x..."
-                  value={newSched.addr}
-                  onChange={e=>{setNewSched(s=>({...s,addr:e.target.value}));setShowContacts(true);}}
-                  onFocus={()=>setShowContacts(true)}
-                  onBlur={()=>setTimeout(()=>setShowContacts(false),150)}
-                />
-                <button type="button" onMouseDown={()=>setShowContacts(v=>!v)} style={{flexShrink:0,width:42,height:42,borderRadius:10,border:"1px solid var(--b1)",background:"var(--elev)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"var(--ac)"}} title="Pick from contacts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
+                  <input
+                    className="ap-input"
+                    style={{marginBottom:0,borderColor:addrValid?undefined:"var(--err,#ef4444)",flex:1}}
+                    placeholder="0x..."
+                    value={newSched.addr}
+                    onChange={e=>setNewSched(s=>({...s,addr:e.target.value}))}
+                  />
+                  <div style={{position:"relative"}}>
+                  <button type="button" onMouseDown={()=>setShowContacts(v=>!v)} style={{flexShrink:0,width:42,height:42,borderRadius:10,border:"1px solid var(--b1)",background:"var(--elev)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"var(--ac)"}} title="Pick from contacts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
+                  {showContacts && (
+                    <div style={{position:"absolute",top:"110%",right:0,zIndex:20,background:"var(--card)",border:"1px solid var(--b1)",borderRadius:12,width:"min(320px,90vw)",boxShadow:"0 8px 24px rgba(0,0,0,.2)"}}>
+                      <div style={{padding:"8px 10px",borderBottom:"1px solid var(--b0)"}}>
+                        <input
+                          autoFocus
+                          placeholder="Search contacts..."
+                          onMouseDown={e=>e.stopPropagation()}
+                          onChange={e=>setContactSearch(e.target.value)}
+                          value={contactSearch}
+                          style={{width:"100%",padding:"6px 10px",borderRadius:8,border:"1px solid var(--b1)",background:"var(--elev)",color:"var(--tx1)",fontSize:12,outline:"none",boxSizing:"border-box"}}
+                        />
+                      </div>
+                      <div style={{maxHeight:265,overflowY:"auto"}}>
+                        {filteredContacts.length===0
+                          ? <div style={{padding:"12px",fontSize:12,color:"var(--tx3)",textAlign:"center"}}>No contacts found</div>
+                          : filteredContacts.map(c=>(
+                            <div key={c.id} onMouseDown={()=>pickContact(c)} style={{padding:"9px 12px",cursor:"pointer",borderBottom:"1px solid var(--b0)",display:"flex",alignItems:"center",gap:8}}>
+                              <div style={{width:32,height:32,borderRadius:"50%",background:"var(--acd)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontWeight:700,fontSize:13,color:"var(--ac)"}}>{c.name?.[0]?.toUpperCase()||'?'}</div>
+                              <div style={{minWidth:0}}>
+                                <div style={{fontWeight:600,fontSize:13,color:"var(--tx1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
+                                <div style={{fontSize:11,color:"var(--tx3)",fontFamily:"monospace"}}>{c.address.slice(0,6)}...{c.address.slice(-4)}</div>
+                              </div>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  )}
+                  </div>
                 </div>
                 {!addrValid && <div style={{fontSize:11,color:'var(--err,#ef4444)',marginTop:4}}>Not a valid address (must start with 0x, 42 characters)</div>}
-                {showContacts && filteredContacts.length > 0 && (
-                  <div style={{position:'absolute',top:'100%',left:0,right:0,zIndex:10,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:8,marginTop:4,maxHeight:180,overflowY:'auto',boxShadow:'0 4px 12px rgba(0,0,0,.15)'}}>
-                    {filteredContacts.slice(0,6).map(c=>(
-                      <div key={c.id} onMouseDown={()=>pickContact(c)} style={{padding:'8px 12px',cursor:'pointer',fontSize:13,borderBottom:'1px solid var(--b2)'}}>
-                        <div style={{fontWeight:600,color:'var(--tx1)'}}>{c.name}</div>
-                        <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace'}}>{c.address}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
               <div>
                 <div className="ap-label">Amount (USDC)</div>
