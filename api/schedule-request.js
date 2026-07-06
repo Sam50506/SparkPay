@@ -121,6 +121,9 @@ export default async function handler(req, res) {
           // Parse as UTC then subtract offset to get correct UTC from local time
           const utcMs = new Date(dateStr + 'Z').getTime() - (tzOffset * 60 * 1000);
           newReleaseTime = Math.floor(utcMs / 1000);
+          if (newReleaseTime <= Math.floor(Date.now() / 1000)) {
+            return res.status(400).json({ error: 'New release time must be in the future' });
+          }
         }
 
         let value = 0n;
