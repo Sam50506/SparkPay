@@ -16,7 +16,7 @@ export default function InvoicePage({
         <div className="ap-card-title">Create Invoice</div>
         <div className="ap-card-sub">Request USDC payment. Stored on Supabase and payable from any device.</div>
         <div className="ap-label">Client Wallet Address</div>
-        <div style={{display:'flex',gap:8,marginBottom:8,position:'relative'}}>
+        <div style={{display:'flex',gap:8,marginBottom:16,position:'relative'}}>
           <input className="ap-input" placeholder="0x..." value={invPayer} onChange={e=>setInvPayer(e.target.value)} style={{marginBottom:0,flex:1}}/>
           <button type="button" onMouseDown={()=>setShowContactsPicker(v=>!v)} className="ap-btn-icon" style={{flexShrink:0,color:"var(--ac)"}} title="Pick from contacts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
           {showContactsPicker&&<div style={{position:'absolute',top:'110%',right:0,zIndex:20,background:'var(--card)',border:'1px solid var(--b1)',borderRadius:12,width:'min(320px,90vw)',boxShadow:'0 8px 24px rgba(0,0,0,.2)'}}>
@@ -35,10 +35,6 @@ export default function InvoicePage({
             </div>
           </div>}
         </div>
-        <button type="button" onMouseDown={()=>setShowContactsPicker(v=>!v)} style={{background:"none",border:"none",color:"var(--ac)",fontSize:12,fontWeight:600,cursor:"pointer",padding:0,marginBottom:16,display:"flex",alignItems:"center",gap:4}}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Choose from Contacts
-        </button>
         <div className="ap-label">Amount (USDC)</div>
         <input className="ap-input" type="number" placeholder="500" value={invAmt} onChange={e=>setInvAmt(e.target.value)} style={{marginBottom:14}}/>
         <div className="ap-label">Description</div>
