@@ -290,6 +290,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           >
             Choose from Contacts
           </button>
+        </div>
 
       {showContactsPicker && (
         <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}}>
