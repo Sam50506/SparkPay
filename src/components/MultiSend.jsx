@@ -270,29 +270,15 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
 
   return (
     <div className="ap-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 8 }}>
-        <div>
-          <div className="ap-card-title">Multi Send</div>
-          <div className="ap-card-sub">Send USDC to multiple recipients in one session.</div>
-        </div>
-        <button
-          className="ap-btn ap-btn-sec"
-          style={{ fontSize: 12, padding: '7px 12px', flexShrink: 0, marginTop: 0 }}
-          onClick={() => fileRef.current?.click()}
-        >
-          Import File
-        </button>
-        <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+        <div className="ap-card-title" style={{marginBottom:0}}>Multi Send</div>
         <div style={{display:'flex',gap:8,flexShrink:0}}>
-          <button
-            className="ap-btn ap-btn-sec"
-            style={{ fontSize: 12, padding: "7px 12px", flexShrink: 0, marginTop: 0, marginLeft: 8 }}
-            onClick={() => setShowContactsPicker(true)}
-          >
-            Choose from Contacts
-          </button>
+          <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'7px 12px',marginTop:0}} onClick={()=>fileRef.current?.click()}>Import File</button>
+          <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{display:'none'}} onChange={handleCSV}/>
+          <button className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'7px 12px',marginTop:0}} onClick={()=>setShowContactsPicker(true)}>Contacts</button>
         </div>
-        </div>
+      </div>
+      <div className="ap-card-sub" style={{marginBottom:12}}>Send USDC to multiple recipients in one session.</div>
 
       {showContactsPicker && (
         <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}}>
