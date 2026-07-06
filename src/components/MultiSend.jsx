@@ -332,6 +332,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           <span>{fileError}</span>
           <button onClick={() => setFileError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 16, fontWeight: 700, padding: 0, lineHeight: 1, flexShrink: 0 }}>&times;</button>
         </div>
+      )}
 
       {fileWarning && (
         <div style={{ background: 'var(--card)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 14, marginBottom: 16, overflow: 'hidden' }}>
