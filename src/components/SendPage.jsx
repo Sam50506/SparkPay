@@ -52,7 +52,7 @@ export default function SendPage({
           <div style={{position:"relative"}}>
             <button type="button" onMouseDown={()=>setShowContactsPicker(v=>!v)} className="ap-btn-icon" style={{flexShrink:0,color:"var(--ac)"}} title="Pick from contacts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
             {showContactsPicker && (
-              <div style={{position:"absolute",top:"110%",right:0,zIndex:20,background:"var(--card)",border:"1px solid var(--b1)",borderRadius:12,width:260,boxShadow:"0 8px 24px rgba(0,0,0,.2)"}}>
+              <div style={{position:"absolute",top:"110%",right:0,zIndex:20,background:"var(--card)",border:"1px solid var(--b1)",borderRadius:12,width:"min(320px,90vw)",boxShadow:"0 8px 24px rgba(0,0,0,.2)"}}>
                 <div style={{padding:"8px 10px",borderBottom:"1px solid var(--b0)"}}>
                   <input
                     autoFocus
@@ -63,7 +63,7 @@ export default function SendPage({
                     style={{width:"100%",padding:"6px 10px",borderRadius:8,border:"1px solid var(--b1)",background:"var(--elev)",color:"var(--tx1)",fontSize:12,outline:"none",boxSizing:"border-box"}}
                   />
                 </div>
-                <div style={{maxHeight:200,overflowY:"auto"}}>
+                <div style={{maxHeight:265,overflowY:"auto"}}>
                   {(contacts||[]).filter(c=>!contactSearch||c.name?.toLowerCase().includes(contactSearch.toLowerCase())||c.address?.toLowerCase().includes(contactSearch.toLowerCase())).length===0
                     ? <div style={{padding:"12px",fontSize:12,color:"var(--tx3)",textAlign:"center"}}>No contacts found</div>
                     : (contacts||[]).filter(c=>!contactSearch||c.name?.toLowerCase().includes(contactSearch.toLowerCase())||c.address?.toLowerCase().includes(contactSearch.toLowerCase())).map(c=>(
