@@ -34,13 +34,37 @@ function CountrySelect({ value, onChange }) {
   );
 }
 
-export default function MultiSend({ multi, setMulti, loading, handleMultiReview }) {
+export default function MultiSend({ multi, setMulti, loading, handleMultiReview, contacts }) {
   const fileRef = useRef(null);
   const rowRefs = useRef({});
   const [fileError, setFileError] = React.useState(null);
   const [fileWarning, setFileWarning] = React.useState(null);
   const [showSkipped, setShowSkipped] = React.useState(false);
   const [highlightIdx, setHighlightIdx] = React.useState(null);
+  const [showContactsPicker, setShowContactsPicker] = React.useState(false);
+  const [contactSearch, setContactSearch] = React.useState('');
+  const [selectedContactIds, setSelectedContactIds] = React.useState(new Set());
+
+  const toggleContactSelect = (id) => {
+    setSelectedContactIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const addSelectedContacts = () => {
+    const chosen = (contacts||[]).filter(c => selectedContactIds.has(c.id));
+    if (chosen.length === 0) return;
+    setMulti(p => {
+      const base = (p.length === 1 && !p[0].addr && !p[0].amount) ? [] : p;
+      return [...base, ...chosen.map(c => ({ addr: c.address, amount: '', country: c.country || '' }))];
+    });
+    setSelectedContactIds(new Set());
+    setContactSearch('');
+    setShowContactsPicker(false);
+  };
+
   const truncateAddr = (a) => (a && a.length > 14) ? `${a.slice(0,6)}...${a.slice(-4)}` : (a || '');
 
   const addAndFocus = (item, i) => {
@@ -259,7 +283,51 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview 
           Import File
         </button>
         <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
+        {contacts?.length>0 && (
+          <button
+            className="ap-btn ap-btn-sec"
+            style={{ fontSize: 12, padding: "7px 12px", flexShrink: 0, marginTop: 0, marginLeft: 8 }}
+            onClick={() => setShowContactsPicker(true)}
+          >
+            Choose from Contacts
+          </button>
+        )}
       </div>
+
+      {showContactsPicker && (
+        <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}}>
+          <div style={{background:'var(--card)',borderRadius:16,width:'100%',maxWidth:400,maxHeight:'70vh',display:'flex',flexDirection:'column',boxShadow:'0 24px 60px rgba(0,0,0,0.4)'}} onClick={e=>e.stopPropagation()}>
+            <div style={{padding:'16px 20px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
+              <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:10}}>Choose Contacts</div>
+              <input autoFocus placeholder="Search contacts..." onChange={e=>setContactSearch(e.target.value)} value={contactSearch} style={{width:'100%',padding:'8px 12px',borderRadius:10,border:'1px solid var(--b1)',background:'var(--elev)',color:'var(--tx1)',fontSize:13,outline:'none',boxSizing:'border-box'}}/>
+            </div>
+            <div style={{overflowY:'auto',flex:1}}>
+              {(contacts||[]).filter(c=>!contactSearch||c.name?.toLowerCase().includes(contactSearch.toLowerCase())||c.address?.toLowerCase().includes(contactSearch.toLowerCase())).length===0
+                ? <div style={{padding:20,fontSize:12,color:'var(--tx3)',textAlign:'center'}}>No contacts found</div>
+                : (contacts||[]).filter(c=>!contactSearch||c.name?.toLowerCase().includes(contactSearch.toLowerCase())||c.address?.toLowerCase().includes(contactSearch.toLowerCase())).map(c=>{
+                  const checked = selectedContactIds.has(c.id);
+                  return (
+                    <div key={c.id} onClick={()=>toggleContactSelect(c.id)} style={{padding:'10px 16px',cursor:'pointer',borderBottom:'1px solid var(--b0)',display:'flex',alignItems:'center',gap:10,background:checked?'var(--acd)':'transparent'}}>
+                      <div style={{width:20,height:20,borderRadius:6,border:checked?'none':'2px solid var(--b1)',background:checked?'var(--ac)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                        {checked && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                      </div>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:'var(--acd)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontWeight:700,fontSize:13,color:'var(--ac)'}}>{c.name?.[0]?.toUpperCase()||'?'}</div>
+                      <div style={{minWidth:0}}>
+                        <div style={{fontWeight:600,fontSize:13,color:'var(--tx1)'}}>{c.name}</div>
+                        <div style={{fontSize:11,color:'var(--tx3)',fontFamily:'monospace'}}>{c.address.slice(0,6)}...{c.address.slice(-4)}</div>
+                      </div>
+                    </div>
+                  );
+                })
+              }
+            </div>
+            <div style={{padding:16,borderTop:'1px solid var(--b0)',display:'flex',gap:10,flexShrink:0}}>
+              <button onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}} style={{flex:1,background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:13,color:'var(--tx2)',fontWeight:600,cursor:'pointer'}}>Cancel</button>
+              <button onClick={addSelectedContacts} disabled={selectedContactIds.size===0} className="ap-btn ap-btn-primary" style={{flex:1,marginTop:0}}>Add {selectedContactIds.size>0?selectedContactIds.size:''} Selected</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {fileError && (
         <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: '#ef4444', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
