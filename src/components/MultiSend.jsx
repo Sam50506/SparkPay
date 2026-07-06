@@ -295,7 +295,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
       </div>
 
       {showContactsPicker && (
-        <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>{setShowContactsPicker(false);setContactSearch('');setSelectedContactIds(new Set());}}>
+        <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={e=>e.stopPropagation()}>
           <div style={{background:'var(--card)',borderRadius:16,width:'100%',maxWidth:400,maxHeight:'70vh',display:'flex',flexDirection:'column',boxShadow:'0 24px 60px rgba(0,0,0,0.4)'}} onClick={e=>e.stopPropagation()}>
             <div style={{padding:'16px 20px',borderBottom:'1px solid var(--b0)',flexShrink:0}}>
               <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:10}}>Choose Contacts</div>
