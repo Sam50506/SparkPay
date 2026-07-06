@@ -392,12 +392,6 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
         </div>
       )}
 
-      <div style={{ background: 'var(--elev)', borderRadius: 10, padding: '8px 12px', fontSize: 12, color: 'var(--tx3)', marginBottom: 14 }}>
-        Format required: wallet address, amount, country (optional)
-        <br /><br />
-        CSV/XLSX and PDF files are allowed
-      </div>
-
       {multi.map((r, i) => (
         <div key={i} ref={el => rowRefs.current[i] = el} style={{ marginBottom: 10, borderRadius: 12, transition: 'box-shadow 0.3s, background 0.3s', boxShadow: highlightIdx === i ? '0 0 0 2px #f59e0b' : 'none', background: highlightIdx === i ? 'rgba(245,158,11,0.06)' : 'transparent', padding: highlightIdx === i ? '8px' : '0' }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
