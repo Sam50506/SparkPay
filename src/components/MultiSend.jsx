@@ -270,7 +270,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
 
   return (
     <div className="ap-card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 8 }}>
         <div>
           <div className="ap-card-title">Multi Send</div>
           <div className="ap-card-sub">Send USDC to multiple recipients in one session.</div>
@@ -283,6 +283,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           Import File
         </button>
         <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls,.pdf" style={{ display: 'none' }} onChange={handleCSV} />
+        <div style={{display:'flex',gap:8,flexShrink:0}}>
           <button
             className="ap-btn ap-btn-sec"
             style={{ fontSize: 12, padding: "7px 12px", flexShrink: 0, marginTop: 0, marginLeft: 8 }}
@@ -290,6 +291,7 @@ export default function MultiSend({ multi, setMulti, loading, handleMultiReview,
           >
             Choose from Contacts
           </button>
+        </div>
         </div>
 
       {showContactsPicker && (
