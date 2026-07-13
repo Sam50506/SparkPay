@@ -17,7 +17,7 @@ export const SCHED_ABI = [
 export function useSchedule({ signer, address, newSched, setNewSched, setLoading, setStatus, setTxns, refreshBal }) {
 
   const handleSchedule = useCallback(async () => {
-    const releaseTimeCheck = Math.floor(new Date(newSched.next+'T'+(newSched.time||'12:00')+':00').getTime()/1000);
+    const [sy,sm,sd]=newSched.next.split('-').map(Number);const [sh,smin]=(newSched.time||'12:00').split(':').map(Number);const releaseTimeCheck=Math.floor(new Date(sy,sm-1,sd,sh,smin,0).getTime()/1000);
     if (releaseTimeCheck < Math.floor(Date.now()/1000) + 120) {
       setStatus({ type: 'error', msg: 'Release time must be at least 2 minutes in the future.' });
       return;
@@ -27,7 +27,7 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
       return;
     }
     if (!signer) { setStatus({ type: 'error', msg: 'Connect your wallet first' }); return; }
-    const releaseTime=Math.floor(new Date(newSched.next+'T'+(newSched.time||'12:00')+':00').getTime()/1000);
+    const releaseTime=Math.floor(new Date(sy,sm-1,sd,sh,smin,0).getTime()/1000);
     setLoading(true);
     try {
       const amt = ethers.parseUnits(newSched.amount, 18);
