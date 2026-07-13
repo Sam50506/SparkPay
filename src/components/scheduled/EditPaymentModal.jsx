@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { ethers } from 'ethers';
 
 export function EditPaymentModal({payment,paymentId,signer,contractAddress,schedAbi,onClose,onSuccess}){
-  const[newRecipient,setNewRecipient]=useState('');
-  const[addAmount,setAddAmount]=useState('');
-  const[newDate,setNewDate]=useState('');
-  const[newTime,setNewTime]=useState('');
+  const existingDate=new Date(payment.releaseTime*1000);
+  const pad=n=>String(n).padStart(2,'0');
+  const[newRecipient,setNewRecipient]=useState(payment.recipient||'');
+  const[addAmount,setAddAmount]=useState(parseFloat(payment.amount).toFixed(2));
+  const[newDate,setNewDate]=useState(existingDate.getFullYear()+'-'+pad(existingDate.getMonth()+1)+'-'+pad(existingDate.getDate()));
+  const[newTime,setNewTime]=useState(pad(existingDate.getHours())+':'+pad(existingDate.getMinutes()));
   const[loading,setLoading]=useState(false);
   const[error,setError]=useState('');
 
@@ -38,7 +40,7 @@ export function EditPaymentModal({payment,paymentId,signer,contractAddress,sched
   return(<div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={onClose}>
     <div style={{background:'var(--card)',borderRadius:16,padding:20,width:'100%',maxWidth:380,boxShadow:'var(--shl)'}} onClick={e=>e.stopPropagation()}>
       <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:4}}>Edit Payment</div>
-      <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Leave fields blank to keep current values. Only fill what you want to change.</div>
+      <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Edit the fields below. Only changed values will be updated on-chain.</div>
       <div className="ap-label">New Recipient Address</div>
       <input className="ap-input" style={{marginBottom:10}} placeholder="0x..." value={newRecipient} onChange={e=>setNewRecipient(e.target.value)}/>
       <div className="ap-label">New Total Amount (USDC)</div>
