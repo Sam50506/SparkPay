@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IC } from '../icons';
 import { ALL_CC, CURRENCY } from '../config';
 import CountrySelect from './CountrySelect';
@@ -11,6 +11,18 @@ export default function SendPage({
 }) {
   const [showContactsPicker, setShowContactsPicker] = useState(false);
   const [contactSearch, setContactSearch] = useState('');
+  const contactsPickerRef = useRef(null);
+
+  useEffect(() => {
+    if (!showContactsPicker) return;
+    const handleClickOutside = (e) => {
+      if (contactsPickerRef.current && !contactsPickerRef.current.contains(e.target)) {
+        setShowContactsPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showContactsPicker]);
   const filteredC = (contacts||[]).filter(c =>
     c.address?.toLowerCase().includes(sendTo.toLowerCase()) ||
     c.name?.toLowerCase().includes(sendTo.toLowerCase())
@@ -49,7 +61,7 @@ export default function SendPage({
         <div className="ap-label">Recipient Address</div>
         <div style={{display:'flex',gap:8,marginBottom:14}}>
           <input className="ap-input" placeholder="0x..." value={sendTo} onChange={e=>setSendTo(e.target.value)} style={{marginBottom:0,flex:1}}/>
-          <div style={{position:"relative"}}>
+          <div ref={contactsPickerRef} style={{position:"relative"}}>
             <button type="button" onMouseDown={()=>setShowContactsPicker(v=>!v)} className="ap-btn-icon" style={{flexShrink:0,color:"var(--ac)"}} title="Pick from contacts"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button>
             {showContactsPicker && (
               <div style={{position:"absolute",top:"110%",right:0,zIndex:20,background:"var(--card)",border:"1px solid var(--b1)",borderRadius:12,width:"min(320px,90vw)",boxShadow:"0 8px 24px rgba(0,0,0,.2)"}}>
