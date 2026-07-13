@@ -13,8 +13,8 @@ export function EditPaymentModal({payment,paymentId,signer,contractAddress,sched
     setLoading(true);setError('');
     try{
       const contract=new ethers.Contract(contractAddress,schedAbi,signer);
-      const recipientArg=newRecipient.trim()?ethers.getAddress(newRecipient.trim()):ethers.ZeroAddress;
-      let releaseTimeArg=0;
+      const recipientArg=newRecipient.trim()?ethers.getAddress(newRecipient.trim()):ethers.getAddress(payment.recipient);
+      let releaseTimeArg=Number(payment.releaseTime);
       if(newDate){
         const timeStr=newTime||'12:00';
         releaseTimeArg=Math.floor((()=>{const [dy,dm,dd]=newDate.split('-').map(Number);const [dh,dmin]=(newTime||'12:00').split(':').map(Number);return new Date(dy,dm-1,dd,dh,dmin,0);})(  ).getTime()/1000);
