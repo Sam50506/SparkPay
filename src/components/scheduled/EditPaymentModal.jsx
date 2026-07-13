@@ -41,14 +41,14 @@ export function EditPaymentModal({payment,paymentId,signer,contractAddress,sched
     <div style={{background:'var(--card)',borderRadius:16,padding:20,width:'100%',maxWidth:380,boxShadow:'var(--shl)'}} onClick={e=>e.stopPropagation()}>
       <div style={{fontSize:15,fontWeight:800,color:'var(--tx1)',marginBottom:4}}>Edit Payment</div>
       <div style={{fontSize:12,color:'var(--tx3)',marginBottom:14}}>Edit the fields below. Only changed values will be updated on-chain.</div>
-      <div className="ap-label">New Recipient Address</div>
+      <div className="ap-label">Recipient Address</div>
       <input className="ap-input" style={{marginBottom:10}} placeholder="0x..." value={newRecipient} onChange={e=>setNewRecipient(e.target.value)}/>
-      <div className="ap-label">New Total Amount (USDC)</div>
+      <div className="ap-label">Amount (USDC)</div>
       <input className="ap-input" type="number" style={{marginBottom:10}} placeholder="0.00" value={addAmount} onChange={e=>setAddAmount(e.target.value)}/>
-      <div style={{fontSize:11,color:"var(--tx3)",marginBottom:10,marginTop:-6}}>Enter the new total amount, not the difference.</div>
-      <div className="ap-label">New Release Date</div>
+      
+      <div className="ap-label">Release Date</div>
       <input className="ap-input" type="date" style={{marginBottom:10}} value={newDate} onChange={e=>setNewDate(e.target.value)}/>
-      <div className="ap-label">New Release Time</div>
+      <div className="ap-label">Release Time</div>
       <input className="ap-input" type="time" style={{marginBottom:10}} value={newTime} onChange={e=>setNewTime(e.target.value)}/>
       {error&&<div style={{fontSize:12,color:'var(--re)',marginBottom:10}}>{error}</div>}
       <button className="ap-btn ap-btn-primary" style={{width:'100%'}} onClick={submit} disabled={loading||(!newRecipient&&!addAmount&&!newDate&&!newTime)}>{loading?'Submitting...':'Save Changes'}</button>
