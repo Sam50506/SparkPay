@@ -17,15 +17,14 @@ export function EditPaymentModal({payment,paymentId,signer,contractAddress,sched
       let releaseTimeArg=0;
       if(newDate){
         const timeStr=newTime||'12:00';
-        const dateStr=`${newDate}T${timeStr}:00`;
-        releaseTimeArg=Math.floor(new Date(dateStr).getTime()/1000);
+        releaseTimeArg=Math.floor((()=>{const [dy,dm,dd]=newDate.split('-').map(Number);const [dh,dmin]=(newTime||'12:00').split(':').map(Number);return new Date(dy,dm-1,dd,dh,dmin,0);})(  ).getTime()/1000);
         if(releaseTimeArg<=Math.floor(Date.now()/1000)){
           setError('Release time must be in the future.');
           setLoading(false);
           return;
         }
       }
-      const value=addAmount&&parseFloat(addAmount)>0?ethers.parseUnits(String(parseFloat(addAmount)),18):0n;
+      const existingAmt=parseFloat(payment.amount)||0;const newAmt=addAmount&&parseFloat(addAmount)>0?parseFloat(addAmount):0;const diff=newAmt-existingAmt;const value=diff>0?ethers.parseUnits(diff.toFixed(6),18):0n;
       const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:300000});
       await tx.wait();
       onSuccess();
