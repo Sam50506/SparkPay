@@ -40,6 +40,20 @@ export const short  =a=>a?a.slice(0,6)+'...'+a.slice(-4):'';
 export const sendNotif=(title,body)=>{if('Notification' in window&&Notification.permission==='granted'){if(navigator.serviceWorker?.controller){navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,{body,icon:'/sparkpay-logo.jpg'}));}else{try{new Notification(title,{body,icon:'/sparkpay-logo.jpg'});}catch(_){}}}};
 export const requestNotifPermission=async()=>{if('Notification' in window&&Notification.permission==='default'){await Notification.requestPermission();}};
 export const fmtUsdc=v=>v!=null?parseFloat(ethers.formatUnits(BigInt(v.toString()),18)).toFixed(2):'0.00';
+
+// Native side (Arc gas token, incl. this app's current send/invoice/schedule flows): 18 decimals.
+// ERC-20 side (USDC_ADDR, 0x3600...0000 per Circle's Arc docs): 6 decimals.
+// Same underlying dollars through two interfaces - never mix a raw value from one
+// with a raw value from the other without converting first. Not used anywhere yet;
+// reserved for when SparkPay needs allowances/transferFrom against the ERC-20 side.
+export const nativeToErc20 = (amountStr) => {
+  const wei = ethers.parseUnits(amountStr.toString(), 18);
+  return wei / 1000000000000n; // 1e18 -> 1e6
+};
+export const erc20ToNative = (units) => {
+  const wei = BigInt(units.toString()) * 1000000000000n; // 1e6 -> 1e18
+  return ethers.formatUnits(wei, 18);
+};
 export const fmtDate=ts=>{if(!ts)return'';const d=new Date(Number(ts)*1000);return d.toLocaleDateString('en',{month:'short',day:'numeric',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});};
 export const fmtTime=ts=>{if(!ts)return'';const d=new Date(Number(ts)*1000);return d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone});};
 export const ls     =(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
