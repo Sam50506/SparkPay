@@ -2,6 +2,7 @@
 import './App.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
+import { useWallet } from './hooks/useWallet';
 import { useInvoices } from './hooks/useInvoices';
 import { useSend } from './hooks/useSend';
 import { useMulti } from './hooks/useMulti';
@@ -37,17 +38,16 @@ import SettingsPage from './components/SettingsPage';
 import Lottie from 'lottie-react';
 import arcpayAnimation from './arcpay-animation.json';
 import { ethers } from 'ethers';
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { QRCodeSVG } from 'qrcode.react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { ARC_CHAIN_ID, ARC_CHAIN_HEX, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RPC, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, SCHED_ADDR, REMIT_ADDR, USDC_ADDR, WC_ID, SB_URL, SB_KEY, APP_URL } from './config';
+import { ARC_CHAIN_ID, DEFAULT_MAINTENANCE, ADMIN_ADDRESS, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, SCHED_ADDR, REMIT_ADDR, USDC_ADDR, SB_URL, SB_KEY, APP_URL } from './config';
 import { COUNTRIES, ALL_COUNTRIES, ALL_CURRENCY, ALL_CC, CC, flagEmoji, CURRENCY } from './config';
 import { REMIT_ABI, ERC20_ABI } from './config';
-import { short, sendNotif, requestNotifPermission, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
+import { short, sendNotif, fmtUsdc, fmtDate, fmtTime, ls, lsSave, awaitReceipt } from './config';
 import { buildChart } from './config';
 import { addrColor, isValidAddr } from './config';
-import { getProvider, sbFetch, sbInsert, sbSelect, sbUpdate } from './config';
+import { sbFetch, sbInsert, sbSelect, sbUpdate } from './config';
 
 function AppInner() {
   const isAdminRoute = window.location.hash === '#admin';
@@ -61,9 +61,9 @@ function AppInner() {
       setMaintenanceLoaded(true);
     }).catch(()=>setMaintenanceLoaded(true));
   },[]);
-  const [provider,setProvider]=useState(null);const[signer,setSigner]=useState(null);const[address,setAddress]=useState('');const[balance,setBalance]=useState('0.00');const[walletName,setWalletName]=useState('');
-  const wcProvRef=useRef(null);const wcInitRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const isPWA=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;const[splash,setSplash]=useState(!isPWA);const[isResumed,setIsResumed]=useState(false);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[showWalletPrompt,setShowWalletPrompt]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
   const[tab,setTab]=useState('send');const[status,setStatus]=useState(null);const[loading,setLoading]=useState(false);const[mobOpen,setMobOpen]=useState(false);const[dm,setDm]=useState(()=>{const saved=ls('arc_dm');if(saved===null||saved===undefined)return false;return saved===true||saved==='true';});
+  const { provider, signer, address, balance, setBalance, walletName, setWalletName, isResumed, setIsResumed, wcProvRef, doDisconnect, refreshBal, connectBrowser, connectWC, findProviderByName } = useWallet({ setStatus });
+  const wcInitRef=useRef(null);const[showPicker,setShowPicker]=useState(false);const isPWA=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;const[splash,setSplash]=useState(!isPWA);const[showOnboarding,setShowOnboarding]=useState(()=>!ls('arc_onboarded',false));const[faucetLoading,setFaucetLoading]=useState(false);const[showWalletPrompt,setShowWalletPrompt]=useState(false);const[faucetMsg,setFaucetMsg]=useState(null);const[lastClaim,setLastClaim]=useState(0);const[showFaucetFrame,setShowFaucetFrame]=useState(false);useEffect(()=>{if(address)setLastClaim(ls('arc_faucet_last_'+address,0));},[address]);
   const[showResumeModal,setShowResumeModal]=useState(false);const[savedSession,setSavedSession]=useState(null);
   const[showConfirm,setShowConfirm]=useState(false);const[confirmData,setConfirmData]=useState(null);const[confirmAction,setConfirmAction]=useState(null);
   const[showQR,setShowQR]=useState(false);const[rates,setRates]=useState({});
@@ -101,11 +101,6 @@ function AppInner() {
   useEffect(()=>{const p=new URLSearchParams(window.location.search);const pa=p.get('pay');const pamt=p.get('amount');if(pa){setSendTo(pa);if(pamt)setSendAmt(pamt);setTab('send');}const inv=p.get('inv');if(inv){try{const i=JSON.parse(atob(inv));const s=ls('arc_invoices',[]);if(!s.find(x=>x.id===i.id))lsSave('arc_invoices',[i,...s]);setPayId(i.id);setTab('pay');}catch{}}},[]);
   useEffect(()=>{fetch('https://api.exchangerate-api.com/v4/latest/USD').then(r=>r.json()).then(d=>setRates(d.rates||{})).catch(()=>setRates({PKR:279,NGN:1371,INR:96.7,PHP:61.8,BDT:122.8,MXN:17.4,BRL:5.03,IDR:17713,VND:26222,GHS:11.5,KES:129,EGP:53.1,TRY:45.6,ARS:1399,COP:3795,UAH:44.2,ETB:155.9,TZS:2572,UGX:3734,NPR:154.6}));},[]);
 
-  const doDisconnect=useCallback(()=>{if(wcProvRef.current){wcProvRef.current.disconnect();wcProvRef.current=null;}try{if(window.ethereum)window.ethereum.request({method:'wallet_revokePermissions',params:[{eth_accounts:{}}]});}catch{}setProvider(null);setSigner(null);setAddress('');setWalletName('');setStatus(null);setBalance('0.00');setIsResumed(false);lsSave('arc_session',null);},[]);
-
-  useEffect(()=>{if(!window.ethereum)return;const onAcc=a=>{if(!a.length){setTimeout(()=>{if(window.ethereum)window.ethereum.request({method:'eth_accounts'}).then(accounts=>{if(!accounts.length)doDisconnect();})},1000);}else setAddress(a[0]);};const onChain=(chainId)=>{};window.ethereum.on('accountsChanged',onAcc);window.ethereum.on('chainChanged',onChain);return()=>{window.ethereum.removeListener('accountsChanged',onAcc);window.ethereum.removeListener('chainChanged',onChain);};},[doDisconnect]);
-
-  const refreshBal=useCallback(async()=>{if(!address)return;try{const rp=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});const b=await rp.getBalance(address);setBalance(parseFloat(ethers.formatUnits(b,18)).toFixed(2));}catch{}},[address]);
   useEffect(()=>{if(signer&&address){refreshBal();setContacts(ls('arc_contacts_'+address,[]));setContactsLoaded(true);setDeletedHashes(new Set(ls('arc_deleted_hashes_'+address,[])));}},[signer,address,refreshBal]);
   useEffect(()=>{if(!signer||!address)return;const t=setInterval(refreshBal,15000);return()=>clearInterval(t);},[signer,address,refreshBal]);
 
@@ -161,50 +156,6 @@ function AppInner() {
     if(!claimRes.ok)throw new Error(claimData.error||'Claim failed');
     setClaimSubmitted(true);setCashbackPending(claimData.newBalance);
   }catch(e){setStatus({type:'error',msg:'Claim failed: '+e.message});}setClaimLoading(false);};
-
-  const addArc=p=>({chainId:ARC_CHAIN_HEX,chainName:'Arc Testnet',nativeCurrency:{name:'USDC',symbol:'USDC',decimals:18},rpcUrls:[ARC_RPC||ARC_RPC_FALLBACK],blockExplorerUrls:['https://testnet.arcscan.app'],...p});
-  const ensureArc=async eth=>{try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902||e.code===-32603){setStatus({type:'info',msg:'Adding Arc Testnet to your wallet...'});try{await eth.request({method:'wallet_addEthereumChain',params:[addArc({})]});}catch(ae){setStatus({type:'error',msg:'Please add Arc Testnet manually in your wallet settings. Chain ID: 5042002, RPC: https://rpc.testnet.arc.network'});throw ae;}}else throw e;}};
-  const finaliseConnect=async bp=>{bp.pollingInterval=800;const s=await bp.getSigner();const addr=await s.getAddress();setProvider(bp);setSigner(s);setAddress(addr);setIsResumed(false);setStatus({type:'success',msg:'Connected: '+short(addr)});setTimeout(()=>setStatus(null),5000);requestNotifPermission();};
-
-  const connectBrowser=async(type,provObj)=>{try{const eth=provObj||(window.okxwallet&&(type==='OKX Wallet'||provObj?.isOkxWallet||provObj?.isOKExWallet)?window.okxwallet:null)||await getProvider();if(!eth){setStatus({type:'error',msg:'No wallet found. Install MetaMask.'});return;}await eth.request({method:'eth_requestAccounts'});const bp=new ethers.BrowserProvider(eth,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});await ensureArc(eth);let name='Browser Wallet';if(eth.isMises||(window.mises?.ethereum===eth))name='Mises';else if(eth.isMetaMask&&!eth.isBraveWallet)name='MetaMask';else if(eth.isBraveWallet)name='Brave';else if(eth.isCoinbaseWallet)name='Coinbase';else if(eth.isOkxWallet||eth.isOKExWallet)name='OKX';setWalletName(name);await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'Connection failed'});}};
-
-  // Resume must reconnect to the EXACT same wallet the user used before, not just
-// any wallet matching loose flag heuristics (which is what getProvider() does).
-// EIP-6963 gives each wallet a stable, unambiguous name via announceProvider —
-// use that to find the right one first, falling back to legacy flag matching,
-// and only as a last resort falling back to the generic auto-detect.
-const findProviderByName=(walletType)=>new Promise(resolve=>{
-  if(!walletType||walletType==='WalletConnect'||walletType==='Browser Wallet'){resolve(null);return;}
-  const found=[];
-  const handler=(e)=>{const {info,provider}=e.detail;if(!found.find(w=>w.info.uuid===info.uuid))found.push({info,provider});};
-  window.addEventListener('eip6963:announceProvider',handler);
-  window.dispatchEvent(new Event('eip6963:requestProvider'));
-  setTimeout(()=>{
-    window.removeEventListener('eip6963:announceProvider',handler);
-    const match=found.find(w=>w.info.name.toLowerCase().includes(walletType.toLowerCase())||walletType.toLowerCase().includes(w.info.name.toLowerCase()));
-    if(match){resolve(match.provider);return;}
-    // Fallback: legacy provider-array flag matching (same logic as WalletPicker's else-branch)
-    const eth=window.ethereum;
-    if(eth){
-      const providers=eth.providers?.length?eth.providers:[eth];
-      const byFlag=providers.find(p=>{
-        const wt=walletType.toLowerCase();
-        if(wt.includes('metamask'))return p.isMetaMask&&!p.isBraveWallet;
-        if(wt.includes('brave'))return p.isBraveWallet;
-        if(wt.includes('coinbase'))return p.isCoinbaseWallet;
-        if(wt.includes('rabby'))return p.isRabby;
-        if(wt.includes('okx'))return p.isOkxWallet||p.isOKExWallet;
-        if(wt.includes('trust'))return p.isTrust;
-        if(wt.includes('mises'))return p.isMises||window.mises?.ethereum===p;
-        return false;
-      });
-      if(byFlag){resolve(byFlag);return;}
-    }
-    resolve(null);
-  },250);
-});
-
-const connectWC=async()=>{try{const wcp=await EthereumProvider.init({projectId:WC_ID,chains:[1],optionalChains:[ARC_CHAIN_ID],showQrModal:true,qrModalOptions:{themeMode:'light',themeVariables:{'--wcm-font-family':'inherit'}},methods:['eth_sendTransaction','personal_sign','wallet_addEthereumChain','wallet_switchEthereumChain'],events:['chainChanged','accountsChanged']});await wcp.enable();wcp.on('accountsChanged',a=>{if(!a.length)doDisconnect();else setAddress(a[0]);});wcp.on('disconnect',doDisconnect);try{await wcp.request({method:'wallet_switchEthereumChain',params:[{chainId:ARC_CHAIN_HEX}]});}catch(e){if(e.code===4902)await wcp.request({method:'wallet_addEthereumChain',params:[addArc({})]});}const bp=new ethers.BrowserProvider(wcp,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});wcProvRef.current=wcp;setWalletName('WalletConnect');await finaliseConnect(bp);}catch(e){setStatus({type:'error',msg:e.message||'WalletConnect failed'});}};
 
   const exportCSV=()=>{const rows=[['Type','Hash','Recipient','Amount (USDC)','Country','Date','Status'],...txns.map(t=>['Send',t.hash||'',t.recipient||'',t.amount||'',t.country||'',fmtDate(t.timestamp),t.status||'']),...ls('arc_invoices',[]).map(i=>['Invoice',i.id||'',i.payer||'',i.amount||'',i.country||'',fmtDate(i.ts),i.paid?'Paid':'Unpaid']),...scheds.map(s=>['Scheduled','',s.addr||'',s.amount||'',s.country||'',s.next||'',s.freq||''])];const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='sparkpay-history.csv';a.click();URL.revokeObjectURL(url);};
 
