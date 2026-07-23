@@ -192,9 +192,49 @@ async function main() {
     console.error("Could not read scheduled_payments count, falling back to full sweep:", e.message);
   }
 
-  const MAX_PER_RUN = 2; // caps actual execute() attempts per cron run to avoid rate-limit bursts on a backlog
+  // Adaptive pacing + circuit breaker (replaces the earlier fixed MAX_PER_RUN cap).
+  // Goal: release every due payment in one run when the RPC is healthy (no artificial
+  // count limit), but back off automatically under real strain instead of hammering
+  // an already-struggling endpoint.
+  //   - pace between payments grows on failure, eases back down on success
+  //   - after 2 CONSECUTIVE full failures (each already exhausted executeWithRetry's
+  //     own 4-attempt backoff), stop this run and defer the remainder to the next
+  //     15-min cycle, rather than continuing to fail down the whole backlog
+  const BASE_PACE_MS = 500;
+  const MAX_PACE_MS = 5000;
+  const CIRCUIT_BREAKER_THRESHOLD = 2;
   const counters = { executed: 0, failed: 0, skipped: 0 };
   const inSync = sbCount !== null && sbCount === onChainCount;
+
+  async function runQueue(ids, getPaymentId) {
+    let pace = BASE_PACE_MS;
+    let consecutiveFailures = 0;
+    for (const item of ids) {
+      const paymentId = getPaymentId(item);
+      const failedBefore = counters.failed;
+      const skippedBefore = counters.skipped;
+      await processPayment(contract, paymentId, now, counters);
+      const wasFailure = counters.failed > failedBefore;
+      const wasSkip = counters.skipped > skippedBefore;
+
+      if (wasFailure) {
+        consecutiveFailures++;
+        pace = Math.min(pace * 2, MAX_PACE_MS);
+        console.warn(`Payment ${paymentId} failed (consecutive: ${consecutiveFailures}/${CIRCUIT_BREAKER_THRESHOLD}), pace now ${pace}ms`);
+        if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+          console.warn(`Circuit breaker: ${CIRCUIT_BREAKER_THRESHOLD} consecutive failures (each already retried) — stopping this run, remainder deferred to next cycle`);
+          break;
+        }
+      } else if (!wasSkip) {
+        // successful execute: ease pace back toward baseline
+        consecutiveFailures = 0;
+        pace = Math.max(BASE_PACE_MS, Math.floor(pace * 0.8));
+      }
+      // skips don't touch the RPC's execute path, so leave pace/consecutiveFailures as-is
+
+      await new Promise(r => setTimeout(r, pace));
+    }
+  }
 
   if (inSync) {
     console.log(`Supabase in sync (${sbCount}/${onChainCount}) — using fast candidate query`);
@@ -204,28 +244,15 @@ async function main() {
     );
     const candidates = await candRes.json();
     console.log("Checking " + candidates.length + " candidate payment(s)");
-    for (const row of candidates) {
-      if (counters.executed + counters.failed >= MAX_PER_RUN) {
-        console.log(`MAX_PER_RUN (${MAX_PER_RUN}) reached — deferring remaining candidates to next run`);
-        break;
-      }
-      await processPayment(contract, row.payment_id, now, counters);
-      await new Promise(r => setTimeout(r, 500));
-    }
+    await runQueue(candidates, row => row.payment_id);
   } else {
     console.warn(`SYNC MISMATCH: Supabase has ${sbCount ?? 'unknown'} rows, on-chain has ${onChainCount}. Falling back to full on-chain sweep for safety.`);
     await sendTelegramAlert(
       `⚠️ <b>SparkPay Keeper Sync Warning</b>\n\nSupabase rows: <b>${sbCount ?? 'unknown'}</b>\nOn-chain paymentCount: <b>${onChainCount}</b>\n\nFalling back to full sweep this run. Investigate the data gap.`
     );
     console.log("Checking all " + onChainCount + " payments (full sweep)");
-    for (let i = 0; i < onChainCount; i++) {
-      if (counters.executed + counters.failed >= MAX_PER_RUN) {
-        console.log(`MAX_PER_RUN (${MAX_PER_RUN}) reached — deferring remaining payments to next run`);
-        break;
-      }
-      await processPayment(contract, i, now, counters);
-      await new Promise(r => setTimeout(r, 500));
-    }
+    const ids = Array.from({ length: onChainCount }, (_, i) => i);
+    await runQueue(ids, i => i);
   }
 
   try {
