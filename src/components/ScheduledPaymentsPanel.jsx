@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { KeeperCountdown } from './KeeperCountdown';
 import { ethers } from 'ethers';
-import { SB_URL, SB_KEY, SCHED_ADDR, ls, lsSave, ALL_CURRENCY } from '../config';
+import { SB_URL, SB_KEY, SCHED_ADDR, ARC_RPC_FALLBACK, ls, lsSave, ALL_CURRENCY } from '../config';
 import { Countdown } from './scheduled/Countdown';
 import { EditPaymentModal } from './scheduled/EditPaymentModal';
 import { NeedHelpMenu } from './scheduled/NeedHelpMenu';
@@ -74,6 +74,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
 export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onExecute,onCancel,loading,rates}){
   const[payments,setPayments]=useState([]);
   const[fetching,setFetching]=useState(false);
+  const[fetchError,setFetchError]=useState(null);
   const[now,setNow]=useState(Math.floor(Date.now()/1000));
   const[manageSched,setManageSched]=useState(false);
   const[selectedSched,setSelectedSched]=useState([]);
@@ -98,8 +99,11 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   const fetchPayments=useCallback(async()=>{
     if(!address||!provider)return;
     setFetching(true);
-    try{
-      const sched=new ethers.Contract(schedAddr,schedAbi,provider);
+    // On-chain read via the connected wallet's RPC. If that endpoint is rate-limited
+    // or otherwise unreachable, fall back to ARC_RPC_FALLBACK (same pattern as
+    // refreshPendingTxns) instead of failing the whole panel silently.
+    const attempt=async(readProvider)=>{
+      const sched=new ethers.Contract(schedAddr,schedAbi,readProvider);
       const count=Number(await sched.paymentCount());
       const results=[];
       for(let i=count-1;i>=0&&results.length<50;i--){
@@ -108,8 +112,24 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
           results.push({id:i,recipient:p.recipient,amount:ethers.formatUnits(p.amount,18),releaseTime:Number(p.releaseTime),executed:p.executed,cancelled:p.cancelled,country:p.country});
         }
       }
+      return results;
+    };
+    try{
+      const results=await attempt(provider);
       setPayments(results);
-    }catch(e){console.error(e);}
+      setFetchError(null);
+    }catch(primaryErr){
+      try{
+        const fallbackProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK);
+        const results=await attempt(fallbackProvider);
+        setPayments(results);
+        setFetchError(null);
+      }catch(fallbackErr){
+        console.error(primaryErr);
+        console.error(fallbackErr);
+        setFetchError('Could not load scheduled payments right now. Your payments are safe on-chain — this is just a network hiccup.');
+      }
+    }
     setFetching(false);
   },[address,provider,schedAddr,schedAbi]);
 
@@ -136,7 +156,12 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   const shownActive=showAllActive?activePayments:activePayments.slice(0,LIMIT);
   const shownHistory=showAllHistory?historyPayments:historyPayments.slice(0,LIMIT);
 
-  if(visiblePayments.length===0&&!fetching)return null;
+  // Previously: `if(visiblePayments.length===0&&!fetching)return null;`
+  // Removed — this made the ENTIRE panel vanish (not even an empty state) whenever
+  // payments was empty, which also happened silently on any RPC/fetch error since
+  // the catch block just logged and left payments as []. The tabs below already
+  // render proper "No active/history" empty states, so this early return was both
+  // redundant for the true-empty case and actively harmful for the error case.
 
   const ChangesModal=()=>!changesModal?null:(
     <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}} onClick={()=>setChangesModal(null)}>
@@ -204,6 +229,11 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
         <button onClick={()=>setSelectedSched([])} className="ap-btn ap-btn-sec" style={{fontSize:12,padding:'5px 10px'}}>Deselect All</button>
         {selectedSched.length>0&&<button onClick={()=>{if(window.confirm('Hide '+selectedSched.length+' payment(s)?')){const next=new Set([...hiddenSched,...selectedSched]);setHiddenSched(next);lsSave('arc_hidden_sched_'+address,[...next]);setSelectedSched([]);setManageSched(false);}}} style={{background:'var(--re)',border:'none',color:'#fff',cursor:'pointer',padding:'5px 12px',fontSize:12,borderRadius:8,fontWeight:600}}>Hide {selectedSched.length} Selected</button>}
       </div>
+    </div>}
+
+    {fetchError&&<div style={{display:'flex',alignItems:'center',gap:10,background:'rgba(240,196,63,.08)',border:'1px solid rgba(240,196,63,.2)',borderRadius:10,padding:'10px 12px',marginBottom:14,fontSize:12,color:'#f59e0b'}}>
+      <span style={{flex:1}}>{fetchError}</span>
+      <button onClick={fetchPayments} style={{background:'none',border:'1px solid #f59e0b',borderRadius:8,padding:'5px 10px',fontSize:11,fontWeight:700,color:'#f59e0b',cursor:'pointer',flexShrink:0}}>Retry</button>
     </div>}
 
     {fetching&&visiblePayments.length===0&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'20px 0',fontSize:13}}>Loading...</div>}
