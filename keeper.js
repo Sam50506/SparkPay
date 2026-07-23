@@ -80,6 +80,27 @@ async function checkPayoutBalance(provider) {
   }
 }
 
+async function executeWithRetry(contract, i, maxAttempts = 4) {
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    await new Promise(r => setTimeout(r, 800));
+    try {
+      const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
+      await tx.wait();
+      return tx;
+    } catch (err) {
+      lastErr = err;
+      const isRateLimit = err?.error?.code === -32011 ||
+        /request limit|rate limit|too many requests|429/i.test(err?.message || err?.error?.message || '');
+      if (!isRateLimit || attempt === maxAttempts) throw err;
+      const backoffMs = 2000 * attempt;
+      console.warn(`Payment ${i}: rate limited (attempt ${attempt}/${maxAttempts}), retrying in ${backoffMs}ms`);
+      await new Promise(r => setTimeout(r, backoffMs));
+    }
+  }
+  throw lastErr;
+}
+
 async function processPayment(contract, i, now, counters) {
   try {
     await new Promise(r => setTimeout(r, 400));
@@ -104,8 +125,7 @@ async function processPayment(contract, i, now, counters) {
     if (reqs.length > 0) { console.log("Skipping payment " + i + " — pending cancel request"); counters.skipped++; return; }
 
     console.log("Executing payment " + i);
-    const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
-    await tx.wait();
+    const tx = await executeWithRetry(contract, i);
     console.log("Done: " + tx.hash);
     counters.executed++;
 
@@ -180,6 +200,7 @@ async function main() {
     console.log("Checking " + candidates.length + " candidate payment(s)");
     for (const row of candidates) {
       await processPayment(contract, row.payment_id, now, counters);
+      await new Promise(r => setTimeout(r, 500));
     }
   } else {
     console.warn(`SYNC MISMATCH: Supabase has ${sbCount ?? 'unknown'} rows, on-chain has ${onChainCount}. Falling back to full on-chain sweep for safety.`);
@@ -189,6 +210,7 @@ async function main() {
     console.log("Checking all " + onChainCount + " payments (full sweep)");
     for (let i = 0; i < onChainCount; i++) {
       await processPayment(contract, i, now, counters);
+      await new Promise(r => setTimeout(r, 500));
     }
   }
 
