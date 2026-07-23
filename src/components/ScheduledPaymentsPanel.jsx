@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { KeeperCountdown } from './KeeperCountdown';
 import { ethers } from 'ethers';
-import { SB_URL, SB_KEY, SCHED_ADDR, ARC_RPC_FALLBACK, ARC_CHAIN_ID, ls, lsSave, ALL_CURRENCY } from '../config';
+import { SB_URL, SB_KEY, SCHED_ADDR, ARC_RPC_FALLBACK, ARC_RPC_FALLBACK2, ARC_RPC_FALLBACK3, ARC_CHAIN_ID, ls, lsSave, ALL_CURRENCY } from '../config';
 import { Countdown } from './scheduled/Countdown';
 import { EditPaymentModal } from './scheduled/EditPaymentModal';
 import { NeedHelpMenu } from './scheduled/NeedHelpMenu';
@@ -116,28 +116,35 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
       for(const id of ids){
         const p=await sched.getPayment(id);
         results.push({id,recipient:p.recipient,amount:ethers.formatUnits(p.amount,18),releaseTime:Number(p.releaseTime),executed:p.executed,cancelled:p.cancelled,country:p.country});
-        if(ids.length>1)await new Promise(r=>setTimeout(r,150));
+        if(ids.length>1)await new Promise(r=>setTimeout(r,600));
       }
       return results;
     };
-    // Reads go through a dedicated RPC provider, not the wallet's injected
-    // provider (MetaMask etc). Racing reads against the wallet's own request
-    // queue was triggering "Request is being rate limited" on mobile, which
-    // ethers then surfaced as a confusing "missing revert data" error even
-    // though the contract call itself was fine. Writes still go through the
-    // wallet provider elsewhere - only these background reads changed.
-    const readProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
-    try{
-      const results=await attempt(readProvider);
+    // Reads go through a rotation of public RPC endpoints instead of the
+    // wallet's injected provider. The primary testnet RPC 429s under normal
+    // polling load (shared public endpoint, not us doing anything wrong), so
+    // try each known endpoint in turn before falling back to the wallet's
+    // own provider as a last resort. Writes still go through the wallet
+    // provider elsewhere - only these background reads changed.
+    const rpcUrls=[ARC_RPC_FALLBACK,ARC_RPC_FALLBACK2,ARC_RPC_FALLBACK3];
+    let results=null,lastErr=null;
+    for(const url of rpcUrls){
+      try{
+        const readProvider=new ethers.JsonRpcProvider(url,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
+        results=await attempt(readProvider);
+        break;
+      }catch(e){lastErr=e;}
+    }
+    if(results){
       setPayments(results);
       setFetchError(null);
-    }catch(primaryErr){
+    }else{
       try{
-        const results=await attempt(provider);
+        results=await attempt(provider);
         setPayments(results);
         setFetchError(null);
       }catch(fallbackErr){
-        console.error(primaryErr);
+        console.error(lastErr);
         console.error(fallbackErr);
         setFetchError('Could not load scheduled payments right now. Your payments are safe on-chain. This is just a network hiccup.');
       }
