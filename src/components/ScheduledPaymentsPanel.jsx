@@ -120,14 +120,20 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
       }
       return results;
     };
+    // Reads go through a dedicated RPC provider, not the wallet's injected
+    // provider (MetaMask etc). Racing reads against the wallet's own request
+    // queue was triggering "Request is being rate limited" on mobile, which
+    // ethers then surfaced as a confusing "missing revert data" error even
+    // though the contract call itself was fine. Writes still go through the
+    // wallet provider elsewhere - only these background reads changed.
+    const readProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
     try{
-      const results=await attempt(provider);
+      const results=await attempt(readProvider);
       setPayments(results);
       setFetchError(null);
     }catch(primaryErr){
       try{
-        const fallbackProvider=new ethers.JsonRpcProvider(ARC_RPC_FALLBACK,{name:'Arc Testnet',chainId:ARC_CHAIN_ID});
-        const results=await attempt(fallbackProvider);
+        const results=await attempt(provider);
         setPayments(results);
         setFetchError(null);
       }catch(fallbackErr){
