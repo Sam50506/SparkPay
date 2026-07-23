@@ -11,10 +11,10 @@ async function main() {
   const scheduledAddr = await scheduled.getAddress();
   console.log("ScheduledPayment deployed to:", scheduledAddr);
 
-  // Deploy Remittance
+  // Deploy Remittance (native-currency based, no constructor args needed)
   console.log("Deploying Remittance contract...");
   const Remittance = await hre.ethers.getContractFactory("Remittance");
-  const remittance = await Remittance.deploy(USDC_ADDR);
+  const remittance = await Remittance.deploy();
   await remittance.waitForDeployment();
   const remittanceAddr = await remittance.getAddress();
   console.log("Remittance deployed to:", remittanceAddr);

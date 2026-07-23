@@ -9,7 +9,7 @@ export const ARC_RPC_FALLBACK='https://rpc.testnet.arc.network';
 export const ARC_RPC_FALLBACK2='https://arc-testnet.drpc.org';
 export const ARC_RPC_FALLBACK3='https://5042002.rpc.thirdweb.com';
 export const SCHED_ADDR = '0x79a1C363Afd912212B7581F735a9096fB453F8be';
-export const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xa26f4Ce72185BF0cA2f338d03F4c19d5597f1DCe';
+export const REMIT_ADDR = process.env.REACT_APP_REMIT_ADDR||'0xfDBaC6e9C4Eb93BFb60294E8C7D7cdEeAA000219';
 export const USDC_ADDR  = process.env.REACT_APP_USDC_ADDR||'0x3600000000000000000000000000000000000000';
 export const WC_ID      = process.env.REACT_APP_WC_ID||'';
 export const SB_URL     = process.env.REACT_APP_SUPABASE_URL||'';
@@ -26,9 +26,9 @@ export const CURRENCY={Pakistan:'PKR',Nigeria:'NGN',India:'INR',Philippines:'PHP
 
 export const REMIT_ABI=[
   {inputs:[{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'}],name:'createInvoice',outputs:[{name:'',type:'bytes32'}],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:'token',type:'address'},{name:'invoiceId',type:'bytes32'}],name:'payInvoice',outputs:[],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:'token',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'}],name:'sendMoney',outputs:[],stateMutability:'nonpayable',type:'function'},
-  {inputs:[{name:"token",type:"address"},{name:"recipients",type:"address[]"},{name:"amounts",type:"uint256[]"},{name:"countries",type:"string[]"}],name:"batchSend",outputs:[],stateMutability:"nonpayable",type:"function"},
+  {inputs:[{name:'invoiceId',type:'bytes32'}],name:'payInvoice',outputs:[],stateMutability:'payable',type:'function'},
+  {inputs:[{name:'recipient',type:'address'},{name:'country',type:'string'}],name:'sendMoney',outputs:[],stateMutability:'payable',type:'function'},
+  {inputs:[{name:"recipients",type:"address[]"},{name:"amounts",type:"uint256[]"},{name:"countries",type:"string[]"}],name:"batchSend",outputs:[],stateMutability:"payable",type:"function"},
   {inputs:[{name:'user',type:'address'}],name:'getPayments',outputs:[{components:[{name:'sender',type:'address'},{name:'recipient',type:'address'},{name:'amount',type:'uint256'},{name:'country',type:'string'},{name:'timestamp',type:'uint256'},{name:'invoiceId',type:'bytes32'}],name:'',type:'tuple[]'}],stateMutability:'view',type:'function'},
   {inputs:[{name:'user',type:'address'}],name:'getUserInvoices',outputs:[{name:'',type:'bytes32[]'}],stateMutability:'view',type:'function'},
   {inputs:[{name:'',type:'bytes32'}],name:'invoices',outputs:[{name:'creator',type:'address'},{name:'payer',type:'address'},{name:'amount',type:'uint256'},{name:'description',type:'string'},{name:'country',type:'string'},{name:'paid',type:'bool'},{name:'createdAt',type:'uint256'},{name:'nonce',type:'uint256'}],stateMutability:'view',type:'function'},

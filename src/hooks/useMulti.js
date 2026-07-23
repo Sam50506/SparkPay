@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
-import { ARC_RPC, ARC_RPC_FALLBACK, ARC_CHAIN_ID, REMIT_ADDR, USDC_ADDR, lsSave } from '../config';
+import { ARC_RPC, ARC_RPC_FALLBACK, ARC_CHAIN_ID, REMIT_ADDR, lsSave } from '../config';
 
 export function useMulti({ signer, address, walletName, setStatus, setLoading, setTxns, awardCashback, refreshBal, cleanErr, setConfirmData, setConfirmAction, setShowConfirm, setShowWalletPrompt, getC }) {
   const [multi, setMulti] = useState([{ addr: '', amount: '', country: '' }]);
@@ -11,50 +11,29 @@ export function useMulti({ signer, address, walletName, setStatus, setLoading, s
     if (!signer || !valid.length) return;
     setLoading(true);
     try {
-      const { remit, usdc } = getC();
+      const { remit } = getC();
       const recipients = valid.map(r => ethers.getAddress(r.addr.toLowerCase()));
       const amounts = valid.map(r => ethers.parseUnits(parseFloat(r.amount).toString(), 18));
       const countries = valid.map(r => r.country || '');
       const total = amounts.reduce((a, b) => a + b, 0n);
 
-      // batchSend() pulls USDC via safeTransferFrom, which requires prior approval —
-      // this is a separate step from the batchSend call itself, not sent as native value.
-      setStatus({ type: 'info', msg: 'Checking USDC approval...' });
-      const currentAllowance = await usdc.allowance(address, REMIT_ADDR);
-      if (currentAllowance < total) {
-        setShowWalletPrompt(true);
-        setStatus({ type: 'info', msg: 'Approve USDC spend in your wallet...' });
-        let approveTx;
-        try {
-          approveTx = await usdc.approve(REMIT_ADDR, total);
-        } catch (ae) {
-          setShowWalletPrompt(false);
-          if (ae?.code === 4001 || ae?.code === 'ACTION_REJECTED') {
-            setStatus({ type: 'error', msg: 'Approval cancelled' });
-          } else {
-            setStatus({ type: 'error', msg: cleanErr(ae) });
-          }
-          setLoading(false);
-          return;
-        }
-        setStatus({ type: 'info', msg: 'Waiting for approval confirmation...' });
-        await approveTx.wait();
-      }
-
+      // USDC is Arc Testnet's native currency — batchSend() is payable and pays
+      // recipients directly via native value, matching the rest of the app
+      // (single-send, ScheduledPayment) rather than treating it as a separate ERC20.
       setStatus({ type: 'info', msg: 'Estimating gas...' });
       const rp = new ethers.JsonRpcProvider(ARC_RPC || ARC_RPC_FALLBACK, { name: 'Arc Testnet', chainId: ARC_CHAIN_ID });
-      const iface = new ethers.Interface(['function batchSend(address token, address[] recipients, uint256[] amounts, string[] countries)']);
-      const data = iface.encodeFunctionData('batchSend', [USDC_ADDR, recipients, amounts, countries]);
+      const iface = new ethers.Interface(['function batchSend(address[] recipients, uint256[] amounts, string[] countries) payable']);
+      const data = iface.encodeFunctionData('batchSend', [recipients, amounts, countries]);
       let gasLimit = 300000;
       try {
-        const est = await rp.send('eth_estimateGas', [{ from: address, to: REMIT_ADDR, data }]);
+        const est = await rp.send('eth_estimateGas', [{ from: address, to: REMIT_ADDR, value: '0x' + total.toString(16), data }]);
         gasLimit = Math.ceil(parseInt(est, 16) * 1.3);
       } catch (e) { }
 
       setShowWalletPrompt(true);
       let tx;
       try {
-        tx = await remit.batchSend(USDC_ADDR, recipients, amounts, countries, { gasLimit, gasPrice: ethers.parseUnits('21', 'gwei') });
+        tx = await remit.batchSend(recipients, amounts, countries, { value: total, gasLimit, gasPrice: ethers.parseUnits('21', 'gwei') });
       } catch (ue) {
         if (ue?.code === 4001 || ue?.code === 'ACTION_REJECTED') {
           setShowWalletPrompt(false);
