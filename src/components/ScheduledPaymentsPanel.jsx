@@ -127,7 +127,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
       }catch(fallbackErr){
         console.error(primaryErr);
         console.error(fallbackErr);
-        setFetchError('Could not load scheduled payments right now. Your payments are safe on-chain — this is just a network hiccup.');
+        setFetchError('Could not load scheduled payments right now. Your payments are safe on-chain. This is just a network hiccup.');
       }
     }
     setFetching(false);
@@ -157,7 +157,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   const shownHistory=showAllHistory?historyPayments:historyPayments.slice(0,LIMIT);
 
   // Previously: `if(visiblePayments.length===0&&!fetching)return null;`
-  // Removed — this made the ENTIRE panel vanish (not even an empty state) whenever
+  // Removed. This made the ENTIRE panel vanish (not even an empty state) whenever
   // payments was empty, which also happened silently on any RPC/fetch error since
   // the catch block just logged and left payments as []. The tabs below already
   // render proper "No active/history" empty states, so this early return was both
