@@ -112,11 +112,10 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
       const sched=new ethers.Contract(schedAddr,schedAbi,readProvider);
       const rawIds=await sched.getUserPayments(address);
       const ids=[...rawIds].map(x=>Number(x)).sort((a,b)=>b-a).slice(0,50);
-      const results=[];
-      for(const id of ids){
+      const results=await Promise.all(ids.map(async id=>{
         const p=await sched.getPayment(id);
-        results.push({id,recipient:p.recipient,amount:ethers.formatUnits(p.amount,18),releaseTime:Number(p.releaseTime),executed:p.executed,cancelled:p.cancelled,country:p.country});
-        if(ids.length>1)await new Promise(r=>setTimeout(r,600));
+        return{id,recipient:p.recipient,amount:ethers.formatUnits(p.amount,18),releaseTime:Number(p.releaseTime),executed:p.executed,cancelled:p.cancelled,country:p.country};
+      }));
       }
       return results;
     };
