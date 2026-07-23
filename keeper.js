@@ -82,7 +82,14 @@ async function checkPayoutBalance(provider) {
 
 async function processPayment(contract, i, now, counters) {
   try {
-    const p = await contract.getPayment(i);
+    await new Promise(r => setTimeout(r, 400));
+    let p;
+    try {
+      p = await contract.getPayment(i);
+    } catch (rpcErr) {
+      await new Promise(r => setTimeout(r, 1500));
+      p = await contract.getPayment(i);
+    }
 
     // SECURITY: on-chain state is the only source of truth for execution decisions.
     // Supabase is used elsewhere purely to discover candidate IDs faster — never to
