@@ -106,6 +106,51 @@ async function executeWithRetry(contract, i, maxAttempts = 4) {
   throw lastErr;
 }
 
+// Adaptive pacing + circuit breaker (replaces the earlier fixed MAX_PER_RUN cap).
+// Goal: release every due payment in one run when the RPC is healthy (no artificial
+// count limit), but back off automatically under real strain instead of hammering
+// an already-struggling endpoint.
+//   - pace between payments grows on failure, eases back down on success
+//   - after 2 CONSECUTIVE full failures (each already exhausted executeWithRetry's
+//     own 4-attempt backoff), stop this run and defer the remainder to the next
+//     15-min cycle, rather than continuing to fail down the whole backlog
+// Module-level (not nested in main()) and takes processFn/counters as explicit params
+// so it can be unit-tested via require() with a mock processFn, with zero risk of
+// touching the real RPC/Supabase/contract - require()-ing this file never runs main()
+// (see the require.main === module guard at the bottom), so importing this function
+// alone is fully side-effect-free.
+const BASE_PACE_MS = 500;
+const MAX_PACE_MS = 5000;
+const CIRCUIT_BREAKER_THRESHOLD = 2;
+
+async function runQueue(ids, getPaymentId, processFn, counters) {
+  let pace = BASE_PACE_MS;
+  let consecutiveFailures = 0;
+  for (const item of ids) {
+    const paymentId = getPaymentId(item);
+    const failedBefore = counters.failed;
+    const skippedBefore = counters.skipped;
+    await processFn(paymentId, counters);
+    const wasFailure = counters.failed > failedBefore;
+    const wasSkip = counters.skipped > skippedBefore;
+
+    if (wasFailure) {
+      consecutiveFailures++;
+      pace = Math.min(pace * 2, MAX_PACE_MS);
+      console.warn(`Payment ${paymentId} failed (consecutive: ${consecutiveFailures}/${CIRCUIT_BREAKER_THRESHOLD}), pace now ${pace}ms`);
+      if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
+        console.warn(`Circuit breaker: ${CIRCUIT_BREAKER_THRESHOLD} consecutive failures (each already retried) — stopping this run, remainder deferred to next cycle`);
+        break;
+      }
+    } else if (!wasSkip) {
+      consecutiveFailures = 0;
+      pace = Math.max(BASE_PACE_MS, Math.floor(pace * 0.8));
+    }
+
+    await new Promise(r => setTimeout(r, pace));
+  }
+}
+
 async function processPayment(contract, i, now, counters) {
   try {
     await new Promise(r => setTimeout(r, 400));
@@ -192,49 +237,9 @@ async function main() {
     console.error("Could not read scheduled_payments count, falling back to full sweep:", e.message);
   }
 
-  // Adaptive pacing + circuit breaker (replaces the earlier fixed MAX_PER_RUN cap).
-  // Goal: release every due payment in one run when the RPC is healthy (no artificial
-  // count limit), but back off automatically under real strain instead of hammering
-  // an already-struggling endpoint.
-  //   - pace between payments grows on failure, eases back down on success
-  //   - after 2 CONSECUTIVE full failures (each already exhausted executeWithRetry's
-  //     own 4-attempt backoff), stop this run and defer the remainder to the next
-  //     15-min cycle, rather than continuing to fail down the whole backlog
-  const BASE_PACE_MS = 500;
-  const MAX_PACE_MS = 5000;
-  const CIRCUIT_BREAKER_THRESHOLD = 2;
   const counters = { executed: 0, failed: 0, skipped: 0 };
   const inSync = sbCount !== null && sbCount === onChainCount;
-
-  async function runQueue(ids, getPaymentId) {
-    let pace = BASE_PACE_MS;
-    let consecutiveFailures = 0;
-    for (const item of ids) {
-      const paymentId = getPaymentId(item);
-      const failedBefore = counters.failed;
-      const skippedBefore = counters.skipped;
-      await processPayment(contract, paymentId, now, counters);
-      const wasFailure = counters.failed > failedBefore;
-      const wasSkip = counters.skipped > skippedBefore;
-
-      if (wasFailure) {
-        consecutiveFailures++;
-        pace = Math.min(pace * 2, MAX_PACE_MS);
-        console.warn(`Payment ${paymentId} failed (consecutive: ${consecutiveFailures}/${CIRCUIT_BREAKER_THRESHOLD}), pace now ${pace}ms`);
-        if (consecutiveFailures >= CIRCUIT_BREAKER_THRESHOLD) {
-          console.warn(`Circuit breaker: ${CIRCUIT_BREAKER_THRESHOLD} consecutive failures (each already retried) — stopping this run, remainder deferred to next cycle`);
-          break;
-        }
-      } else if (!wasSkip) {
-        // successful execute: ease pace back toward baseline
-        consecutiveFailures = 0;
-        pace = Math.max(BASE_PACE_MS, Math.floor(pace * 0.8));
-      }
-      // skips don't touch the RPC's execute path, so leave pace/consecutiveFailures as-is
-
-      await new Promise(r => setTimeout(r, pace));
-    }
-  }
+  const defaultProcessFn = (pid, cnt) => processPayment(contract, pid, now, cnt);
 
   if (inSync) {
     console.log(`Supabase in sync (${sbCount}/${onChainCount}) — using fast candidate query`);
@@ -244,7 +249,7 @@ async function main() {
     );
     const candidates = await candRes.json();
     console.log("Checking " + candidates.length + " candidate payment(s)");
-    await runQueue(candidates, row => row.payment_id);
+    await runQueue(candidates, row => row.payment_id, defaultProcessFn, counters);
   } else {
     console.warn(`SYNC MISMATCH: Supabase has ${sbCount ?? 'unknown'} rows, on-chain has ${onChainCount}. Falling back to full on-chain sweep for safety.`);
     await sendTelegramAlert(
@@ -252,7 +257,7 @@ async function main() {
     );
     console.log("Checking all " + onChainCount + " payments (full sweep)");
     const ids = Array.from({ length: onChainCount }, (_, i) => i);
-    await runQueue(ids, i => i);
+    await runQueue(ids, i => i, defaultProcessFn, counters);
   }
 
   try {
@@ -264,5 +269,9 @@ async function main() {
   console.log(`Keeper finished — mode: ${inSync ? 'fast' : 'full-sweep-fallback'}, executed: ${counters.executed}, failed: ${counters.failed}, skipped: ${counters.skipped}`);
 }
 
-main().catch(e => { console.error(e.message); });
+if (require.main === module) {
+  main().catch(e => { console.error(e.message); });
+}
 // v4 - hybrid with self-healing sync check
+
+module.exports = { runQueue, BASE_PACE_MS, MAX_PACE_MS, CIRCUIT_BREAKER_THRESHOLD };
