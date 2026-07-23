@@ -187,6 +187,7 @@ async function main() {
     console.error("Could not read scheduled_payments count, falling back to full sweep:", e.message);
   }
 
+  const MAX_PER_RUN = 2; // caps actual execute() attempts per cron run to avoid rate-limit bursts on a backlog
   const counters = { executed: 0, failed: 0, skipped: 0 };
   const inSync = sbCount !== null && sbCount === onChainCount;
 
@@ -199,6 +200,10 @@ async function main() {
     const candidates = await candRes.json();
     console.log("Checking " + candidates.length + " candidate payment(s)");
     for (const row of candidates) {
+      if (counters.executed + counters.failed >= MAX_PER_RUN) {
+        console.log(`MAX_PER_RUN (${MAX_PER_RUN}) reached — deferring remaining candidates to next run`);
+        break;
+      }
       await processPayment(contract, row.payment_id, now, counters);
       await new Promise(r => setTimeout(r, 500));
     }
@@ -209,6 +214,10 @@ async function main() {
     );
     console.log("Checking all " + onChainCount + " payments (full sweep)");
     for (let i = 0; i < onChainCount; i++) {
+      if (counters.executed + counters.failed >= MAX_PER_RUN) {
+        console.log(`MAX_PER_RUN (${MAX_PER_RUN}) reached — deferring remaining payments to next run`);
+        break;
+      }
       await processPayment(contract, i, now, counters);
       await new Promise(r => setTimeout(r, 500));
     }
