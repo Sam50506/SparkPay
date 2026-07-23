@@ -18,7 +18,12 @@ const ERC20_ABI = [
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const PAYOUT_WALLET_ADDRESS = process.env.PAYOUT_WALLET_ADDRESS;
-const USDC_ADDR = process.env.REACT_APP_USDC_ADDR || "0x3600000000000000000000000000000000000000";
+// Note: intentionally NOT the REACT_APP_ prefix — that's a Create React App
+// build-time convention for the frontend bundle (see src/config.js), and keeper.js
+// is a standalone Node script, not part of that build. Using a distinct name here
+// avoids the false impression that this var is auto-populated the way frontend
+// REACT_APP_ vars are; it's just a plain Railway environment variable.
+const USDC_ADDR = process.env.USDC_ADDR || "0x3600000000000000000000000000000000000000";
 const LOW_BALANCE_THRESHOLD = 20;
 
 const SB_URL = process.env.SUPABASE_URL;
