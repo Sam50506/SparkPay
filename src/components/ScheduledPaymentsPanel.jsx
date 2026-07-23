@@ -116,7 +116,6 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
         const p=await sched.getPayment(id);
         return{id,recipient:p.recipient,amount:ethers.formatUnits(p.amount,18),releaseTime:Number(p.releaseTime),executed:p.executed,cancelled:p.cancelled,country:p.country};
       }));
-      }
       return results;
     };
     // Reads go through a rotation of public RPC endpoints instead of the
