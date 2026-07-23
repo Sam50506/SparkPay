@@ -11,7 +11,8 @@ export const SCHED_ABI = [
   'function adminEdit(uint256 id,address payable newRecipient,uint256 newAmount,uint256 newReleaseTime,string calldata newCountry) external payable',
   'function topUp(uint256 id) external payable',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))',
-  'function paymentCount() external view returns (uint256)'
+  'function paymentCount() external view returns (uint256)',
+  'function getUserPayments(address user) external view returns (uint256[])'
 ];
 
 export function useSchedule({ signer, address, newSched, setNewSched, setLoading, setStatus, setTxns, refreshBal }) {
