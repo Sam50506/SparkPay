@@ -79,22 +79,26 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
           new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 30000))
         ]);
       } catch (waitErr) {
-        if (waitErr.message === 'timeout') {
-          // Do NOT claim success yet — the tx may still fail. Keep polling in the
-          // background and only finalize (DB insert, history, form reset) once we
-          // actually have a confirmed receipt. If it never confirms, tell the user.
-          setStatus({ type: 'info', msg: 'Still confirming on-chain (this can take a bit longer than usual)... Transaction hash: ' + tx.hash });
-          setLoading(false);
-          awaitReceipt(signer.provider || signer, tx.hash, 300000).then(receipt => {
-            if (receipt) {
-              finalizeSchedule();
-            } else {
-              setStatus({ type: 'error', msg: 'Could not confirm transaction after 5 minutes. Check the tx hash on the block explorer before retrying: ' + tx.hash });
-            }
-          });
-          return;
-        }
-        throw waitErr;
+        // SECURITY/UX: at this point `tx` already exists, meaning the transaction
+        // was genuinely broadcast to the network. ANY failure from here on (a 30s
+        // timeout, an RPC rate-limit glitch like "could not coalesce error", or any
+        // other polling hiccup) means we failed to OBSERVE confirmation - it does
+        // NOT mean the transaction itself failed. Treating those as "scheduling
+        // failed" is a false negative that can cause the user to resubmit and lock
+        // funds twice for what may already be a successful schedule. So: never
+        // declare failure here. Always fall back to background polling via
+        // awaitReceipt and only report an outcome once we have a real answer.
+        console.warn('tx.wait() did not resolve cleanly, falling back to background poll:', waitErr.message);
+        setStatus({ type: 'info', msg: 'Still confirming on-chain (this can take a bit longer than usual)... Transaction hash: ' + tx.hash });
+        setLoading(false);
+        awaitReceipt(signer.provider || signer, tx.hash, 300000).then(receipt => {
+          if (receipt) {
+            finalizeSchedule();
+          } else {
+            setStatus({ type: 'error', msg: 'Could not confirm transaction after 5 minutes. Before retrying, check this tx hash on the block explorer to make sure you don\'t schedule it twice: ' + tx.hash });
+          }
+        });
+        return;
       }
       await finalizeSchedule();
     } catch (e) {
