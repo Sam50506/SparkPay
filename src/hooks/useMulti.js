@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ethers } from 'ethers';
-import { ARC_RPC, ARC_RPC_FALLBACK, ARC_CHAIN_ID, REMIT_ADDR, lsSave } from '../config';
+import { ARC_RPC, ARC_RPC_FALLBACK, ARC_CHAIN_ID, REMIT_ADDR, lsSave, awaitReceipt } from '../config';
 
 export function useMulti({ signer, address, walletName, setStatus, setLoading, setTxns, awardCashback, refreshBal, cleanErr, setConfirmData, setConfirmAction, setShowConfirm, setShowWalletPrompt, getC }) {
   const [multi, setMulti] = useState([{ addr: '', amount: '', country: '' }]);
@@ -44,17 +44,44 @@ export function useMulti({ signer, address, walletName, setStatus, setLoading, s
         throw ue;
       }
       setStatus({ type: 'info', msg: 'Waiting for confirmation...' });
-      await tx.wait();
-      valid.forEach((r) => {
-        const rec = { id: tx.hash + '_' + r.addr, hash: tx.hash, recipient: r.addr, amount: parseFloat(r.amount), country: r.country, timestamp: Math.floor(Date.now() / 1000), status: 'confirmed' };
-        setTxns(prev => { const u = [rec, ...prev.slice(0, 499)]; lsSave('arc_txhistory_' + address, u); return u; });
-        awardCashback(tx.hash, r.amount);
-      });
-      setShowWalletPrompt(false);
-      setStatus({ type: 'success', msg: 'Sent to ' + valid.length + ' recipients in one transaction!' });
-      setMulti([{ addr: '', amount: '', country: '' }]);
-      setTimeout(refreshBal, 3000);
-      setTimeout(refreshBal, 6000);
+
+      const finalizeMulti = () => {
+        valid.forEach((r) => {
+          const rec = { id: tx.hash + '_' + r.addr, hash: tx.hash, recipient: r.addr, amount: parseFloat(r.amount), country: r.country, timestamp: Math.floor(Date.now() / 1000), status: 'confirmed' };
+          setTxns(prev => { const u = [rec, ...prev.slice(0, 499)]; lsSave('arc_txhistory_' + address, u); return u; });
+          awardCashback(tx.hash, r.amount);
+        });
+        setShowWalletPrompt(false);
+        setStatus({ type: 'success', msg: 'Sent to ' + valid.length + ' recipients in one transaction!' });
+        setMulti([{ addr: '', amount: '', country: '' }]);
+        setTimeout(refreshBal, 3000);
+        setTimeout(refreshBal, 6000);
+      };
+
+      try {
+        await tx.wait();
+      } catch (waitErr) {
+        // SECURITY/UX: `tx` already exists here, meaning batchSend was genuinely
+        // broadcast and may already be paying multiple recipients. A wait-step
+        // glitch (RPC rate limit, "could not coalesce error", etc.) is NOT proof
+        // the transaction failed - only that we failed to observe confirmation.
+        // Never declare failure at this point: doing so risks the user resending
+        // a multi-recipient batch and double-paying everyone in it. Fall back to
+        // background polling and only report an outcome once we have a real answer.
+        console.warn('useMulti: tx.wait() did not resolve cleanly, falling back to background poll:', waitErr.message);
+        setStatus({ type: 'info', msg: 'Still confirming on-chain (this can take a bit longer than usual)... Transaction hash: ' + tx.hash });
+        setLoading(false);
+        awaitReceipt(signer.provider || signer, tx.hash, 300000).then(receipt => {
+          if (receipt) {
+            finalizeMulti();
+          } else {
+            setShowWalletPrompt(false);
+            setStatus({ type: 'error', msg: 'Could not confirm transaction after 5 minutes. Before retrying, check this tx hash on the block explorer to make sure recipients weren\'t already paid: ' + tx.hash });
+          }
+        });
+        return;
+      }
+      finalizeMulti();
     } catch (e) {
       setShowWalletPrompt(false);
       setStatus({ type: 'error', msg: cleanErr(e) });
