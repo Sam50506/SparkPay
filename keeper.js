@@ -156,10 +156,10 @@ async function processPayment(contract, i, now, counters) {
     await new Promise(r => setTimeout(r, 400));
     let p;
     try {
-      p = await contract.getPayment(i);
+      p = await Promise.race([contract.getPayment(i), new Promise((_,r)=>setTimeout(()=>r(new Error('getPayment timeout')),15000))]);
     } catch (rpcErr) {
       await new Promise(r => setTimeout(r, 1500));
-      p = await contract.getPayment(i);
+      p = await Promise.race([contract.getPayment(i), new Promise((_,r)=>setTimeout(()=>r(new Error('getPayment timeout retry')),15000))]);
     }
 
     // SECURITY: on-chain state is the only source of truth for execution decisions.
