@@ -90,8 +90,8 @@ async function executeWithRetry(contract, i, maxAttempts = 4) {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     await new Promise(r => setTimeout(r, 800));
     try {
-      const tx = await contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 });
-      await tx.wait();
+      const tx = await Promise.race([contract.execute(i, { gasPrice: ethers.parseUnits("100", "gwei"), gasLimit: 100000 }), new Promise((_,r)=>setTimeout(()=>r(new Error("execute timeout")),30000))]);
+      await Promise.race([tx.wait(), new Promise((_,r)=>setTimeout(()=>r(new Error("tx.wait timeout")),60000))]);
       return tx;
     } catch (err) {
       lastErr = err;
