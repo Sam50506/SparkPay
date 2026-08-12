@@ -67,7 +67,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.1.2",
     "@nomicfoundation/hardhat-ethers": "^4.0.13",
-    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
     "@nomicfoundation/hardhat-verify": "^3.0.21",
     "@nomiclabs/hardhat-etherscan": "^3.1.8",
     "chai": "^6.2.2",
