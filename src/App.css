@@ -251,8 +251,8 @@ g:focus {
    coin tumbling and was never actually correct regardless of direction/speed. */
 .ap-earth-globe {
   display: inline-block;
-  width: 0.95em;
-  height: 0.95em;
+  width: 1.05em;
+  height: 1.05em;
   border-radius: 50%;
   overflow: hidden;
   position: relative;
