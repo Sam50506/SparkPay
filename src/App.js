@@ -212,41 +212,72 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
 
       {!address&&(
         <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto'}}>
-          {/* Hero Section */}
-          <div style={{maxWidth:1100,width:'100%',margin:'0 auto',padding:'40px 40px 0',display:'flex',alignItems:'center',justifyContent:'space-between',gap:60,flexWrap:'wrap'}}>
-            <div style={{flex:'1 1 400px',minWidth:300}}>
-            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:40}}>
-              <SparkPayLogo size={48}/>
-              <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
+
+          {/* Nav */}
+          <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 40px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <SparkPayLogo size={36}/>
+              <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:17,color:'var(--tx1)'}}>SparkPay</span>
             </div>
-            <div style={{textAlign:'center',marginBottom:40}}>
-              <div style={{fontFamily:'var(--fd)',fontSize:40,fontWeight:900,color:'var(--tx1)',lineHeight:1.1,letterSpacing:'-0.5px',marginBottom:12}}>Send USDC<br/><span style={{color:'var(--ac)'}}>GL<span className="ap-earth-globe" role="img" aria-label="O"></span>BALLY.</span></div>
-              <div style={{fontSize:14,color:'var(--tx2)',lineHeight:1.6}}>Send money across borders instantly.<br/>Zero fees. Instant settlement. Powered by Arc.</div>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontSize:12,fontWeight:600,color:'var(--tx3)',padding:'4px 10px',borderRadius:999,border:'1px solid var(--b1)'}}>Arc Testnet</span>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:32}}>
-              {[
-                ['150+','Countries', <svg key="g" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>],
-                ['~0','Fees', <svg key="z" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>],
-                ['Instant','Settlement', <svg key="c" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>]
-              ].map(([v,l,icon])=>(
-                <div key={l} style={{background:'var(--card)',border:'1px solid var(--b0)',borderRadius:16,padding:'16px 8px',textAlign:'center'}}>
-                  <div style={{width:32,height:32,borderRadius:'50%',background:'var(--acd)',color:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 8px'}}>{icon}</div>
-                  <div style={{fontFamily:'var(--fd)',fontSize:17,fontWeight:800,color:'var(--tx1)'}}>{v}</div>
-                  <div style={{fontSize:10,color:'var(--tx3)',marginTop:3,fontWeight:600,letterSpacing:'.02em'}}>{l}</div>
-                </div>
-              ))}
-            </div>
-            </div>
-            <div style={{flex:'0 0 360px',minWidth:300}}>
-            {/* Connect Card */}
-            <div className="ap-connect-card" style={{marginBottom:48}}>
-              <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
-              <div style={{fontSize:13,color:'var(--tx2)',marginBottom:20}}>Connect your wallet to start sending USDC</div>
-              <div className="ap-connect-btns">
-                {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button><ConnectTroubleshoot/></>}
+          </div>
+
+          {/* Hero + Connect */}
+          <div style={{maxWidth:1100,margin:'0 auto',padding:'60px 40px 80px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:60,flexWrap:'wrap'}}>
+            <div style={{flex:'1 1 420px',minWidth:280}}>
+              <div style={{fontSize:12,fontWeight:700,color:'var(--ac)',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:16}}>Cross-border payments, reimagined</div>
+              <div style={{fontFamily:'var(--fd)',fontSize:52,fontWeight:900,color:'var(--tx1)',lineHeight:1.05,letterSpacing:'-1px',marginBottom:20}}>Send USDC<br/><span style={{color:'var(--ac)'}}>GL<span className="ap-earth-globe" role="img" aria-label="O"></span>BALLY.</span></div>
+              <div style={{fontSize:16,color:'var(--tx2)',lineHeight:1.7,marginBottom:36,maxWidth:440}}>Send money across 150+ countries instantly. Zero fees, no banks, no KYC. Powered by Arc and USDC.</div>
+              <div style={{display:'flex',gap:24,flexWrap:'wrap'}}>
+                {[['150+','Countries'],['~0','Fees'],['Instant','Settlement'],['1%','Cashback']].map(([v,l])=>(
+                  <div key={l}>
+                    <div style={{fontFamily:'var(--fd)',fontSize:22,fontWeight:900,color:'var(--tx1)'}}>{v}</div>
+                    <div style={{fontSize:12,color:'var(--tx3)',fontWeight:600,marginTop:2}}>{l}</div>
+                  </div>
+                ))}
               </div>
             </div>
+            <div style={{flex:'0 0 360px',minWidth:280}}>
+              <div className="ap-connect-card">
+                <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:20,color:'var(--tx1)',marginBottom:6}}>Get Started</div>
+                <div style={{fontSize:13,color:'var(--tx2)',marginBottom:24,lineHeight:1.6}}>Connect your wallet to start sending USDC across borders instantly.</div>
+                <div className="ap-connect-btns">
+                  {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button><ConnectTroubleshoot/></>}
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Features */}
+          <div style={{borderTop:'1px solid var(--b0)',background:'var(--elev)'}}>
+            <div style={{maxWidth:1100,margin:'0 auto',padding:'64px 40px'}}>
+              <div style={{textAlign:'center',marginBottom:48}}>
+                <div style={{fontFamily:'var(--fd)',fontSize:28,fontWeight:800,color:'var(--tx1)',marginBottom:8}}>Everything you need to send money globally</div>
+                <div style={{fontSize:15,color:'var(--tx2)'}}>Five powerful tools. One simple interface.</div>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:24}}>
+                {[
+                  {icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,title:'Instant Send',desc:'Transfer USDC to any wallet address across 150+ countries in seconds. Zero fees, no bank delays, no KYC required.'},
+                  {icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,title:'Multi Send',desc:'Pay multiple recipients in one transaction. Import your recipient list via CSV, XLSX, or PDF and send in bulk.'},
+                  {icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,title:'Scheduled Payments',desc:'Lock USDC in a smart contract escrow now. It releases to the recipient automatically at your chosen time.'},
+                  {icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,title:'Invoice and Pay',desc:'Create a USDC payment request and share the invoice ID with your client. They can pay from anywhere in the world.'},
+                  {icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,title:'1% Cashback',desc:'Earn USDC rewards on every confirmed transaction of 5 USDC or more. Claim directly to your wallet once you reach 5 USDC.'},
+                ].map(f=>(
+                  <div key={f.title} style={{background:'var(--card)',borderRadius:16,padding:'28px 24px',border:'1px solid var(--b0)'}}>
+                    <div style={{width:44,height:44,borderRadius:12,background:'var(--acd)',color:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:16}}>{f.icon}</div>
+                    <div style={{fontFamily:'var(--fd)',fontWeight:700,fontSize:16,color:'var(--tx1)',marginBottom:8}}>{f.title}</div>
+                    <div style={{fontSize:13,color:'var(--tx2)',lineHeight:1.7}}>{f.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div style={{borderTop:'1px solid var(--b0)',padding:'24px 40px',textAlign:'center'}}>
+            <div style={{fontSize:12,color:'var(--tx3)'}}>SparkPay on Arc Testnet, Chain 5042002 &nbsp;<a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={{color:'var(--ac)',textDecoration:'none'}}>Block Explorer</a></div>
           </div>
         </div>
       )}
