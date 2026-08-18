@@ -23,6 +23,7 @@ export default function PayPage({
     }).finally(()=>setInvLoading(false));
   }, [address]);
   return (
+    <>
     <div className="ap-card">
       <div className="ap-card-title">Pay Invoice</div>
       <div className="ap-card-sub">Enter an invoice ID to look it up and pay instantly.</div>
@@ -60,5 +61,6 @@ export default function PayPage({
         </div>
       ))}
     </div>}
+    </>
   );
 }
