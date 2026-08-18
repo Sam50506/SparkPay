@@ -194,7 +194,7 @@ html,body{height:100%;background:var(--bg);color:var(--tx1);font-family:var(--fb
 .ap-quick-pill:hover{border-color:var(--ac);color:var(--ac2);background:var(--acd)}
 .ap-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
 .ap-qr-box{background:#fff;border-radius:16px;padding:16px;display:inline-flex;box-shadow:var(--sh)}
-.ap-qr-link{background:var(--elev);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;font-family:'Courier New',monospace;font-size:11px;color:var(--ac2);word-break:break-all;line-height:1.5;width:100%}
+.ap-qr-link{background:var(--elev);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;font-family:'Courier New',monospace;font-size:11px;color:var(--tx2);word-break:break-all;line-height:1.5;width:100%}
 .ap-about-link{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--b0);cursor:pointer;text-decoration:none;color:var(--tx1);transition:color .14s}
 .ap-about-link:hover{color:var(--ac2)}
 .ap-about-link:last-child{border-bottom:none}
