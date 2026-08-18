@@ -5,6 +5,6 @@
     "ethers": "6.13.0"
   },
   "scripts": {
-    "start": "node keeper-check.js"
+    "start": "node keeper.js"
   }
 }
