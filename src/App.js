@@ -211,9 +211,9 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
       {showCashbackToast&&cashbackToastData&&<CashbackToast amount={cashbackToastData.amount} rarity={cashbackToastData.rarity} onClose={()=>setShowCashbackToast(false)}/>}
 
       {!address&&(
-        <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto'}}>
+        <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto',display:'flex',alignItems:'stretch'}}>
           {/* Hero Section */}
-          <div style={{maxWidth:480,margin:'0 auto',padding:'16px 24px 0'}}>
+          <div style={{maxWidth:640,width:'100%',margin:'0 auto',padding:'16px 24px 0'}}>
             <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:40}}>
               <SparkPayLogo size={48}/>
               <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
