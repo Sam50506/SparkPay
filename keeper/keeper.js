@@ -219,8 +219,7 @@ async function processPayment(contract, i, now, counters) {
 async function main() {
   if (!PRIVATE_KEY) { console.error("No private key"); process.exit(1); }
   const key = PRIVATE_KEY.startsWith('0x') ? PRIVATE_KEY : '0x' + PRIVATE_KEY;
-  const provider = new ethers.JsonRpcProvider(RPC, 5042002, { polling: true, staticNetwork: true });
-  provider.getNetwork = () => Promise.resolve({ chainId: 5042002n, name: "arc-testnet" });
+  const provider = new ethers.JsonRpcProvider(RPC, 5042002);
   const wallet = new ethers.Wallet(key, provider);
   const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
   const now = Math.floor(Date.now() / 1000);
