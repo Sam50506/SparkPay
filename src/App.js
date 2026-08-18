@@ -211,9 +211,10 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
       {showCashbackToast&&cashbackToastData&&<CashbackToast amount={cashbackToastData.amount} rarity={cashbackToastData.rarity} onClose={()=>setShowCashbackToast(false)}/>}
 
       {!address&&(
-        <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto',display:'flex',alignItems:'stretch'}}>
+        <div style={{minHeight:'100vh',background:'var(--bg)',overflowY:'auto'}}>
           {/* Hero Section */}
-          <div style={{maxWidth:640,width:'100%',margin:'0 auto',padding:'16px 24px 0'}}>
+          <div style={{maxWidth:1100,width:'100%',margin:'0 auto',padding:'40px 40px 0',display:'flex',alignItems:'center',justifyContent:'space-between',gap:60,flexWrap:'wrap'}}>
+            <div style={{flex:'1 1 400px',minWidth:300}}>
             <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:40}}>
               <SparkPayLogo size={48}/>
               <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
@@ -235,6 +236,8 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
                 </div>
               ))}
             </div>
+            </div>
+            <div style={{flex:'0 0 360px',minWidth:300}}>
             {/* Connect Card */}
             <div className="ap-connect-card" style={{marginBottom:48}}>
               <div style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',marginBottom:4}}>Get Started</div>
@@ -242,6 +245,7 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
               <div className="ap-connect-btns">
                 {showPicker?<WalletPicker onPick={(type,p,name)=>{setShowPicker(false);if(name)setWalletName(name);connectBrowser(type,p);}} onClose={()=>setShowPicker(false)}/>:<><button className="ap-btn ap-btn-primary" style={{marginTop:0}} onClick={()=>setShowPicker(true)}>Connect Wallet</button><div className="ap-cdivider">or</div><button className="ap-btn ap-btn-outline-full" onClick={connectWC}><IC.WC/> Connect via WalletConnect</button><ConnectTroubleshoot/></>}
               </div>
+            </div>
             </div>
           </div>
         </div>
