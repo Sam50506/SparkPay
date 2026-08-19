@@ -20,12 +20,20 @@ export function PendingScheduledList(){
         const sched=new ethers.Contract(SCHED_ADDR,SCHED_ABI,provider);
         const count=Number(await sched.paymentCount());
         const list=[];
-        for(let i=0;i<count;i++){
-          const p=await sched.getPayment(i);
-          if(!p.executed&&!p.cancelled){
-            list.push({id:i,recipient:p.recipient,amount:p.amount,releaseTime:Number(p.releaseTime)});
+        const BATCH=4;
+        for(let start=0;start<count;start+=BATCH){
+          const batchIds=[];
+          for(let i=start;i<Math.min(start+BATCH,count);i++)batchIds.push(i);
+          const results=await Promise.all(batchIds.map(async id=>{
+            const p=await sched.getPayment(id);
+            return{id,p};
+          }));
+          for(const{id,p}of results){
+            if(!p.executed&&!p.cancelled){
+              list.push({id,recipient:p.recipient,amount:p.amount,releaseTime:Number(p.releaseTime)});
+            }
           }
-          if(count>1)await new Promise(r=>setTimeout(r,400));
+          if(start+BATCH<count)await new Promise(r=>setTimeout(r,250));
         }
         out=list.sort((a,b)=>a.releaseTime-b.releaseTime);
         break;
@@ -64,7 +72,7 @@ export function PendingScheduledList(){
         <div key={p.id} style={{padding:'12px 0',borderBottom:'1px solid var(--b0)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,flexWrap:'wrap'}}>
             <div style={{fontSize:13,color:'var(--tx1)'}}>
-              <div style={{fontWeight:700,color:'var(--tx1)'}}>#{p.id} — {fmtUsdc(p.amount)} USDC {due&&<span style={{color:'var(--re)',fontWeight:700}}>(OVERDUE)</span>}</div>
+              <div style={{fontWeight:700,color:'var(--tx1)'}}>#{p.id}: {fmtUsdc(p.amount)} USDC {due&&<span style={{color:'var(--re)',fontWeight:700}}>(OVERDUE)</span>}</div>
               <div style={{opacity:.7,fontSize:12,color:'var(--tx2)'}}>To: {short(p.recipient)}</div>
               <div style={{opacity:.7,fontSize:12,color:'var(--tx2)'}}>Release: {fmtDate(p.releaseTime)} {fmtTime(p.releaseTime)}</div>
             </div>
