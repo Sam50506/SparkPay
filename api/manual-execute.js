@@ -2,11 +2,15 @@ import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
 import { rateLimit } from '../src/lib/rateLimit.js';
 
-const RPC = 'https://rpc.testnet.arc.network';
+const RPCS = [
+  'https://rpc.testnet.arc.network',
+  'https://arc-testnet.drpc.org',
+  'https://5042002.rpc.thirdweb.com'
+];
 const SCHED_ADDR = '0x79a1C363Afd912212B7581F735a9096fB453F8be';
 const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY || process.env.PAYOUT_PRIVATE_KEY;
 const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
-const SCHED_ABI = [
+const SCHED_ABI_FULL = [
   'function execute(uint256 id) external',
   'function getPayment(uint256 id) external view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))',
   'function paymentCount() external view returns (uint256)'
@@ -36,9 +40,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid payment_id' });
 
   try {
-    const provider = new ethers.JsonRpcProvider(RPC, { name: 'Arc Testnet', chainId: 5042002 });
-    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-    const contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI, wallet);
+    let provider, wallet, contract, lastErr;
+    for (const url of RPCS) {
+      try {
+        provider = new ethers.JsonRpcProvider(url, { name: 'Arc Testnet', chainId: 5042002 });
+        await provider.getBlockNumber();
+        wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+        contract = new ethers.Contract(SCHED_ADDR, SCHED_ABI_FULL, wallet);
+        break;
+      } catch (e) { lastErr = e; provider = null; }
+    }
+    if (!provider) throw lastErr || new Error('All RPC endpoints unreachable');
 
     const count = Number(await contract.paymentCount());
     if (id >= count)
@@ -55,6 +67,12 @@ export default async function handler(req, res) {
     const now = Math.floor(Date.now() / 1000);
     if (Number(payment.releaseTime) > now)
       return res.status(400).json({ error: `Payment #${id} release time has not passed yet. Releases at: ${new Date(Number(payment.releaseTime) * 1000).toISOString()}` });
+
+    try {
+      await contract.execute.staticCall(id);
+    } catch (simErr) {
+      return res.status(400).json({ error: 'Simulation failed: ' + (simErr.reason || simErr.shortMessage || simErr.message) });
+    }
 
     const tx = await contract.execute(id, { gasPrice: ethers.parseUnits('100', 'gwei'), gasLimit: 100000 });
     await tx.wait();
