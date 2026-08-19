@@ -63,10 +63,10 @@ export function PendingScheduledList(){
       return(
         <div key={p.id} style={{padding:'12px 0',borderBottom:'1px solid var(--b0)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,flexWrap:'wrap'}}>
-            <div style={{fontSize:13}}>
-              <div style={{fontWeight:700}}>#{p.id} — {fmtUsdc(p.amount)} USDC {due&&<span style={{color:'var(--re)',fontWeight:700}}>(OVERDUE)</span>}</div>
-              <div style={{opacity:.7,fontSize:12}}>To: {short(p.recipient)}</div>
-              <div style={{opacity:.7,fontSize:12}}>Release: {fmtDate(p.releaseTime)} {fmtTime(p.releaseTime)}</div>
+            <div style={{fontSize:13,color:'var(--tx1)'}}>
+              <div style={{fontWeight:700,color:'var(--tx1)'}}>#{p.id} — {fmtUsdc(p.amount)} USDC {due&&<span style={{color:'var(--re)',fontWeight:700}}>(OVERDUE)</span>}</div>
+              <div style={{opacity:.7,fontSize:12,color:'var(--tx2)'}}>To: {short(p.recipient)}</div>
+              <div style={{opacity:.7,fontSize:12,color:'var(--tx2)'}}>Release: {fmtDate(p.releaseTime)} {fmtTime(p.releaseTime)}</div>
             </div>
             <button className="ap-btn ap-btn-primary" style={{marginTop:0,padding:'8px 16px'}} disabled={execId===p.id||!due} onClick={()=>executeOne(p.id)}>
               {execId===p.id?'Executing...':(due?'Execute Manually':'Not due yet')}
