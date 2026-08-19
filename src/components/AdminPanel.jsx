@@ -6,6 +6,7 @@ import { SparkPayLogo } from './OnboardingModal';
 import { ScheduledRequests } from './admin/ScheduledRequests';
 import { CashbackClaims } from './admin/CashbackClaims';
 import { ManualExecute } from './admin/ManualExecute';
+import { PendingScheduledList } from './admin/PendingScheduledList';
 import { FailedTxns } from './admin/FailedTxns';
 import { Diagnostics } from './admin/Diagnostics';
 export { ScheduledRequests, ManualExecute, FailedTxns, Diagnostics };
@@ -425,7 +426,10 @@ return(
           </Section>
 
           <Section icon={<IC.Execute/>} title="Manual Execute">
-            <Card title="Force Execute Payment" subtitle="Manually trigger a scheduled payment if the keeper bot fails.">
+            <Card title="Currently Scheduled Payments" subtitle="Active payments on-chain. Execute directly if the keeper bot fails.">
+              <PendingScheduledList/>
+            </Card>
+            <Card title="Force Execute Payment" subtitle="Or enter a payment ID directly.">
               <ManualExecute/>
             </Card>
           </Section>
