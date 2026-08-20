@@ -111,7 +111,7 @@ export function PendingScheduledList(){
     if(row.status==='not_due')return null;
     if(row.status==='waiting_keeper')return <span style={{color:'var(--ac)',fontWeight:700}}>(Waiting for keeper — up to {Math.max(0,Math.ceil(60-row.minsSince))}m left)</span>;
     if(row.status==='keeper_delayed')return <span style={{color:'#e2a03f',fontWeight:700}}>(Keeper delayed — {Math.floor(row.minsSince)}m overdue, would succeed)</span>;
-    if(row.status==='stuck')return <span style={{color:'var(--re)',fontWeight:700}}>(STUCK: {row.failReason})</span>;
+    if(row.status==='stuck')return <span style={{color:'var(--re)',fontWeight:700}}>(Would fail if executed now — {row.failReason})</span>;
     return null;
   };
 
