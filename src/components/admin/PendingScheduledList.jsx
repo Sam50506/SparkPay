@@ -51,11 +51,15 @@ export function PendingScheduledList(){
           if(due){
             const minsSince=(now-releaseTime)/60;
             try{
-              await sched.execute.staticCall(id,{from:ADMIN_ADDRESS});
-              status=minsSince<KEEPER_WINDOW_MIN?'waiting_keeper':'keeper_delayed';
+              const chk=await fetch('/api/check-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({payment_id:id})}).then(r=>r.json());
+              if(chk.ready){
+                status=minsSince<KEEPER_WINDOW_MIN?'waiting_keeper':'keeper_delayed';
+              }else{
+                status='stuck';
+                failReason=chk.reason||'Unknown';
+              }
             }catch(e){
-              status='stuck';
-              failReason=e.reason||e.shortMessage||e.message;
+              status='keeper_delayed';
             }
           }
           list.push({id,recipient:p.recipient,amount:p.amount,releaseTime,status,failReason,minsSince:due?(now-releaseTime)/60:null});
