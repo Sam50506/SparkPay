@@ -59,6 +59,21 @@ export function PendingScheduledList(){
     setExecId(null);
   };
 
+  const adminAction=async(id,action)=>{
+    const reason=window.prompt(action==='cancel_refund'?'Reason for cancelling & refunding payment #'+id+':':'Reason for marking payment #'+id+' under review:');
+    if(!reason||!reason.trim())return;
+    setExecId(id);setResult(null);
+    try{
+      const token=sessionStorage.getItem('sp_admin_jwt');
+      if(!token){alert('Session expired. Please re-verify with passkey.');window.location.reload();return;}
+      const r=await fetch('/api/admin-payment-action',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({payment_id:id,action,reason})});
+      const d=await r.json();
+      if(d.error){setResult({id,type:'error',msg:d.error});}
+      else{setResult({id,type:'success',msg:(action==='cancel_refund'?'Cancelled & refunded. ':'Marked under review. ')+(d.failureReason?'Failure reason: '+d.failureReason:'')});if(action==='cancel_refund')load();}
+    }catch(e){setResult({id,type:'error',msg:e.message});}
+    setExecId(null);
+  };
+
   const now=Math.floor(Date.now()/1000);
 
   if(loading)return <div style={{fontSize:13,opacity:.7}}>Loading scheduled payments...</div>;
@@ -76,9 +91,13 @@ export function PendingScheduledList(){
               <div style={{opacity:.7,fontSize:12,color:'var(--tx2)'}}>To: {short(p.recipient)}</div>
               <div style={{opacity:.7,fontSize:12,color:'var(--tx2)'}}>Release: {fmtDate(p.releaseTime)} {fmtTime(p.releaseTime)}</div>
             </div>
-            <button className="ap-btn ap-btn-primary" style={{marginTop:0,padding:'8px 16px'}} disabled={execId===p.id||!due} onClick={()=>executeOne(p.id)}>
-              {execId===p.id?'Executing...':(due?'Execute Manually':'Not due yet')}
-            </button>
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              <button className="ap-btn ap-btn-primary" style={{marginTop:0,padding:'8px 16px'}} disabled={execId===p.id||!due} onClick={()=>executeOne(p.id)}>
+                {execId===p.id?'Executing...':(due?'Execute Manually':'Not due yet')}
+              </button>
+              <button className="ap-btn" style={{marginTop:0,padding:'8px 16px'}} onClick={()=>adminAction(p.id,'cancel_refund')}>Cancel & Refund</button>
+              <button className="ap-btn" style={{marginTop:0,padding:'8px 16px'}} onClick={()=>adminAction(p.id,'under_review')}>Send Under Review</button>
+            </div>
           </div>
           {result&&result.id===p.id&&<div style={{marginTop:8,fontSize:12,padding:'8px 12px',borderRadius:8,background:result.type==='success'?'rgba(23,229,176,.1)':'rgba(255,79,97,.1)',color:result.type==='success'?'var(--cy)':'var(--re)',wordBreak:'break-all'}}>{result.msg}</div>}
         </div>
