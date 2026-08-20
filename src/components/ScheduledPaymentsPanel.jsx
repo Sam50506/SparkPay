@@ -45,7 +45,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
         </div>}
         {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining to request cancellation or edits. Use the Need Help option below if needed.'/></div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
-          {st==='cancelled_admin'?'Cancelled by admin request. USDC has been refunded to your wallet.':'You cancelled this payment. USDC has been refunded to your wallet.'}
+          {st==='cancelled_admin'?(adminCancelInfo(p)?'Cancelled by admin: "'+adminCancelInfo(p).admin_reason+'". USDC has been refunded to your wallet.':'Cancelled by admin request. USDC has been refunded to your wallet.'):'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}
         {isCancelApproved&&<div style={{marginTop:8,background:'rgba(23,229,176,.08)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--cy)',fontWeight:600}}>Refund is being processed to your wallet.</div>}
         {editRequests.length>0&&<div style={{marginTop:8}}>
@@ -80,6 +80,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
   const[selectedSched,setSelectedSched]=useState([]);
   const[hiddenSched,setHiddenSched]=useState(()=>new Set(ls('arc_hidden_sched_'+address,[])));
   const[requests,setRequests]=useState({});
+  const[adminActions,setAdminActions]=useState({});
   const[expandedId,setExpandedId]=useState(null);
   const[changesModal,setChangesModal]=useState(null);
   const[activeTab,setActiveTab]=useState('active');
@@ -92,6 +93,8 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     if(!address)return;
     fetch(SB_URL+'/rest/v1/scheduled_payment_requests?wallet_address=eq.'+address+'&contract_address=eq.'+SCHED_ADDR+'&order=created_at.desc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
       .then(r=>r.json()).then(d=>{const map={};(d||[]).forEach(r=>{if(!map[r.payment_id])map[r.payment_id]=[];map[r.payment_id].push(r);});setRequests(map);}).catch(()=>{});
+    fetch(SB_URL+'/rest/v1/admin_payment_actions?select=*&order=created_at.desc',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+      .then(r=>r.json()).then(d=>{const map={};(d||[]).forEach(r=>{if(!map[r.payment_id])map[r.payment_id]=r;});setAdminActions(map);}).catch(()=>{});
   },[address]);
 
   useEffect(()=>{fetchRequests();const t=setInterval(fetchRequests,15000);return()=>clearInterval(t);},[fetchRequests]);
@@ -155,10 +158,11 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
 
   const hasCancelApproved=p=>!!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'&&r.status==='approved'));
   const hasCancelRequest=p=>!!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'));
+  const adminCancelInfo=p=>adminActions[p.id]&&adminActions[p.id].action==='cancel_refund'?adminActions[p.id]:null;
   const getStatus=p=>{
     if(p.executed)return'executed';
     if(hasCancelApproved(p))return'cancel_approved';
-    if(p.cancelled)return hasCancelRequest(p)?'cancelled_admin':'cancelled_user';
+    if(p.cancelled)return (hasCancelRequest(p)||adminCancelInfo(p))?'cancelled_admin':'cancelled_user';
     if(now>=p.releaseTime)return'processing';
     return'scheduled';
   };
