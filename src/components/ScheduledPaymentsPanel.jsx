@@ -7,7 +7,8 @@ import { EditPaymentModal } from './scheduled/EditPaymentModal';
 import { NeedHelpMenu } from './scheduled/NeedHelpMenu';
 export { NeedHelpMenu };
 
-function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading,rates}){
+function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId,setExpandedId,requests,adminActions,changesModal,setChangesModal,address,signer,schedAddr,schedAbi,fetchPayments,onCancel,loading,rates}){
+  const adminCancelInfo=adminActions&&adminActions[p.id]&&adminActions[p.id].action==='cancel_refund'?adminActions[p.id]:null;
   const isExpanded=expandedId===p.id;
   const[editOpen,setEditOpen]=useState(false);
   const isPending=st==='scheduled';
@@ -45,7 +46,7 @@ function PaymentCard({p,st,manageSched,selectedSched,setSelectedSched,expandedId
         </div>}
         {isProcessing&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>Your payment will be processed within 60 minutes. <KeeperCountdown suffix=' remaining to request cancellation or edits. Use the Need Help option below if needed.'/></div>}
         {(st==='cancelled_admin'||st==='cancelled_user')&&<div style={{marginTop:8,background:'var(--card)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--tx2)',lineHeight:1.7}}>
-          {st==='cancelled_admin'?(adminCancelInfo(p)?'Cancelled by admin: "'+adminCancelInfo(p).admin_reason+'". USDC has been refunded to your wallet.':'Cancelled by admin request. USDC has been refunded to your wallet.'):'You cancelled this payment. USDC has been refunded to your wallet.'}
+          {st==='cancelled_admin'?(adminCancelInfo?'Cancelled by admin: "'+adminCancelInfo.admin_reason+'". USDC has been refunded to your wallet.':'Cancelled by admin request. USDC has been refunded to your wallet.'):'You cancelled this payment. USDC has been refunded to your wallet.'}
         </div>}
         {isCancelApproved&&<div style={{marginTop:8,background:'rgba(23,229,176,.08)',borderRadius:10,padding:'10px 12px',fontSize:12,color:'var(--cy)',fontWeight:600}}>Refund is being processed to your wallet.</div>}
         {editRequests.length>0&&<div style={{marginTop:8}}>
@@ -158,11 +159,11 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
 
   const hasCancelApproved=p=>!!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'&&r.status==='approved'));
   const hasCancelRequest=p=>!!(requests[p.id]&&requests[p.id].some(r=>r.request_type==='cancel'));
-  const adminCancelInfo=p=>adminActions[p.id]&&adminActions[p.id].action==='cancel_refund'?adminActions[p.id]:null;
+
   const getStatus=p=>{
     if(p.executed)return'executed';
     if(hasCancelApproved(p))return'cancel_approved';
-    if(p.cancelled)return (hasCancelRequest(p)||adminCancelInfo(p))?'cancelled_admin':'cancelled_user';
+    if(p.cancelled)return (hasCancelRequest(p)||(adminActions[p.id]&&adminActions[p.id].action==='cancel_refund'))?'cancelled_admin':'cancelled_user';
     if(now>=p.releaseTime)return'processing';
     return'scheduled';
   };
@@ -262,7 +263,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     {/* Active Tab */}
     {activeTab==='active'&&<>
       {activePayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No active scheduled payments.</div>}
-      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading} rates={rates}/>)}
+      {shownActive.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} adminActions={adminActions} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading} rates={rates}/>)}
       {activePayments.length>LIMIT&&<button onClick={()=>setShowAllActive(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
         {showAllActive?'Show Less ↑':'Show All '+activePayments.length+' Payments ↓'}
       </button>}
@@ -271,7 +272,7 @@ export function OnChainSchedules({address,provider,signer,schedAddr,schedAbi,onE
     {/* History Tab */}
     {activeTab==='history'&&<>
       {historyPayments.length===0&&!fetching&&<div style={{textAlign:'center',color:'var(--tx3)',padding:'24px 0',fontSize:13}}>No payment history yet.</div>}
-      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading} rates={rates}/>)}
+      {shownHistory.map(p=><PaymentCard key={p.id} p={p} st={getStatus(p)} manageSched={manageSched} selectedSched={selectedSched} setSelectedSched={setSelectedSched} expandedId={expandedId} setExpandedId={setExpandedId} requests={requests} adminActions={adminActions} changesModal={changesModal} setChangesModal={setChangesModal} address={address} signer={signer} schedAddr={schedAddr} schedAbi={schedAbi} fetchPayments={fetchPayments} onCancel={onCancel} loading={loading} rates={rates}/>)}
       {historyPayments.length>LIMIT&&<button onClick={()=>setShowAllHistory(s=>!s)} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',fontWeight:600,cursor:'pointer',marginTop:4}}>
         {showAllHistory?'Show Less ↑':'Show All '+historyPayments.length+' Payments ↓'}
       </button>}
