@@ -53,6 +53,12 @@ export default async function handler(req, res) {
       const getRes = await sb(`cashback_balances?wallet_address=eq.${wallet_address}&select=pending_amount`);
       const rows = await getRes.json();
       const newBalance = rows[0]?.pending_amount ?? null;
+      try {
+        await sb('cashback_events', {
+          method: 'POST',
+          body: JSON.stringify({ wallet_address, amount, tx_hash: tx_hash || null })
+        });
+      } catch (e) { console.error('cashback_events insert failed:', e.message); }
       return res.json({ success: true, newBalance });
     } catch (e) {
       return res.status(500).json({ error: e.message });

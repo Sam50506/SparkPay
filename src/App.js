@@ -84,6 +84,9 @@ function AppInner() {
     };
     fetchCashback();
     const t=setInterval(fetchCashback,15000);
+    sbSelect('cashback_events','wallet_address=eq.'+address+'&select=amount,tx_hash,created_at&order=created_at.desc&limit=50').then(rows=>{
+      setCashbackHistory((rows||[]).map(r=>({amount:parseFloat(r.amount),txHash:r.tx_hash,ts:new Date(r.created_at).getTime()})));
+    }).catch(()=>{});
     return()=>clearInterval(t);
   },[address]);
   const[showCashbackToast,setShowCashbackToast]=useState(false);const[cashbackToastData,setCashbackToastData]=useState(null);const[claimLoading,setClaimLoading]=useState(false);const[claimSubmitted,setClaimSubmitted]=useState(false);const[claimAmt,setClaimAmt]=useState('');const[myClaimsHistory,setMyClaimsHistory]=useState([]);const[claimsLoading,setClaimsLoading]=useState(false);const[manageTxns,setManageTxns]=useState(false);const[rateSearch,setRateSearch]=useState('');const[manageContacts,setManageContacts]=useState(false);const[selectedContacts,setSelectedContacts]=useState([]);const[cSearch,setCSearch]=useState('');const[showAdd,setShowAdd]=useState(false);const[selectedTxns,setSelectedTxns]=useState([]);const[deletedHashes,setDeletedHashes]=useState(()=>new Set([]));const[txSearch,setTxSearch]=useState('');const[txFilter,setTxFilter]=useState('all');const[txPage,setTxPage]=useState(1);const[expandedTx,setExpandedTx]=useState(null);const[showTxns,setShowTxns]=useState(true);const[pendingClaimsCount,setPendingClaimsCount]=useState(0);
