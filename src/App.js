@@ -219,15 +219,11 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
           {/* Nav */}
           <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 40px',display:'flex',alignItems:'center',justifyContent:'space-between',animation:'slideUp .5s ease both'}}>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <div style={{animation:'logoPop .6s cubic-bezier(.34,1.56,.64,1) both'}}>
+              <div style={{}}>
                 <SparkPayLogo size={40}/>
               </div>
               <div>
-                <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',display:'inline-flex'}}>
-                  {['S','p','a','r','k','P','a','y'].map((l,i)=>(
-                    <span key={i} style={{display:'inline-block',animation:'elecShake 2.5s ease infinite',animationDelay:`${(4-Math.abs(i-4))*0.08}s`}}>{l}</span>
-                  ))}
-                </span>
+                <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)'}}>SparkPay</span>
                 <div style={{display:'flex',alignItems:'center',gap:4,marginTop:2}}>
                   <span style={{width:6,height:6,borderRadius:'50%',background:'#17e5b0',display:'inline-block'}}/>
                   <span style={{fontSize:10,fontWeight:700,color:'var(--tx3)',letterSpacing:'.06em',textTransform:'uppercase'}}>Arc Testnet</span>
