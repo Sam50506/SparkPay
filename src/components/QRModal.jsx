@@ -4,6 +4,7 @@ import { APP_URL } from '../config';
 
 export default function QRModal({address,onClose}){
   const[amt,setAmt]=useState('');
+  const[copied,setCopied]=useState('');
   const link=APP_URL+'/?pay='+address+(amt?'&amount='+amt:'');
   return(
     <div className="ap-modal-bg" onClick={onClose}>
@@ -18,8 +19,8 @@ export default function QRModal({address,onClose}){
             <div style={{fontSize:13,fontWeight:600,color:'var(--tx2)',marginBottom:6}}>Payment Link</div>
             <div className="ap-qr-link">{link}</div>
             <div style={{display:'flex',gap:8,marginTop:10}}>
-              <button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>navigator.clipboard?.writeText(link)}>Copy Link</button>
-              <button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>navigator.clipboard?.writeText(address)}>Copy Address</button>
+              <button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>{navigator.clipboard?.writeText(link);setCopied('link');setTimeout(()=>setCopied(''),2000);}}>{copied==='link'?'Copied!':'Copy Link'}</button>
+              <button className="ap-btn ap-btn-sec" style={{flex:1}} onClick={()=>{navigator.clipboard?.writeText(address);setCopied('address');setTimeout(()=>setCopied(''),2000);}}>{copied==='address'?'Copied!':'Copy Address'}</button>
             </div>
 
           </div>

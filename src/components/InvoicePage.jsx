@@ -9,6 +9,7 @@ export default function InvoicePage({
   invId, handleCreateInv, loading, setPayId, setTab, contacts
 }) {
   const [showContactsPicker, setShowContactsPicker] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
   const [contactSearch, setContactSearch] = useState('');
   const contactsPickerRef = useRef(null);
 
@@ -59,7 +60,7 @@ export default function InvoicePage({
             <div style={{fontSize:13,fontWeight:700,color:'var(--cy)',marginBottom:10,display:'flex',alignItems:'center',gap:6}}><IC.Check/> Invoice created successfully</div>
             <div className="ap-code">{invId}</div>
             <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
-              <button className="ap-btn ap-btn-sec" onClick={()=>navigator.clipboard?.writeText(invId)}><IC.Copy/> Copy ID</button>
+              <button className="ap-btn ap-btn-sec" onClick={()=>{navigator.clipboard?.writeText(invId);setCopiedId(true);setTimeout(()=>setCopiedId(false),2000);}}><IC.Copy/> {copiedId?'Copied!':'Copy ID'}</button>
               <button className="ap-btn ap-btn-sec" onClick={()=>{setPayId(invId);setTab('pay');}}>Pay this Invoice</button>
             </div>
           </div>

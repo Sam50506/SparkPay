@@ -90,7 +90,7 @@ export function useMulti({ signer, address, walletName, setStatus, setLoading, s
     }
   };
 
-  const handleMultiReview = () => { const valid = multi.filter(r => (ethers.isAddress(r.addr) || /^0x[0-9a-fA-F]{40}$/.test(r.addr)) && parseFloat(r.amount) > 0); if (!signer || !valid.length) { setStatus({ type: 'error', msg: 'Add at least one valid recipient' }); return; } const total = valid.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0); if (walletName?.toLowerCase().includes('okx')) { handleMulti(); } else { setConfirmData({ rows: [{ k: 'Recipients', v: valid.length + ' addresses' }, { k: 'Total', v: total.toFixed(2) + ' USDC' }, { k: 'Est. Fee', v: '~' + (valid.length * .001).toFixed(3) + ' USDC', highlight: true }, { k: 'Network', v: 'Arc Testnet' }], confirmLabel: 'Send to All Wallets' }); setConfirmAction(() => handleMulti); setShowConfirm(true); } };
+  const handleMultiReview = () => { const valid = multi.filter(r => (ethers.isAddress(r.addr) || /^0x[0-9a-fA-F]{40}$/.test(r.addr)) && parseFloat(r.amount) > 0); if (!signer || valid.length < 2) { setStatus({ type: 'error', msg: 'Add at least two valid recipients for multi-send' }); return; } const total = valid.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0); if (walletName?.toLowerCase().includes('okx')) { handleMulti(); } else { setConfirmData({ rows: [{ k: 'Recipients', v: valid.length + ' addresses' }, { k: 'Total', v: total.toFixed(2) + ' USDC' }, { k: 'Est. Fee', v: '~' + (valid.length * .001).toFixed(3) + ' USDC', highlight: true }, { k: 'Network', v: 'Arc Testnet' }], confirmLabel: 'Send to All Wallets' }); setConfirmAction(() => handleMulti); setShowConfirm(true); } };
 
   return { multi, setMulti, handleMulti, handleMultiReview };
 }
