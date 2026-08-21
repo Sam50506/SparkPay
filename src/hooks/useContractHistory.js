@@ -6,8 +6,11 @@ export function useContractHistory({ address, provider, setContractTxns }) {
   const loadContractHistory = useCallback(async () => {
     if (!address) return;
     try {
-      const r = await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address=' + address + '&sort=desc');
-      const d = await r.json();
+      const [rRes, schedTxsResp] = await Promise.all([
+        fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address=' + address + '&sort=desc'),
+        fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address=' + SCHED_ADDR + '&sort=desc')
+      ]);
+      const d = await rRes.json();
       const allExplorer = [];
       if (d.message === 'OK' && d.result) {
         d.result.filter(t => t.isError === '0' && parseInt(t.value) > 0).forEach(t => {
@@ -16,30 +19,39 @@ export function useContractHistory({ address, provider, setContractTxns }) {
         });
       }
       try {
-        const schedTxsResp = await fetch('https://testnet.arcscan.app/api?module=account&action=txlist&address=' + SCHED_ADDR + '&sort=desc');
         const schedTxsData = await schedTxsResp.json();
         const schedTxs = schedTxsData.message === 'OK' ? schedTxsData.result || [] : [];
         const schedContract = new ethers.Contract(SCHED_ADDR, ['function paymentCount() view returns (uint256)', 'function getPayment(uint256) view returns (tuple(address sender,address recipient,uint256 amount,uint256 releaseTime,bool executed,bool cancelled,string country))'], provider);
         const count = Number(await schedContract.paymentCount());
         const seenHashes = new Set(allExplorer.map(t => t.hash));
-        for (let i = count - 1; i >= 0; i--) {
-          const p = await schedContract.getPayment(i);
+
+        // Fetch all payments in parallel instead of one-by-one
+        const ids = Array.from({ length: count }, (_, k) => count - 1 - k);
+        const payments = await Promise.all(ids.map(async i => [i, await schedContract.getPayment(i)]));
+
+        // Fetch every real tx_hash in a single Supabase query instead of per-payment
+        let hashMap = {};
+        const executedIds = payments.filter(([, p]) => p.executed && p.sender.toLowerCase() === address.toLowerCase()).map(([i]) => i);
+        if (executedIds.length) {
+          try {
+            const SB_URL = process.env.REACT_APP_SUPABASE_URL;
+            const SB_ANON = process.env.REACT_APP_SUPABASE_ANON_KEY;
+            const idsFilter = executedIds.join(',');
+            const hashRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=in.(${idsFilter})&select=payment_id,tx_hash`, {
+              headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` }
+            });
+            const hashData = await hashRes.json();
+            (hashData || []).forEach(row => { if (row.tx_hash) hashMap[row.payment_id] = row.tx_hash; });
+          } catch (e) {}
+        }
+
+        for (const [i, p] of payments) {
           const amt = parseFloat(ethers.formatUnits(p.amount, 18)).toFixed(2);
           if (p.sender.toLowerCase() === address.toLowerCase()) {
             if (p.executed) {
               const execTx = schedTxs.find(t => t.input && t.input.startsWith('0xfe0d94c1') && parseInt('0x' + t.input.slice(10), 16) === i && t.isError === '0');
               const execTs = execTx ? parseInt(execTx.timeStamp) : Number(p.releaseTime);
-              // Fetch real tx hash from Supabase
-              let realHash = 'sched_exec_' + i;
-              try {
-                const SB_URL = process.env.REACT_APP_SUPABASE_URL;
-                const SB_ANON = process.env.REACT_APP_SUPABASE_ANON_KEY;
-                const hashRes = await fetch(`${SB_URL}/rest/v1/scheduled_payments?payment_id=eq.${i}&select=tx_hash`, {
-                  headers: { 'apikey': SB_ANON, 'Authorization': `Bearer ${SB_ANON}` }
-                });
-                const hashData = await hashRes.json();
-                if (hashData[0]?.tx_hash) realHash = hashData[0].tx_hash;
-              } catch(e) {}
+              const realHash = hashMap[i] || ('sched_exec_' + i);
               if (!seenHashes.has('sched_exec_' + i)) {
                 allExplorer.push({ hash: realHash, recipient: p.recipient, sender: address, amount: amt, country: p.country, timestamp: execTs, status: 'confirmed', type: 'scheduled', label: 'Scheduled Payment' });
                 seenHashes.add('sched_exec_' + i);
