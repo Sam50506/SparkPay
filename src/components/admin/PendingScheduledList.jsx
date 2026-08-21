@@ -57,6 +57,14 @@ export function PendingScheduledList(){
               }else{
                 status='stuck';
                 failReason=chk.reason||'Unknown';
+                if(failReason==='Transfer failed'){
+                  try{
+                    const code=await provider.getCode(p.recipient);
+                    if(code&&code!=='0x'){
+                      failReason='Transfer failed - recipient is a contract with no payable receive/fallback function, so it cannot accept a plain USDC transfer';
+                    }
+                  }catch(_){}
+                }
               }
             }catch(e){
               status='keeper_delayed';
