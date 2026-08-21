@@ -34,11 +34,13 @@ export function useSchedule({ signer, address, newSched, setNewSched, setLoading
       const amt = ethers.parseUnits(newSched.amount, 18);
       const sched = new ethers.Contract(SCHED_ADDR, SCHED_ABI, signer);
       setStatus({ type: 'info', msg: 'Locking USDC in escrow...' });
+      const feeData = await signer.provider.getFeeData();
+      const gasPrice = feeData.gasPrice || ethers.parseUnits('21', 'gwei');
       let tx = await sched.schedule(
         ethers.getAddress(newSched.addr.trim()),
         releaseTime,
         newSched.country || '',
-        { value: amt, gasPrice: ethers.parseUnits('100', 'gwei'), gasLimit: 200000 }
+        { value: amt, gasPrice, gasLimit: 200000 }
       );
       setStatus({ type: 'info', msg: 'Transaction submitted! Waiting for confirmation...' });
 

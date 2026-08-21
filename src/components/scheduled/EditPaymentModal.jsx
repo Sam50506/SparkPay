@@ -27,7 +27,9 @@ export function EditPaymentModal({payment,paymentId,signer,contractAddress,sched
         }
       }
       const existingAmt=parseFloat(payment.amount)||0;const newAmt=addAmount&&parseFloat(addAmount)>0?parseFloat(addAmount):0;const diff=newAmt-existingAmt;const value=diff>0?ethers.parseUnits(diff.toFixed(6),18):0n;
-      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,'',{value,gasPrice:ethers.parseUnits('100','gwei'),gasLimit:300000});
+      const feeData=await contract.runner.provider.getFeeData();
+      const gasPrice=feeData.gasPrice||ethers.parseUnits('21','gwei');
+      const tx=await contract.edit(paymentId,recipientArg,releaseTimeArg,'',{value,gasPrice,gasLimit:300000});
       await tx.wait();
       onSuccess();
       onClose();
