@@ -223,7 +223,7 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
                 <SparkPayLogo size={40}/>
               </div>
               <div>
-                <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',animation:'sparkText 1.2s ease both'}}>SparkPay</span>
+                <span style={{fontFamily:'var(--fd)',fontWeight:800,fontSize:18,color:'var(--tx1)',animation:'sparkText 3s ease infinite'}}>SparkPay</span>
                 <div style={{display:'flex',alignItems:'center',gap:4,marginTop:2}}>
                   <span style={{width:6,height:6,borderRadius:'50%',background:'#17e5b0',display:'inline-block'}}/>
                   <span style={{fontSize:10,fontWeight:700,color:'var(--tx3)',letterSpacing:'.06em',textTransform:'uppercase'}}>Arc Testnet</span>
