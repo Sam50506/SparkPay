@@ -219,7 +219,7 @@ const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
           {/* Nav */}
           <div style={{maxWidth:1100,margin:'0 auto',padding:'24px 40px',display:'flex',alignItems:'center',justifyContent:'space-between',animation:'slideUp .5s ease both'}}>
             <div style={{display:'flex',alignItems:'center',gap:10}}>
-              <div style={{animation:'scaleIn .4s ease both'}}>
+              <div style={{animation:'logoPop .6s cubic-bezier(.34,1.56,.64,1) both'}}>
                 <SparkPayLogo size={40}/>
               </div>
               <div>
