@@ -3,19 +3,23 @@ import { SB_URL, SB_KEY, short } from '../../config';
 
 export function CashbackClaims() {
   const [claims, setClaims] = useState([]);
+  const [rejected, setRejected] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editReason, setEditReason] = useState('');
 
   const fetchClaims = async () => {
     setLoading(true);
     try {
-      const r = await fetch(`${SB_URL}/rest/v1/cashback_claims?status=eq.pending&order=timestamp.desc&select=*`, {
-        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
-      });
-      const d = await r.json();
-      setClaims(d || []);
+      const [pendingRes, rejectedRes] = await Promise.all([
+        fetch(`${SB_URL}/rest/v1/cashback_claims?status=eq.pending&order=timestamp.desc&select=*`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }),
+        fetch(`${SB_URL}/rest/v1/cashback_claims?status=eq.rejected&order=timestamp.desc&limit=10&select=*`, { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } })
+      ]);
+      setClaims((await pendingRes.json()) || []);
+      setRejected((await rejectedRes.json()) || []);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
@@ -61,8 +65,43 @@ export function CashbackClaims() {
     setActionLoading(null);
   };
 
+  const saveEditedReason = async (claim) => {
+    const token = sessionStorage.getItem('sp_admin_jwt');
+    if (!token) { alert('Session expired.'); window.location.reload(); return; }
+    setActionLoading('edit_' + claim.id);
+    try {
+      const r = await fetch('/api/edit-claim-decision', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claim_id: claim.id, action: 'edit_reason', reason: editReason.trim() })
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      setEditingId(null);
+      fetchClaims();
+    } catch (e) { alert('Error: ' + e.message); }
+    setActionLoading(null);
+  };
+
+  const revertToPending = async (claim) => {
+    if (!window.confirm('Move this claim back to pending? This re-reserves ' + parseFloat(claim.amount).toFixed(3) + ' USDC from the wallet\'s balance.')) return;
+    const token = sessionStorage.getItem('sp_admin_jwt');
+    if (!token) { alert('Session expired.'); window.location.reload(); return; }
+    setActionLoading('revert_' + claim.id);
+    try {
+      const r = await fetch('/api/edit-claim-decision', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claim_id: claim.id, action: 'revert_to_pending' })
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      fetchClaims();
+    } catch (e) { alert('Error: ' + e.message); }
+    setActionLoading(null);
+  };
+
   if (loading) return <div style={{color:'var(--tx3)',fontSize:13,padding:'12px 0'}}>Loading claims...</div>;
-  if (!claims.length) return <div style={{color:'var(--tx3)',fontSize:13,padding:'12px 0'}}>No pending claims.</div>;
 
   return (
     <div>
@@ -88,6 +127,8 @@ export function CashbackClaims() {
           </div>
         </div>
       )}
+
+      {!claims.length && <div style={{color:'var(--tx3)',fontSize:13,padding:'12px 0'}}>No pending claims.</div>}
       {claims.map(c => (
         <div key={c.id} style={{background:'var(--elev)',borderRadius:12,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b1)'}}>
           <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
@@ -108,6 +149,43 @@ export function CashbackClaims() {
           </div>
         </div>
       ))}
+
+      {rejected.length>0 && (
+        <div style={{marginTop:20}}>
+          <div style={{fontSize:13,fontWeight:700,color:'var(--tx2)',marginBottom:10}}>Recently Rejected</div>
+          {rejected.map(c => (
+            <div key={c.id} style={{background:'var(--elev)',borderRadius:12,padding:'14px 16px',marginBottom:10,border:'1px solid var(--b1)'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:'var(--tx1)'}}>{parseFloat(c.amount).toFixed(3)} USDC</div>
+                  <div style={{fontSize:11,fontFamily:'monospace',color:'var(--tx2)'}}>{short(c.wallet_address)}</div>
+                </div>
+                <span style={{fontSize:11,fontWeight:700,padding:'3px 10px',borderRadius:999,background:'rgba(255,79,97,.1)',color:'var(--re)'}}>rejected</span>
+              </div>
+              {editingId===c.id ? (
+                <div>
+                  <textarea value={editReason} onChange={e=>setEditReason(e.target.value)} rows={2} style={{width:'100%',padding:'8px 10px',borderRadius:8,border:'1px solid var(--b1)',background:'var(--card)',color:'var(--tx1)',fontSize:12,outline:'none',resize:'none',boxSizing:'border-box',marginBottom:8,fontFamily:'inherit'}}/>
+                  <div style={{display:'flex',gap:8}}>
+                    <button onClick={()=>saveEditedReason(c)} disabled={!!actionLoading} style={{flex:1,background:'var(--ac)',border:'none',color:'#fff',borderRadius:8,padding:'7px',fontSize:12,fontWeight:700,cursor:'pointer'}}>Save</button>
+                    <button onClick={()=>setEditingId(null)} style={{flex:1,background:'none',border:'1px solid var(--b1)',color:'var(--tx2)',borderRadius:8,padding:'7px',fontSize:12,fontWeight:600,cursor:'pointer'}}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{fontSize:12,color:'var(--tx2)',fontStyle:'italic',marginBottom:8}}>"{c.rejection_reason||'-'}"</div>
+                  <div style={{display:'flex',gap:8}}>
+                    <button onClick={()=>{setEditingId(c.id);setEditReason(c.rejection_reason||'');}} style={{flex:1,background:'none',border:'1px solid var(--b1)',color:'var(--tx2)',borderRadius:8,padding:'7px',fontSize:12,fontWeight:600,cursor:'pointer'}}>Edit Reason</button>
+                    <button onClick={()=>revertToPending(c)} disabled={!!actionLoading} style={{flex:1,background:'none',border:'1px solid var(--ac)',color:'var(--ac)',borderRadius:8,padding:'7px',fontSize:12,fontWeight:600,cursor:'pointer'}}>
+                      {actionLoading==='revert_'+c.id?'Reverting...':'Revert to Pending'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       <button onClick={fetchClaims} style={{width:'100%',background:'none',border:'1px solid var(--b1)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--tx2)',cursor:'pointer',marginTop:4}}>Refresh</button>
     </div>
   );
