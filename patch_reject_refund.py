@@ -1,19 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
-import jwt from 'jsonwebtoken';
+path = "api/reject-claim.js"
+with open(path) as f:
+    content = f.read()
 
-const JWT_SECRET = process.env.PAYOUT_ADMIN_KEY;
-const ADMIN_ADDRESS = (process.env.ADMIN_ADDRESS || '0x9e086e6c07d5108ce40d84e9df1ce43caedd2306').toLowerCase();
+old = """  const { claim_id } = req.body;
+  if (!claim_id) return res.status(400).json({ error: 'claim_id required' });
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  
-  const token = req.headers['authorization']?.replace('Bearer ', '');
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.address?.toLowerCase() !== ADMIN_ADDRESS) throw new Error('Unauthorized');
-  } catch { return res.status(401).json({ error: 'Unauthorized' }); }
+  const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  const { reason } = req.body;
+  const { error } = await supabase.from('cashback_claims').update({ status: 'rejected', rejection_reason: reason || '' }).eq('id', claim_id);
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ success: true });"""
 
-  const { claim_id } = req.body;
+new = """  const { claim_id } = req.body;
   if (!claim_id) return res.status(400).json({ error: 'claim_id required' });
 
   const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -30,5 +28,12 @@ export default async function handler(req, res) {
 
   const { error } = await supabase.from('cashback_claims').update({ status: 'rejected', rejection_reason: reason || '' }).eq('id', claim_id);
   if (error) return res.status(500).json({ error: error.message });
-  return res.json({ success: true });
-}
+  return res.json({ success: true });"""
+
+if old not in content:
+    print("PATCH FAILED: block not matched.")
+else:
+    content = content.replace(old, new, 1)
+    with open(path, "w") as f:
+        f.write(content)
+    print("PATCH OK: rejecting a claim now restores the balance via increment_cashback")
